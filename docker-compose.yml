@@ -1,0 +1,68 @@
+services:
+  # --- API GATEWAY ---
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: thinknalyze-gateway
+    ports:
+      - "2000:2000"
+    environment:
+      - port=2000
+      - timezone=Asia/Jakarta
+    volumes:
+      - ./gateway/routes.json:/app/routes.json:ro
+      - ./gateway/certs:/app/certs:ro
+    depends_on:
+      - notification
+      - operational
+      - subscription
+      - tickets
+      - users
+    networks:
+      - thinknalyze-network
+
+  # --- MICROSERVICES ---
+  notification:
+    build: ./notification
+    container_name: thinknalyze-notification
+    environment:
+      - PORT=2001
+    networks:
+      - thinknalyze-network
+
+  operational:
+    build: ./operational
+    container_name: thinknalyze-operational
+    environment:
+      - PORT=2002
+    networks:
+      - thinknalyze-network
+
+  subscription:
+    build: ./subscription
+    container_name: thinknalyze-subscription
+    environment:
+      - PORT=2003
+    networks:
+      - thinknalyze-network
+
+  tickets:
+    build: ./tickets
+    container_name: thinknalyze-tickets
+    environment:
+      - PORT=2004
+    networks:
+      - thinknalyze-network
+
+  users:
+    build: ./users
+    container_name: thinknalyze-users
+    environment:
+      - PORT=2005
+    networks:
+      - thinknalyze-network
+
+networks:
+  thinknalyze-network:
+    driver: bridge

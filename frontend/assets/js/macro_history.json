@@ -1,0 +1,51 @@
+[
+    {
+        "id": "eff45886-d286-4bb3-89f4-53287697215a",
+        "timestamp_local": "2026-02-11 20:36:18",
+        "session": "US",
+        "market_metrics": {
+            "risk_index_val": 0.3194931357016338,
+            "active_indices": {
+                "US500": 0.308222282657965,
+                "USTEC": 0.34933984226463066,
+                "US30": 0.30091728218230573
+            },
+            "global_heatmap": {
+                "ASIA": 0.21050311711149267,
+                "EUROPE": 0.1497419168068677,
+                "US": 0.3194937632687243
+            },
+            "commodities": {
+                "INDUSTRIAL": 1.4923868704682999,
+                "ENERGY": 1.922175339896854,
+                "PRECIOUS": 2.343942572223588,
+                "AGRICULTURE": 0.0747183913726078
+            },
+            "global_assets": {
+                "forex": 0.226157999632484,
+                "haven": 0.4587101167082764,
+                "btc": -1.9026651892459323,
+                "vix": -1.4025974025974004,
+                "dxy": 0.27756201128888863,
+                "bond": 0.0
+            },
+            "calendar_risk": {
+                "is_risk": true,
+                "message": "\u26a0\ufe0f HIGH IMPACT: Average Hourly Earnings m/m (USD) in -6m"
+            }
+        },
+        "scores": {
+            "risk_score": 0.0,
+            "news_score": 0
+        },
+        "decision": {
+            "status": "\u26a0\ufe0f NEWS EVENT",
+            "strategy": "STAND ASIDE (\u26a0\ufe0f HIGH IMPACT: Average Hourly Earnings m/m (USD) in -6m)"
+        },
+        "expert_analysis": {
+            "text": "Pivotal US labor market data, particularly Average Hourly Earnings, has placed the market in a firm 'stand aside' posture, overshadowing positive momentum observed in industrial metals. This pre-event caution signals high expected volatility once the high-impact employment figures are released.",
+            "language": "en",
+            "generated_at": "23:59:53"
+        }
+    }
+]

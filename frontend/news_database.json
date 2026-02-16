@@ -1,0 +1,338 @@
+{
+    "last_updated_utc": "2026-02-11 11:08:39",
+    "current_score": 0.6999826669692993,
+    "articles": [
+        {
+            "title": "American Airlines CEO\u2019s crisis grows as flight attendant union calls for him to step down",
+            "score": 0,
+            "sentiment": {
+                "label": "Neutral",
+                "score": 0
+            }
+        },
+        {
+            "title": "Why that $2 trillion software stock wipeout didn\u2019t derail the AI bull market",
+            "score": 1.0,
+            "sentiment": {
+                "label": "Positive",
+                "score": 1.0
+            }
+        },
+        {
+            "title": "Market Wrap: Sensex adds 208 points, Nifty extends gain for third session, reclaims 25,900; auto, metal stocks shine",
+            "score": 0.9999935626983643,
+            "sentiment": {
+                "label": "Positive",
+                "score": 0.9999935626983643
+            }
+        },
+        {
+            "title": "Conduct Risk Training Course: Regulator Approaches and Best Practices in the UK, EU, and Globally (ONLINE EVENT: March 25th, 2026)",
+            "score": 0,
+            "sentiment": {
+                "label": "Neutral",
+                "score": 0
+            }
+        },
+        {
+            "title": "1 Day Clearing, Settlement and Counterparty Risk Training Course: Addressing Key Regulatory Imperatives, Such As G20 Reforms, EMIR, Dodd-Frank, and the Shift Toward T+1 Settlement",
+            "score": 0.9998688697814941,
+            "sentiment": {
+                "label": "Positive",
+                "score": 0.9998688697814941
+            }
+        },
+        {
+            "title": "1 Day CoRep, FinRep & Capital Adequacy Online Course: Regulatory Guidance from the PRA/FCA, EBA and Local European Regulators - and UK Financial Reporting Post Brexit",
+            "score": 0.9999998807907104,
+            "sentiment": {
+                "label": "Positive",
+                "score": 0.9999998807907104
+            }
+        },
+        {
+            "title": "Asian markets extend gains",
+            "score": 0.9999932050704956,
+            "sentiment": {
+                "label": "Positive",
+                "score": 0.9999932050704956
+            }
+        },
+        {
+            "title": "Luis de Guindos: Interview with Econostream Media",
+            "score": 0,
+            "sentiment": {
+                "label": "Neutral",
+                "score": 0
+            }
+        },
+        {
+            "title": "Stock Market LIVE: GIFT Nifty hints at positive start amid strong cues; Asian markets extend gains",
+            "score": 1.0,
+            "sentiment": {
+                "label": "Positive",
+                "score": 1.0
+            }
+        },
+        {
+            "title": "Dollar soft ahead of US data, yen holds onto its gains after election",
+            "score": 0.9999711513519287,
+            "sentiment": {
+                "label": "Positive",
+                "score": 0.9999711513519287
+            }
+        },
+        {
+            "title": "Global Market Today: Asian stocks extend rally to record, gold falls",
+            "score": 0.8463362455368042,
+            "sentiment": {
+                "label": "Positive",
+                "score": 0.8463362455368042
+            }
+        },
+        {
+            "title": "Japan's Nikkei 225 set to continue post election rally as Asian markets on course to open higher",
+            "score": 0.9999003410339355,
+            "sentiment": {
+                "label": "Positive",
+                "score": 0.9999003410339355
+            }
+        },
+        {
+            "title": "Stock Market Today: Dow Slightly Higher; Japanese Stocks Jump After Election \u2014 Live Updates - The Wall Street Journal",
+            "score": 0,
+            "sentiment": {
+                "label": "Neutral",
+                "score": 0
+            }
+        },
+        {
+            "title": "Australia Interest Rate Hike Fears Influence $BMIC Macro Investment Tones",
+            "score": 0.9996880292892456,
+            "sentiment": {
+                "label": "Positive",
+                "score": 0.9996880292892456
+            }
+        },
+        {
+            "title": "Don\u2019t get comfortable with the global stock rally today: Goldman\u2019s Panic Index is approaching \u2018max fear\u2019",
+            "score": -0.989688515663147,
+            "sentiment": {
+                "label": "Negative",
+                "score": -0.989688515663147
+            }
+        },
+        {
+            "title": "World stocks climb, Nikkei soars on Japan PM Takaichi's big poll win",
+            "score": 0.9997890591621399,
+            "sentiment": {
+                "label": "Positive",
+                "score": 0.9997890591621399
+            }
+        },
+        {
+            "title": "Some healthcare CEOs praise TrumpRx for empowering consumers to compare drug prices",
+            "score": 0,
+            "sentiment": {
+                "label": "Neutral",
+                "score": 0
+            }
+        },
+        {
+            "uuid": "-3171027735410665414",
+            "published_at": "2026-02-09T07:21:35Z",
+            "session_tag": "EUROPE",
+            "title": "The Malesina conspiracy, Alexis\u2019s springtime party and the Karahalios\u2013Kasselakis entanglements, National Bank heading for Allianz, while EFET is asleep",
+            "description": "Papastavrou\u2019s double trip to the US for LNG, the Vertical Corridor and hydrocarbons\nThe post The Malesina conspiracy, Alexis\u2019s springtime party and the Karahalios\u2013Kasselakis entanglements, National Bank heading for Allianz, while EFET is asleep appeared first\u2026",
+            "content_snippet": "So, greetingstwo weeks from today we have a strong traditional three-day break, that of Clean Monday, so a little patience; the best is coming, because we all sense that after Carnival there isnt muc\u2026",
+            "source_url": "https://en.protothema.gr/2026/02/09/the-malesina-conspiracy-alexiss-springtime-party-and-the-karahalios-kasselakis-entanglements-national-bank-heading-for-allianz-while-efet-is-asleep/",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.9999816417694092,
+                "score": 0
+            }
+        },
+        {
+            "uuid": "8716403307954032224",
+            "published_at": "2026-02-09T07:00:00Z",
+            "session_tag": "EUROPE",
+            "title": "Transaction in Own Shares",
+            "description": "LEI: 213800NNT42FFIZB1T09\u00a0 09 February 2026  Transactions in Own Shares  Foresight Group Holdings Limited (\"Foresight\", the \"Group\"), a leading investment...",
+            "content_snippet": "LEI: 213800NNT42FFIZB1T09\u00a0 09 February 2026\r\nTransactions in Own Shares\r\nForesight Group Holdings Limited (\"Foresight\", the \"Group\"), a leading investment manager in real assets and providing capital\u2026",
+            "source_url": "https://www.globenewswire.com/news-release/2026/02/09/3234248/0/en/Transaction-in-Own-Shares.html",
+            "sentiment": {
+                "label": "Positive",
+                "confidence": 0.5806786417961121,
+                "score": 0.5806786417961121
+            }
+        },
+        {
+            "uuid": "4986895277675575878",
+            "published_at": "2026-02-09T05:37:25Z",
+            "session_tag": "EUROPE",
+            "title": "London Stocks Are Leaving the Growth Market They Once Flocked to",
+            "description": "In 2005, Young & Co.\u2019s Brewery Plc was one of 40 companies to transfer its shares from the London Stock Exchange\u2019s main market to its growth segment. The nearly 200-year-old pub chain was attracted by the smaller exchange\u2019s tax incentives, \u201cgrowing success an\u2026",
+            "content_snippet": "(Bloomberg) In 2005, Young &amp; Co.s Brewery Plc was one of 40 companies to transfer its shares from the London Stock Exchanges main market to its growth segment. The nearly 200-year-old pub chain w\u2026",
+            "source_url": "https://financialpost.com/pmn/business-pmn/london-stocks-are-leaving-the-growth-market-they-once-flocked-to",
+            "sentiment": {
+                "label": "Positive",
+                "confidence": 0.9971113204956055,
+                "score": 0.9971113204956055
+            }
+        },
+        {
+            "uuid": "-1366945197058468649",
+            "published_at": "2026-02-09T04:47:53Z",
+            "session_tag": "EUROPE",
+            "title": "Wall Street Soars as Bargain Hunting and Strong Sentiment Spark Broad-Based Rally",
+            "description": "U.S. stocks surged with the Dow jumping over 1,200 points amid renewed buying interest and upbeat consumer sentiment; airline, tech and gold stocks led gains despite Amazon's sharp drop.",
+            "content_snippet": "U.S. stocks surged with the Dow jumping over 1,200 points amid renewed buying interest and upbeat consumer sentiment; airline, tech and gold stocks led gains despite Amazon's sharp drop.\r\nThe Dow soa\u2026",
+            "source_url": "https://www.business-standard.com/markets/capital-market-news/wall-street-soars-as-bargain-hunting-and-strong-sentiment-spark-broad-based-rally-126020900250_1.html",
+            "sentiment": {
+                "label": "Positive",
+                "confidence": 0.9999998807907104,
+                "score": 0.9999998807907104
+            }
+        },
+        {
+            "uuid": "7180550269368159818",
+            "published_at": "2026-02-09T08:20:00Z",
+            "session_tag": "EUROPE",
+            "title": "Britain's Prince William to meet Saudi crown prince on official visit",
+            "description": "LONDON, Feb 9 (Reuters) - Britain's \u200cPrince William will meet Crown Prince Mohammed bin \u200cSalman during a three-day visit to Saudi Arabia starting \u200con Monday, an official trip on behalf of the government to deepen ties with the country. Read full story",
+            "content_snippet": "LONDON, Feb 9 (Reuters) - Britain's Prince William will meet Crown Prince Mohammed bin Salman during a three-day visit to Saudi Arabia starting on Monday, an official trip on behalf of the government\u2026",
+            "source_url": "https://www.thestar.com.my/news/world/2026/02/09/britain039s-prince-william-to-meet-saudi-crown-prince-on-official-visit",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.9914543628692627,
+                "score": 0
+            }
+        },
+        {
+            "uuid": "-8147316294206766178",
+            "published_at": "2026-02-09T08:15:56Z",
+            "session_tag": "EUROPE",
+            "title": "Check-In, Clock-Out: Hospitality That Moves With the Nomad Lifestyle",
+            "description": "Bo Frederique van den Bosch is a second-place winner (in a four-way tie) in the HFTP Fall 2025 Blog Competition.",
+            "content_snippet": "Bo Frederique van den Bosch is a second-place winner (in a four-way tie) in the HFTP Fall 2025 Blog Competition.\r\nAs of 2024, digital nomads earn an average annual income exceeding $120,000, with man\u2026",
+            "source_url": "https://www.hospitalitynet.org/opinion/4130784.html",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.940284788608551,
+                "score": 0
+            }
+        },
+        {
+            "uuid": "-1733387655875252991",
+            "published_at": "2026-02-09T08:14:52Z",
+            "session_tag": "EUROPE",
+            "title": "\u2018Not the Automatic Choice Anymore\u2019: Why Indian students are moving away from US universities",
+            "description": "Jessica Turner, CEO of global rankings firm QS Quacquarelli Symonds speaks to Vidheesha Kuntamalla on the fading US and Canada dominance in Indian student mobility, visa anxiety around F1 and H1B pathways and whether American universities risk slipping in glo\u2026",
+            "content_snippet": "As immigration rules tighten, visa scrutiny intensifies and post-study work pathways become uncertain, the Indian student interest both in the United States of America and Canada have witnessed a dec\u2026",
+            "source_url": "https://indianexpress.com/article/education/study-abroad/not-the-automatic-choice-anymore-why-indian-students-are-moving-away-from-us-universities-10522064/",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.5256277322769165,
+                "score": 0
+            }
+        },
+        {
+            "uuid": "-5072706841247715427",
+            "published_at": "2026-02-09T08:13:38Z",
+            "session_tag": "EUROPE",
+            "title": "Tata, JSW, Jindal Steel at new high; rally up to 18% in 1 month; here's why",
+            "description": "India's steel consumption to grow by 8 per cent- 9 per cent in the next few years, aided by strong demand from the infrastructure, construction and manufacturing sectors, believe analysts.",
+            "content_snippet": "India's steel consumption to grow by 8 per cent- 9 per cent in the next few years, aided by strong demand from the infrastructure, construction and manufacturing sectors, believe analysts.\r\nJSW, Jind\u2026",
+            "source_url": "https://www.business-standard.com/markets/news/tata-jsw-jindal-steel-at-new-high-rally-up-to-18-in-1-month-here-s-why-126020900468_1.html",
+            "sentiment": {
+                "label": "Positive",
+                "confidence": 1.0,
+                "score": 1.0
+            }
+        },
+        {
+            "uuid": "-2039331147311217885",
+            "published_at": "2026-02-09T08:12:04Z",
+            "session_tag": "EUROPE",
+            "title": "Rick Dalton Pointing ] Wait, Is That Cliff Booth? - Vulture",
+            "description": "Rick Dalton Pointing ] Wait, Is That Cliff Booth?Vulture Brad Pitt Revisits His Oscar-Winning Role in Surprise Trailer for \u201cThe Adventures of Cliff Booth\u201d During Super BowlYahoo News UK \u2018Cliff Booth\u2019 Teaser: Brad Pitt Surprises Super Bowl With First Footage F\u2026",
+            "content_snippet": "\"Mr. Watson, come here, I want you.\" -- Alexander Graham Bell",
+            "source_url": "https://slashdot.org/firehose.pl?op=view&amp;id=180759680",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.9773514866828918,
+                "score": 0
+            }
+        },
+        {
+            "uuid": "-973564357863734519",
+            "published_at": "2026-02-09T05:58:15Z",
+            "session_tag": "ASIA",
+            "title": "Scientists develop domestic pharmaceutical raw materials in Erzurum",
+            "description": "A team of scientists at Atat\u00fcrk University has launched an ambitious effort to domestically synthesize pharmaceutical raw materials used in treatments ranging from cardiovascular disease to cancer and rare illnesses, addressing long-standing vulnerabilities i\u2026",
+            "content_snippet": "ERZURUM\r\nA team of scientists at Atat\u00fcrk University has launched an ambitious effort to domestically synthesize pharmaceutical raw materials used in treatments ranging from cardiovascular disease to \u2026",
+            "source_url": "https://www.hurriyetdailynews.com/scientists-develop-domestic-pharmaceutical-raw-materials-in-erzurum-218720",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.8236641883850098,
+                "score": 0
+            }
+        },
+        {
+            "uuid": "5725706490884253597",
+            "published_at": "2026-02-09T05:58:00Z",
+            "session_tag": "ASIA",
+            "title": "Jimmy Lai's evolution from Hong Kong media magnate to activist in photos",
+            "description": "Prominent democracy advocate Jimmy Lai was a child stowaway from mainland China who rose to become Hong Kong\u2019s onetime media magnate. Unlike other rags-to-riches tycoons who cultivated ties with Beijing, he chose to become its fierce critic. \n\nThe 78-year-old\u2026",
+            "content_snippet": "HONG KONG -- Prominent democracy advocate Jimmy Lai was a child stowaway from mainland China who rose to become Hong Kongs onetime media magnate. Unlike other rags-to-riches tycoons who cultivated ti\u2026",
+            "source_url": "https://abcnews.go.com/Business/wireStory/jimmy-lais-evolution-hong-kong-media-magnate-activist-129983680",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.9946932196617126,
+                "score": 0
+            }
+        },
+        {
+            "uuid": "1189024979814316392",
+            "published_at": "2026-02-09T05:58:00Z",
+            "session_tag": "ASIA",
+            "title": "The midlife \u2018gap year\u2019: \u2018How you can get the most value out of the short time you have\u2019",
+            "description": "Can a midlife break spent criss-crossing the globe bring renewed meaning to life?",
+            "content_snippet": "On February 1st, 2025, my partner Mark Graham and I waved goodbye to friends and family, got on our bikes and pedalled to Rosslare ferry port. We left on a two-year break from our careers, domestic a\u2026",
+            "source_url": "https://www.irishtimes.com/life-style/travel/2026/02/09/the-midlife-gap-year-you-start-to-think-about-how-you-can-get-the-most-value-out-of-the-short-time-you-have/",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.9606642723083496,
+                "score": 0
+            }
+        },
+        {
+            "uuid": "5725706490884253597",
+            "published_at": "2026-02-09T05:57:59Z",
+            "session_tag": "ASIA",
+            "title": "Jimmy Lai's evolution from Hong Kong media magnate to activist in photos",
+            "description": "Prominent democracy advocate Jimmy Lai was a child stowaway from mainland China who rose to become Hong Kong\u2019s onetime media magnate. Unlike other rags-to-riches tycoons who cultivated ties with Beijing, he chose to become its fierce critic. \n\nThe 78-year-old\u2026",
+            "content_snippet": "HONG KONG -- Prominent democracy advocate Jimmy Lai was a child stowaway from mainland China who rose to become Hong Kongs onetime media magnate. Unlike other rags-to-riches tycoons who cultivated ti\u2026",
+            "source_url": "https://abcnews.go.com/International/wireStory/jimmy-lais-evolution-hong-kong-media-magnate-activist-129983679",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.9946932196617126,
+                "score": 0
+            }
+        },
+        {
+            "uuid": "4168523774331234324",
+            "published_at": "2026-02-09T05:56:07Z",
+            "session_tag": "ASIA",
+            "title": "\u2018Very Hard To Root For Someone Like This\u2019: President Trump Blasts \u2018Real Loser\u2019 Hunter Hess For Anti-American Nonsense",
+            "description": "When it comes to the drama surrounding Team USA freestyle skier Hunter Hess, President Donald Trump is letting it all out, and quite frankly, I don't blame him.",
+            "content_snippet": "The greatest sports president this land has ever seen is at it again!\r\nWhen it comes to the drama surrounding Team USA freestyle skier Hunter Hess, President Donald Trump is letting it all out, and q\u2026",
+            "source_url": "https://dailycaller.com/2026/02/09/president-donald-trump-hunter-hess-olympics/",
+            "sentiment": {
+                "label": "Neutral",
+                "confidence": 0.9995033740997314,
+                "score": 0
+            }
+        }
+    ]
+}

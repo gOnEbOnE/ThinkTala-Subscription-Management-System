@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Macro Radar | ThinkTala AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+     <link rel="stylesheet" href="assets/css/styles.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+</head>
+<body>
+
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <nav class="sidebar">
+        <div class="sidebar-brand mb-3">
+            <div class="brand-wrapper">
+                <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
+                <div class="brand-text-content">
+                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span class="text-cyan">Tala</span></h4>
+                    <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Institutional AI</p>
+                </div>
+            </div>
+        </div>
+        <ul class="nav flex-column flex-grow-1">
+            <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
+            <li class="nav-item"><a class="nav-link active" href="market-insight.html"><i class="fa-solid fa-globe icon-left"></i><span class="link-text">Market Insight</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="deep-scanner.html"><i class="fa-solid fa-satellite-dish icon-left"></i><span class="link-text">Deep Scanner</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="ask_nizza.html"><i class="fa-solid fa-wand-magic-sparkles icon-left"></i><span class="link-text">Ask Nizza</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="algo-studio.html"><i class="fa-solid fa-flask icon-left"></i><span class="link-text">Algo Studio</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="auto-trade.html"><i class="fa-solid fa-bolt icon-left"></i><span class="link-text">Auto Trade</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="ecosystem.html"><i class="fa-solid fa-circle-nodes icon-left"></i><span class="link-text">Ecosystem</span></a></li>
+        </ul>
+        <ul class="nav flex-column mb-5">
+            <li class="nav-item"><a class="nav-link" href="membership.html"><i class="fa-solid fa-id-card icon-left"></i><span class="link-text">Membership</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="settings.html"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span></a></li>
+        </ul>
+    </nav>
+
+    <header class="top-navbar d-flex justify-content-between align-items-center">
+        
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn-header" id="sidebarToggle">
+                <i class="fa-solid fa-bars fa-lg"></i>
+            </button>
+            
+            <button class="btn-header d-md-none" onclick="toggleMobileSearch()">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </div>
+
+        <div class="nizza-wrapper mx-auto d-none d-md-block">
+            <div class="nizza-search">
+                <i class="fa-solid fa-wand-magic-sparkles magic-icon"></i>
+                <input type="text" class="form-control" placeholder="Ask Nizza AI about market trends...">
+                <button class="btn btn-sm text-muted"><i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 gap-md-3">
+            
+            <div class="dropdown">
+                <button class="btn-header" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="https://flagcdn.com/w40/us.png" alt="EN" width="20" style="border-radius: 3px;">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate">
+                    <li><h6 class="dropdown-header">Select Language</h6></li>
+                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="#">
+                        <img src="https://flagcdn.com/w40/us.png" width="20"> English <i class="fa-solid fa-check ms-auto text-cyan small"></i>
+                    </a></li>
+                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="#">
+                        <img src="https://flagcdn.com/w40/id.png" width="20"> Indonesia
+                    </a></li>
+                </ul>
+            </div>
+
+            <div class="dropdown">
+                <button class="btn-header position-relative" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notif-badge">5</span>
+                </button>
+                
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate" style="min-width: 320px;">
+                    <li class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom border-secondary" style="border-opacity: 0.1;">
+                        <span class="fw-bold small">Notifications</span>
+                        <a href="#" class="small text-cyan text-decoration-none">Mark all read</a>
+                    </li>
+                    <div style="max-height: 280px; overflow-y: auto;">
+                        <li><a class="dropdown-item py-2" href="#">
+                            <div class="d-flex align-items-start">
+                                <div class="rounded-circle bg-success bg-opacity-10 text-success p-2 me-2"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                                <div><small class="fw-bold d-block text-main">Take Profit Hit!</small><small class="text-muted" style="font-size: 0.7rem;">XAUUSD reached 2045.50</small></div>
+                            </div>
+                        </a></li>
+                        <li><a class="dropdown-item py-2" href="#">
+                            <div class="d-flex align-items-start">
+                                <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-2 me-2"><i class="fa-solid fa-bolt"></i></div>
+                                <div><small class="fw-bold d-block text-main">High Impact News</small><small class="text-muted" style="font-size: 0.7rem;">CPI Data in 15 mins.</small></div>
+                            </div>
+                        </a></li>
+                        </div>
+                    <li class="p-2 text-center border-top border-secondary" style="border-opacity: 0.1;">
+                        <a href="#" class="small text-muted text-decoration-none">View All History</a>
+                    </li>
+                </ul>
+            </div>
+
+            <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+
+            <div class="dropdown ms-1">
+                <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div class="rounded-circle p-1 position-relative" style="border: 2px solid var(--accent-cyan);">
+                        <img src="https://ui-avatars.com/api/?name=Trader&background=0b0e17&color=fff" class="rounded-circle" width="34" height="34">
+                        <span class="position-absolute bottom-0 end-0 bg-success border border-dark rounded-circle" style="width: 10px; height: 10px;"></span>
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-3">
+                    <li class="px-3 py-2">
+                        <span class="d-block fw-bold text-main">Trader Pro</span>
+                        <small class="text-muted">trader@thinktala.com</small>
+                    </li>
+                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+                    <li><a class="dropdown-item" href="profile.html"><i class="fa-regular fa-user me-2 text-muted"></i> Profile</a></li>
+                    <li><a class="dropdown-item" href="membership.html"><i class="fa-solid fa-crown me-2 text-warning"></i> Membership</a></li>
+                    <li><a class="dropdown-item" href="ewallet.html"><i class="fa-solid fa-wallet me-2 text-success"></i> eWallet</a></li>
+                    <li><a class="dropdown-item" href="settings.html"><i class="fa-solid fa-gear me-2 text-muted"></i> Settings</a></li>
+                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+                    <li><a class="dropdown-item text-danger" href="login.html"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+                </ul>
+            </div>
+
+        </div>
+    </header>
+
+    <div id="mobileSearchBar" class="mobile-search-container">
+        <div class="nizza-search w-100">
+            <i class="fa-solid fa-wand-magic-sparkles magic-icon"></i>
+            <input type="text" class="form-control" placeholder="Ask Nizza AI..." autofocus>
+            <button class="btn btn-sm text-danger" onclick="toggleMobileSearch()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+    <div class="main-content">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Market Insight</h4>
+                <small class="text-muted">AI-Powered Institutional Analysis</small>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-dark border border-secondary text-white font-mono" id="lastUpdate">Updating...</span>
+                <div class="small text-muted mt-1 font-mono" id="clockUTC">--:-- UTC</div>
+            </div>
+        </div>
+
+        <div id="dashboardDragArea">
+
+             
+
+            <div class="row g-4 mb-4 dynamic-row">
+                
+                <div class="col-lg-12 col-md-12 col-12 draggable-item" data-id="insight">
+                    <div class="ai-card shadow-lg ai-insight-box h-100">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fa-solid fa-grip-lines text-muted me-2 drag-handle"></i>
+                            <h6 class="fw-bold text-purple text-uppercase mb-0">Nizza AI Insight</h6>
+                            <small class="text-muted font-mono ms-auto" id="aiTime">--:--</small>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <div class="me-3 mt-1">
+                                <div class="rounded-circle bg-dark d-flex align-items-center justify-content-center border border-purple overflow-hidden" 
+                                    style="width: 48px; height: 48px; box-shadow: 0 0 10px rgba(111, 66, 193, 0.5);">
+                                    <video src="/assets/video/nizza_ai_thinking.mp4" autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                </div>
+                            </div>
+                            <div class="w-100">
+                                <p class="mb-0 text-main lead fs-6" style="line-height: 1.6;">
+                                    <span id="typewriterText">Waiting for AI analysis...</span><span class="typing-cursor"></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-12 col-md-12 col-12 draggable-item" data-id="timeline">
+                    <div class="ai-card shadow-lg pb-4 h-100"> 
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-grip-lines text-muted me-2 drag-handle"></i>
+                                <h6 class="fw-bold text-muted text-uppercase small mb-0">Global Session Timeline (UTC)</h6>
+                            </div>
+                            <span class="badge bg-dark border border-secondary text-cyan" id="timelineStatus">Loading...</span>
+                        </div>
+                        <div class="timeline-container">
+                            <div class="time-grid">
+                                <div class="grid-line"><span class="grid-label">00</span></div>
+                                <div class="grid-line"><span class="grid-label">04</span></div>
+                                <div class="grid-line"><span class="grid-label">08</span></div>
+                                <div class="grid-line"><span class="grid-label">12</span></div>
+                                <div class="grid-line"><span class="grid-label">16</span></div>
+                                <div class="grid-line"><span class="grid-label">20</span></div>
+                                <div class="grid-line"><span class="grid-label">24</span></div>
+                            </div>
+                            <div class="session-block sess-tokyo" style="left: 0%; width: 37.5%;">TOKYO</div>
+                            <div class="session-block sess-london" style="left: 33.33%; width: 37.5%;">LONDON</div>
+                            <div class="session-block sess-ny" style="left: 66.66%; width: 37.5%;">NEW YORK</div>
+                            <div class="current-time-marker" id="timeMarker" style="left: 0%;">
+                                <div class="current-time-badge" id="markerLabel">00:00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row g-4 mb-4 dynamic-row">
+
+                <div class="col-lg-4 col-md-6 col-12 draggable-item" data-id="sentiment">
+                    <div class="ai-card shadow-lg h-100">
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-grip-lines text-muted me-2 drag-handle"></i>
+                                <h6 class="fw-bold text-muted text-uppercase small mb-0">Risk Sentiment</h6>
+                            </div>
+                            <span id="riskLabel" class="fw-bold text-main">NEUTRAL</span>
+                        </div>
+                        <div class="risk-scale">
+                            <div id="riskPointer" class="risk-pointer" style="left: 50%;"></div>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted font-mono mb-3">
+                            <span>Risk-Off</span>
+                            <span>Risk-On</span>
+                        </div>
+                        <div class="p-3 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fa-solid fa-chess-knight text-cyan me-2"></i>
+                                <small class="text-cyan fw-bold">Strategy:</small>
+                            </div>
+                            <p class="mb-0 small fst-italic text-main" id="aiMoodText">"Wait..."</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 col-12 draggable-item" data-id="flow">
+                    <div class="ai-card shadow-lg h-100">
+                            <div class="d-flex align-items-center mb-3">
+                            <i class="fa-solid fa-grip-lines text-muted me-2 drag-handle"></i>
+                            <h6 class="fw-bold text-muted text-uppercase small mb-0">Global Capital Flow</h6>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center h-75">
+                                <div class="text-center w-100 p-2 rounded me-2 flow-box" id="boxAsia">
+                                    <small class="d-block text-muted" style="font-size: 0.7rem;">ASIA</small>
+                                    <h5 class="fw-bold mb-0" id="valAsia">0%</h5>
+                                </div>
+                                <div class="text-center w-100 p-2 rounded me-2 flow-box" id="boxEurope">
+                                <small class="d-block text-muted" style="font-size: 0.7rem;">EUROPE</small>
+                                <h5 class="fw-bold mb-0" id="valEurope">0%</h5>
+                            </div>
+                            <div class="text-center w-100 p-2 rounded flow-box" id="boxUS">
+                                <small class="d-block text-muted" style="font-size: 0.7rem;">US</small>
+                                <h5 class="fw-bold mb-0" id="valUS">0%</h5>
+                            </div>
+                            </div>
+                            <div class="text-center small">
+                            <span class="text-muted">Active Session:</span> 
+                            <span class="text-success fw-bold" id="activeSessionBadge">--</span>
+                            </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6 col-12 draggable-item" data-id="drivers">
+                    <div class="ai-card shadow-lg h-100">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fa-solid fa-grip-lines text-muted me-2 drag-handle"></i>
+                            <h6 class="fw-bold text-muted text-uppercase small mb-0">Key Macro Drivers</h6>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6"><div class="driver-card"><small class="text-muted d-block" style="font-size: 0.7rem;" id="driver-index-name">Composite Idx</small><div class="d-flex justify-content-between align-items-end"><span class="fw-bold text-main" id="d-index">0.00%</span><small id="a-index">--</small></div></div></div>
+                            <div class="col-6"><div class="driver-card"><small class="text-muted d-block" style="font-size: 0.7rem;">VIX (Fear)</small><div class="d-flex justify-content-between align-items-end"><span class="fw-bold text-main" id="d-vix">0.00%</span><small id="a-vix">--</small></div></div></div>
+                            <div class="col-6"><div class="driver-card"><small class="text-muted d-block" style="font-size: 0.7rem;">DXY Index</small><div class="d-flex justify-content-between align-items-end"><span class="fw-bold text-main" id="d-dxy">0.00%</span><small id="a-dxy">--</small></div></div></div>
+                            <div class="col-6"><div class="driver-card"><small class="text-muted d-block" style="font-size: 0.7rem;">US 10Y Yield</small><div class="d-flex justify-content-between align-items-end"><span class="fw-bold text-main" id="d-yield">0.00%</span><small id="a-yield">--</small></div></div></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row g-4 mb-5 dynamic-row">
+
+                <div class="col-lg-6 col-md-12 col-12 draggable-item" data-id="calendar">
+                    <div class="ai-card shadow-lg h-100" style="max-height: 450px; overflow-y: auto;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 sticky-top pt-2 pb-2" style="background: var(--bg-panel); z-index: 10;">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-grip-lines text-muted me-2 drag-handle"></i>
+                                <h6 class="fw-bold text-muted text-uppercase small mb-0">Economic Calendar</h6>
+                            </div>
+                            <span class="badge bg-danger bg-opacity-25 text-red border border-danger">Upcoming</span>
+                        </div>
+                        <div id="calendarList">
+                            <div class="text-center text-muted py-4 small"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 col-md-12 col-12 draggable-item" data-id="commodities">
+                    <div class="ai-card shadow-lg h-100" style="max-height: 450px; overflow-y: auto;">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fa-solid fa-grip-lines text-muted me-2 drag-handle"></i>
+                            <h6 class="fw-bold text-muted text-uppercase small mb-0">Commodities & Indices</h6>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
+                            <div><i class="fa-solid fa-industry me-2"></i><span>Industrial Metals</span></div>
+                            <span id="comm-ind" class="fw-bold text-main">0.00%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
+                            <div><i class="fa-solid fa-fire me-2"></i><span>Energy</span></div>
+                            <span id="comm-ene" class="fw-bold text-main">0.00%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 small text-muted">
+                            <div><i class="fa-solid fa-gem me-2"></i><span>Precious Metals</span></div>
+                            <span id="comm-pre" class="fw-bold text-main">0.00%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3 small text-muted">
+                            <div><i class="fa-solid fa-wheat-awn me-2"></i><span>Agriculture</span></div>
+                            <span id="comm-agr" class="fw-bold text-main">0.00%</span>
+                        </div>
+
+                        <hr class="border-secondary opacity-25">
+                        <div id="indicesContainer" class="row g-2 mt-2"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row g-4 mb-4 dynamic-row">
+
+                <div class="draggable-item col-lg-8 col-12" data-id="news-feed">
+                    <div class="ai-card shadow-lg h-100" style="max-height: 500px; display: flex; flex-direction: column;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pt-2 px-1">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-grip-lines text-muted me-2 drag-handle"></i>
+                                <h6 class="fw-bold text-muted text-uppercase small mb-0">Live Market News</h6>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-dark border border-secondary text-muted" id="newsSentimentScore">Sent: 0.0</span>
+                                <span class="badge bg-danger bg-opacity-25 text-red border border-danger blink">LIVE</span>
+                            </div>
+                        </div>
+
+                        <div class="flex-grow-1 overflow-auto pe-2" id="newsFeedContainer">
+                            <div class="text-center text-muted py-5 small">
+                                <i class="fa-solid fa-circle-notch fa-spin me-2"></i> Fetching News...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="draggable-item col-lg-4 col-12" data-id="csm">
+                    <div class="ai-card shadow-lg h-100">
+                        <div class="d-flex align-items-center mb-4 pt-2 px-1">
+                            <i class="fa-solid fa-grip-lines text-muted me-2 drag-handle"></i>
+                            <h6 class="fw-bold text-muted text-uppercase small mb-0">Currency Strength</h6>
+                        </div>
+
+                        <div id="csmContainer" class="d-flex flex-column gap-3">
+                            </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div> 
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0-ai-enhanced</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/za-theme.js"></script>
+<script src="assets/js/za-sidebar.js"></script>
+<script src="assets/js/za-drag-drop.js"></script>
+<script src="assets/js/za-market-insight.js"></script>
+<script>
+    // --- COMPONENT HELPERS (Hanya untuk halaman ini) ---
+    function updateTimelineWidget() {
+        const now = new Date();
+        const h = now.getUTCHours();
+        const m = now.getUTCMinutes();
+        const percent = (((h * 60) + m) / 1440) * 100;
+        
+        const marker = document.getElementById('timeMarker');
+        if(marker) marker.style.left = percent + "%";
+        
+        const label = document.getElementById('markerLabel');
+        if(label) label.innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+
+        const statusBadge = document.getElementById('timelineStatus');
+        let active = [];
+        if (h >= 0 && h < 9) active.push("Tokyo");
+        if (h >= 8 && h < 17) active.push("London");
+        if (h >= 16 || h < 1) active.push("New York");
+        if(statusBadge) {
+            statusBadge.innerText = active.length > 0 ? "OPEN: " + active.join(" & ") : "MARKET QUIET";
+            statusBadge.className = active.length > 0 ? "badge bg-success bg-opacity-25 text-success border border-success" : "badge bg-secondary border border-secondary text-muted";
+        }
+    }
+
+    function updateClock() { 
+        const el = document.getElementById('clockUTC');
+        if(el) el.innerText = new Date().toUTCString().split(' ')[4].substring(0,5) + " UTC"; 
+    }
+
+    // --- STARTUP SEQUENCER ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Init Data
+        updateDashboard();
+        loadMarketNews();
+        loadCSM();
+        
+        // Init UI Components
+        updateTimelineWidget();
+        updateClock();
+
+        // Init Layout Logic (dari za-drag-drop.js)
+        if(typeof initSortable === "function") initSortable();
+        if(typeof initResizable === "function") initResizable();
+
+        // Set Intervals
+        setInterval(updateDashboard, 5000);
+        setInterval(updateTimelineWidget, 60000);
+    });
+</script>
+</body>
+</html>

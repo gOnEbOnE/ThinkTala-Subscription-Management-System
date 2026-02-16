@@ -1,0 +1,61 @@
+{
+  "allowedOrigins": [
+    "*"
+  ],
+  "routes": [
+    {
+      "path": "/account/register",
+      "target": "http://users:2005",
+      "cors": true,
+      "description": "User registration"
+    },
+    {
+      "path": "/account/login",
+      "target": "http://users:2005",
+      "cors": true,
+      "description": "User login"
+    },
+    {
+      "path": "/account/reset",
+      "target": "http://users:2005",
+      "cors": true,
+      "description": "Password reset"
+    },
+    {
+      "path": "/account/personal/",
+      "target": "http://users:2005",
+      "cors": true,
+      "description": "Personal profile & data management"
+    },
+    {
+      "path": "/account/settings/",
+      "target": "http://users:2005",
+      "cors": true,
+      "description": "Account settings"
+    },
+    {
+      "path": "/account/tickets/",
+      "target": "http://tickets:2004",
+      "cors": true,
+      "description": "Helpdesk tickets"
+    },
+    {
+      "path": "/account/membership/",
+      "target": "http://operational:2002",
+      "cors": true,
+      "description": "Helpdesk tickets"
+    },
+    {
+      "path": "/account/notification/",
+      "target": "http://notification:2001",
+      "cors": true,
+      "description": "News and announcements"
+    },
+    {
+      "path": "/account/packages/",
+      "target": "http://subscription:2003",
+      "cors": true,
+      "description": "Knowledge base"
+    }
+  ]
+}

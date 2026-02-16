@@ -1,0 +1,41 @@
+# --- Environment Variables (SANGAT PENTING) ---
+.env
+.env.*
+!.env.example
+!.env.template
+
+# --- Security / SSL Certificates ---
+gateway/certs/*.crt
+gateway/certs/*.key
+*.pem
+*.pfx
+
+# --- Binaries & Executables (Hasil Build Go) ---
+**/app
+**/thinknalyze-*
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+
+# --- Dependencies ---
+vendor/
+go.work.sum
+
+# --- IDE, OS & Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Logs & Temp Files ---
+*.log
+**/logs/
+.tmp/
+
+# --- Docker ---
+.docker/
