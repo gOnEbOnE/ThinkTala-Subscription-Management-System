@@ -1,0 +1,135 @@
+package token
+
+import (
+	"fmt"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/master-abror/zaframework/core/session"
+	"github.com/master-abror/zaframework/core/utils"
+)
+
+type CurrentUser struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password,omitempty"`
+	Photo     *string   `json:"photo"`
+	GroupID   string    `json:"group_id"`
+	LevelID   string    `json:"level_id"`
+	RoleID    string    `json:"role_id"`
+	Status    string    `json:"status"`
+	Level     string    `json:"level"`
+	Role      string    `json:"role"`
+	Group     string    `json:"group"`
+	CreatedAt time.Time `json:"created_at"`
+	CreatedBy *string   `json:"created_by"`
+	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedBy *string   `json:"updated_by"`
+}
+
+func SetUserAuthz(w http.ResponseWriter, r *http.Request, token_value string) (string, error) {
+	token_key, err := utils.CreateUUID()
+	if err != nil {
+		return "", err
+	}
+	token_key_encrypt, err := utils.Encrypt(token_key.String())
+	if err != nil {
+		return "", err
+	}
+	_, err = session.Set(w, r, "token", token_key_encrypt)
+	if err != nil {
+		return "", err
+	}
+
+	ctx := r.Context()
+
+	v := utils.GetEnv("SESSION_LIFETIME")
+
+	sec, err := strconv.Atoi(v)
+	if err != nil {
+		return "", err
+	}
+
+	sessionLifetime := time.Duration(sec) * time.Second
+
+	err = utils.RedisSet(ctx, token_key.String(), token_value, sessionLifetime)
+	if err != nil {
+		return "", err
+	}
+
+	return token_key_encrypt, nil
+}
+
+func GetUserAuthz(r *http.Request, key string) (*CurrentUser, error) {
+	token_key_encrypt := session.Get(r, key)
+	token_key_decrypt, err := utils.Decrypt(token_key_encrypt.(string))
+
+	ctx := r.Context()
+
+	token_decrypt, err := utils.RedisGet(ctx, string(token_key_decrypt))
+	if err != nil {
+		return nil, err
+	}
+
+	jwtParts := strings.Split(token_decrypt, ".")
+	if len(jwtParts) != 3 {
+		fmt.Print("middleware-auth-error", token_decrypt)
+		return nil, fmt.Errorf("middleware-auth-error: %s", token_decrypt)
+	}
+
+	decrypted, err := utils.Decrypt(jwtParts[2]) // Menggunakan AES engine
+	if err != nil {
+		return nil, err
+	}
+
+	token_ok := jwtParts[0] + "." + jwtParts[1] + "." + string(decrypted)
+
+	claims, err := utils.ValidateJWT(token_ok)
+	if err != nil {
+		return nil, err
+	}
+
+	v := utils.GetEnv("JWT_EXPIRED")
+
+	sec, err := strconv.Atoi(v)
+	if err != nil {
+		return nil, err
+	}
+
+	sessionLifetime := time.Duration(sec) * time.Second
+
+	newToken, _, err := utils.RefreshJWT(token_ok, sessionLifetime)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken := utils.EncryptTokenSignature(newToken)
+
+	err = utils.RedisSet(ctx, string(token_key_decrypt), refreshToken, 15*time.Minute)
+	if err != nil {
+		return nil, err
+	}
+
+	u := claims.User
+
+	photoStr, _ := u["photo"].(string)
+
+	currentUser := CurrentUser{
+		ID:      u["id"].(string),
+		Name:    u["name"].(string),
+		Email:   u["email"].(string),
+		Role:    u["role"].(string),
+		RoleID:  u["role_id"].(string),
+		Level:   u["level"].(string),
+		LevelID: u["level_id"].(string),
+		Group:   u["group"].(string),
+		GroupID: u["group_id"].(string),
+		Status:  u["status"].(string),
+		Photo:   &photoStr,
+	}
+
+	return &currentUser, nil
+}

@@ -315,16 +315,16 @@ func main() {
 	fmt.Printf("Config reload available at: http://localhost:%s/admin/config/reload\n", port)
 	fmt.Printf("Loaded %d routes from configuration\n", len(config.Routes))
 
-	// certFile := "certs/localhost.crt"
-	// keyFile := "certs/localhost.key"
+	certFile := "certs/localhost.crt"
+	keyFile := "certs/localhost.key"
 
-	// if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
-	// 	log.Fatalf("Failed to start server: %v", err)
-	// }
-
-	if err := server.ListenAndServe(); err != nil {
+	if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+
+	// if err := server.ListenAndServe(); err != nil {
+	// 	log.Fatalf("Failed to start server: %v", err)
+	// }
 }
 
 // Custom writer untuk filter TLS errors
