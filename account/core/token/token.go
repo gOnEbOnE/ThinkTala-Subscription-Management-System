@@ -2,10 +2,10 @@ package token
 
 import (
 	"errors"
-	"fmt"
+	// "fmt"
 	"net/http"
 	"strconv"
-	"strings"
+	// "strings"
 	"time"
 
 	"github.com/master-abror/zaframework/core/session"
@@ -56,6 +56,7 @@ func SetUserAuthz(w http.ResponseWriter, r *http.Request, token_value string) (s
 
 	sessionLifetime := time.Duration(sec) * time.Second
 
+	// ✅ SIMPAN RAW TOKEN (TANPA ENKRIPSI SIGNATURE)
 	err = utils.RedisSet(ctx, token_key.String(), token_value, sessionLifetime)
 	if err != nil {
 		return "", err
@@ -81,25 +82,14 @@ func GetUserAuthz(r *http.Request, key string) (*CurrentUser, error) {
 
 	ctx := r.Context()
 
-	token_decrypt, err := utils.RedisGet(ctx, string(token_key_decrypt))
+	// ✅ AMBIL RAW TOKEN DARI REDIS (TANPA DEKRIPSI SIGNATURE)
+	token_raw, err := utils.RedisGet(ctx, string(token_key_decrypt))
 	if err != nil {
 		return nil, err
 	}
 
-	jwtParts := strings.Split(token_decrypt, ".")
-	if len(jwtParts) != 3 {
-		fmt.Print("middleware-auth-error", token_decrypt)
-		return nil, fmt.Errorf("middleware-auth-error: %s", token_decrypt)
-	}
-
-	decrypted, err := utils.Decrypt(jwtParts[2]) // Menggunakan AES engine
-	if err != nil {
-		return nil, err
-	}
-
-	token_ok := jwtParts[0] + "." + jwtParts[1] + "." + string(decrypted)
-
-	claims, err := utils.ValidateJWT(token_ok)
+	// ✅ VALIDASI JWT LANGSUNG (TOKEN SUDAH RAW, TIDAK ENCRYPTED)
+	claims, err := utils.ValidateJWT(token_raw)
 	if err != nil {
 		return nil, err
 	}
@@ -113,14 +103,13 @@ func GetUserAuthz(r *http.Request, key string) (*CurrentUser, error) {
 
 	sessionLifetime := time.Duration(sec) * time.Second
 
-	newToken, _, err := utils.RefreshJWT(token_ok, sessionLifetime)
+	// ✅ REFRESH TOKEN DAN SIMPAN RAW (TANPA ENKRIPSI)
+	newToken, _, err := utils.RefreshJWT(token_raw, sessionLifetime)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken := utils.EncryptTokenSignature(newToken)
-
-	err = utils.RedisSet(ctx, string(token_key_decrypt), refreshToken, 15*time.Minute)
+	err = utils.RedisSet(ctx, string(token_key_decrypt), newToken, 15*time.Minute)
 	if err != nil {
 		return nil, err
 	}

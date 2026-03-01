@@ -3,7 +3,17 @@ package database
 import (
 	"context"
 	"log"
+
+	"golang.org/x/crypto/bcrypt"
 )
+
+func hashPwd(plain string) string {
+	h, err := bcrypt.GenerateFromPassword([]byte(plain), bcrypt.DefaultCost)
+	if err != nil {
+		log.Fatalf("Gagal hash password: %v", err)
+	}
+	return string(h)
+}
 
 func MigrateAndSeed(db interface{}) {
 	ctx := context.Background()
@@ -15,6 +25,7 @@ func MigrateAndSeed(db interface{}) {
 
 	pool := wrapper.Pool
 
+	// ===== MIGRASI (tanpa parameter, bisa batch) =====
 	migrationSQL := `
 	CREATE TABLE IF NOT EXISTS levels (
 		id SERIAL PRIMARY KEY,
@@ -70,7 +81,6 @@ func MigrateAndSeed(db interface{}) {
 	CREATE INDEX IF NOT EXISTS idx_otp_email ON otp_codes(email);
 	CREATE INDEX IF NOT EXISTS idx_otp_user ON otp_codes(user_id);
 
-	-- Notifications table (managed by Operasional)
 	CREATE TABLE IF NOT EXISTS notifications (
 		id UUID PRIMARY KEY,
 		title VARCHAR(255) NOT NULL,
@@ -84,7 +94,6 @@ func MigrateAndSeed(db interface{}) {
 		updated_by UUID REFERENCES users(id) ON DELETE SET NULL
 	);
 
-	-- Subscription packages table (managed by Operasional)
 	CREATE TABLE IF NOT EXISTS subscription_packages (
 		id UUID PRIMARY KEY,
 		name VARCHAR(255) NOT NULL,
@@ -100,7 +109,6 @@ func MigrateAndSeed(db interface{}) {
 		updated_by UUID REFERENCES users(id) ON DELETE SET NULL
 	);
 
-	-- KYC documents table (reviewed by Compliance)
 	CREATE TABLE IF NOT EXISTS kyc_documents (
 		id UUID PRIMARY KEY,
 		user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -126,56 +134,98 @@ func MigrateAndSeed(db interface{}) {
 		log.Fatalf("Gagal menjalankan migrasi: %v", err)
 	}
 
-	seederSQL := `
-	-- Seed Level
-	INSERT INTO levels (id, name, code) 
-	VALUES (1, 'Super Admin', 'SUPERADMIN') 
-	ON CONFLICT (id) DO NOTHING;
+	// ===== SEEDER STATIC (tanpa parameter $1, bisa batch) =====
+	seederStaticSQL := `
+	INSERT INTO levels (id, name, code) VALUES (1, 'Super Admin', 'SUPERADMIN') ON CONFLICT (id) DO NOTHING;
+	INSERT INTO levels (id, name, code) VALUES (2, 'Client', 'CLIENT') ON CONFLICT (id) DO NOTHING;
+	INSERT INTO levels (id, name, code) VALUES (3, 'Staff', 'STAFF') ON CONFLICT (id) DO NOTHING;
 
-	INSERT INTO levels (id, name, code) 
-	VALUES (2, 'Client', 'CLIENT') 
-	ON CONFLICT (id) DO NOTHING;
+	INSERT INTO groups (id, name, code) VALUES ('1e98c63f-5474-4506-826c-ded22b59b3db', 'Owner', 'Owner') ON CONFLICT (id) DO NOTHING;
+	INSERT INTO groups (id, name, code) VALUES ('2e98c63f-5474-4506-826c-ded22b59b3dc', 'Member', 'Member') ON CONFLICT (id) DO NOTHING;
+	INSERT INTO groups (id, name, code) VALUES ('3e98c63f-5474-4506-826c-ded22b59b3dd', 'Internal', 'Internal') ON CONFLICT (id) DO NOTHING;
 
-	-- Seed Group
-	INSERT INTO groups (id, name, code) 
-	VALUES ('1e98c63f-5474-4506-826c-ded22b59b3db', 'Owner', 'Owner') 
-	ON CONFLICT (id) DO NOTHING;
+	INSERT INTO roles (id, name, code, group_id) VALUES ('cf47ce1c-1455-4a20-bafe-c2b7c2ab9993', 'CEO', 'CEO', '1e98c63f-5474-4506-826c-ded22b59b3db') ON CONFLICT (id) DO NOTHING;
+	INSERT INTO roles (id, name, code, group_id) VALUES ('df47ce1c-1455-4a20-bafe-c2b7c2ab9994', 'Client', 'CLIENT', '2e98c63f-5474-4506-826c-ded22b59b3dc') ON CONFLICT (id) DO NOTHING;
+	INSERT INTO roles (id, name, code, group_id) VALUES ('af47ce1c-1455-4a20-bafe-c2b7c2ab9995', 'Operasional', 'OPERASIONAL', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
+	INSERT INTO roles (id, name, code, group_id) VALUES ('bf47ce1c-1455-4a20-bafe-c2b7c2ab9996', 'Compliance', 'COMPLIANCE', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
 
-	INSERT INTO groups (id, name, code) 
-	VALUES ('2e98c63f-5474-4506-826c-ded22b59b3dc', 'Member', 'Member') 
-	ON CONFLICT (id) DO NOTHING;
-
-	-- Seed Role
-	INSERT INTO roles (id, name, code, group_id) 
-	VALUES ('cf47ce1c-1455-4a20-bafe-c2b7c2ab9993', 'CEO', 'CEO', '1e98c63f-5474-4506-826c-ded22b59b3db') 
-	ON CONFLICT (id) DO NOTHING;
-
-	INSERT INTO roles (id, name, code, group_id) 
-	VALUES ('df47ce1c-1455-4a20-bafe-c2b7c2ab9994', 'Client', 'CLIENT', '2e98c63f-5474-4506-826c-ded22b59b3dc') 
-	ON CONFLICT (id) DO NOTHING;
-
-	-- Seed User
 	INSERT INTO users (id, name, email, password, group_id, level_id, role_id, status, created_at, created_by) 
 	VALUES (
-		'10ef7bff-4c69-4b56-aec8-ef7427601952', 
-		'Muhammad Abror', 
-		'abrorcapital@gmail.com',
-		'$2a$12$l4hsF/yaFp07frhIrqfm7uJNfkOfuNXsZWEqv4YgFhs3/eYbPAqoS', 
-		'1e98c63f-5474-4506-826c-ded22b59b3db', 
-		1, 
-		'cf47ce1c-1455-4a20-bafe-c2b7c2ab9993', 
-		'active',
-		CURRENT_TIMESTAMP,
-		'10ef7bff-4c69-4b56-aec8-ef7427601952'
-	) 
-	ON CONFLICT (email) DO NOTHING;
+		'10ef7bff-4c69-4b56-aec8-ef7427601952', 'Muhammad Abror', 'abrorcapital@gmail.com',
+		'$2a$12$l4hsF/yaFp07frhIrqfm7uJNfkOfuNXsZWEqv4YgFhs3/eYbPAqoS',
+		'1e98c63f-5474-4506-826c-ded22b59b3db', 1, 'cf47ce1c-1455-4a20-bafe-c2b7c2ab9993',
+		'active', CURRENT_TIMESTAMP, '10ef7bff-4c69-4b56-aec8-ef7427601952'
+	) ON CONFLICT (email) DO NOTHING;
+
+	INSERT INTO subscription_packages (id, name, code, description, price, duration_days, features, is_active) VALUES 
+		('a1a1a1a1-1111-1111-1111-111111111111', 'Free Plan', 'FREE', 'Basic access with limited features', 0, 9999, '["Market Insight (Delayed)", "Ask Nizza (5/day)"]', TRUE)
+	ON CONFLICT (code) DO NOTHING;
+
+	INSERT INTO subscription_packages (id, name, code, description, price, duration_days, features, is_active) VALUES 
+		('b2b2b2b2-2222-2222-2222-222222222222', 'Pro Plan', 'PRO', 'Professional trader access', 299000, 30, '["Real-time Market Insight", "Ask Nizza Unlimited", "Deep Scanner", "Algo Studio"]', TRUE)
+	ON CONFLICT (code) DO NOTHING;
+
+	INSERT INTO subscription_packages (id, name, code, description, price, duration_days, features, is_active) VALUES 
+		('c3c3c3c3-3333-3333-3333-333333333333', 'Elite Plan', 'ELITE', 'Full institutional-grade access', 799000, 30, '["All Pro Features", "Auto Trade", "Priority Support", "Custom Alerts", "API Access"]', TRUE)
+	ON CONFLICT (code) DO NOTHING;
 	`
 
-	log.Println("Menjalankan Seeder...")
-	_, err = pool.Exec(ctx, seederSQL)
+	log.Println("Menjalankan Seeder (static data)...")
+	_, err = pool.Exec(ctx, seederStaticSQL)
 	if err != nil {
-		log.Fatalf("Gagal menjalankan seeder: %v", err)
+		log.Fatalf("Gagal menjalankan seeder static: %v", err)
 	}
+
+	// ===== SEEDER DENGAN PARAMETER (satu per satu, karena pgx tidak support multiple prepared statements) =====
+	log.Println("Menjalankan Seeder (user accounts)...")
+
+	// Super Admin baru (password: Super123)
+	superAdminPwd := hashPwd("Super123")
+	_, err = pool.Exec(ctx,
+		`INSERT INTO users (id, name, email, password, phone, group_id, level_id, role_id, status, created_at, created_by) 
+		 VALUES (
+			'11ef7bff-4c69-4b56-aec8-ef7427601960', 'Super Admin', 'superadmin@thinktala.com',
+			$1, '080000000000',
+			'1e98c63f-5474-4506-826c-ded22b59b3db', 1, 'cf47ce1c-1455-4a20-bafe-c2b7c2ab9993',
+			'active', CURRENT_TIMESTAMP, '10ef7bff-4c69-4b56-aec8-ef7427601952'
+		) ON CONFLICT (email) DO UPDATE SET password = $1`,
+		superAdminPwd)
+	if err != nil {
+		log.Fatalf("Gagal seed Super Admin: %v", err)
+	}
+	log.Println("  ✓ Super Admin (superadmin@thinktala.com / Super123)")
+
+	// Operasional (password: Operas123)
+	opsPwd := hashPwd("Operas123")
+	_, err = pool.Exec(ctx,
+		`INSERT INTO users (id, name, email, password, phone, group_id, level_id, role_id, status, created_at, created_by) 
+		 VALUES (
+			'20ef7bff-4c69-4b56-aec8-ef7427601953', 'Staff Operasional', 'ops@thinktala.com',
+			$1, '081234567890',
+			'3e98c63f-5474-4506-826c-ded22b59b3dd', 3, 'af47ce1c-1455-4a20-bafe-c2b7c2ab9995',
+			'active', CURRENT_TIMESTAMP, '10ef7bff-4c69-4b56-aec8-ef7427601952'
+		) ON CONFLICT (email) DO UPDATE SET password = $1`,
+		opsPwd)
+	if err != nil {
+		log.Fatalf("Gagal seed Operasional: %v", err)
+	}
+	log.Println("  ✓ Operasional (ops@thinktala.com / Operas123)")
+
+	// Compliance (password: Comply123)
+	compliancePwd := hashPwd("Comply123")
+	_, err = pool.Exec(ctx,
+		`INSERT INTO users (id, name, email, password, phone, group_id, level_id, role_id, status, created_at, created_by) 
+		 VALUES (
+			'30ef7bff-4c69-4b56-aec8-ef7427601954', 'Staff Compliance', 'compliance@thinktala.com',
+			$1, '081234567891',
+			'3e98c63f-5474-4506-826c-ded22b59b3dd', 3, 'bf47ce1c-1455-4a20-bafe-c2b7c2ab9996',
+			'active', CURRENT_TIMESTAMP, '10ef7bff-4c69-4b56-aec8-ef7427601952'
+		) ON CONFLICT (email) DO UPDATE SET password = $1`,
+		compliancePwd)
+	if err != nil {
+		log.Fatalf("Gagal seed Compliance: %v", err)
+	}
+	log.Println("  ✓ Compliance (compliance@thinktala.com / Comply123)")
 
 	log.Println("Migrasi dan Seeding selesai!")
 }

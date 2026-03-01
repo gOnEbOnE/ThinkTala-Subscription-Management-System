@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"gateway/auth"
 	"gateway/system"
 	"io/ioutil"
 	"log"
@@ -10,13 +11,19 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/master-abror/zaframework/core/utils"
 )
 
 func init() {
-	os.Setenv("TZ", system.Env("timezone"))
+	tz := system.Env("timezone")
+	if tz != "" {
+		os.Setenv("TZ", tz)
+	}
 }
 
 // Route configuration structure
@@ -27,16 +34,15 @@ type RouteConfig struct {
 	Description string `json:"description,omitempty"`
 }
 
-// Configuration structure untuk JSON file
+// Configuration structure
 type Config struct {
 	AllowedOrigins []string      `json:"allowedOrigins"`
 	Routes         []RouteConfig `json:"routes"`
 }
 
-// Global config variable
 var config *Config
 
-// ProxyPool untuk reuse proxy instances
+// ProxyPool
 type ProxyPool struct {
 	mu      sync.RWMutex
 	proxies map[string]*httputil.ReverseProxy
@@ -60,7 +66,6 @@ func (p *ProxyPool) GetProxy(target string) *httputil.ReverseProxy {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	// Double-check setelah acquire write lock
 	if proxy, exists := p.proxies[target]; exists {
 		return proxy
 	}
@@ -72,18 +77,13 @@ func (p *ProxyPool) GetProxy(target string) *httputil.ReverseProxy {
 	}
 
 	proxy = httputil.NewSingleHostReverseProxy(targetURL)
-
-	// Konfigurasi proxy dengan timeout dan error handling
 	proxy.Transport = &http.Transport{
 		MaxIdleConns:        100,
 		MaxIdleConnsPerHost: 10,
 		IdleConnTimeout:     90 * time.Second,
-		DisableCompression:  false,
 	}
-
-	// Error handler untuk proxy
 	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
-		log.Printf("Proxy error for %s: %v", r.URL.Path, err)
+		log.Printf("[PROXY ERROR] %s: %v", r.URL.Path, err)
 		http.Error(w, "Service temporarily unavailable", http.StatusBadGateway)
 	}
 
@@ -93,99 +93,69 @@ func (p *ProxyPool) GetProxy(target string) *httputil.ReverseProxy {
 
 var proxyPool = NewProxyPool()
 
-// Load configuration from JSON file
 func loadConfig() (*Config, error) {
-	// Coba beberapa lokasi file
-	configPaths := []string{
-		"routes.json",
-		"config/routes.json",
-		"/etc/jakedu/routes.json",
-	}
-
+	configPaths := []string{"routes.json", "config/routes.json"}
 	var configData []byte
-
 	var configPath string
 
 	for _, path := range configPaths {
 		if _, err := os.Stat(path); err == nil {
 			configPath = path
-			configData, err = ioutil.ReadFile(path)
-			if err == nil {
+			configData, _ = ioutil.ReadFile(path)
+			if configData != nil {
 				break
 			}
 		}
 	}
 
 	if configData == nil {
-		log.Println("Warning: routes.json not found, using default configuration")
+		return &Config{AllowedOrigins: []string{"*"}}, nil
 	}
 
 	var cfg Config
 	if err := json.Unmarshal(configData, &cfg); err != nil {
-		return nil, fmt.Errorf("error parsing config file %s: %v", configPath, err)
+		return nil, fmt.Errorf("error parsing %s: %v", configPath, err)
 	}
 
 	log.Printf("Configuration loaded from: %s", configPath)
 	log.Printf("Loaded %d routes and %d allowed origins", len(cfg.Routes), len(cfg.AllowedOrigins))
-
 	return &cfg, nil
 }
 
-// Reload configuration (untuk hot reload tanpa restart)
-func reloadConfig() error {
-	newConfig, err := loadConfig()
-	if err != nil {
-		return err
-	}
-	config = newConfig
-	log.Println("Configuration reloaded successfully")
-	return nil
-}
-
-// Improved CORS handler dengan security enhancements
+// ========================================
+// CORS
+// ========================================
 func withCORS(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
-
-		// Validasi origin dari config
-		originAllowed := false
 		for _, allowed := range config.AllowedOrigins {
-			if strings.TrimSpace(allowed) == origin {
-				originAllowed = true
+			if strings.TrimSpace(allowed) == "*" || strings.TrimSpace(allowed) == origin {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Set("Vary", "Origin")
 				break
 			}
 		}
-
-		if originAllowed {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-			w.Header().Set("Vary", "Origin")
-		}
-
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
-		w.Header().Set("Access-Control-Max-Age", "86400") // Cache preflight for 24 hours
-
+		w.Header().Set("Access-Control-Max-Age", "86400")
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
-
 		h.ServeHTTP(w, r)
 	}
 }
 
-// Middleware untuk logging dan monitoring
+// ========================================
+// Logging
+// ========================================
 func withLogging(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-
-		// Custom ResponseWriter untuk capture status code
 		ww := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
-
 		h.ServeHTTP(ww, r)
-
-		log.Printf("%s %s %d %v", r.Method, r.URL.Path, ww.statusCode, time.Since(start))
+		log.Printf("[GW] %s %s %d %v", r.Method, r.URL.Path, ww.statusCode, time.Since(start))
 	}
 }
 
@@ -199,152 +169,301 @@ func (rw *responseWriter) WriteHeader(code int) {
 	rw.ResponseWriter.WriteHeader(code)
 }
 
-// Health check endpoint
-func healthCheck(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"healthy","timestamp":"` + time.Now().UTC().Format(time.RFC3339) + `"}`))
-}
+// ========================================
+// Role-based Auth Middleware
+// ========================================
+func withRoleAuth(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("[AUTH] Path: %s", r.URL.Path)
 
-// Config reload endpoint (untuk admin)
-func configReload(w http.ResponseWriter, r *http.Request) {
-	// Basic auth atau API key validation bisa ditambahkan di sini
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	if err := reloadConfig(); err != nil {
-		log.Printf("Failed to reload config: %v", err)
-		http.Error(w, "Failed to reload configuration", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"success","message":"Configuration reloaded","timestamp":"` + time.Now().UTC().Format(time.RFC3339) + `"}`))
-}
-
-// Routes info endpoint
-func routesInfo(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
-	info := map[string]interface{}{
-		"totalRoutes":    len(config.Routes),
-		"allowedOrigins": config.AllowedOrigins,
-		"routes":         config.Routes,
-		"timestamp":      time.Now().UTC().Format(time.RFC3339),
-	}
-
-	json.NewEncoder(w).Encode(info)
-}
-
-// Generic proxy handler - Updated to use direct target URLs
-func createProxyHandler(target string, enableCORS bool) http.HandlerFunc {
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		if target == "" {
-			log.Printf("Target URL not configured")
-			http.Error(w, "Service configuration error", http.StatusInternalServerError)
+		user, err := auth.GetUserFromToken(r)
+		if err != nil {
+			log.Printf("[AUTH] Token error: %v", err)
+			http.Redirect(w, r, "/account/login", http.StatusFound)
 			return
 		}
 
+		log.Printf("[AUTH] User: %s, Role: %s", user.Email, user.RoleCode)
+
+		// Check role access
+		if !auth.CheckRoleAccess(r.URL.Path, user.RoleCode) {
+			log.Printf("[AUTH] Access denied: user=%s role=%s path=%s", user.Email, user.RoleCode, r.URL.Path)
+
+			if r.Header.Get("X-Requested-With") == "XMLHttpRequest" ||
+				strings.Contains(r.Header.Get("Accept"), "application/json") {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusForbidden)
+				w.Write([]byte(`{"error":"Forbidden","message":"You don't have access to this page"}`))
+				return
+			}
+
+			// Serve 403 page
+			w.WriteHeader(http.StatusForbidden)
+			w.Header().Set("Content-Type", "text/html")
+			fmt.Fprintf(w, `<!DOCTYPE html>
+<html><head><title>403 Forbidden</title>
+<style>
+body{font-family:Inter,sans-serif;background:#1a1a2e;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;}
+.box{text-align:center;padding:40px;}
+h1{font-size:4rem;color:#ff4757;}
+a{color:#6C63FF;text-decoration:none;padding:10px 24px;border:2px solid #6C63FF;border-radius:8px;display:inline-block;margin-top:20px;}
+a:hover{background:#6C63FF;color:#fff;}
+</style></head>
+<body><div class="box">
+<h1>403</h1>
+<h3>Access Denied</h3>
+<p>You don't have permission to access this page.<br>Your role: <strong>%s</strong></p>
+<a href="/account/login">Back to Login</a>
+</div></body></html>`, user.RoleCode)
+			return
+		}
+
+		log.Printf("[AUTH] Access granted: user=%s role=%s path=%s", user.Email, user.RoleCode, r.URL.Path)
+		h.ServeHTTP(w, r)
+	}
+}
+
+// ========================================
+// Proxy handler
+// ========================================
+func createProxyHandler(target string, enableCORS bool) http.HandlerFunc {
+	handler := func(w http.ResponseWriter, r *http.Request) {
 		proxy := proxyPool.GetProxy(target)
 		if proxy == nil {
 			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 			return
 		}
-
 		proxy.ServeHTTP(w, r)
 	}
-
-	// Apply middlewares
 	handler = withLogging(handler)
 	if enableCORS {
 		handler = withCORS(handler)
 	}
-
 	return handler
 }
 
+// ========================================
+// Frontend page server
+// ========================================
+func serveFrontendPage(frontendDir, section, defaultPage string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		prefix := "/" + section + "/"
+		pageName := strings.TrimPrefix(r.URL.Path, prefix)
+		if pageName == "" {
+			pageName = defaultPage
+		}
+		pageName = strings.TrimSuffix(pageName, "/")
+
+		file := filepath.Join(frontendDir, section, pageName+".html")
+		if _, err := os.Stat(file); err == nil {
+			http.ServeFile(w, r, file)
+			return
+		}
+
+		fallback := filepath.Join(frontendDir, section, defaultPage+".html")
+		if _, err := os.Stat(fallback); err == nil {
+			http.ServeFile(w, r, fallback)
+			return
+		}
+
+		http.Error(w, "Page not found", http.StatusNotFound)
+	}
+}
+
+// ========================================
+// MAIN
+// ========================================
 func main() {
-	// Load configuration dari JSON file
+	// ✅ HARUS pakai utils.LoadEnv agar utils.GetEnv() bisa kerja
+	utils.LoadEnv(".env")
+
+	// Load JWT public key for validation
+	if err := utils.InitJWTLoadKeys("certs/private.pem", "certs/public.pem"); err != nil {
+		if err2 := utils.InitJWTLoadKeys("../users/certs/private.pem", "../users/certs/public.pem"); err2 != nil {
+			log.Fatalf("[FATAL] JWT keys not found: %v / %v", err, err2)
+		}
+	}
+
+	// ✅ Init Redis SETELAH LoadEnv
+	auth.InitRedis()
+
+	// ✅ TAMBAHKAN INI: Load route config
 	var err error
 	config, err = loadConfig()
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		log.Fatalf("[FATAL] Failed to load config: %v", err)
 	}
 
-	// Management endpoints
-	http.HandleFunc("/health", healthCheck)
-	http.HandleFunc("/admin/config/reload", configReload)
-	http.HandleFunc("/admin/routes/info", routesInfo)
-	fs := http.FileServer(http.Dir("./public/jakedu/assets"))
-	http.Handle("/j-assets/", http.StripPrefix("/j-assets/", fs))
+	frontendDir := "../frontend"
+	if envDir := system.Env("FRONTEND_DIR"); envDir != "" {
+		frontendDir = envDir
+	}
 
-	// Register all routes dynamically dari JSON config
+	// ========================================
+	// 1. Management endpoints (no auth)
+	// ========================================
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{"status":"healthy"}`))
+	})
+	http.HandleFunc("/admin/config/reload", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		newConfig, err := loadConfig()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		config = newConfig
+		w.Write([]byte(`{"status":"reloaded"}`))
+	})
+
+	// ========================================
+	// 2. Static assets (no auth)
+	// ========================================
+	assetsDir := filepath.Join(frontendDir, "assets")
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsDir))))
+
+	// ========================================
+	// 3. Protected Dashboard Pages (with Role Auth)
+	// ========================================
+
+	// /ops/* → Only OPERASIONAL, CEO, SUPERADMIN
+	http.HandleFunc("/ops/", withRoleAuth(serveFrontendPage(frontendDir, "ops", "dashboard")))
+
+	// /client/* → Only CLIENT, SUPERADMIN
+	http.HandleFunc("/client/", withRoleAuth(serveFrontendPage(frontendDir, "client", "dashboard")))
+
+	// /compliance/* → Only COMPLIANCE, SUPERADMIN
+	http.HandleFunc("/compliance/", withRoleAuth(serveFrontendPage(frontendDir, "compliance", "dashboard")))
+
+	// ========================================
+	// 4. Account pages (no role auth, just serve HTML)
+	// ========================================
+	http.HandleFunc("/account/", func(w http.ResponseWriter, r *http.Request) {
+		// POST /account/login/auth → proxy to users service
+		if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/account/login/auth") {
+			for _, route := range config.Routes {
+				if route.Path == "/account/login/auth" {
+					createProxyHandler(route.Target, route.CORS)(w, r)
+					return
+				}
+			}
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+
+		// GET /account/logout
+		if r.URL.Path == "/account/logout" {
+			// Clear cookies
+			http.SetCookie(w, &http.Cookie{Name: "token", Value: "", Path: "/", MaxAge: -1})
+			http.SetCookie(w, &http.Cookie{Name: "_authz", Value: "", Path: "/", MaxAge: -1})
+			http.SetCookie(w, &http.Cookie{Name: "session_id", Value: "", Path: "/", MaxAge: -1})
+			http.Redirect(w, r, "/account/login", http.StatusFound)
+			return
+		}
+
+		// Serve HTML pages
+		pageName := strings.TrimPrefix(r.URL.Path, "/account/")
+		if pageName == "" || pageName == "/" {
+			pageName = "login"
+		}
+		pageName = strings.TrimSuffix(pageName, "/")
+
+		// Try exact match
+		file := filepath.Join(frontendDir, "account", pageName+".html")
+		if _, err := os.Stat(file); err == nil {
+			log.Printf("[GW] Serving: %s -> %s", r.URL.Path, file)
+			http.ServeFile(w, r, file)
+			return
+		}
+
+		// Fallback to login
+		fallback := filepath.Join(frontendDir, "account", "login.html")
+		log.Printf("[GW] Fallback: %s -> %s", r.URL.Path, fallback)
+		http.ServeFile(w, r, fallback)
+	})
+
+	// ========================================
+	// 5. Root redirect
+	// ========================================
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/" || r.URL.Path == "" {
+			// If user has valid token, redirect to their dashboard
+			if user, err := auth.GetUserFromToken(r); err == nil {
+				redirect := redirectByRole(user.RoleCode)
+				http.Redirect(w, r, redirect, http.StatusFound)
+				return
+			}
+			http.Redirect(w, r, "/account/login", http.StatusFound)
+			return
+		}
+
+		// API routes
+		for _, route := range config.Routes {
+			if strings.HasPrefix(r.URL.Path, route.Path) {
+				createProxyHandler(route.Target, route.CORS)(w, r)
+				return
+			}
+		}
+
+		http.Error(w, "Not found", http.StatusNotFound)
+	})
+
+	// ========================================
+	// 6. API proxy routes
+	// ========================================
 	for _, route := range config.Routes {
-		http.HandleFunc(route.Path, createProxyHandler(route.Target, route.CORS))
-		log.Printf("Route registered: %s -> %s (CORS: %t)", route.Path, route.Target, route.CORS)
+		if strings.HasPrefix(route.Path, "/api/") {
+			http.HandleFunc(route.Path, createProxyHandler(route.Target, route.CORS))
+			log.Printf("[GW] API proxy: %s -> %s", route.Path, route.Target)
+		}
 	}
 
-	// Server configuration
+	// ========================================
+	// 7. Start HTTP server
+	// ========================================
 	port := system.Env("port")
 	if port == "" {
 		port = "2000"
 	}
 
-	// Custom logger yang filter TLS handshake errors
-	customLogger := log.New(os.Stderr, "", log.LstdFlags)
-
-	// Create HTTP server with timeouts dan custom error log
 	server := &http.Server{
 		Addr:           ":" + port,
 		ReadTimeout:    30 * time.Second,
 		WriteTimeout:   30 * time.Second,
 		IdleTimeout:    120 * time.Second,
-		MaxHeaderBytes: 1 << 20, // 1MB
-		ErrorLog:       customLogger,
+		MaxHeaderBytes: 1 << 20,
 	}
 
-	// Filter TLS handshake errors dari log
-	log.SetOutput(&filteredWriter{original: os.Stderr})
+	fmt.Println("=========================================")
+	fmt.Printf("  Gateway started on http://localhost:%s\n", port)
+	fmt.Println("=========================================")
+	fmt.Println("  Dashboard URLs (role-protected):")
+	fmt.Printf("    Ops:        http://localhost:%s/ops/dashboard\n", port)
+	fmt.Printf("    Client:     http://localhost:%s/client/dashboard\n", port)
+	fmt.Printf("    Compliance: http://localhost:%s/compliance/dashboard\n", port)
+	fmt.Println("  Login:        http://localhost:" + port + "/account/login")
+	fmt.Println("=========================================")
 
-	fmt.Printf("Server started at port: %s\n", port)
-	fmt.Printf("Health check available at: http://localhost:%s/health\n", port)
-	fmt.Printf("Routes info available at: http://localhost:%s/admin/routes/info\n", port)
-	fmt.Printf("Config reload available at: http://localhost:%s/admin/config/reload\n", port)
-	fmt.Printf("Loaded %d routes from configuration\n", len(config.Routes))
-
-	certFile := "certs/localhost.crt"
-	keyFile := "certs/localhost.key"
-
-	if err := server.ListenAndServeTLS(certFile, keyFile); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
-
-	// if err := server.ListenAndServe(); err != nil {
-	// 	log.Fatalf("Failed to start server: %v", err)
-	// }
 }
 
-// Custom writer untuk filter TLS errors
-type filteredWriter struct {
-	original *os.File
-}
-
-func (fw *filteredWriter) Write(p []byte) (n int, err error) {
-	s := string(p)
-	// Skip TLS handshake error messages
-	if strings.Contains(s, "TLS handshake error") &&
-		strings.Contains(s, "client sent an HTTP request to an HTTPS server") {
-		return len(p), nil // Don't write to log
+func redirectByRole(roleCode string) string {
+	switch strings.ToUpper(roleCode) {
+	case "OPERASIONAL", "CEO":
+		return "/ops/dashboard"
+	case "COMPLIANCE":
+		return "/compliance/dashboard"
+	case "CLIENT":
+		return "/client/dashboard"
+	case "SUPERADMIN":
+		return "/ops/dashboard"
+	default:
+		return "/client/dashboard"
 	}
-	return fw.original.Write(p)
 }
-
-/*
-	Copyright © 2024 - 2025. PT Arunika Tala Archipelago
-	Developed by Muhammad Abror
-	Optimized version with direct IP configuration
-	For more info, please visit https://arunikatala.co.id
-*/

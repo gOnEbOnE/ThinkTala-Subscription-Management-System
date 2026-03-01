@@ -40,16 +40,20 @@ func main() {
         sameSiteMode = http.SameSiteNoneMode
     }
 
+    sessionLife := utils.ToInt(utils.GetEnv("SESSION_LIFETIME", "3600"))
+
     session.Init(session.Config{
         Driver:      utils.GetEnv("SESSION_DRIVER", "cookie"),
         SecretKey:   utils.GetEnv("SESSION_KEY", utils.GetEnv("APP_KEY")),
         CookieName:  utils.GetEnv("SESSION_NAME", "za_session"),
-        SessionLife: utils.ToInt(utils.GetEnv("SESSION_LIFETIME", "3600")),
-        Domain:      utils.GetEnv("SESSION_DOMAIN", ""),
-        Path:        utils.GetEnv("SESSION_PATH", "/"),
-        Secure:      utils.GetEnv("SESSION_SECURE") == "true",
-        HttpOnly:    utils.GetEnv("SESSION_HTTP_ONLY") == "true",
-        SameSite:    sameSiteMode,
+        SessionLife: sessionLife,
+
+        // Cookie Settings
+        Path:     "/",
+        Domain:   "",  // 👈 PENTING: Set kosong
+        Secure:   utils.GetEnv("SESSION_SECURE") == "true",
+        HttpOnly: true,
+        SameSite: sameSiteMode,
     })
 
     maxConns, _ := strconv.Atoi(utils.GetEnv("read_db_max_conn", "5"))

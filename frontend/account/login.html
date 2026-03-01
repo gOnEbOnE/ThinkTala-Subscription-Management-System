@@ -29,8 +29,8 @@
         .form-control::placeholder { color:#94a3b8!important; opacity:0.7; }
         .form-control:focus { background:#fff; border-color:#00b4d8; box-shadow:0 0 0 4px rgba(0,180,216,0.1); }
         .btn-primary-glow { background:linear-gradient(135deg,#00b4d8,#0077b6); border:none; color:#fff; font-weight:700; padding:12px; border-radius:8px; width:100%; transition:0.3s; }
-        .btn-primary-glow:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,180,216,0.3); }
-        .btn-primary-glow:disabled { opacity:0.7; transform:none; }
+        .btn-primary-glow:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,180,216,0.3); color:#fff; }
+        .btn-primary-glow:disabled { opacity:0.7; transform:none; color:#fff; }
         .btn-google { background:#fff; color:#334155; border:1px solid var(--border-color); font-weight:600; padding:12px; border-radius:8px; width:100%; display:flex; align-items:center; justify-content:center; gap:10px; transition:0.2s; }
         .btn-google:hover { background:#f1f5f9; border-color:#cbd5e1; }
         .divider { display:flex; align-items:center; text-align:center; color:var(--text-muted); margin:25px 0; font-size:0.8rem; }
@@ -151,34 +151,52 @@
             if (!email || !password) { showToast('Email dan Password wajib diisi!'); return; }
 
             btn.disabled = true;
-            btn.textContent = 'Signing in...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Signing in...';
 
             try {
                 const res = await fetch('/account/login/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
                     body: JSON.stringify({ email, password })
                 });
+
                 const data = await res.json();
+                console.log('=== LOGIN RESPONSE ===');
+                console.log('Status:', data.status);
+                console.log('Msg:', data.msg);
+                console.log('User:', data.user);
+                console.log('Redirect URL:', data.redirect_url);
+                console.log('=======================');
+
                 if (data.status === true) {
                     showToast('Login berhasil! Redirecting...', 'success');
-
-                    // Simpan data user ke localStorage
+                    
+                    // Save user data ke localStorage
                     if (data.user) {
                         localStorage.setItem('user', JSON.stringify(data.user));
+                        console.log('User saved to localStorage:', data.user);
                     }
 
-                    // Redirect berdasarkan role dari server
+                    // Ambil redirect URL dari response
                     const redirectURL = data.redirect_url || '/client/dashboard';
-                    setTimeout(() => { window.location.href = redirectURL; }, 1000);
+                    console.log('Final redirect URL:', redirectURL);
+
+                    // Redirect setelah delay 500ms
+                    setTimeout(() => {
+                        console.log('Redirecting to:', redirectURL);
+                        window.location.href = redirectURL;
+                    }, 500);
                 } else {
                     showToast(data.msg || 'Login gagal!');
+                    btn.disabled = false;
+                    btn.innerHTML = 'Sign In';
                 }
             } catch (err) {
+                console.error('Login error:', err);
                 showToast('Koneksi ke server gagal!');
-            } finally {
                 btn.disabled = false;
-                btn.textContent = 'Sign In';
+                btn.innerHTML = 'Sign In';
             }
         });
     </script>

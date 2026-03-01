@@ -54,21 +54,17 @@ func main() {
 
 	// 2. Init Session dengan Config Lengkap (Sesuai update manager.go)
 	session.Init(session.Config{
-		Driver: utils.GetEnv("SESSION_DRIVER", "cookie"),
-
-		// Prioritaskan SESSION_KEY, jika kosong pakai APP_KEY
+		Driver:    utils.GetEnv("SESSION_DRIVER", "cookie"),
 		SecretKey: utils.GetEnv("SESSION_KEY", utils.GetEnv("APP_KEY")),
 
 		CookieName:  utils.GetEnv("SESSION_NAME", "za_session"),
 		SessionLife: utils.ToInt(utils.GetEnv("SESSION_LIFETIME", "3600")),
 
-		// Config Advanced (Dari .env)
-		Domain: utils.GetEnv("SESSION_DOMAIN", ""), // Kosongkan jika localhost
-		Path:   utils.GetEnv("SESSION_PATH", "/"),
-
-		// Konversi string "true" ke boolean
+		// Cookie Settings (FIXED: Domain kosong agar bisa dibaca gateway)
+		Path:     "/",
+		Domain:   "", // 👈 PENTING: Set kosong atau sesuai gateway domain
 		Secure:   utils.GetEnv("SESSION_SECURE") == "true",
-		HttpOnly: utils.GetEnv("SESSION_HTTP_ONLY") == "true",
+		HttpOnly: true,
 		SameSite: sameSiteMode,
 	})
 

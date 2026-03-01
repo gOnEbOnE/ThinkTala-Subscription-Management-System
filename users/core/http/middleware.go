@@ -421,8 +421,8 @@ func Authorize(r *http.Request, code string) (CurrentUser, error) {
 		return CurrentUser{}, err
 	}
 
+	// ✅ AMBIL RAW TOKEN DARI REDIS
 	jwt, err := utils.RedisGet(ctx, string(key))
-
 	if err != nil {
 		fmt.Println("token-err", err)
 		DestroyAuthorize(r)
@@ -431,32 +431,20 @@ func Authorize(r *http.Request, code string) (CurrentUser, error) {
 
 	fmt.Println("token-login", jwt)
 
-	jwtParts := strings.Split(jwt, ".")
-	if len(jwtParts) != 3 {
-		fmt.Print("middleware-auth-error", jwt)
-		return CurrentUser{}, fmt.Errorf("middleware-auth-error: %s", jwt)
+	// ✅ VALIDASI JWT LANGSUNG (TANPA DEKRIPSI SIGNATURE)
+	claims, err := utils.ValidateJWT(jwt)
+	if err != nil {
+		fmt.Println("jwt-validation-error", err)
+		return CurrentUser{}, err
 	}
 
-	decrypted, err := utils.Decrypt(jwtParts[2]) // Menggunakan AES engine
+	// ✅ REFRESH DAN SIMPAN RAW TOKEN
+	newToken, _, err := utils.RefreshJWT(jwt, 15*time.Minute)
 	if err != nil {
 		return CurrentUser{}, err
 	}
 
-	token := jwtParts[0] + "." + jwtParts[1] + "." + string(decrypted)
-
-	claims, err := utils.ValidateJWT(token)
-	if err != nil {
-		return CurrentUser{}, err
-	}
-
-	newToken, _, err := utils.RefreshJWT(token, 15*time.Minute)
-	if err != nil {
-		return CurrentUser{}, err
-	}
-
-	enToken := utils.EncryptTokenSignature(newToken)
-
-	err = utils.RedisSet(ctx, string(key), enToken, 15*time.Minute)
+	err = utils.RedisSet(ctx, string(key), newToken, 15*time.Minute)
 	if err != nil {
 		return CurrentUser{}, err
 	}
