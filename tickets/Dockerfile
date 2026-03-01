@@ -1,14 +1,48 @@
+# =====================
+# BUILD STAGE
+# =====================
 FROM golang:alpine AS builder
+
 WORKDIR /app
+
+# Copy dependency dulu (cache optimal)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
 COPY . .
-RUN if [ -f go.mod ]; then go mod download; fi
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o app main.go
 
+# Build binary
+RUN CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    go build -ldflags="-s -w" -o tickets .
+
+# =====================
+# RUNTIME STAGE
+# =====================
 FROM alpine:latest
-WORKDIR /app
-RUN apk --no-cache add tzdata
-COPY --from=builder /app/app .
 
-ENV PORT=2004
-EXPOSE 2004
-CMD ["./app"]
+WORKDIR /app
+
+# Install timezone data
+RUN apk --no-cache add tzdata
+
+# Copy binary dari builder
+COPY --from=builder /app/tickets /app/tickets
+RUN chmod +x /app/tickets
+
+# Copy env file (opsional)
+# Copy env file
+COPY .env .env
+
+# ---> TAMBAHKAN BARIS INI UNTUK MENGCOPY FILE PEM <---
+COPY private.pem public.pem ./
+
+COPY public/ ./public/
+
+# Expose port aplikasi
+EXPOSE 2005
+
+# Jalankan aplikasi
+CMD ["/app/tickets"]

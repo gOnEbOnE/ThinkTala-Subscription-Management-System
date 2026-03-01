@@ -5,13 +5,13 @@
   "routes": [
     {
       "path": "/account/register",
-      "target": "http://users:2005",
+      "target": "http://users:2006",
       "cors": true,
       "description": "User registration"
     },
     {
       "path": "/account/login",
-      "target": "http://users:2005",
+      "target": "http://users:2006",
       "cors": true,
       "description": "User login"
     },

@@ -1,0 +1,132 @@
+<div class="container-fluid animate-page-in">
+    <div class="mb-4">
+        <h3 class="fw-bold text-secondary mb-1">Pengaturan Akun</h3>
+        <p class="text-muted">Perbarui keamanan akun Anda secara berkala untuk menjaga kerahasiaan data.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-lg-8 col-xl-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-transparent border-bottom border-secondary-subtle py-3 px-4">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary-subtle text-primary rounded-circle p-2 me-3">
+                            <i class="bi bi-shield-lock-fill fs-5"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Ubah Kata Sandi</h5>
+                    </div>
+                </div>
+                
+                <form id="formUbahPassword" onsubmit="handleUpdatePassword(event)">
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-secondary">Kata Sandi Lama</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary border-secondary-subtle">
+                                    <i class="bi bi-key text-muted"></i>
+                                </span>
+                                <input type="password" class="form-control bg-body-tertiary border-secondary-subtle" 
+                                       id="old_password" placeholder="Masukkan kata sandi saat ini" required>
+                                <button class="btn btn-outline-secondary border-secondary-subtle" type="button" onclick="togglePass('old_password')">
+                                    <i class="bi bi-eye" id="icon-old_password"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 border-secondary-subtle">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-secondary">Kata Sandi Baru</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary border-secondary-subtle">
+                                    <i class="bi bi-lock-fill text-muted"></i>
+                                </span>
+                                <input type="password" class="form-control bg-body-tertiary border-secondary-subtle" 
+                                       id="new_password" placeholder="Minimal 8 karakter" required>
+                                <button class="btn btn-outline-secondary border-secondary-subtle" type="button" onclick="togglePass('new_password')">
+                                    <i class="bi bi-eye" id="icon-new_password"></i>
+                                </button>
+                            </div>
+                            <div class="form-text small">Gunakan kombinasi huruf, angka, dan simbol.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-secondary">Konfirmasi Kata Sandi Baru</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-body-tertiary border-secondary-subtle">
+                                    <i class="bi bi-check-circle-fill text-muted"></i>
+                                </span>
+                                <input type="password" class="form-control bg-body-tertiary border-secondary-subtle" 
+                                       id="confirm_password" placeholder="Ulangi kata sandi baru" required>
+                                <button class="btn btn-outline-secondary border-secondary-subtle" type="button" onclick="togglePass('confirm_password')">
+                                    <i class="bi bi-eye" id="icon-confirm_password"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-light-subtle border-top border-secondary-subtle py-3 px-4">
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="reset" class="btn btn-light border-secondary-subtle px-4 rounded-pill">Batal</button>
+                            <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm">
+                                <i class="bi bi-save me-2"></i>Simpan Perubahan
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="mt-4 p-3 bg-info-subtle border border-info-subtle rounded-4">
+                <div class="d-flex">
+                    <i class="bi bi-info-circle-fill text-info fs-5 me-3"></i>
+                    <p class="small text-info-emphasis mb-0">
+                        Setelah mengubah kata sandi, Anda mungkin akan diminta untuk login kembali pada semua perangkat yang terhubung.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fungsi untuk memperlihatkan/menyembunyikan password
+    function togglePass(id) {
+        const input = document.getElementById(id);
+        const icon = document.getElementById('icon-' + id);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+
+    // Fungsi handle submit (Integrasi ke Backend)
+    async function handleUpdatePassword(e) {
+        e.preventDefault();
+        const oldPass = document.getElementById('old_password').value;
+        const newPass = document.getElementById('new_password').value;
+        const confirmPass = document.getElementById('confirm_password').value;
+
+        if (newPass !== confirmPass) {
+            alert("Konfirmasi kata sandi tidak cocok!");
+            return;
+        }
+
+        if (newPass.length < 8) {
+            alert("Kata sandi baru minimal 8 karakter!");
+            return;
+        }
+
+        // Contoh fetch ke backend Go Anda
+        /*
+        const response = await fetch('/api/update-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ old: oldPass, new: newPass })
+        });
+        */
+        
+        alert("Permintaan perubahan kata sandi telah dikirim!");
+    }
+</script>

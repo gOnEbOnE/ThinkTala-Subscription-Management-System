@@ -23,11 +23,19 @@ services:
       - thinknalyze-network
 
   # --- MICROSERVICES ---
+  account:
+    build: ./account
+    container_name: thinknalyze-account
+    environment:
+      - PORT=2001
+    networks:
+      - thinknalyze-network
+
   notification:
     build: ./notification
     container_name: thinknalyze-notification
     environment:
-      - PORT=2001
+      - PORT=2002
     networks:
       - thinknalyze-network
 
@@ -35,7 +43,7 @@ services:
     build: ./operational
     container_name: thinknalyze-operational
     environment:
-      - PORT=2002
+      - PORT=2003
     networks:
       - thinknalyze-network
 
@@ -43,7 +51,7 @@ services:
     build: ./subscription
     container_name: thinknalyze-subscription
     environment:
-      - PORT=2003
+      - PORT=2004
     networks:
       - thinknalyze-network
 
@@ -51,7 +59,7 @@ services:
     build: ./tickets
     container_name: thinknalyze-tickets
     environment:
-      - PORT=2004
+      - PORT=2005
     networks:
       - thinknalyze-network
 
@@ -59,7 +67,7 @@ services:
     build: ./users
     container_name: thinknalyze-users
     environment:
-      - PORT=2005
+      - PORT=2006
     networks:
       - thinknalyze-network
 

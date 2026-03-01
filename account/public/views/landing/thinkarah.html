@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThinkArah | Project Blueprint</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            /* Warna Aksen (Tetap sama di kedua mode) */
+            --accent-cyan: #00f2ff;
+            --accent-purple: #bd00ff;
+            --accent-green: #00d26a;
+
+            /* Default: Dark Mode */
+            --bg-body: #05070a;
+            --bg-nav: rgba(5, 7, 10, 0.95);
+            --bg-card: rgba(20, 25, 40, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-main: #e2e8f0;
+            --text-heading: #ffffff;
+            --text-muted: #94a3b8;
+            --grid-line: rgba(255, 255, 255, 0.03);
+            --shadow-card: rgba(0,0,0,0.5);
+            --input-bg: #212529;
+        }
+
+        /* Light Mode Overrides */
+        body.light-mode {
+            --bg-body: #f0f4f8;
+            --bg-nav: rgba(255, 255, 255, 0.95);
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --border-color: rgba(0, 0, 0, 0.08);
+            --text-main: #334155;
+            --text-heading: #0f172a;
+            --text-muted: #64748b;
+            --grid-line: rgba(0, 0, 0, 0.05);
+            --shadow-card: rgba(0,0,0,0.1);
+            --input-bg: #e2e8f0;
+            
+            /* Re-map accent colors for better contrast on white if needed */
+            --accent-cyan: #0099a3; 
+            --accent-purple: #8a00ba;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+            /* Subtle Grid Background */
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* --- NAVIGATION --- */
+        .navbar {
+            background: var(--bg-nav);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.3s;
+        }
+        
+        /* Force override Bootstrap colors for theme adaptability */
+        .navbar-brand, .nav-link {
+            color: var(--text-muted) !important;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--accent-cyan) !important;
+        }
+        
+        /* Light mode navbar text fix */
+        body.light-mode .navbar-brand {
+            color: var(--text-heading) !important;
+        }
+        
+        /* Theme Toggle Button */
+        .theme-toggle {
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-heading);
+            transition: all 0.3s;
+        }
+        body.light-mode .theme-toggle {
+            background: rgba(0,0,0,0.05);
+            color: var(--text-heading);
+        }
+
+        /* --- SLIDE SECTIONS --- */
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* --- AI GLASS CARDS --- */
+        .ai-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px var(--shadow-card);
+            transition: transform 0.3s, border-color 0.3s, background 0.3s;
+        }
+        .ai-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-5px);
+        }
+
+        /* --- TYPOGRAPHY & OVERRIDES --- */
+        /* Overriding Bootstrap text-white/muted classes to obey theme */
+        .text-white { color: var(--text-heading) !important; }
+        .text-muted { color: var(--text-muted) !important; }
+        
+        .text-cyan { color: var(--accent-cyan) !important; }
+        .text-purple { color: var(--accent-purple) !important; }
+        .text-green { color: var(--accent-green) !important; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .glow-text {
+            text-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+        }
+
+        /* --- ANIMATIONS --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* --- TIMELINE (Roadmap) --- */
+        .timeline {
+            border-left: 2px solid var(--border-color);
+            padding-left: 30px;
+            margin-left: 10px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -36px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-purple);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-purple);
+        }
+
+        /* --- GAUGE MOCKUP --- */
+        .gauge-container {
+            width: 200px;
+            height: 100px;
+            background: linear-gradient(90deg, #00d26a 0%, #f5a623 50%, #f93e3e 100%);
+            border-top-left-radius: 110px;
+            border-top-right-radius: 110px;
+            position: relative;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        .gauge-needle {
+            width: 4px;
+            height: 90px;
+            background: #fff;
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform-origin: bottom center;
+            transform: rotate(45deg); 
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+        body.light-mode .gauge-needle {
+            background: #333;
+        }
+
+        /* Input styling for theme */
+        .form-control, .input-group-text {
+            background-color: var(--input-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-heading) !important;
+        }
+
+    </style>
+</head>
+<body data-bs-spy="scroll" data-bs-target="#navbar-example" data-bs-smooth-scroll="true" tabindex="0">
+
+    <nav id="navbar-example" class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold font-mono" href="#"><i class="fa-solid fa-brain text-cyan me-2"></i>Think<span class="text-cyan">Arah</span></a>
+            
+            <div class="d-flex align-items-center gap-2 order-lg-last">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Dark/Light Mode">
+                    <i class="fa-solid fa-sun" id="theme-icon"></i>
+                </button>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon" style="filter: invert(0.5);"></span>
+                </button>
+            </div>
+
+            <div class="collapse navbar-collapse justify-content-end me-3" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link active" href="#vision">Vision</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#architecture">Architecture</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#logic">Core Logic</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#risk">Risk</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#ondemand">On-Demand</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#roadmap">Roadmap</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section id="vision">
+        <div class="container text-center reveal">
+            <div class="mb-4">
+                <span class="badge rounded-pill border border-cyan text-cyan px-3 py-2 mb-3">INTERNAL PROJECT BLUEPRINT</span>
+            </div>
+            <h1 class="display-1 fw-bold mb-3">THINK<span class="text-cyan glow-text">ARAH</span> AI</h1>
+            <p class="lead text-muted mb-5 mx-auto" style="max-width: 700px;">
+                Membawa kecerdasan institusi ke trader ritel. Sebuah dashboard AI otonom yang memadukan 
+                <span class="text-white fw-bold">Data Makro</span>, <span class="text-white fw-bold">Korelasi Komoditas</span>, dan <span class="text-white fw-bold">Sentimen Berita</span>.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="#architecture" class="btn btn-outline-info px-4 py-2 rounded-pill">Explore Architecture <i class="fa-solid fa-arrow-down ms-2"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <section id="architecture">
+        <div class="container reveal">
+            <div class="text-center mb-5">
+                <h6 class="text-cyan font-mono text-uppercase">The Pipeline</h6>
+                <h2 class="fw-bold display-5 text-white">End-to-End System Flow</h2>
+            </div>
+
+            <div class="row g-4 align-items-center justify-content-center text-center">
+                <div class="col-md-3">
+                    <div class="ai-card h-100">
+                        <div class="display-4 text-muted mb-3"><i class="fa-solid fa-database"></i></div>
+                        <h4 class="fw-bold text-white">1. Data Ingestion</h4>
+                        <ul class="list-unstyled text-muted small text-start mx-auto mt-3" style="max-width: 150px;">
+                            <li><i class="fa-solid fa-check text-success me-2"></i>Yahoo Finance</li>
+                            <li><i class="fa-solid fa-check text-success me-2"></i>Investing Scraping</li>
+                            <li><i class="fa-solid fa-check text-success me-2"></i>RSS Feeds (News)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-1 d-none d-md-block">
+                    <i class="fa-solid fa-chevron-right fa-2x text-muted opacity-25"></i>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="ai-card h-100 border-cyan position-relative">
+                        <span class="position-absolute top-0 start-50 translate-middle badge bg-cyan text-dark">PYTHON WORKER</span>
+                        <div class="display-4 text-cyan mb-3"><i class="fa-solid fa-microchip"></i></div>
+                        <h4 class="fw-bold text-white">2. AI Engine</h4>
+                        <p class="small text-muted">Calculating Correlations, Regression (Fair Value), and NLP Sentiment Scoring.</p>
+                    </div>
+                </div>
+
+                <div class="col-md-1 d-none d-md-block">
+                    <i class="fa-solid fa-chevron-right fa-2x text-muted opacity-25"></i>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="ai-card h-100">
+                        <div class="display-4 text-purple mb-3"><i class="fa-solid fa-laptop-code"></i></div>
+                        <h4 class="fw-bold text-white">3. Interface</h4>
+                        <p class="small text-muted">FastAPI serving JSON to a Bootstrap 5 Dashboard. Live updates every 5 mins.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="logic">
+        <div class="container reveal">
+            <div class="row align-items-center">
+                <div class="col-lg-5 mb-4 mb-lg-0">
+                    <h6 class="text-purple font-mono text-uppercase">The Intelligence</h6>
+                    <h2 class="display-4 fw-bold mb-4 text-white">Confluence Logic:<br>The "3 Judges"</h2>
+                    <p class="text-muted lead">
+                        AI kita tidak menggunakan satu indikator. Sinyal <strong class="text-success">STRONG BUY</strong> hanya dirilis jika ketiga algoritma ini sepakat.
+                    </p>
+                    <div class="d-flex align-items-center gap-3 mt-4">
+                        <i class="fa-solid fa-shield-halved fa-2x text-white"></i>
+                        <div>
+                            <strong class="d-block text-white">High Win-Rate</strong>
+                            <span class="text-muted small">Memfilter noise dan sinyal palsu.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="ai-card d-flex align-items-center gap-4">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded-circle text-primary">
+                                    <i class="fa-solid fa-scale-balanced fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h4 class="fw-bold mb-1 text-white">1. Macro Fair Value</h4>
+                                    <p class="mb-0 text-muted small">Mendeteksi Divergensi Harga vs Komoditas & Yield Obligasi.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="ai-card d-flex align-items-center gap-4">
+                                <div class="bg-success bg-opacity-10 p-3 rounded-circle text-success">
+                                    <i class="fa-solid fa-dumbbell fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h4 class="fw-bold mb-1 text-white">2. Strength Index</h4>
+                                    <p class="mb-0 text-muted small">Menghitung kekuatan murni mata uang (Basket) secara global.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="ai-card d-flex align-items-center gap-4">
+                                <div class="bg-warning bg-opacity-10 p-3 rounded-circle text-warning">
+                                    <i class="fa-solid fa-newspaper fa-2x"></i>
+                                </div>
+                                <div>
+                                    <h4 class="fw-bold mb-1 text-white">3. NLP Sentiment</h4>
+                                    <p class="mb-0 text-muted small">AI membaca berita (Reuters/Bloomberg) sebagai filter fundamental.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="risk">
+        <div class="container reveal text-center">
+            <h6 class="text-danger font-mono text-uppercase">The Brake System</h6>
+            <h2 class="display-5 fw-bold mb-5 text-white">Fear & Greed Integration</h2>
+
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="ai-card py-5">
+                        <div class="gauge-container mb-4">
+                            <div class="gauge-needle"></div> 
+                        </div>
+                        
+                        <h3 class="fw-bold text-danger">EXTREME GREED (92)</h3>
+                        <p class="text-muted mt-3 px-4">
+                            "Meskipun data Makro bagus, Pasar sudah terlalu serakah (Overbought). AI memblokir sinyal BUY untuk mencegah pembelian di pucuk."
+                        </p>
+                        <div class="mt-4">
+                            <span class="badge bg-dark border border-secondary p-2">AI DECISION: <span class="text-warning fw-bold">WAIT FOR DIP</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="ondemand">
+        <div class="container reveal">
+            <div class="row align-items-center">
+                <div class="col-lg-6 order-lg-2">
+                    <h6 class="text-cyan font-mono text-uppercase">Interactive Feature</h6>
+                    <h2 class="display-5 fw-bold mb-3 text-white">"Google Search"<br>for Trading Ops</h2>
+                    <p class="text-muted lead mb-4">
+                        User tidak perlu mencari manual. Cukup ketik pair, AI akan melakukan deep-scan detik itu juga.
+                    </p>
+                    <ul class="list-unstyled text-muted">
+                        <li class="mb-3"><i class="fa-solid fa-bolt text-cyan me-2"></i> <strong>Instant Analysis:</strong> Hasil keluar < 2 detik.</li>
+                        <li class="mb-3"><i class="fa-solid fa-user-shield text-cyan me-2"></i> <strong>Personalized:</strong> Analisa pair apa saja (Exotic/Major).</li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-6 order-lg-1">
+                    <div class="ai-card border-top border-4 border-cyan">
+                        <div class="input-group input-group-lg mb-4">
+                            <span class="input-group-text"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                            <input type="text" class="form-control" value="GBPJPY" disabled>
+                            <button class="btn btn-primary opacity-50">ANALYZE</button>
+                        </div>
+                        
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <h2 class="fw-bold mb-0 text-white">GBPJPY</h2>
+                            <span class="badge bg-success">STRONG BUY</span>
+                        </div>
+                        
+                        <div class="mb-2 small">
+                            <div class="d-flex justify-content-between text-muted"><span>Yield Spread (UK vs JP)</span> <span class="text-success">+85%</span></div>
+                            <div class="progress" style="height:4px"><div class="progress-bar bg-success" style="width:85%"></div></div>
+                        </div>
+                        <div class="mb-2 small">
+                            <div class="d-flex justify-content-between text-muted"><span>Currency Strength</span> <span class="text-success">+70%</span></div>
+                            <div class="progress" style="height:4px"><div class="progress-bar bg-success" style="width:70%"></div></div>
+                        </div>
+                        
+                        <div class="alert mt-3 p-2 small text-muted fst-italic" style="background: rgba(100,100,100,0.1); border: 1px solid var(--border-color);">
+                            <i class="fa-solid fa-robot me-2"></i>"Carry trade potential high due to widening yield gap."
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roadmap">
+        <div class="container reveal">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold text-white">Execution Roadmap</h2>
+                <p class="text-muted">Rencana pengembangan 4 Minggu.</p>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <span class="text-cyan font-mono small">WEEK 1</span>
+                            <h4 class="fw-bold text-white mt-1">Data Pipeline Construction</h4>
+                            <p class="text-muted small">Membangun script Python (`data_engine.py`) untuk menarik data Minyak, Forex, dan Yields dari Yahoo Finance.</p>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <span class="text-cyan font-mono small">WEEK 2</span>
+                            <h4 class="fw-bold text-white mt-1">The Brain (Logic Coding)</h4>
+                            <p class="text-muted small">Implementasi logika Korelasi, Synthetic Strength Index, dan Regresi Fair Value.</p>
+                        </div>
+
+                        <div class="timeline-item">
+                            <span class="text-cyan font-mono small">WEEK 3</span>
+                            <h4 class="fw-bold text-white mt-1">API & NLP Integration</h4>
+                            <p class="text-muted small">Menghubungkan FinBERT untuk analisa berita dan membungkus semua logika dalam FastAPI Server.</p>
+                        </div>
+
+                        <div class="timeline-item">
+                            <span class="text-success font-mono small">WEEK 4</span>
+                            <h4 class="fw-bold text-white mt-1">Frontend & Launch</h4>
+                            <p class="text-muted small">Deployment ke server live dengan Scheduler 24 jam.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-4 text-center border-top text-muted small" style="border-color: var(--border-color) !important;">
+        <p class="mb-0">© 2024 ThinkArah AI Project. Confidential Internal Blueprint.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 1. REVEAL ANIMATION
+        const revealElements = document.querySelectorAll('.reveal');
+        const revealOnScroll = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, { threshold: 0.1 });
+        revealElements.forEach((el) => revealOnScroll.observe(el));
+
+        // 2. THEME TOGGLE LOGIC
+        function toggleTheme() {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            
+            // Toggle Class
+            body.classList.toggle('light-mode');
+            
+            // Ubah Ikon
+            if (body.classList.contains('light-mode')) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Cek Local Storage saat Load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('theme-icon').classList.remove('fa-sun');
+                document.getElementById('theme-icon').classList.add('fa-moon');
+            }
+
+            // 3. FIX MOBILE MENU (Auto close on click)
+            const navLinks = document.querySelectorAll('.nav-link');
+            const menuToggle = document.getElementById('navbarNav');
+            const bsCollapse = new bootstrap.Collapse(menuToggle, {toggle: false});
+            
+            navLinks.forEach((l) => {
+                l.addEventListener('click', () => {
+                    // Hanya tutup jika menu sedang terbuka (untuk mobile)
+                    if (menuToggle.classList.contains('show')) {
+                        bsCollapse.hide();
+                    }
+                })
+            })
+        });
+    </script>
+</body>
+</html>

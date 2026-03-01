@@ -1,0 +1,191 @@
+<div class="container-fluid">
+            <div class="d-md-flex align-items-center justify-content-between mb-4">
+                <div class="mb-3 mb-md-0">
+                    <h3 class="fw-bold text-secondary mb-1">Pengguna Diblokir</h3>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Pengguna Diblokir</li>
+                        </ol>
+                    </nav>
+                </div>
+                <button class="btn btn-primary shadow-sm rounded-pill px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalTambahData">
+                    <i class="bi bi-plus-lg me-2"></i>Tambah Data
+                </button>
+            </div>
+
+            <div class="card shadow-lg border-0 bg-body rounded-4 overflow-hidden">
+                <div class="card-header bg-transparent border-bottom border-secondary-subtle py-3 px-4">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-12 col-md-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="input-group input-group-sm" style="max-width: 300px;">
+                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="Cari siswa...">
+                                </div>
+                                <button class="btn btn-sm btn-outline-danger rounded-3 d-none" id="btnBulkDelete">
+                                    <i class="bi bi-trash me-1"></i> Hapus
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center">
+                            <label class="small text-muted me-2 mb-0">Tampilkan:</label>
+                            <select class="form-select form-select-sm w-auto bg-body-tertiary border-secondary-subtle text-body rounded-3">
+                                <option value="12">12</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr class="bg-primary-subtle text-primary-emphasis border-bottom border-primary-subtle">
+                                    <th scope="col" class="ps-4 py-3" style="width: 40px;">
+                                        <div class="form-check">
+                                            <input class="form-check-input border-primary rounded-1" type="checkbox" id="selectAll">
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="py-3 fw-bold">ID</th>
+                                    <th scope="col" class="py-3 fw-bold">Nama Lengkap</th>
+                                    <th scope="col" class="py-3 fw-bold">Kelas</th>
+                                    <th scope="col" class="py-3 fw-bold">Status</th>
+                                    <th scope="col" class="py-3 fw-bold text-center pe-4">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="border-top-0">
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input row-checkbox" type="checkbox">
+                                        </div>
+                                    </td>
+                                    <td class="fw-bold">#202601</td>
+                                    <td>Aditya Pratama</td>
+                                    <td>XII-IPA 1</td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle">Aktif</span>
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-light border-secondary-subtle rounded-3 me-1" title="Edit">
+                                                <i class="bi bi-pencil-square text-primary"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-light border-secondary-subtle rounded-3" title="Hapus">
+                                                <i class="bi bi-trash3 text-danger"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent border-top border-secondary-subtle py-3 px-4">
+                    <div class="row align-items-center">
+                        <div class="col-12 col-md-6 d-flex align-items-center mb-3 mb-md-0">
+                            <label class="small text-muted me-2 mb-0">Halaman:</label>
+                            <select class="form-select form-select-sm w-auto bg-body-tertiary border-secondary-subtle text-body rounded-3">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                            </select>
+                            <div class="ms-3 d-flex gap-2">
+                                <button class="btn btn-sm btn-outline-secondary border-secondary-subtle rounded-3 px-3">
+                                    <i class="bi bi-chevron-left small"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary border-secondary-subtle rounded-3 px-3">
+                                    <i class="bi bi-chevron-right small"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 text-md-end text-muted small">
+                            Menampilkan <span class="fw-bold text-emphasis">5</span> dari <span class="fw-bold text-emphasis">1,250</span> data
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="modalTambahData" tabindex="-1" aria-labelledby="modalTambahDataLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="modalTambahDataLabel">Input Data Siswa Baru</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Nama Lengkap</label>
+                                <input type="text" class="form-control" placeholder="Masukkan nama siswa..." required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Kelas</label>
+                                <select class="form-select">
+                                    <option selected disabled>Pilih Kelas</option>
+                                    <option>X (Sepuluh)</option>
+                                    <option>XI (Sebelas)</option>
+                                    <option>XII (Duabelas)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Status Awal</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" id="status1" checked>
+                                        <label class="form-check-label" for="status1">Aktif</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" id="status2">
+                                        <label class="form-check-label" for="status2">Pending</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Simpan Data</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+
+<script>
+        // Logika Checkbox Pilih Semua
+        const selectAll = document.getElementById('selectAll');
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        const btnBulkDelete = document.getElementById('btnBulkDelete');
+
+        selectAll.addEventListener('change', function() {
+            rowCheckboxes.forEach(cb => {
+                cb.checked = this.checked;
+            });
+            toggleBulkButton();
+        });
+
+        rowCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (!this.checked) selectAll.checked = false;
+                if (document.querySelectorAll('.row-checkbox:checked').length === rowCheckboxes.length) {
+                    selectAll.checked = true;
+                }
+                toggleBulkButton();
+            });
+        });
+
+        function toggleBulkButton() {
+            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+            if (checkedCount > 0) {
+                btnBulkDelete.classList.remove('d-none');
+            } else {
+                btnBulkDelete.classList.add('d-none');
+            }
+        }
+    </script>

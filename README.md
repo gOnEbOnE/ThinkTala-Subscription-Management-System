@@ -109,8 +109,6 @@ Anda dapat mengubah rute di `gateway/routes.json` tanpa perlu membangun ulang ko
 
 ---
 
-
-
 ## 📄 Lisensi
 Copyright © 2026. **Thinknalyze**.  
 *Optimized for efficiency and high-concurrency microservices.*

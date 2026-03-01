@@ -7,9 +7,7 @@
 
 ## 📖 Ringkasan Modul
 
-Branch ini berfokus pada pengembangan modul analitik bisnis pada aplikasi ThinkNalyze yang digunakan oleh pihak manajemen untuk memonitor performa platform.
-
-Modul ini berfungsi sebagai **pusat pengambilan keputusan (Decision Support Dashboard)** dengan menyajikan data penjualan paket serta perilaku pelanggan secara visual, terstruktur, dan berbasis periode waktu.
+Branch ini berfokus pada pengembangan modul analitik bisnis pada aplikasi ThinkNalyze yang digunakan oleh pihak manajemen untuk memonitor performa platform.Modul ini berfungsi sebagai **pusat pengambilan keputusan (Decision Support Dashboard)** dengan menyajikan data penjualan paket serta perilaku pelanggan secara visual, terstruktur, dan berbasis periode waktu.
 
 ### Melalui modul ini, manajemen dapat:
 

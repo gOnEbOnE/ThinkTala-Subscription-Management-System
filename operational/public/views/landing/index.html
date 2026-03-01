@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacroQuant | AI Forex Intelligence</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            /* Default Dark Mode (Cyberpunk) */
+            --bg-dark: #0b0e17;
+            --bg-sidebar: #0f121d; /* Slightly lighter than bg-dark */
+            --bg-panel: rgba(21, 26, 45, 0.7);
+            --border-color: rgba(255, 255, 255, 0.05);
+            --accent-cyan: #00f2ff;
+            --accent-purple: #bd00ff;
+            --text-main: #e2e8f0;
+            --text-muted: #8b9bb4;
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.2);
+            --sidebar-border: 1px solid rgba(255, 255, 255, 0.05);
+            --chart-grid: rgba(255,255,255,0.05);
+            --chart-text: #8b9bb4;
+        }
+
+        [data-theme="light"] {
+            /* Light Mode (Clean Tech Lab) */
+            --bg-dark: #f0f2f5;
+            --bg-sidebar: #ffffff;
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --border-color: rgba(0, 0, 0, 0.05);
+            --accent-cyan: #008891; /* Darker cyan for visibility on white */
+            --accent-purple: #700099;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --sidebar-border: 1px solid rgba(0, 0, 0, 0.05);
+            --chart-grid: rgba(0,0,0,0.05);
+            --chart-text: #64748b;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: var(--sidebar-border);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+            padding-top: 20px;
+            transition: background 0.3s;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            padding: 12px 20px;
+            margin: 4px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent-cyan);
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+
+        /* AI Glass Cards */
+        .ai-card {
+            background: var(--bg-panel);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-card);
+            transition: transform 0.2s, background 0.3s, border-color 0.3s;
+        }
+
+        .ai-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-cyan);
+        }
+
+        /* Typography & Utilities */
+        .text-cyan { color: var(--accent-cyan) !important; }
+        .text-purple { color: var(--accent-purple) !important; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .ai-badge {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent-cyan);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--accent-cyan);
+        }
+
+        /* Custom Progress Bar */
+        .progress {
+            height: 6px;
+            background-color: var(--border-color);
+        }
+
+        /* Toggle Switch Button */
+        .theme-toggle-btn {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .theme-toggle-btn:hover {
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
+        /* Animation Pulse */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 242, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 242, 255, 0); }
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #00d26a;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Table Styles override */
+        .table {
+            color: var(--text-main);
+        }
+        .table thead th {
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .table td {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="text-center mb-5">
+            <h4 class="fw-bold tracking-wider" style="color: var(--text-main)"><i class="fa-solid fa-brain text-cyan me-2"></i>Macro<span class="text-cyan">Quant</span></h4>
+            <p class="small" style="color: var(--text-muted)">AI Institutional Intelligence</p>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#"><i class="fa-solid fa-chart-radar me-2"></i> Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fa-solid fa-globe me-2"></i> Macro Data <span class="badge bg-danger ms-2" style="font-size:0.6rem">LIVE</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fa-solid fa-layer-group me-2"></i> Correlations</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fa-solid fa-robot me-2"></i> AI Predictions</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="fa-solid fa-history me-2"></i> Backtest Lab</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Market Overview</h2>
+                <p class="mb-0" style="color: var(--text-muted)">AI Last Sync: <span class="font-mono text-cyan">14:02:45 UTC</span> <span class="live-dot ms-2"></span></p>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="theme-toggle-btn" id="themeToggle" title="Switch Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+
+                <div class="ai-card py-2 px-3 mb-0 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-microchip text-purple"></i>
+                    <span class="small" style="color: var(--text-main)">Model: <strong>NeuroMac v4.2</strong></span>
+                </div>
+                
+                <div class="rounded-circle p-1" style="background: linear-gradient(45deg, var(--accent-cyan), var(--accent-purple));">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=0b0e17&color=fff" class="rounded-circle" width="35">
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="ai-card h-100 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="small text-uppercase" style="color: var(--text-muted)">Global Regime</span>
+                        <span class="ai-badge">HIGH CONFIDENCE</span>
+                    </div>
+                    <h3 class="fw-bold text-danger">RISK OFF <i class="fa-solid fa-shield-cat ms-2 small"></i></h3>
+                    <p class="small mb-0" style="color: var(--text-muted)">Investors fleeing to USD & Gold.</p>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span style="color: var(--text-main)">Risk Score</span>
+                            <span class="font-mono text-danger">88/100</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" style="width: 88%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="ai-card h-100">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="small text-uppercase" style="color: var(--text-muted)">Top AI Opportunity</span>
+                        <span class="ai-badge border-success text-success bg-success bg-opacity-10">BUY SIGNAL</span>
+                    </div>
+                    <div class="d-flex align-items-end gap-2">
+                        <h3 class="fw-bold mb-0">AUD/NZD</h3>
+                        <span class="text-success small fw-bold">+0.45% Est.</span>
+                    </div>
+                    <p class="small mt-2 mb-0" style="color: var(--text-muted)">Reason: <span class="text-cyan">Rate Differential widening +2.1%</span></p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="ai-card h-100">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="small text-uppercase" style="color: var(--text-muted)">Anomaly Detected</span>
+                        <span class="ai-badge border-warning text-warning bg-warning bg-opacity-10">ALERT</span>
+                    </div>
+                    <h5 class="fw-bold" style="color: var(--text-main)">Oil vs CAD Divergence</h5>
+                    <p class="small" style="color: var(--text-muted)">Oil prices surged <span class="text-success">+2.3%</span> but CAD remains flat. Expect CAD to catch up soon.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="ai-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="fw-bold mb-0">AI Fair Value Gap Analysis</h5>
+                            <span class="small" style="color: var(--text-muted)">Asset: <span class="text-cyan fw-bold">EUR/USD</span> (H4)</span>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary active">1H</button>
+                            <button class="btn btn-outline-secondary">4H</button>
+                            <button class="btn btn-outline-secondary">1D</button>
+                        </div>
+                    </div>
+                    <div style="height: 300px;">
+                        <canvas id="fairValueChart"></canvas>
+                    </div>
+                    <div class="mt-3 p-3 rounded" style="background: rgba(125,125,125,0.1);">
+                        <div class="row text-center">
+                            <div class="col-4 border-end border-secondary">
+                                <span class="d-block small" style="color: var(--text-muted)">Current Price</span>
+                                <span class="fw-bold font-mono">1.0845</span>
+                            </div>
+                            <div class="col-4 border-end border-secondary">
+                                <span class="d-block small" style="color: var(--text-muted)">AI Fair Value</span>
+                                <span class="fw-bold font-mono text-cyan">1.0920</span>
+                            </div>
+                            <div class="col-4">
+                                <span class="d-block small" style="color: var(--text-muted)">Gap (Potential)</span>
+                                <span class="fw-bold font-mono text-success">+75 Pips</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="ai-card mb-4">
+                    <h6 class="fw-bold mb-3 text-uppercase small tracking-wider">Macro Strength Meter</h6>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="fw-bold">USD</span>
+                            <span class="font-mono text-success">8.5</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: 85%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="fw-bold">GBP</span>
+                            <span class="font-mono text-success">6.2</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success opacity-75" style="width: 62%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="fw-bold">EUR</span>
+                            <span class="font-mono text-warning">4.0</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: 40%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small mb-1">
+                            <span class="fw-bold">JPY</span>
+                            <span class="font-mono text-danger">1.8</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" style="width: 18%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card">
+                    <h6 class="fw-bold mb-3 text-uppercase small tracking-wider">Institutional Sentiment (NLP)</h6>
+                    <div class="d-flex align-items-center justify-content-center position-relative" style="height: 150px;">
+                        <canvas id="sentimentChart"></canvas>
+                        <div class="position-absolute text-center">
+                            <span class="d-block small text-muted">Bias</span>
+                            <strong class="text-danger h4">BEARISH</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="ai-card">
+                    <h5 class="fw-bold mb-3">Live AI Macro Insights</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="small text-uppercase">
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Event/Data</th>
+                                    <th>Impact</th>
+                                    <th>AI Analysis</th>
+                                    <th>Asset Effect</th>
+                                </tr>
+                            </thead>
+                            <tbody class="font-mono small">
+                                <tr>
+                                    <td class="text-muted">14:00</td>
+                                    <td>US CPI (YoY)</td>
+                                    <td><span class="badge bg-danger">HIGH</span></td>
+                                    <td>Came in at 3.4% vs 3.1% Exp. (Hotter)</td>
+                                    <td class="text-success"><i class="fa-solid fa-arrow-up"></i> USD Pairs</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">12:30</td>
+                                    <td>ECB Speech</td>
+                                    <td><span class="badge bg-warning text-dark">MED</span></td>
+                                    <td>Lagarde mentions "Rate pause possible"</td>
+                                    <td class="text-danger"><i class="fa-solid fa-arrow-down"></i> EUR/USD</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // --- THEME & COLOR MANAGEMENT ---
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+        const icon = themeToggleBtn.querySelector('i');
+
+        // Helper to get CSS Variable Value
+        function getCssVar(name) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        }
+
+        // Initialize Charts Variables (so we can update them later)
+        let fvChartInstance = null;
+        let sentChartInstance = null;
+
+        // --- CHART CONFIGURATIONS ---
+
+        function initCharts() {
+            // 1. Fair Value Chart
+            const ctxFV = document.getElementById('fairValueChart').getContext('2d');
+            
+            // Dynamic Colors based on theme
+            const gridColor = getCssVar('--chart-grid');
+            const textColor = getCssVar('--chart-text');
+            const cyanColor = getCssVar('--accent-cyan');
+
+            let gradientFV = ctxFV.createLinearGradient(0, 0, 0, 400);
+            gradientFV.addColorStop(0, 'rgba(0, 242, 255, 0.5)'); // Keep neon for effect
+            gradientFV.addColorStop(1, 'rgba(0, 242, 255, 0)');
+
+            fvChartInstance = new Chart(ctxFV, {
+                type: 'line',
+                data: {
+                    labels: ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', 'Now'],
+                    datasets: [
+                        {
+                            label: 'Market Price',
+                            data: [1.0820, 1.0815, 1.0830, 1.0825, 1.0840, 1.0835, 1.0845, 1.0845],
+                            borderColor: textColor, // Updates with theme
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.1,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: 'AI Fair Value',
+                            data: [1.0850, 1.0860, 1.0870, 1.0880, 1.0890, 1.0900, 1.0910, 1.0920],
+                            borderColor: cyanColor, // Updates with theme
+                            backgroundColor: gradientFV,
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointBackgroundColor: getCssVar('--bg-dark'),
+                            pointBorderColor: cyanColor,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: textColor } },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: getCssVar('--bg-panel'),
+                            titleColor: cyanColor,
+                            bodyColor: textColor,
+                            borderColor: gridColor,
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: { grid: { color: gridColor }, ticks: { color: textColor } },
+                        y: { grid: { color: gridColor }, ticks: { color: textColor } }
+                    }
+                }
+            });
+
+            // 2. Sentiment Chart
+            const ctxSent = document.getElementById('sentimentChart').getContext('2d');
+            sentChartInstance = new Chart(ctxSent, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Bearish', 'Bullish', 'Neutral'],
+                    datasets: [{
+                        data: [65, 20, 15],
+                        backgroundColor: ['#f93e3e', '#00d26a', '#8b9bb4'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // --- UPDATE CHARTS ON THEME CHANGE ---
+        function updateChartsTheme() {
+            if(!fvChartInstance) return;
+
+            const gridColor = getCssVar('--chart-grid');
+            const textColor = getCssVar('--chart-text');
+            const cyanColor = getCssVar('--accent-cyan');
+            const bgDark = getCssVar('--bg-dark');
+            const bgPanel = getCssVar('--bg-panel');
+
+            // Update Fair Value Chart
+            fvChartInstance.data.datasets[0].borderColor = textColor; // Market Price line
+            fvChartInstance.data.datasets[1].borderColor = cyanColor; // AI Line
+            fvChartInstance.data.datasets[1].pointBackgroundColor = bgDark;
+            fvChartInstance.data.datasets[1].pointBorderColor = cyanColor;
+            
+            fvChartInstance.options.scales.x.grid.color = gridColor;
+            fvChartInstance.options.scales.x.ticks.color = textColor;
+            fvChartInstance.options.scales.y.grid.color = gridColor;
+            fvChartInstance.options.scales.y.ticks.color = textColor;
+            
+            fvChartInstance.options.plugins.legend.labels.color = textColor;
+            fvChartInstance.options.plugins.tooltip.backgroundColor = bgPanel;
+            fvChartInstance.options.plugins.tooltip.titleColor = cyanColor;
+            fvChartInstance.options.plugins.tooltip.bodyColor = textColor;
+            
+            fvChartInstance.update();
+        }
+
+        // --- TOGGLE LOGIC ---
+        function setTheme(theme) {
+            htmlElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            
+            if (theme === 'light') {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+            
+            // Wait slightly for CSS transition to start, then update chart canvas
+            setTimeout(updateChartsTheme, 10); 
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        });
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            setTheme(savedTheme);
+            initCharts();
+        });
+
+    </script>
+</body>
+</html>
