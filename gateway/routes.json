@@ -1,61 +1,14 @@
 {
-  "allowedOrigins": [
-    "*"
-  ],
+  "allowedOrigins": ["*"],
   "routes": [
-    {
-      "path": "/account/register",
-      "target": "http://users:2005",
-      "cors": true,
-      "description": "User registration"
-    },
-    {
-      "path": "/account/login",
-      "target": "http://users:2005",
-      "cors": true,
-      "description": "User login"
-    },
-    {
-      "path": "/account/reset",
-      "target": "http://users:2005",
-      "cors": true,
-      "description": "Password reset"
-    },
-    {
-      "path": "/account/personal/",
-      "target": "http://users:2005",
-      "cors": true,
-      "description": "Personal profile & data management"
-    },
-    {
-      "path": "/account/settings/",
-      "target": "http://users:2005",
-      "cors": true,
-      "description": "Account settings"
-    },
-    {
-      "path": "/account/tickets/",
-      "target": "http://tickets:2004",
-      "cors": true,
-      "description": "Helpdesk tickets"
-    },
-    {
-      "path": "/account/membership/",
-      "target": "http://operational:2002",
-      "cors": true,
-      "description": "Helpdesk tickets"
-    },
-    {
-      "path": "/account/notification/",
-      "target": "http://notification:2001",
-      "cors": true,
-      "description": "News and announcements"
-    },
-    {
-      "path": "/account/packages/",
-      "target": "http://subscription:2003",
-      "cors": true,
-      "description": "Knowledge base"
-    }
+    { "path": "/api/auth/register", "target": "http://localhost:2006", "cors": true, "description": "Register API" },
+    { "path": "/api/auth/verify-otp", "target": "http://localhost:2006", "cors": true, "description": "Verify OTP" },
+    { "path": "/api/auth/resend-otp", "target": "http://localhost:2006", "cors": true, "description": "Resend OTP" },
+    { "path": "/api/auth", "target": "http://localhost:2006", "cors": true, "description": "Auth API" },
+    { "path": "/account/login/auth", "target": "http://localhost:2006", "cors": true, "description": "Login POST" },
+    { "path": "/api/operational/", "target": "http://localhost:5005", "cors": true, "description": "Operational API" },
+    { "path": "/api/kyc/", "target": "http://localhost:5005", "cors": true, "description": "KYC API" },
+    { "path": "/api/notifications/", "target": "http://localhost:5003", "cors": true, "description": "Notification API" },
+    { "path": "/api/subscriptions/", "target": "http://localhost:5004", "cors": true, "description": "Subscription API" }
   ]
 }

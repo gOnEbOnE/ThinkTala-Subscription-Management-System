@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pink AI - Future Intelligence</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <div class="logo">
+                <i class="fa-solid fa-brain brain-icon"></i> Pink<span class="accent-text">AI.</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#docs">Docs</a></li>
+                <li><a href="#get-started" class="btn-nav">Get Started</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section id="home" class="hero-section">
+        <div class="ai-particles"></div>
+        
+        <div class="container hero-container">
+            <div class="hero-text">
+                <span class="badge">Next-Gen Technology</span>
+                <h1>Discover The Power of <br><span class="gradient-text">Artificial Intelligence</span></h1>
+                <p>Jelajahi masa depan dengan platform AI kami yang cerdas, cepat, dan didesain dengan estetika futuristik berwarna pink. Solusi satu atap untuk inovasi Anda.</p>
+                <div class="cta-group">
+                    <a href="#about" class="btn-primary"><i class="fa-solid fa-rocket"></i> Jelajahi Fitur</a>
+                    <a href="#docs" class="btn-secondary"><i class="fa-regular fa-file-code"></i> Dokumentasi</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://img.freepik.com/free-vector/artificial-intelligence-concept-illustration_114360-7774.jpg?w=826&t=st=1709194446~exp=1709195046~hmac=e7c51060a3913335076716000948506246443308599108745453367061341046" alt="AI Brain Visualization">
+                <div class="glow-circle"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section-padding dark-bg">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="gradient-text">Mengapa Memilih Pink AI?</h2>
+                <p>Kami menggabungkan kecerdasan mesin dengan antarmuka yang indah dan intuitif.</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h3>Neural Processing</h3>
+                    <p>Pemrosesan data secepat kilat menggunakan arsitektur jaringan saraf tiruan terbaru.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3>Secure Core</h3>
+                    <p>Keamanan tingkat lanjut yang memastikan data dan model AI Anda tetap terlindungi.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3>Auto-Optimization</h3>
+                    <p>Sistem yang belajar sendiri untuk terus meningkatkan efisiensi alur kerja Anda.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="docs" class="section-padding highlight-bg">
+        <div class="container">
+            <div class="docs-container">
+                <div class="docs-text">
+                    <h2 class="gradient-text">Dokumentasi Lengkap</h2>
+                    <p class="lead">Pelajari cara mengintegrasikan Pink AI ke dalam aplikasi Anda dalam hitungan menit, bukan hari.</p>
+                    <p>Dokumentasi kami dirancang agar mudah dipahami oleh pemula maupun ahli. Dilengkapi dengan contoh kode interaktif, panduan langkah demi langkah, dan referensi API yang komprehensif.</p>
+                    
+                    <ul class="docs-list">
+                        <li><i class="fa-solid fa-check"></i> Panduan Instalasi Cepat</li>
+                        <li><i class="fa-solid fa-check"></i> Referensi RESTful API</li>
+                        <li><i class="fa-solid fa-check"></i> SDK untuk Go, Python, dan JS</li>
+                    </ul>
+                    <a href="#" class="btn-primary cta-docs">Baca Dokumentasi Lengkap <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+                <div class="docs-preview code-window">
+                    <div class="code-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span>example_integration.go</span>
+                    </div>
+                    <pre class="code-content">
+<code>package main
+
+import (
+    "fmt"
+    "github.com/pinkai/sdk-go"
+)
+
+func main() {
+    // Initialize AI Client
+    client := pinkai.NewClient("YOUR_API_KEY")
+
+    // Run analysis
+    result, err := client.Analyze("Hello World Data")
+    
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("AI Score: %v\n", result.Score)
+}</code>
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer id="get-started">
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <h3>Pink<span class="accent-text">AI.</span></h3>
+                <p>The future is pretty in pink.</p>
+            </div>
+            <div class="footer-links">
+                <a href="#"><i class="fa-brands fa-github"></i> GitHub</a>
+                <a href="#"><i class="fa-brands fa-twitter"></i> Twitter</a>
+                <a href="#"><i class="fa-brands fa-discord"></i> Discord</a>
+            </div>
+        </div>
+        <div class="copyright text-center">
+             &copy; 2024 Pink AI Technologies. All Rights Reserved.
+        </div>
+    </footer>
+
+</body>
+</html>
