@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - {{ .data.AppName }}</title>
+    
+    <link rel="stylesheet" href="{{.BaseURL}}/assets/css/style.css">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* CSS KHUSUS DOCS */
+        body { padding-top: 80px; }
+        
+        .docs-layout {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* SIDEBAR */
+        .docs-sidebar {
+            width: 280px;
+            background: rgba(10, 2, 20, 0.95);
+            border-right: 1px solid rgba(255, 0, 127, 0.2);
+            position: fixed;
+            top: 80px;
+            bottom: 0;
+            overflow-y: auto;
+            padding: 30px;
+            z-index: 100;
+        }
+        .docs-sidebar h4 {
+            color: var(--primary-pink);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            margin-top: 25px;
+        }
+        .docs-sidebar h4:first-child { margin-top: 0; }
+        .docs-sidebar ul { list-style: none; }
+        .docs-sidebar li { margin-bottom: 8px; }
+        .docs-sidebar a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            display: block;
+            padding: 5px 0;
+        }
+        .docs-sidebar a:hover, .docs-sidebar a.active {
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        /* CONTENT */
+        .docs-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px 60px;
+            max-width: 1000px;
+        }
+
+        .version-badge {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            vertical-align: middle;
+            margin-left: 15px;
+            box-shadow: 0 4px 10px rgba(255, 0, 127, 0.3);
+        }
+
+        .docs-content h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        .docs-content h2 { font-size: 1.8rem; margin-top: 60px; margin-bottom: 20px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .docs-content h3 { font-size: 1.4rem; margin-top: 35px; margin-bottom: 15px; color: var(--secondary-pink); }
+        .docs-content p { margin-bottom: 15px; color: #ccc; line-height: 1.7; }
+        .docs-content ul { margin-left: 20px; margin-bottom: 20px; color: #ccc; }
+        .docs-content li { margin-bottom: 8px; }
+        
+        .alert-box {
+            background: rgba(255, 0, 127, 0.08);
+            border-left: 4px solid var(--primary-pink);
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            color: #ffccdd;
+        }
+
+        /* CODE BLOCKS */
+        pre {
+            background: #150525;
+            border: 1px solid rgba(255, 0, 127, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            margin: 20px 0;
+            color: #e0e0e0;
+        }
+        code {
+            font-family: 'Fira Code', monospace;
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--secondary-pink);
+        }
+        pre code { background: none; padding: 0; color: inherit; }
+
+        .kwd { color: #ff007f; font-weight: bold; }
+        .str { color: #a6e22e; }
+        .func { color: #66d9ef; }
+        .com { color: #75715e; font-style: italic; }
+
+        @media (max-width: 900px) {
+            .docs-sidebar { display: none; }
+            .docs-content { margin-left: 0; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <div class="logo">
+                <i class="fa-solid fa-book brain-icon"></i> ZA<span class="accent-text">Docs.</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="{{.BaseURL}}">Home</a></li>
+                <li><a href="{{.BaseURL}}/docs" class="active">Documentation</a></li>
+                <li><a href="{{.BaseURL}}/acc/login" class="btn-nav">Login App</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="docs-layout">
+        <aside class="docs-sidebar">
+            <h4>Getting Started</h4>
+            <ul>
+                <li><a href="#intro">Introduction</a></li>
+                <li><a href="#structure">Folder Structure</a></li>
+                <li><a href="#config">Configuration</a></li>
+            </ul>
+            
+            <h4>Core Utilities</h4>
+            <ul>
+                <li><a href="#session">Session & Redis</a></li>
+                <li><a href="#uploader">File Uploader</a></li>
+                <li><a href="#image">Image Processing</a></li>
+                <li><a href="#security">Security & Auth</a></li>
+                <li><a href="#validator">Validator</a></li>
+            </ul>
+
+            <h4>Development</h4>
+            <ul>
+                <li><a href="#routing">Routing System</a></li>
+                <li><a href="#worker">Worker Pool</a></li>
+                <li><a href="#db-toggle">Database Bypass</a></li>
+            </ul>
+        </aside>
+
+        <main class="docs-content">
+            
+            <section id="intro">
+                <h1>Documentation <span class="version-badge">v1.0.0</span></h1>
+                <p class="lead">Panduan lengkap ZAFramework dengan integrasi utils modern.</p>
+                <div class="alert-box">
+                    <i class="fa-solid fa-check-circle"></i> <strong>Full Features:</strong> Documentation ini mencakup Session, Validator, Routing, dan Worker Pool yang baru ditambahkan.
+                </div>
+            </section>
+
+            <section id="structure">
+                <h2>1. Folder Structure</h2>
+                <p>Struktur folder terbaru memisahkan resource publik dan view secara lebih rapi.</p>
+                <pre><code>/zaframework
+├── main.go               <span class="com"># Entry point</span>
+├── .env                  <span class="com"># Environment Config</span>
+├── app/
+│   ├── modules/         <span class="com"># Modules (Controller, Service, Repo)</span>
+│   └── routes/           <span class="com"># Routing System</span>
+├── core/                 <span class="com"># Framework Engine</span>
+│   ├── utils/            <span class="com"># Helpers (Session, Image, etc)</span>
+│   └── http/             <span class="com"># Response & Middleware</span>
+└── public/
+    ├── assets/           <span class="com"># CSS, JS, Uploaded Files</span>
+    └── views/            <span class="com"># HTML Templates</span></code></pre>
+            </section>
+
+            <section id="config">
+                <h2>2. Configuration</h2>
+                <p>Pengaturan aplikasi terpusat di file <code>.env</code>. Core engine akan memuat konfigurasi ini saat startup.</p>
+                <pre><code><span class="com"># .env Example</span>
+app_name=ZAFramework
+port=9002
+app_env=development
+
+<span class="com"># Database</span>
+postgres=true
+read_db_host=localhost
+read_db_port=5432
+read_db_user=postgres
+read_db_pass=rahasia
+
+<span class="com"># Session & Redis</span>
+SESSION_DRIVER=redis
+redis=true
+redis_host=localhost</code></pre>
+            </section>
+
+            <section id="session">
+                <h2>3. Session Manager</h2>
+                <p>Mendukung Multi-Driver: <code>cookie</code>, <code>redis</code>, <code>stateless</code> (JWT), dan <code>stateless_with_redis</code>.</p>
+                
+                <h3>Usage in Controller</h3>
+                <pre><code><span class="kwd">import</span> "github.com/master-abror/zaframework/core/utils/session"
+
+<span class="kwd">func</span> (c *Controller) Login(w http.ResponseWriter, r *http.Request) {
+    <span class="com">// Set Session (Otomatis menyesuaikan driver di .env)</span>
+    session.Set(w, r, <span class="str">"user_id"</span>, 101)
+    
+    <span class="com">// Get Session</span>
+    uid := session.Get(r, <span class="str">"user_id"</span>)
+
+    <span class="com">// Logout</span>
+    session.Destroy(w, r)
+}</code></pre>
+            </section>
+
+            <section id="uploader">
+                <h2>4. File Uploader</h2>
+                <p>Menangani upload file dengan validasi tipe, ukuran, dan auto-rename (UUID).</p>
+                <pre><code><span class="kwd">func</span> UploadAvatar(w http.ResponseWriter, r *http.Request) {
+    folder := <span class="str">"public/assets/uploads/avatars"</span>
+    
+    <span class="com">// Params: Request, FieldName, Folder, AllowedExts, MaxSize</span>
+    filename, err := utils.UploadFile(r, <span class="str">"foto"</span>, folder, utils.FileImages, 2*1024*1024)
+    
+    <span class="kwd">if</span> err != nil {
+        http.Error(w, err.Error(), 400)
+    }
+}</code></pre>
+            </section>
+
+            <section id="image">
+                <h2>5. Image Processing</h2>
+                <p>Resize, Compress, dan Crop gambar secara otomatis menggunakan preset cerdas.</p>
+                <pre><code><span class="com">// Setelah upload, proses gambarnya</span>
+fullPath := <span class="str">"public/assets/uploads/avatars/"</span> + filename
+
+<span class="com">// Resize jadi kotak 200x200 & Compress Quality 80</span>
+err := utils.ProcessImage(fullPath, utils.ImgSquareSmall)
+
+<span class="com">// Atau Custom</span>
+custom := utils.ImagePreset{Width: 800, Height: 400, Quality: 70, Mode: "fit"}
+utils.ProcessImage(fullPath, custom)</code></pre>
+            </section>
+
+            <section id="security">
+                <h2>6. Security & Auth</h2>
+                <p>Kumpulan fungsi wajib untuk keamanan data (Bcrypt).</p>
+                <pre><code><span class="com">// Hash Password</span>
+hash, _ := utils.HashPassword(<span class="str">"rahasia123"</span>)
+
+<span class="com">// Check Password (Login)</span>
+match := utils.CheckPasswordHash(<span class="str">"rahasia123"</span>, hash)</code></pre>
+            </section>
+
+            <section id="validator">
+                <h2>7. Input Validator</h2>
+                <p>Memvalidasi Struct Input menggunakan struct tags. Menggunakan library <code>go-playground/validator</code>.</p>
+                <pre><code><span class="kwd">type</span> UserInput <span class="kwd">struct</span> {
+    Email <span class="func">string</span> `validate:"required,email"`
+    Age   <span class="func">int</span>    `validate:"min=17"`
+}
+
+<span class="kwd">func</span> CreateUser(input UserInput) {
+    <span class="com">// Validasi struct</span>
+    if errs := utils.ValidateStruct(input); errs != nil {
+        <span class="com">// return error json: {"email": "Format email salah"}</span>
+    }
+}</code></pre>
+            </section>
+
+            <section id="routing">
+                <h2>8. Routing System</h2>
+                <p>Sistem routing terpusat di folder <code>app/routes</code>. Menggunakan standard library <code>http.ServeMux</code> yang dibungkus.</p>
+                
+                <h3>Register Route</h3>
+                <pre><code><span class="com">// File: app/routes/router.go</span>
+<span class="kwd">func</span> Init(app *core.App, loginCtrl *login.Controller) {
+    
+    <span class="com">// 1. GET Request</span>
+    app.Router.HandleFunc(<span class="str">"GET /dashboard"</span>, loginCtrl.Dashboard)
+
+    <span class="com">// 2. POST Request</span>
+    app.Router.HandleFunc(<span class="str">"POST /api/login"</span>, loginCtrl.LoginAuth)
+    
+    <span class="com">// 3. Static Files</span>
+    fs := http.FileServer(http.Dir("./public/assets"))
+    app.Router.Handle(<span class="str">"GET /assets/"</span>, http.StripPrefix("/assets/", fs))
+}</code></pre>
+            </section>
+
+            <section id="worker">
+                <h2>9. Worker Pool (Concurrency)</h2>
+                <p>Fitur andalan ZAFramework untuk memproses tugas berat di latar belakang tanpa memblokir request user.</p>
+
+                <h3>1. Register Job Handler (main.go)</h3>
+                <pre><code><span class="com">// Daftarkan tugas "send_email" ke dispatcher</span>
+app.RegisterJob(<span class="str">"send_email"</span>, <span class="kwd">func</span>(payload <span class="func">interface</span>{}) error {
+    email := payload.(string)
+    fmt.Println("Sending email to:", email)
+    time.Sleep(2 * time.Second) <span class="com">// Simulasi berat</span>
+    return nil
+})</code></pre>
+
+                <h3>2. Dispatch Job (Controller)</h3>
+                <pre><code><span class="kwd">func</span> (c *Controller) Register(w http.ResponseWriter, r *http.Request) {
+    <span class="com">// Proses DB selesai...</span>
+    
+    <span class="com">// Kirim email di background worker</span>
+    <span class="com">// User langsung dapat response tanpa menunggu email terkirim</span>
+    c.Dispatcher.Dispatch(concurrency.Job{
+        Type:    <span class="str">"send_email"</span>,
+        Payload: "user@example.com",
+    })
+    
+    c.Response.JSON(w, r, map[string]any{"msg": "Success"})
+}</code></pre>
+            </section>
+
+            <section id="db-toggle">
+                <h2>10. Database Bypass Mode</h2>
+                <p>Fitur unik untuk menjalankan aplikasi tanpa koneksi database (Nil-Safe).</p>
+                <div class="alert-box">
+                    Set <code>postgres=false</code> di .env agar aplikasi tetap jalan meskipun DB mati.
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        // Smooth Scroll Spy
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

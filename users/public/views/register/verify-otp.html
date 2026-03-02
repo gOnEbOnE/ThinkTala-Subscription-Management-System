@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifikasi OTP | ThinkNalyze AI</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --accent-cyan: #00b4d8; --text-heading: #0f172a; --text-muted: #64748b; --border-color: #e2e8f0; }
+        body { background: #f8fafc; font-family: 'Inter', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .otp-card { background: #fff; border-radius: 16px; padding: 50px 40px; max-width: 440px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.08); text-align: center; }
+        .brand-logo { font-size: 1.8rem; font-weight: 800; color: var(--text-heading); text-decoration: none; }
+        .otp-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #e0f7fa, #b2ebf2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+        .otp-icon i { font-size: 2rem; color: var(--accent-cyan); }
+        .otp-inputs { display: flex; gap: 10px; justify-content: center; margin: 25px 0; }
+        .otp-inputs input {
+            width: 50px; height: 56px; text-align: center; font-size: 1.5rem; font-weight: 700;
+            border: 2px solid var(--border-color); border-radius: 12px; outline: none; color: var(--text-heading);
+            transition: 0.2s; font-family: 'JetBrains Mono', monospace;
+        }
+        .otp-inputs input:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 4px rgba(0,180,216,0.15); }
+        .btn-verify { background: linear-gradient(135deg, var(--accent-cyan), #0077b6); border: none; color: #fff; font-weight: 700; padding: 14px; border-radius: 10px; width: 100%; font-size: 1rem; transition: 0.3s; }
+        .btn-verify:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,180,216,0.3); }
+        .btn-verify:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .resend-link { color: var(--accent-cyan); cursor: pointer; font-weight: 600; text-decoration: none; }
+        .resend-link:hover { text-decoration: underline; }
+        .resend-link.disabled { color: #94a3b8; pointer-events: none; }
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        .toast-msg { padding: 14px 20px; border-radius: 10px; color: #fff; font-size: 0.9rem; margin-bottom: 10px; animation: slideIn 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .toast-msg.success { background: #059669; }
+        .toast-msg.error { background: #dc2626; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="otp-card">
+        <a href="/" class="brand-logo d-block mb-3">Think<span style="color: var(--accent-cyan);">Nalyze</span></a>
+        
+        <div class="otp-icon">
+            <i class="fa-solid fa-envelope-open-text"></i>
+        </div>
+
+        <h3 class="fw-bold" style="color: var(--text-heading);">Verifikasi Email</h3>
+        <p class="text-muted small mb-1">Kami telah mengirim kode 6 digit ke</p>
+        <p class="fw-bold mb-0" id="emailDisplay" style="color: var(--text-heading);">—</p>
+
+        <div class="otp-inputs" id="otpInputs">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autofocus>
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        </div>
+
+        <button class="btn btn-verify mb-3" id="btnVerify" disabled>Verifikasi</button>
+
+        <p class="small text-muted mb-0">
+            Tidak menerima kode? 
+            <a class="resend-link disabled" id="resendLink" onclick="resendOTP()">
+                Kirim Ulang (<span id="countdown">60</span>s)
+            </a>
+        </p>
+    </div>
+
+    <script>
+        // ========== INIT ==========
+        const email = sessionStorage.getItem('otp_email') || '';
+        if (!email) { window.location.href = '/account/register'; }
+        document.getElementById('emailDisplay').textContent = email;
+
+        // ========== TOAST ==========
+        function showToast(msg, type = 'error') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast-msg ${type}`;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 4000);
+        }
+
+        // ========== OTP INPUT LOGIC ==========
+        const inputs = document.querySelectorAll('#otpInputs input');
+        const btnVerify = document.getElementById('btnVerify');
+
+        inputs.forEach((input, i) => {
+            input.addEventListener('input', (e) => {
+                // Hanya angka
+                input.value = input.value.replace(/[^0-9]/g, '');
+                if (input.value && i < inputs.length - 1) inputs[i + 1].focus();
+                checkOTPComplete();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && i > 0) {
+                    inputs[i - 1].focus();
+                }
+            });
+
+            // Paste support
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const data = e.clipboardData.getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+                data.split('').forEach((char, idx) => {
+                    if (inputs[idx]) inputs[idx].value = char;
+                });
+                if (data.length > 0) inputs[Math.min(data.length, 5)].focus();
+                checkOTPComplete();
+            });
+        });
+
+        function getOTPValue() { return Array.from(inputs).map(i => i.value).join(''); }
+        function checkOTPComplete() { btnVerify.disabled = getOTPValue().length !== 6; }
+
+        // ========== VERIFY ==========
+        btnVerify.addEventListener('click', async () => {
+            const otp = getOTPValue();
+            if (otp.length !== 6) return;
+
+            btnVerify.disabled = true;
+            btnVerify.textContent = 'Memverifikasi...';
+
+            try {
+                const res = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, otp_code: otp })
+                });
+
+                const data = await res.json();
+
+                if (data.status === true) {
+                    showToast('Akun berhasil diaktifkan! Mengalihkan ke login...', 'success');
+                    sessionStorage.removeItem('otp_email');
+                    setTimeout(() => { window.location.href = '/account/login'; }, 2000);
+                } else {
+                    showToast(data.msg || 'Verifikasi gagal!');
+                    // Clear inputs
+                    inputs.forEach(i => i.value = '');
+                    inputs[0].focus();
+                }
+            } catch (err) {
+                showToast('Koneksi ke server gagal!');
+            } finally {
+                btnVerify.disabled = false;
+                btnVerify.textContent = 'Verifikasi';
+                checkOTPComplete();
+            }
+        });
+
+        // ========== COUNTDOWN & RESEND ==========
+        let timer = 60;
+        const countdownEl = document.getElementById('countdown');
+        const resendLink = document.getElementById('resendLink');
+
+        function startCountdown() {
+            timer = 60;
+            resendLink.classList.add('disabled');
+            const interval = setInterval(() => {
+                timer--;
+                countdownEl.textContent = timer;
+                if (timer <= 0) {
+                    clearInterval(interval);
+                    resendLink.classList.remove('disabled');
+                    resendLink.innerHTML = 'Kirim Ulang';
+                }
+            }, 1000);
+        }
+
+        startCountdown();
+
+        async function resendOTP() {
+            if (resendLink.classList.contains('disabled')) return;
+
+            try {
+                const res = await fetch('/api/auth/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const data = await res.json();
+                if (data.status === true) {
+                    showToast('Kode OTP baru telah dikirim!', 'success');
+                    resendLink.innerHTML = 'Kirim Ulang (<span id="countdown">60</span>s)';
+                    startCountdown();
+                } else {
+                    showToast(data.msg || 'Gagal mengirim ulang OTP');
+                }
+            } catch (err) {
+                showToast('Koneksi gagal!');
+            }
+        }
+    </script>
+</body>
+</html>

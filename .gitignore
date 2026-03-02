@@ -7,12 +7,13 @@
 # --- Security / SSL Certificates ---
 gateway/certs/*.crt
 gateway/certs/*.key
-*.pem
-*.pfx
+**/private.pem        # ⭐ ONLY ignore private key
+!**/public.pem        # ⭐ FORCE push public key
 
 # --- Binaries & Executables (Hasil Build Go) ---
-**/app
-**/thinknalyze-*
+bin/                    # Hanya folder bin/ untuk binaries
+dist/                   # Hanya folder dist/
+**/thinknalyze-*       # Named binaries saja
 *.exe
 *.exe~
 *.dll

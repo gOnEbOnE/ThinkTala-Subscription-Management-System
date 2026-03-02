@@ -1,0 +1,81 @@
+# ----------------------------------------------------------------------
+# 1. SECRETS & CONFIG (Sangat Penting!)
+# ----------------------------------------------------------------------
+.env
+.env.local
+.env.*
+*.pem
+*.key
+
+# Kecuali .env.example (boleh di-commit sebagai panduan tim)
+!.env.example
+
+# ----------------------------------------------------------------------
+# 2. GO BUILD ARTIFACTS
+# ----------------------------------------------------------------------
+# Folder output binary (jika kamu build ke folder bin/)
+bin/
+dist/
+
+# File binary hasil 'go build' (biasanya bernama sama dengan folder atau main)
+main
+jakedu-login
+jakedu-app
+*.exe
+*.test
+*.prof
+
+# ----------------------------------------------------------------------
+# 3. DEPENDENCIES
+# ----------------------------------------------------------------------
+# Vendor directory (Hanya jika kamu tidak ingin commit vendor files)
+# Jika kamu pakai go modules biasa, folder ini jarang dipakai.
+vendor/
+
+# ----------------------------------------------------------------------
+# 4. IDE & EDITOR SETTINGS
+# ----------------------------------------------------------------------
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains (GoLand)
+.idea/
+*.iml
+
+# ----------------------------------------------------------------------
+# 5. OS GENERATED FILES
+# ----------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ----------------------------------------------------------------------
+# 6. LOGS & TEMP FILES
+# ----------------------------------------------------------------------
+*.log
+logs/
+tmp/
+coverage.out
+profile.out
+
+# --- Binaries & Executables ---
+bin/
+dist/
+main                    # Binary 'main' saja
+jakedu-login
+jakedu-app
+*.exe
+*.test
+*.prof
+
+# ❌ REMOVE: **/app atau *.go yang generic
+# ✅ KEEP: Source code files
