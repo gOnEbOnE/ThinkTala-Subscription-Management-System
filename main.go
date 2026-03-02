@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"runtime"
@@ -18,43 +19,65 @@ func init() {
 	ensureCerts()
 }
 
-// ensureCerts generates RSA keys if they don't exist
+// ensureCerts generates RSA keys ONCE from users, then copies to gateway & account.
+// All services must share the same key pair: users signs, gateway/account verify.
 func ensureCerts() {
-	certDirs := []struct {
-		name    string
-		private string
-		public  string
-	}{
-		{
-			name:    "gateway",
-			private: "gateway/certs/private.pem",
-			public:  "gateway/certs/public.pem",
-		},
-		{
-			name:    "users",
-			private: "users/certs/private.pem",
-			public:  "users/certs/public.pem",
-		},
-		{
-			name:    "account",
-			private: "account/certs/private.pem",
-			public:  "account/certs/public.pem",
-		},
+	masterPrivate := "users/certs/private.pem"
+	masterPublic := "users/certs/public.pem"
+
+	// Step 1: Generate master key pair di users/certs/ jika belum ada
+	_, errPriv := os.Stat(masterPrivate)
+	_, errPub := os.Stat(masterPublic)
+	if errPriv != nil || errPub != nil {
+		fmt.Println("\n🔐 Generating master JWT key pair (users/certs/)...")
+		os.MkdirAll("users/certs", 0755)
+		if err := certs.GenerateAndSaveKeys(masterPrivate, masterPublic); err != nil {
+			log.Fatalf("[FATAL] Failed to generate master certs: %v", err)
+		}
+		fmt.Println("✅ Master key pair generated")
+	} else {
+		fmt.Println("✅ Master key pair already exists (users/certs/)")
 	}
 
-	for _, cd := range certDirs {
-		// Skip if both files exist
-		if _, errPriv := os.Stat(cd.private); errPriv == nil {
-			if _, errPub := os.Stat(cd.public); errPub == nil {
-				fmt.Printf("✅ %s certificates already exist\n", cd.name)
-				continue
-			}
+	// Step 2: Baca master key
+	privateKey, err := os.ReadFile(masterPrivate)
+	if err != nil {
+		log.Fatalf("[FATAL] Cannot read master private key: %v", err)
+	}
+	publicKey, err := os.ReadFile(masterPublic)
+	if err != nil {
+		log.Fatalf("[FATAL] Cannot read master public key: %v", err)
+	}
+
+	// Step 3: Copy ke semua service lain (gateway & account hanya butuh public key,
+	// tapi kita copy private juga agar tidak ada error saat load)
+	targets := []struct {
+		name    string
+		dir     string
+	}{
+		{"gateway", "gateway/certs"},
+		{"account", "account/certs"},
+	}
+
+	for _, t := range targets {
+		os.MkdirAll(t.dir, 0755)
+		privPath := t.dir + "/private.pem"
+		pubPath := t.dir + "/public.pem"
+
+		// Cek apakah sudah sync
+		existingPub, pubErr := os.ReadFile(pubPath)
+		if pubErr == nil && string(existingPub) == string(publicKey) {
+			fmt.Printf("✅ %s certificates already in sync\n", t.name)
+			continue
 		}
 
-		fmt.Printf("\n🔐 Generating certificates for %s...\n", cd.name)
-		if err := certs.GenerateAndSaveKeys(cd.private, cd.public); err != nil {
-			log.Fatalf("[FATAL] Failed to generate certs for %s: %v", cd.name, err)
+		if err := os.WriteFile(privPath, privateKey, 0600); err != nil {
+			log.Fatalf("[FATAL] Failed to write %s private key: %v", t.name, err)
 		}
+		if err := os.WriteFile(pubPath, publicKey, 0644); err != nil {
+			log.Fatalf("[FATAL] Failed to write %s public key: %v", t.name, err)
+		}
+		fmt.Printf("✅ %s certificates synced from master\n", t.name)
 	}
 }
 
@@ -77,15 +100,20 @@ func main() {
 	services := []*Service{}
 	var mu sync.Mutex
 
-	// Start Redis
-	fmt.Println("[REDIS] Starting Redis server...")
-	redisCmd := exec.Command("redis-server", "--port", "6379")
-	redisCmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-	if err := redisCmd.Start(); err != nil {
-		log.Fatalf("[FATAL] Failed to start Redis: %v", err)
+	// Start Redis (skip if already running, e.g. via WSL or Docker)
+	var redisCmd *exec.Cmd
+	if checkRedisConnectable() {
+		fmt.Println("[REDIS] Redis already running on port 6379 ✅")
+	} else {
+		fmt.Println("[REDIS] Starting Redis server...")
+		redisCmd = exec.Command("redis-server", "--port", "6379")
+		redisCmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+		if err := redisCmd.Start(); err != nil {
+			log.Fatalf("[FATAL] Failed to start Redis: %v\nPastikan Redis sudah running (WSL: redis-server, atau Docker: docker run -d -p 6379:6379 redis:alpine)", err)
+		}
+		fmt.Printf("[+] Redis started with PID %d\n", redisCmd.Process.Pid)
+		time.Sleep(500 * time.Millisecond)
 	}
-	fmt.Printf("[+] Redis started with PID %d\n", redisCmd.Process.Pid)
-	time.Sleep(500 * time.Millisecond)
 
 	// Service configurations
 	serviceConfigs := []struct {
@@ -164,8 +192,8 @@ func main() {
 		}
 	}
 
-	// Kill Redis
-	if redisCmd.Process != nil {
+	// Kill Redis (only if we started it)
+	if redisCmd != nil && redisCmd.Process != nil {
 		redisCmd.Process.Kill()
 		fmt.Println("[*] Terminated Redis")
 	}
@@ -173,32 +201,47 @@ func main() {
 	fmt.Println("\n✅ All services stopped")
 }
 
+// checkGoInstalled checks if Go is installed
+func checkGoInstalled() bool {
+	var checkCmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		checkCmd = exec.Command("cmd", "/c", "go version")
+	} else {
+		checkCmd = exec.Command("go", "version")
+	}
+	return checkCmd.Run() == nil
+}
+
+// checkRedisConnectable checks if Redis is reachable on localhost:6379 via TCP
+func checkRedisConnectable() bool {
+	conn, err := net.DialTimeout("tcp", "localhost:6379", 2*time.Second)
+	if err != nil {
+		return false
+	}
+	conn.Close()
+	return true
+}
+
 // checkPrerequisites checks if required tools are installed
 func checkPrerequisites() {
-	// ⭐ MODIFIED: Only check Go & Redis, skip PostgreSQL
-	tools := map[string]string{
-		"Go":    "go version",
-		"Redis": "redis-cli --version",
-	}
-
 	fmt.Println("[*] Checking prerequisites...\n")
 
 	allOk := true
-	for tool, cmd := range tools {
-		var checkCmd *exec.Cmd
-		if runtime.GOOS == "windows" {
-			checkCmd = exec.Command("cmd", "/c", cmd)
-		} else {
-			parts := []string{cmd}
-			checkCmd = exec.Command(parts[0])
-		}
 
-		if err := checkCmd.Run(); err != nil {
-			fmt.Printf("  ❌ %s - NOT INSTALLED\n", tool)
-			allOk = false
-		} else {
-			fmt.Printf("  ✅ %s - OK\n", tool)
-		}
+	// Check Go
+	if checkGoInstalled() {
+		fmt.Printf("  ✅ Go - OK\n")
+	} else {
+		fmt.Printf("  ❌ Go - NOT INSTALLED\n")
+		allOk = false
+	}
+
+	// Check Redis via TCP connection (supports WSL, Docker, or native Redis)
+	if checkRedisConnectable() {
+		fmt.Printf("  ✅ Redis - OK (connected to localhost:6379)\n")
+	} else {
+		fmt.Printf("  ❌ Redis - NOT REACHABLE (pastikan Redis sudah running di port 6379)\n")
+		allOk = false
 	}
 
 	fmt.Printf("  ℹ️  PostgreSQL - (will be checked by services)\n")
