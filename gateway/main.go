@@ -31,6 +31,7 @@ type RouteConfig struct {
 	Path        string `json:"path"`
 	Target      string `json:"target"`
 	CORS        bool   `json:"cors"`
+	Auth        bool   `json:"auth"`
 	Description string `json:"description,omitempty"`
 }
 
@@ -242,6 +243,39 @@ func createProxyHandler(target string, enableCORS bool) http.HandlerFunc {
 	return handler
 }
 
+// createAuthProxyHandler membuat proxy handler yang memerlukan autentikasi
+// dan inject X-User-ID header sebelum forward ke backend service
+func createAuthProxyHandler(target string, enableCORS bool) http.HandlerFunc {
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		// Validasi token dan ambil user info
+		user, err := auth.GetUserFromToken(r)
+		if err != nil {
+			log.Printf("[AUTH-PROXY] Token error for %s: %v", r.URL.Path, err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte(`{"status":false,"msg":"Sesi tidak valid, silakan login kembali"}`))
+			return
+		}
+
+		// Inject user info ke header sebelum proxy
+		r.Header.Set("X-User-ID", user.ID)
+		r.Header.Set("X-User-Email", user.Email)
+		r.Header.Set("X-User-Role", user.RoleCode)
+
+		proxy := proxyPool.GetProxy(target)
+		if proxy == nil {
+			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		proxy.ServeHTTP(w, r)
+	}
+	handler = withLogging(handler)
+	if enableCORS {
+		handler = withCORS(handler)
+	}
+	return handler
+}
+
 // ========================================
 // Frontend page server
 // ========================================
@@ -253,15 +287,23 @@ func serveFrontendPage(frontendDir, section, defaultPage string) http.HandlerFun
 			pageName = defaultPage
 		}
 		pageName = strings.TrimSuffix(pageName, "/")
+		pageName = strings.TrimSuffix(pageName, ".html")
+
+		// Prevent browser from caching HTML pages (always get latest)
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
 
 		file := filepath.Join(frontendDir, section, pageName+".html")
 		if _, err := os.Stat(file); err == nil {
+			log.Printf("[FE] Serving: %s -> %s", r.URL.Path, file)
 			http.ServeFile(w, r, file)
 			return
 		}
 
 		fallback := filepath.Join(frontendDir, section, defaultPage+".html")
 		if _, err := os.Stat(fallback); err == nil {
+			log.Printf("[FE] Fallback: %s -> %s", r.URL.Path, fallback)
 			http.ServeFile(w, r, fallback)
 			return
 		}
@@ -325,6 +367,11 @@ func main() {
 	// ========================================
 	assetsDir := filepath.Join(frontendDir, "assets")
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsDir))))
+
+	// Serve uploaded files (KYC images, etc.) from users/public/uploads
+	uploadsDir := filepath.Join("..", "users", "public", "uploads")
+	http.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadsDir))))
+	log.Printf("[GW] Static uploads: /uploads/ -> %s", uploadsDir)
 
 	// ========================================
 	// 3. Protected Dashboard Pages (with Role Auth)
@@ -417,8 +464,14 @@ func main() {
 	// ========================================
 	for _, route := range config.Routes {
 		if strings.HasPrefix(route.Path, "/api/") {
-			http.HandleFunc(route.Path, createProxyHandler(route.Target, route.CORS))
-			log.Printf("[GW] API proxy: %s -> %s", route.Path, route.Target)
+			if route.Auth {
+				// Route yang butuh autentikasi (inject X-User-ID header)
+				http.HandleFunc(route.Path, createAuthProxyHandler(route.Target, route.CORS))
+				log.Printf("[GW] API proxy (auth): %s -> %s", route.Path, route.Target)
+			} else {
+				http.HandleFunc(route.Path, createProxyHandler(route.Target, route.CORS))
+				log.Printf("[GW] API proxy: %s -> %s", route.Path, route.Target)
+			}
 		}
 	}
 

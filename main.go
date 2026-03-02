@@ -77,14 +77,15 @@ func main() {
 	services := []*Service{}
 	var mu sync.Mutex
 
-	// Start Redis
+	// Start Redis (optional)
 	fmt.Println("[REDIS] Starting Redis server...")
 	redisCmd := exec.Command("redis-server", "--port", "6379")
-	redisCmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	redisCmd.SysProcAttr = &syscall.SysProcAttr{}
 	if err := redisCmd.Start(); err != nil {
-		log.Fatalf("[FATAL] Failed to start Redis: %v", err)
+		fmt.Printf("[-] Redis not started: %v (services will run without Redis)\n", err)
+	} else {
+		fmt.Printf("[+] Redis started with PID %d\n", redisCmd.Process.Pid)
 	}
-	fmt.Printf("[+] Redis started with PID %d\n", redisCmd.Process.Pid)
 	time.Sleep(500 * time.Millisecond)
 
 	// Service configurations
@@ -93,8 +94,8 @@ func main() {
 		dir  string
 		port string
 	}{
-		{"account", "account", "2001"},
 		{"gateway", "gateway", "2000"},
+		{"account", "account", "2001"},
 		{"users", "users", "2006"},
 	}
 
@@ -114,7 +115,7 @@ func main() {
 			cmd.Dir = config.dir
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
-			cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: false}
+			cmd.SysProcAttr = &syscall.SysProcAttr{}
 
 			if err := cmd.Start(); err != nil {
 				log.Printf("[-] Failed to start %s: %v", config.name, err)
@@ -141,15 +142,14 @@ func main() {
 	}
 
 	fmt.Println("\n=========================================")
-	fmt.Println("  ✅ ALL SERVICES STARTED")
+	fmt.Println("  ✅ SERVICES STARTED")
 	fmt.Println("=========================================")
 	fmt.Println("\n  🌐 Gateway (Port 2000):")
 	fmt.Println("     http://localhost:2000")
-	fmt.Println("\n  🔐 Login:")
-	fmt.Println("     http://localhost:2000/account/login")
-	fmt.Println("\n  📊 Test Credentials:")
-	fmt.Println("     Email: superadmin@thinktala.com")
-	fmt.Println("     Pass:  Super123")
+	fmt.Println("\n  👤 Account (Port 2001):")
+	fmt.Println("     http://localhost:2001")
+	fmt.Println("\n  🔐 Users (Port 2006):")
+	fmt.Println("     http://localhost:2006")
 	fmt.Println("\n=========================================\n")
 
 	// Wait for all services
@@ -183,19 +183,16 @@ func checkPrerequisites() {
 
 	fmt.Println("[*] Checking prerequisites...\n")
 
-	allOk := true
 	for tool, cmd := range tools {
 		var checkCmd *exec.Cmd
 		if runtime.GOOS == "windows" {
 			checkCmd = exec.Command("cmd", "/c", cmd)
 		} else {
-			parts := []string{cmd}
-			checkCmd = exec.Command(parts[0])
+			checkCmd = exec.Command("sh", "-c", cmd)
 		}
 
 		if err := checkCmd.Run(); err != nil {
 			fmt.Printf("  ❌ %s - NOT INSTALLED\n", tool)
-			allOk = false
 		} else {
 			fmt.Printf("  ✅ %s - OK\n", tool)
 		}
@@ -203,9 +200,10 @@ func checkPrerequisites() {
 
 	fmt.Printf("  ℹ️  PostgreSQL - (will be checked by services)\n")
 
-	if !allOk {
-		log.Fatal("\n[FATAL] Please install missing prerequisites")
-	}
+	// Redis is optional, don't fail if not installed
+	// if !allOk {
+	// 	log.Fatal("\n[FATAL] Please install missing prerequisites")
+	// }
 
 	fmt.Println()
 }
