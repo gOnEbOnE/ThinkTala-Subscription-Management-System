@@ -11,7 +11,7 @@ gateway/certs/*.key
 !**/public.pem        # ⭐ FORCE push public key
 
 # --- Binaries & Executables (Hasil Build Go) ---
-**/app
+# **/app
 **/thinknalyze-*
 *.exe
 *.exe~
