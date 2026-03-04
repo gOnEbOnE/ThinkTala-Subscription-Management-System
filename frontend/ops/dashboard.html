@@ -8,6 +8,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        .nav-item-group { position: relative; }
+        .nav-link-parent { cursor: pointer; user-select: none; }
+        .nav-link-parent .caret { margin-left: auto; font-size: .7rem; transition: transform .25s; color: var(--text-muted); }
+        .nav-link-parent.open .caret { transform: rotate(90deg); }
+        .nav-link-parent.open, .nav-link-parent.parent-active { color: var(--accent-cyan) !important; }
+        .nav-submenu { list-style: none; padding: 0; margin: 0; max-height: 0; overflow: hidden; transition: max-height .28s ease; }
+        .nav-submenu.open { max-height: 200px; }
+        .nav-submenu .nav-link { font-size: .82rem; padding: 8px 20px 8px 52px; margin: 1px 15px; color: var(--text-muted); }
+        .nav-submenu .nav-link:hover { color: var(--accent-cyan); background: rgba(0,242,255,.06); }
+        .nav-submenu .nav-link.active { color: var(--accent-cyan) !important; border-left: 3px solid var(--accent-cyan); background: rgba(0,242,255,.1); }
+        body.sidebar-collapsed .nav-submenu { display: none !important; }
+        body.sidebar-collapsed .nav-link-parent .caret { display: none; }
+    </style>
 </head>
 <body>
     <div class="mobile-overlay" id="mobileOverlay"></div>
@@ -24,7 +38,17 @@
         </div>
         <ul class="nav flex-column flex-grow-1">
             <li class="nav-item"><a class="nav-link active" href="dashboard.html"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="notifications.html"><i class="fa-solid fa-bell icon-left"></i><span class="link-text">Notifications</span></a></li>
+            <li class="nav-item nav-item-group">
+                <a class="nav-link nav-link-parent" onclick="toggleSubmenu(this)">
+                    <i class="fa-solid fa-bell icon-left"></i>
+                    <span class="link-text">Notification</span>
+                    <i class="fa-solid fa-chevron-right caret link-text"></i>
+                </a>
+                <ul class="nav-submenu" id="notifSubmenu">
+                    <li><a class="nav-link" href="notifications.html"><i class="fa-solid fa-list me-2" style="font-size:.85rem"></i><span>Monitoring</span></a></li>
+                    <li><a class="nav-link" href="notification-templates.html"><i class="fa-solid fa-file-alt me-2" style="font-size:.85rem"></i><span>Template Management</span></a></li>
+                </ul>
+            </li>
             <li class="nav-item"><a class="nav-link" href="subscriptions.html"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
         </ul>
         <ul class="nav flex-column mb-5">
@@ -156,6 +180,13 @@
     <script src="../assets/js/za-theme.js"></script>
     <script src="../assets/js/za-sidebar.js"></script>
     <script>
+        function toggleSubmenu(el) {
+            const parent  = el.closest('.nav-item-group');
+            const submenu = parent.querySelector('.nav-submenu');
+            el.classList.toggle('open');
+            submenu.classList.toggle('open');
+        }
+
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');

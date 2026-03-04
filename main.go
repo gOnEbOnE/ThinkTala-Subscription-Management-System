@@ -124,6 +124,9 @@ func main() {
 		{"account", "account", "2001"},
 		{"gateway", "gateway", "2000"},
 		{"users", "users", "2006"},
+		{"notification", "notification", "5003"},
+		{"operational", "operational", "5005"},
+		{"subscription", "subscription", "5004"},
 	}
 
 	fmt.Println("\nMemulai semua service...\n")
@@ -178,6 +181,10 @@ func main() {
 	fmt.Println("\n  📊 Test Credentials:")
 	fmt.Println("     Email: superadmin@thinktala.com")
 	fmt.Println("     Pass:  Super123")
+	fmt.Println("\n  📌 Pages (via Gateway):")
+	fmt.Println("     http://localhost:2000/ops/dashboard")
+	fmt.Println("     http://localhost:2000/ops/notifications")
+	fmt.Println("     http://localhost:2000/ops/notification-templates")
 	fmt.Println("\n=========================================\n")
 
 	// Wait for all services

@@ -47,6 +47,9 @@ func main() {
 	r.GET("/ops/notifications", func(c *gin.Context) {
 		c.File("./public/views/notifications.html")
 	})
+	r.GET("/ops/notification-templates", func(c *gin.Context) {
+        c.File("./public/views/notification-templates.html")
+    })
 	r.GET("/ops/subscriptions", func(c *gin.Context) {
 		c.File("./public/views/subscriptions.html")
 	})

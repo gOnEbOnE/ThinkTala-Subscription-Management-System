@@ -27,3 +27,20 @@ sidebarToggle.addEventListener('click', () => {
 mobileOverlay.addEventListener('click', () => { 
     body.classList.remove('sidebar-mobile-open'); 
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    
+    navLinks.forEach(function(link) {
+        const href = link.getAttribute('href');
+        
+        // Remove active from all links first
+        link.classList.remove('active');
+        
+        // Add active if href matches current path
+        if (href && href !== '#' && currentPath === href) {
+            link.classList.add('active');
+        }
+    });
+});

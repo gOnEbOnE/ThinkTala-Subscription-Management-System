@@ -9,6 +9,7 @@
     { "path": "/api/operational/", "target": "http://localhost:5005", "cors": true, "description": "Operational API" },
     { "path": "/api/kyc/", "target": "http://localhost:5005", "cors": true, "description": "KYC API" },
     { "path": "/api/notifications/", "target": "http://localhost:5003", "cors": true, "description": "Notification API" },
+    { "path": "/api/help/", "target": "http://localhost:5003", "cors": true, "description": "Notification templates & help API" },
     { "path": "/api/subscriptions/", "target": "http://localhost:5004", "cors": true, "description": "Subscription API" }
   ]
 }
