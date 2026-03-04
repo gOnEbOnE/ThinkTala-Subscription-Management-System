@@ -4,58 +4,58 @@
   ],
   "routes": [
     {
-      "path": "/account/register",
-      "target": "http://users:2005",
+      "path": "/api/auth/register",
+      "target": "http://localhost:2006",
       "cors": true,
-      "description": "User registration"
+      "description": "Register API"
     },
     {
-      "path": "/account/login",
-      "target": "http://users:2005",
+      "path": "/api/auth/verify-otp",
+      "target": "http://localhost:2006",
       "cors": true,
-      "description": "User login"
+      "description": "Verify OTP"
     },
     {
-      "path": "/account/reset",
-      "target": "http://users:2005",
+      "path": "/api/auth/resend-otp",
+      "target": "http://localhost:2006",
       "cors": true,
-      "description": "Password reset"
+      "description": "Resend OTP"
     },
     {
-      "path": "/account/personal/",
-      "target": "http://users:2005",
+      "path": "/api/auth",
+      "target": "http://localhost:2006",
       "cors": true,
-      "description": "Personal profile & data management"
+      "description": "Auth API"
     },
     {
-      "path": "/account/settings/",
-      "target": "http://users:2005",
+      "path": "/account/login/auth",
+      "target": "http://localhost:2006",
       "cors": true,
-      "description": "Account settings"
+      "description": "Login POST"
     },
     {
-      "path": "/account/tickets/",
-      "target": "http://tickets:2004",
+      "path": "/api/operational/",
+      "target": "http://localhost:5005",
       "cors": true,
-      "description": "Helpdesk tickets"
+      "description": "Operational API"
     },
     {
-      "path": "/account/membership/",
-      "target": "http://operational:2002",
+      "path": "/api/kyc/",
+      "target": "http://localhost:5005",
       "cors": true,
-      "description": "Helpdesk tickets"
+      "description": "KYC API"
     },
     {
-      "path": "/account/notification/",
-      "target": "http://notification:2001",
+      "path": "/api/notifications/",
+      "target": "http://localhost:5003",
       "cors": true,
-      "description": "News and announcements"
+      "description": "Notification API"
     },
     {
-      "path": "/account/packages/",
-      "target": "http://subscription:2003",
+      "path": "/api/subscriptions/",
+      "target": "http://localhost:5004",
       "cors": true,
-      "description": "Knowledge base"
+      "description": "Subscription API"
     }
   ]
 }

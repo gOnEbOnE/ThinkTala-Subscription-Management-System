@@ -6,9 +6,14 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/master-abror/zaframework/app/modules/login"
-	"github.com/master-abror/zaframework/app/modules/register"
+	// Import Feature Login (Modular)
+
+	// Import Router Baru
+	"github.com/master-abror/zaframework/app/modules/account"
+	"github.com/master-abror/zaframework/app/modules/dashboard"
 	"github.com/master-abror/zaframework/app/routes"
+
+	// Import Framework Core
 	"github.com/master-abror/zaframework/core"
 	"github.com/master-abror/zaframework/core/concurrency"
 	"github.com/master-abror/zaframework/core/database"
@@ -21,18 +26,25 @@ func main() {
 	// 1. INITIALIZATION & CONFIG
 	// ============================================================
 
+	// Load Environment Variables
 	utils.LoadEnv(".env")
 
+	// Init JWT Keys (Wajib ada file private.pem & public.pem di root)
 	if err := utils.InitJWTLoadKeys("certs/private.pem", "certs/public.pem"); err != nil {
 		log.Fatalf("[FATAL] Gagal memuat kunci JWT: %v", err)
 	}
 
+	// Init Redis (Sesuai request sebelumnya)
+	// Jika di .env redis=false, ini akan bypass otomatis tanpa error
 	if err := utils.InitRedis(); err != nil {
 		log.Printf("[WARNING] Redis init failed: %v", err)
 	}
 
-	// SESSION INIT
-	sameSiteMode := http.SameSiteLaxMode
+	// ------------------------------------------------------------
+	// SESSION INIT (UPDATED)
+	// ------------------------------------------------------------
+	// 1. Tentukan Mode SameSite (Lax/Strict/None)
+	sameSiteMode := http.SameSiteLaxMode // Default
 	switch utils.GetEnv("SESSION_SAME_SITE", "Lax") {
 	case "Strict":
 		sameSiteMode = http.SameSiteStrictMode
@@ -40,25 +52,27 @@ func main() {
 		sameSiteMode = http.SameSiteNoneMode
 	}
 
-	sessionLife := utils.ToInt(utils.GetEnv("SESSION_LIFETIME", "3600"))
-
+	// 2. Init Session dengan Config Lengkap (Sesuai update manager.go)
 	session.Init(session.Config{
-		Driver:      utils.GetEnv("SESSION_DRIVER", "cookie"),
-		SecretKey:   utils.GetEnv("SESSION_KEY", utils.GetEnv("APP_KEY")),
-		CookieName:  utils.GetEnv("SESSION_NAME", "za_session"),
-		SessionLife: sessionLife,
+		Driver:    utils.GetEnv("SESSION_DRIVER", "cookie"),
+		SecretKey: utils.GetEnv("SESSION_KEY", utils.GetEnv("APP_KEY")),
 
-		// Cookie Settings
+		CookieName:  utils.GetEnv("SESSION_NAME", "za_session"),
+		SessionLife: utils.ToInt(utils.GetEnv("SESSION_LIFETIME", "3600")),
+
+		// Cookie Settings (FIXED: Domain kosong agar bisa dibaca gateway)
 		Path:     "/",
-		Domain:   "", // 👈 PENTING: Set kosong
+		Domain:   "", // 👈 PENTING: Set kosong atau sesuai gateway domain
 		Secure:   utils.GetEnv("SESSION_SECURE") == "true",
 		HttpOnly: true,
 		SameSite: sameSiteMode,
 	})
 
+	// Helper parsers
 	maxConns, _ := strconv.Atoi(utils.GetEnv("read_db_max_conn", "5"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
 
+	// Config Engine
 	cfg := core.Config{
 		AppName:        utils.GetEnv("app_name", "ZaFramework"),
 		Port:           utils.GetEnv("port", "9002"),
@@ -98,6 +112,7 @@ func main() {
 		},
 	}
 
+	// Start Engine
 	app := core.New(cfg)
 
 	database.MigrateAndSeed(app.DB)
@@ -107,27 +122,21 @@ func main() {
 	// ============================================================
 
 	// --- Feature: Login ---
-	loginRepo := login.NewRepository(app.DB)
-	loginService := login.NewService(loginRepo)
-	loginController := login.NewController(app.Dispatcher, app.Response)
-
-	// --- Feature: Register ---
-	registerRepo := register.NewRepository(app.DB)
-	registerService := register.NewService(registerRepo)
-	registerController := register.NewController(app.Dispatcher, app.Response)
-
-	// Register Job Handlers (Workers)
-	app.RegisterJob("auth", loginService.ProcessLoginJob)
-	app.RegisterJob("register", registerService.ProcessRegisterJob)
-	app.RegisterJob("verify_otp", registerService.ProcessVerifyOTPJob)
-	app.RegisterJob("resend_otp", registerService.ProcessResendOTPJob)
+	// accountRepo := account.NewRepository(app.DB)
+	// accountService := account.NewService(accountRepo)
+	accountController := account.NewController(app.Dispatcher, app.Response)
+	dashboardController := dashboard.NewController(app.Dispatcher, app.Response)
+	// app.RegisterJob("auth", accountService.ProcessLoginJob)
 
 	// ============================================================
 	// 3. ROUTING
 	// ============================================================
+
+	// Panggil file router terpisah
+	// Kita inject Controller yang sudah di-init di atas ke router
 	routes.Init(app,
-		loginController,
-		registerController,
+		accountController,
+		dashboardController,
 	)
 
 	// ============================================================
