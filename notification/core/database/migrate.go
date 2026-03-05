@@ -92,16 +92,6 @@ func Seed() {
 			"Pembayaran Berhasil",
 			"Halo {{name}},\n\nPembayaran sebesar {{amount}} telah berhasil diproses. Terima kasih!",
 		},
-		{
-			"Welcome WhatsApp", "user_register", "whatsapp",
-			"",
-			"Halo {{name}}, selamat datang di ThinkTala! Kami senang Anda bergabung.",
-		},
-		{
-			"OTP WhatsApp", "otp_verification", "whatsapp",
-			"",
-			"Kode OTP Anda: {{otp}} (berlaku 10 menit). Jangan bagikan kode ini.",
-		},
 	}
 
 	for _, t := range templates {

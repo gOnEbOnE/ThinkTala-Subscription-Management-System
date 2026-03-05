@@ -8,7 +8,7 @@ type NotificationTemplate struct {
 	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	EventType string    `json:"event_type"` // otp_verification | user_register | user_kyc_approved | ...
-	Channel   string    `json:"channel"`    // email | whatsapp | telegram
+	Channel   string    `json:"channel"`    // email | telegram
 	Subject   *string   `json:"subject,omitempty"`
 	Content   string    `json:"content"` // Mendukung placeholder: {{name}}, {{otp}}, dst.
 	CreatedAt time.Time `json:"created_at"`

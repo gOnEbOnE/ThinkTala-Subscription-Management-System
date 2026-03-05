@@ -61,7 +61,7 @@
 
         /* ─── Channel Badges ─── */
         .badge-email    { background: rgba(59,130,246,0.18); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
-        .badge-whatsapp { background: rgba(34,197,94,0.18);  color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+        /* .badge-whatsapp { background: rgba(34,197,94,0.18);  color: #4ade80; border: 1px solid rgba(34,197,94,0.3); } */
         .badge-telegram { background: rgba(14,165,233,0.18); color: #38bdf8; border: 1px solid rgba(14,165,233,0.3); }
         .channel-badge  { font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
 
@@ -292,7 +292,7 @@
                 <div class="d-flex gap-2 flex-wrap">
                     <button class="filter-chip active" data-channel="" onclick="setFilter('channel','',this)">All</button>
                     <button class="filter-chip" data-channel="email" onclick="setFilter('channel','email',this)"><i class="fa-solid fa-envelope me-1"></i>Email</button>
-                    <button class="filter-chip" data-channel="whatsapp" onclick="setFilter('channel','whatsapp',this)"><i class="fa-brands fa-whatsapp me-1"></i>WhatsApp</button>
+                    <!-- <button class="filter-chip" data-channel="whatsapp" onclick="setFilter('channel','whatsapp',this)"><i class="fa-brands fa-whatsapp me-1"></i>WhatsApp</button> -->
                     <button class="filter-chip" data-channel="telegram" onclick="setFilter('channel','telegram',this)"><i class="fa-brands fa-telegram me-1"></i>Telegram</button>
                 </div>
             </div>
@@ -369,7 +369,7 @@
                             <select class="form-select" id="tplChannel" onchange="onChannelChange()">
                                 <option value="">— Pilih Channel —</option>
                                 <option value="email">Email</option>
-                                <option value="whatsapp">WhatsApp</option>
+                                <!-- <option value="whatsapp">WhatsApp</option> -->
                                 <option value="telegram">Telegram</option>
                             </select>
                             <div class="field-error" id="err-tplChannel">Field ini wajib diisi.</div>
@@ -479,7 +479,7 @@
     function channelBadge(ch) {
         const map = {
             email:    ['badge-email',    '<i class="fa-solid fa-envelope me-1"></i>Email'],
-            whatsapp: ['badge-whatsapp', '<i class="fa-brands fa-whatsapp me-1"></i>WhatsApp'],
+            // whatsapp: ['badge-whatsapp', '<i class="fa-brands fa-whatsapp me-1"></i>WhatsApp'],
             telegram: ['badge-telegram', '<i class="fa-brands fa-telegram me-1"></i>Telegram'],
         };
         const [cls, label] = map[ch] || ['bg-secondary', ch];
@@ -491,7 +491,7 @@
         const subjectWrapper = document.getElementById('subjectWrapper');
         const subjectRequired = document.getElementById('subjectRequired');
         const subjectOptional = document.getElementById('subjectOptional');
-        if (ch === 'whatsapp' || ch === 'telegram') {
+        if ( ch === 'telegram') {
             subjectWrapper.classList.add('disabled');
             subjectRequired.style.display = 'none';
             subjectOptional.style.display = 'inline';
