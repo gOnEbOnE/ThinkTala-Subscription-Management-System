@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC Detail | ThinkTala Compliance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        /* ===== KYC Detail Specific ===== */
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 1.5rem; }
+        @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
+
+        .ktp-viewer {
+            position: relative; border-radius: 12px; overflow: hidden;
+            border: 1px solid var(--border-color); background: #0a0d14;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 320px; cursor: zoom-in;
+        }
+        .ktp-viewer img { max-width: 100%; max-height: 420px; object-fit: contain; transition: transform 0.3s; }
+        .ktp-viewer:hover img { transform: scale(1.02); }
+        .ktp-zoom-btn {
+            position: absolute; top: 12px; right: 12px;
+            background: rgba(0,0,0,0.6); border: none; color: #fff;
+            border-radius: 8px; padding: 0.4rem 0.7rem; cursor: pointer;
+            font-size: 0.85rem; transition: background 0.2s;
+        }
+        .ktp-zoom-btn:hover { background: rgba(0,212,255,0.3); }
+
+        .info-card {
+            padding: 1.5rem; border-radius: 12px;
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+        }
+        .info-row {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 600; }
+        .info-value { font-size: 0.95rem; color: var(--text-heading); font-weight: 500; text-align: right; max-width: 60%; word-break: break-word; }
+
+        .action-bar { display: flex; gap: 1rem; margin-top: 2rem; flex-wrap: wrap; }
+        .btn-approve {
+            background: #22c55e; color: #fff; border: none;
+            padding: 0.65rem 2rem; border-radius: 8px;
+            font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-approve:hover:not(:disabled) { background: #16a34a; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,197,94,0.3); color: #fff; }
+        .btn-reject {
+            background: #ef4444; color: #fff; border: none;
+            padding: 0.65rem 2rem; border-radius: 8px;
+            font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-reject:hover:not(:disabled) { background: #dc2626; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.3); color: #fff; }
+        .btn-back {
+            background: transparent; color: var(--text-muted);
+            border: 1px solid var(--border-color);
+            padding: 0.55rem 1.5rem; border-radius: 8px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-back:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+
+        .badge-status { padding: 0.3rem 0.75rem; border-radius: 20px; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+        .badge-pending { background: rgba(234,179,8,0.15); color: #eab308; }
+        .badge-approved { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .badge-rejected { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
+
+        /* Lightbox */
+        .lightbox-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92); z-index: 10000;
+            display: none; align-items: center; justify-content: center; cursor: zoom-out;
+        }
+        .lightbox-overlay.active { display: flex; }
+        .lightbox-overlay img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px; }
+
+        /* Loading skeleton */
+        .skel { animation: pulse 1.5s ease-in-out infinite; background: var(--border-color); border-radius: 6px; height: 1rem; display: inline-block; }
+        @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.8; } }
+
+        /* Modal fix for dark theme */
+        .modal-content { background: var(--bg-panel) !important; border: 1px solid var(--border-color) !important; }
+    </style>
+</head>
+<body>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- ===== SIDEBAR ===== -->
+    <nav class="sidebar">
+        <div class="sidebar-brand mb-3">
+            <div class="brand-wrapper">
+                <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
+                <div class="brand-text-content">
+                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span class="text-cyan">Tala</span></h4>
+                    <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Compliance Panel</p>
+                </div>
+            </div>
+        </div>
+        <ul class="nav flex-column flex-grow-1">
+            <li class="nav-item"><a class="nav-link" href="/compliance/dashboard"><i class="fa-solid fa-shield-halved icon-left"></i><span class="link-text">KYC Review</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="/compliance/reports"><i class="fa-solid fa-chart-bar icon-left"></i><span class="link-text">Reports</span></a></li>
+        </ul>
+        <ul class="nav flex-column mb-5">
+            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- ===== TOP NAVBAR ===== -->
+    <header class="top-navbar d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn-header" id="sidebarToggle"><i class="fa-solid fa-bars fa-lg"></i></button>
+            <span class="badge bg-danger" style="font-size: 0.7rem;">COMPLIANCE</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+            <div class="dropdown ms-1">
+                <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
+                    <div class="rounded-circle p-1" style="border: 2px solid var(--accent-cyan);">
+                        <img src="https://ui-avatars.com/api/?name=CM&background=0b0e17&color=fff" class="rounded-circle" width="34" height="34" id="avatarImg">
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-3">
+                    <li class="px-3 py-2">
+                        <span class="d-block fw-bold text-main" id="userName">Compliance</span>
+                        <small class="text-muted" id="userEmail">compliance@thinktala.com</small>
+                    </li>
+                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===== LIGHTBOX ===== -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+        <img id="lightboxImg" src="" alt="KTP Fullscreen">
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content">
+        <a href="/compliance/dashboard" class="btn-back mb-3">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar
+        </a>
+
+        <div class="d-flex align-items-center gap-3 mb-2 flex-wrap">
+            <h4 class="fw-bold mb-0" style="color: var(--text-heading);">
+                <i class="fa-solid fa-user-check text-cyan me-2"></i>Detail KYC
+            </h4>
+            <span class="badge-status" id="statusBadge">Loading...</span>
+        </div>
+        <p class="text-muted small mb-0" id="submissionDate">-</p>
+
+        <div class="detail-grid">
+            <!-- Left: KTP Image -->
+            <div>
+                <h6 class="fw-semibold mb-3" style="color: var(--text-heading);">
+                    <i class="fa-solid fa-id-card text-cyan me-2"></i>Foto KTP
+                </h6>
+                <div class="ktp-viewer" id="ktpViewer" onclick="openLightbox()">
+                    <div class="text-center text-muted p-4" id="ktpLoading">
+                        <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+                        <p class="mt-2 small">Memuat gambar...</p>
+                    </div>
+                    <img id="ktpImage" src="" alt="KTP" style="display: none;">
+                    <button class="ktp-zoom-btn" title="Perbesar"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                </div>
+            </div>
+
+            <!-- Right: User Info -->
+            <div>
+                <h6 class="fw-semibold mb-3" style="color: var(--text-heading);">
+                    <i class="fa-solid fa-circle-info text-cyan me-2"></i>Data Pengguna
+                </h6>
+                <div class="info-card" id="infoCard">
+                    <div class="info-row"><span class="info-label">Nama Lengkap</span><span class="info-value" id="infoName">-</span></div>
+                    <div class="info-row"><span class="info-label">NIK</span><span class="info-value font-mono" id="infoNIK">-</span></div>
+                    <div class="info-row"><span class="info-label">Email</span><span class="info-value" id="infoEmail">-</span></div>
+                    <div class="info-row"><span class="info-label">Alamat</span><span class="info-value" id="infoAddress">-</span></div>
+                    <div class="info-row"><span class="info-label">Tanggal Lahir</span><span class="info-value" id="infoDOB">-</span></div>
+                    <div class="info-row"><span class="info-label">No. Telepon</span><span class="info-value font-mono" id="infoPhone">-</span></div>
+                </div>
+
+                <!-- Rejection reason (shown only if rejected) -->
+                <div class="info-card mt-3" id="rejectReasonCard" style="display: none; border-color: rgba(239,68,68,0.3);">
+                    <h6 class="fw-semibold text-danger mb-2"><i class="fa-solid fa-circle-xmark me-2"></i>Alasan Penolakan</h6>
+                    <p class="mb-0" id="rejectReasonText" style="color: var(--text-heading);"></p>
+                </div>
+
+                <!-- Actions (only for pending) -->
+                <div class="action-bar" id="actionBar" style="display: none;">
+                    <button class="btn-approve" onclick="showApproveModal()">
+                        <i class="fa-solid fa-circle-check me-2"></i>Approve
+                    </button>
+                    <button class="btn-reject" onclick="showRejectModal()">
+                        <i class="fa-solid fa-circle-xmark me-2"></i>Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== APPROVE MODAL ===== -->
+    <div class="modal fade" id="approveModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-check text-success me-2"></i>Konfirmasi Approve</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: var(--text-heading);">Apakah Anda yakin ingin menyetujui KYC ini?</p>
+                    <div class="info-card">
+                        <div class="info-row"><span class="info-label">Nama</span><span class="info-value" id="modalApproveName">-</span></div>
+                        <div class="info-row"><span class="info-label">Email</span><span class="info-value" id="modalApproveEmail">-</span></div>
+                        <div class="info-row"><span class="info-label">NIK</span><span class="info-value" id="modalApproveNIK">-</span></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn-approve" id="btnConfirmApprove" onclick="doApprove()">
+                        <i class="fa-solid fa-circle-check me-2"></i>Confirm Approve
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== REJECT MODAL ===== -->
+    <div class="modal fade" id="rejectModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold"><i class="fa-solid fa-circle-xmark text-danger me-2"></i>Konfirmasi Reject</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p style="color: var(--text-heading);">Apakah Anda yakin ingin menolak KYC ini?</p>
+                    <div class="info-card mb-3">
+                        <div class="info-row"><span class="info-label">Nama</span><span class="info-value" id="modalRejectName">-</span></div>
+                        <div class="info-row"><span class="info-label">Email</span><span class="info-value" id="modalRejectEmail">-</span></div>
+                    </div>
+                    <label class="form-label fw-semibold" style="color: var(--text-heading);">
+                        Alasan Penolakan <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control" id="rejectReasonInput" rows="3" placeholder="Masukkan alasan penolakan..." oninput="toggleRejectBtn()"></textarea>
+                    <small class="text-muted">Alasan wajib diisi dan akan ditampilkan kepada pengguna</small>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn-reject" id="btnConfirmReject" onclick="doReject()" disabled>
+                        <i class="fa-solid fa-circle-xmark me-2"></i>Confirm Reject
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/za-sidebar.js"></script>
+    <script>
+    /* ===== State ===== */
+    var kycData = null;
+    var kycId = new URLSearchParams(window.location.search).get('id');
+
+    /* ===== Init ===== */
+    document.addEventListener('DOMContentLoaded', function () {
+        loadUserInfo();
+        if (!kycId) {
+            window.location.href = '/compliance/dashboard';
+            return;
+        }
+        loadDetail();
+    });
+
+    /* ===== Load user info ===== */
+    function loadUserInfo() {
+        try {
+            var user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.name) {
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('avatarImg').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=0b0e17&color=fff';
+            }
+            if (user.email) document.getElementById('userEmail').textContent = user.email;
+        } catch (e) { /* ignore */ }
+    }
+
+    /* ===== Load KYC Detail ===== */
+    function loadDetail() {
+        fetch('/api/admin/kyc/' + encodeURIComponent(kycId), { credentials: 'include' })
+            .then(function (res) {
+                if (res.status === 401) { window.location.href = '/account/login'; return null; }
+                if (res.status === 403) { showToast('error', 'Anda tidak memiliki akses'); return null; }
+                if (res.status === 404) { showToast('error', 'Data KYC tidak ditemukan'); return null; }
+                return res.json();
+            })
+            .then(function (json) {
+                if (!json) return;
+                // Handle both formats: {data: {kyc: {...}}} or {data: {...}}
+                var d = json.data || {};
+                kycData = d.kyc || d;
+                if (!kycData || !kycData.id) {
+                    showToast('error', 'Format data tidak valid');
+                    return;
+                }
+                renderDetail();
+            })
+            .catch(function (e) {
+                console.error('loadDetail error:', e);
+                showToast('error', 'Gagal memuat data KYC');
+            });
+    }
+
+    /* ===== Render Detail ===== */
+    function renderDetail() {
+        var d = kycData;
+
+        // Status badge
+        var badge = document.getElementById('statusBadge');
+        badge.textContent = (d.status || '').toUpperCase();
+        badge.className = 'badge-status badge-' + (d.status || 'pending');
+
+        // Submission date
+        document.getElementById('submissionDate').textContent = 'Diajukan pada ' + formatDate(d.created_at);
+
+        // Info fields
+        document.getElementById('infoName').textContent = d.full_name || '-';
+        document.getElementById('infoNIK').textContent = d.nik || '-';
+        document.getElementById('infoEmail').textContent = d.email || '-';
+        document.getElementById('infoAddress').textContent = d.address || '-';
+        document.getElementById('infoDOB').textContent = formatDate(d.birthdate);
+        document.getElementById('infoPhone').textContent = d.phone || '-';
+
+        // KTP Image
+        var ktpLoading = document.getElementById('ktpLoading');
+        var ktpImage = document.getElementById('ktpImage');
+        if (d.ktp_image) {
+            var src = d.ktp_image;
+            // Handle relative path - add /uploads/kyc/ prefix if needed
+            if (src.indexOf('http') !== 0 && src.indexOf('/uploads/') !== 0) {
+                src = '/uploads/kyc/' + src;
+            } else if (src.indexOf('/') !== 0 && src.indexOf('http') !== 0) {
+                src = '/' + src;
+            }
+            ktpImage.src = src;
+            ktpImage.onload = function () {
+                ktpLoading.style.display = 'none';
+                ktpImage.style.display = 'block';
+            };
+            ktpImage.onerror = function () {
+                console.error('Failed to load image:', src);
+                ktpLoading.innerHTML = '<i class="fa-solid fa-image fa-2x text-muted"></i><p class="mt-2 small text-muted">Gambar tidak tersedia</p>';
+            };
+        } else {
+            ktpLoading.innerHTML = '<i class="fa-solid fa-image fa-2x text-muted"></i><p class="mt-2 small text-muted">Tidak ada foto KTP</p>';
+        }
+
+        // Actions for pending
+        if (d.status === 'pending') {
+            document.getElementById('actionBar').style.display = 'flex';
+        }
+
+        // Rejection reason
+        if (d.status === 'rejected' && d.reject_reason) {
+            document.getElementById('rejectReasonCard').style.display = 'block';
+            document.getElementById('rejectReasonText').textContent = d.reject_reason;
+        }
+    }
+
+    /* ===== Lightbox ===== */
+    function openLightbox() {
+        var img = document.getElementById('ktpImage');
+        if (!img.src || img.style.display === 'none') return;
+        document.getElementById('lightboxImg').src = img.src;
+        document.getElementById('lightbox').classList.add('active');
+    }
+    function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLightbox(); });
+
+    /* ===== Approve ===== */
+    function showApproveModal() {
+        document.getElementById('modalApproveName').textContent = kycData.full_name || '-';
+        document.getElementById('modalApproveEmail').textContent = kycData.email || '-';
+        document.getElementById('modalApproveNIK').textContent = kycData.nik || '-';
+        new bootstrap.Modal(document.getElementById('approveModal')).show();
+    }
+
+    function doApprove() {
+        var btn = document.getElementById('btnConfirmApprove');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Processing...';
+
+        fetch('/api/admin/kyc/' + encodeURIComponent(kycId) + '/approve', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+        .then(function (result) {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('approveModal'));
+            if (modal) modal.hide();
+            if (result.ok) {
+                showToast('success', 'KYC berhasil disetujui!');
+                setTimeout(function () { window.location.href = '/compliance/dashboard'; }, 1500);
+            } else {
+                showToast('error', (result.data && result.data.msg) || 'Gagal menyetujui KYC');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i>Confirm Approve';
+            }
+        })
+        .catch(function (e) {
+            console.error(e);
+            showToast('error', 'Terjadi kesalahan jaringan');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-circle-check me-2"></i>Confirm Approve';
+        });
+    }
+
+    /* ===== Reject ===== */
+    function showRejectModal() {
+        document.getElementById('modalRejectName').textContent = kycData.full_name || '-';
+        document.getElementById('modalRejectEmail').textContent = kycData.email || '-';
+        document.getElementById('rejectReasonInput').value = '';
+        toggleRejectBtn();
+        new bootstrap.Modal(document.getElementById('rejectModal')).show();
+    }
+
+    function toggleRejectBtn() {
+        var val = document.getElementById('rejectReasonInput').value.trim();
+        document.getElementById('btnConfirmReject').disabled = val.length === 0;
+    }
+
+    function doReject() {
+        var reason = document.getElementById('rejectReasonInput').value.trim();
+        if (!reason) return;
+
+        var btn = document.getElementById('btnConfirmReject');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Processing...';
+
+        fetch('/api/admin/kyc/' + encodeURIComponent(kycId) + '/reject', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
+        .then(function (result) {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('rejectModal'));
+            if (modal) modal.hide();
+            if (result.ok) {
+                showToast('success', 'KYC berhasil ditolak.');
+                setTimeout(function () { window.location.href = '/compliance/dashboard'; }, 1500);
+            } else {
+                showToast('error', (result.data && result.data.msg) || 'Gagal menolak KYC');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-circle-xmark me-2"></i>Confirm Reject';
+            }
+        })
+        .catch(function (e) {
+            console.error(e);
+            showToast('error', 'Terjadi kesalahan jaringan');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-circle-xmark me-2"></i>Confirm Reject';
+        });
+    }
+
+    /* ===== Helpers ===== */
+    function formatDate(d) {
+        if (!d) return '-';
+        try { return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }); }
+        catch (e) { return d; }
+    }
+
+    function showToast(type, msg) {
+        var c = document.getElementById('toastContainer');
+        var id = 'toast-' + Date.now();
+        var bg = type === 'success' ? 'bg-success' : 'bg-danger';
+        var icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+        c.insertAdjacentHTML('beforeend',
+            '<div id="' + id + '" class="toast align-items-center text-white ' + bg + ' border-0 show" role="alert" style="min-width:320px;">' +
+            '<div class="d-flex"><div class="toast-body"><i class="fa-solid ' + icon + ' me-2"></i>' + msg + '</div>' +
+            '<button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>'
+        );
+        setTimeout(function () { var el = document.getElementById(id); if (el) el.remove(); }, 5000);
+    }
+
+    function logout() {
+        fetch('/account/logout', { credentials: 'include' }).catch(function(){});
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/account/login';
+    }
+    </script>
+</body>
+</html>

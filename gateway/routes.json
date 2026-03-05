@@ -1,7 +1,5 @@
 {
-  "allowedOrigins": [
-    "*"
-  ],
+  "allowedOrigins": ["*"],
   "routes": [
     {
       "path": "/api/auth/register",
@@ -41,9 +39,24 @@
     },
     {
       "path": "/api/kyc/",
-      "target": "http://localhost:5005",
+      "target": "http://localhost:2006",
       "cors": true,
-      "description": "KYC API"
+      "auth": true,
+      "description": "KYC API (Users Service)"
+    },
+    {
+      "path": "/api/admin/kyc",
+      "target": "http://localhost:2006",
+      "cors": true,
+      "auth": true,
+      "description": "Admin KYC List API"
+    },
+    {
+      "path": "/api/admin/kyc/",
+      "target": "http://localhost:2006",
+      "cors": true,
+      "auth": true,
+      "description": "Admin KYC Detail/Action API"
     },
     {
       "path": "/api/notifications/",

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC Verification | ThinkTala</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .kyc-card { max-width: 720px; margin: 0 auto; }
+        .step-indicator { display: flex; align-items: center; gap: 0; margin-bottom: 2rem; }
+        .step { display: flex; align-items: center; gap: 0.5rem; }
+        .step-num {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.85rem;
+            border: 2px solid var(--border-color, #2d3748);
+            color: var(--text-muted, #888);
+            background: transparent;
+            transition: all 0.3s;
+        }
+        .step.active .step-num {
+            background: var(--accent-cyan, #00d4ff);
+            border-color: var(--accent-cyan, #00d4ff);
+            color: #000;
+        }
+        .step.completed .step-num {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: #fff;
+        }
+        .step-line {
+            flex: 1; height: 2px; margin: 0 0.75rem;
+            background: var(--border-color, #2d3748);
+            transition: background 0.3s;
+        }
+        .step-line.active { background: var(--accent-cyan, #00d4ff); }
+        .step-label { font-size: 0.8rem; color: var(--text-muted, #888); }
+        .step.active .step-label { color: var(--text-heading, #fff); font-weight: 600; }
+
+        .upload-zone {
+            border: 2px dashed var(--border-color, #2d3748);
+            border-radius: 12px; padding: 2rem; text-align: center;
+            cursor: pointer; transition: all 0.3s; position: relative;
+            background: var(--bg-card-inner, rgba(255,255,255,0.02));
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent-cyan, #00d4ff);
+            background: rgba(0, 212, 255, 0.05);
+        }
+        .upload-zone .upload-icon { font-size: 2.5rem; color: var(--text-muted, #888); margin-bottom: 0.75rem; }
+        .upload-zone.has-file { border-color: #22c55e; background: rgba(34,197,94,0.05); }
+        .upload-zone.has-file .upload-icon { color: #22c55e; }
+
+        .preview-container { margin-top: 1rem; text-align: center; }
+        .preview-container img {
+            max-width: 100%; max-height: 240px;
+            border-radius: 8px; border: 1px solid var(--border-color, #2d3748);
+        }
+        .preview-container .file-info {
+            font-size: 0.8rem; color: var(--text-muted, #888); margin-top: 0.5rem;
+        }
+
+        .form-label-required::after { content: " *"; color: #ef4444; }
+        .field-error { font-size: 0.78rem; color: #ef4444; margin-top: 0.25rem; display: none; }
+        .field-error.show { display: block; }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--accent-cyan, #00d4ff), #0099cc);
+            border: none; color: #000; font-weight: 700; padding: 0.75rem 2rem;
+            border-radius: 8px; font-size: 0.95rem; transition: all 0.3s;
+        }
+        .btn-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,212,255,0.3); }
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
+
+        /* Status card styles */
+        .status-badge { padding: 0.35rem 1rem; border-radius: 20px; font-weight: 600; font-size: 0.85rem; }
+        .status-pending { background: rgba(234,179,8,0.15); color: #eab308; }
+        .status-approved { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .status-rejected { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+        .remove-file-btn {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            background: rgba(239,68,68,0.8); border: none; color: #fff;
+            width: 28px; height: 28px; border-radius: 50%;
+            cursor: pointer; display: none; font-size: 0.8rem;
+        }
+        .upload-zone.has-file .remove-file-btn { display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-brand mb-3">
+            <div class="brand-wrapper">
+                <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
+                <div class="brand-text-content">
+                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span class="text-cyan">Tala</span></h4>
+                    <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Client Portal</p>
+                </div>
+            </div>
+        </div>
+        <ul class="nav flex-column flex-grow-1">
+            <li class="nav-item"><a class="nav-link" href="/client/dashboard"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
+            <li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-globe icon-left"></i><span class="link-text">Market Insight</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>
+            <li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-satellite-dish icon-left"></i><span class="link-text">Deep Scanner</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>
+            <li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-wand-magic-sparkles icon-left"></i><span class="link-text">Ask Nizza</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="/client/kyc-status"><i class="fa-solid fa-id-card icon-left"></i><span class="link-text">KYC Verification</span></a></li>
+        </ul>
+        <ul class="nav flex-column mb-5">
+            <li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>
+            <li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>
+            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>
+        </ul>
+    </nav>
+
+    <!-- Top Navbar -->
+    <header class="top-navbar d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn-header" id="sidebarToggle"><i class="fa-solid fa-bars fa-lg"></i></button>
+        </div>
+        <div class="nizza-wrapper mx-auto d-none d-md-block">
+            <div class="nizza-search">
+                <i class="fa-solid fa-wand-magic-sparkles magic-icon"></i>
+                <input type="text" class="form-control" placeholder="Ask Nizza AI about market trends...">
+                <button class="btn btn-sm text-muted"><i class="fa-solid fa-arrow-right"></i></button>
+            </div>
+        </div>
+        <div class="d-flex align-items-center gap-2 gap-md-3">
+            <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+            <div class="dropdown ms-1">
+                <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
+                    <div class="rounded-circle p-1 position-relative" style="border: 2px solid var(--accent-cyan);">
+                        <img src="https://ui-avatars.com/api/?name=Client&background=0b0e17&color=fff" class="rounded-circle" width="34" height="34">
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-3">
+                    <li class="px-3 py-2">
+                        <span class="d-block fw-bold text-main" id="userName">Client</span>
+                        <small class="text-muted" id="userEmail">client@thinktala.com</small>
+                    </li>
+                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="kyc-card">
+
+            <!-- === KYC FORM (shown when no submission yet or rejected) === -->
+            <div id="kycFormSection">
+                <div class="ai-card shadow-lg p-4 p-md-5">
+                    <h4 class="fw-bold mb-1" style="color: var(--text-heading)">
+                        <i class="fa-solid fa-shield-halved text-cyan me-2"></i>Verifikasi Identitas
+                    </h4>
+                    <p class="text-muted small mb-4">Lengkapi data diri untuk mengakses fitur trading penuh</p>
+
+                    <!-- Step Indicator -->
+                    <div class="step-indicator">
+                        <div class="step active" id="step1Indicator">
+                            <div class="step-num">1</div>
+                            <div class="step-label">Data Pribadi</div>
+                        </div>
+                        <div class="step-line" id="stepLine"></div>
+                        <div class="step" id="step2Indicator">
+                            <div class="step-num">2</div>
+                            <div class="step-label">Upload Dokumen</div>
+                        </div>
+                    </div>
+
+                    <form id="kycForm" novalidate>
+                        <!-- ====== STEP 1: Personal Data ====== -->
+                        <div id="step1" class="step-content">
+                            <div class="mb-3">
+                                <label class="form-label form-label-required fw-semibold">Nama Lengkap</label>
+                                <input type="text" class="form-control" id="fullName" name="full_name"
+                                       placeholder="Masukkan nama lengkap sesuai KTP" maxlength="100" autocomplete="name">
+                                <div class="field-error" id="errFullName"></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label form-label-required fw-semibold">NIK (Nomor Induk Kependudukan)</label>
+                                <input type="text" class="form-control" id="nik" name="nik"
+                                       placeholder="Masukkan 16 digit NIK" maxlength="16" inputmode="numeric" pattern="\d{16}">
+                                <div class="field-error" id="errNik"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label form-label-required fw-semibold">Tanggal Lahir</label>
+                                    <input type="date" class="form-control" id="birthdate" name="birthdate"
+                                           max="2010-01-01">
+                                    <div class="field-error" id="errBirthdate"></div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label form-label-required fw-semibold">Nomor Telepon</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone"
+                                           placeholder="Contoh: 081234567890" maxlength="15" inputmode="tel">
+                                    <div class="field-error" id="errPhone"></div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label form-label-required fw-semibold">Alamat Lengkap</label>
+                                <textarea class="form-control" id="address" name="address" rows="3"
+                                          placeholder="Masukkan alamat lengkap sesuai KTP" maxlength="500"></textarea>
+                                <div class="field-error" id="errAddress"></div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-submit" id="btnNextStep" disabled>
+                                    Lanjut ke Upload Dokumen <i class="fa-solid fa-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ====== STEP 2: Document Upload ====== -->
+                        <div id="step2" class="step-content" style="display:none;">
+                            <div class="mb-4">
+                                <label class="form-label form-label-required fw-semibold">Foto KTP</label>
+                                <div class="upload-zone" id="uploadZone">
+                                    <button type="button" class="remove-file-btn" id="removeFileBtn" title="Hapus file">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                    <div id="uploadContent">
+                                        <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                        <p class="mb-1 fw-semibold" style="color: var(--text-heading)">Drag & drop foto KTP di sini</p>
+                                        <p class="text-muted small mb-2">atau</p>
+                                        <button type="button" class="btn btn-outline-light btn-sm" id="browseBtn">
+                                            <i class="fa-solid fa-folder-open me-1"></i> Pilih File
+                                        </button>
+                                        <p class="text-muted small mt-2 mb-0">Format: JPG, PNG, PDF &bull; Maksimal 2MB</p>
+                                    </div>
+                                    <input type="file" id="ktpFile" name="ktp_image" accept=".jpg,.jpeg,.png,.pdf"
+                                           style="display:none;">
+                                </div>
+                                <div class="field-error" id="errKtp"></div>
+
+                                <!-- Image Preview -->
+                                <div class="preview-container" id="previewContainer" style="display:none;">
+                                    <img id="previewImage" src="" alt="Preview KTP">
+                                    <div class="file-info" id="fileInfo"></div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-light" id="btnPrevStep">
+                                    <i class="fa-solid fa-arrow-left me-2"></i> Kembali
+                                </button>
+                                <button type="submit" class="btn btn-submit" id="btnSubmit" disabled>
+                                    <span id="btnSubmitText">
+                                        <i class="fa-solid fa-paper-plane me-2"></i> Kirim Verifikasi
+                                    </span>
+                                    <span id="btnSubmitLoading" style="display:none;">
+                                        <i class="fa-solid fa-spinner fa-spin me-2"></i> Mengirim...
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- === KYC STATUS (shown when submission exists) === -->
+            <div id="kycStatusSection" style="display:none;">
+                <div class="ai-card shadow-lg p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <div id="statusIconContainer" class="mb-3"></div>
+                        <h4 class="fw-bold" style="color: var(--text-heading)" id="statusTitle"></h4>
+                        <p class="text-muted" id="statusMessage"></p>
+                    </div>
+
+                    <div class="ai-card p-3 mb-3" style="background: var(--bg-card-inner, rgba(255,255,255,0.02));">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Nama Lengkap</small>
+                                <span class="fw-semibold" id="statusName" style="color: var(--text-heading)">-</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">NIK</small>
+                                <span class="fw-semibold" id="statusNik" style="color: var(--text-heading)">-</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Tanggal Lahir</small>
+                                <span class="fw-semibold" id="statusBirthdate" style="color: var(--text-heading)">-</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Telepon</small>
+                                <span class="fw-semibold" id="statusPhone" style="color: var(--text-heading)">-</span>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted d-block">Alamat</small>
+                                <span class="fw-semibold" id="statusAddress" style="color: var(--text-heading)">-</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Status</small>
+                                <span class="status-badge" id="statusBadge">-</span>
+                            </div>
+                            <div class="col-md-6">
+                                <small class="text-muted d-block">Tanggal Pengajuan</small>
+                                <span class="fw-semibold" id="statusDate" style="color: var(--text-heading)">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="rejectReasonContainer" style="display:none;" class="ai-card p-3 mb-3" style="background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2);">
+                        <small class="text-danger fw-semibold d-block mb-1"><i class="fa-solid fa-circle-exclamation me-1"></i> Alasan Penolakan</small>
+                        <span id="rejectReason" style="color: var(--text-heading)">-</span>
+                    </div>
+
+                    <div id="resubmitContainer" style="display:none;" class="text-center mt-4">
+                        <button class="btn btn-submit" onclick="showForm()">
+                            <i class="fa-solid fa-rotate-right me-2"></i> Ajukan Ulang
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="kycLoading" class="text-center py-5">
+                <i class="fa-solid fa-spinner fa-spin fa-2x text-cyan mb-3"></i>
+                <p class="text-muted">Memuat data KYC...</p>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/za-sidebar.js"></script>
+    <script>
+    // ======================================================
+    // GLOBAL STATE
+    // ======================================================
+    let currentStep = 1;
+    let selectedFile = null;
+    let isSubmitting = false;
+
+    // ======================================================
+    // DOM ELEMENTS
+    // ======================================================
+    const $ = id => document.getElementById(id);
+
+    const kycFormSection   = $('kycFormSection');
+    const kycStatusSection = $('kycStatusSection');
+    const kycLoading       = $('kycLoading');
+    const step1            = $('step1');
+    const step2            = $('step2');
+    const step1Indicator   = $('step1Indicator');
+    const step2Indicator   = $('step2Indicator');
+    const stepLine         = $('stepLine');
+    const uploadZone       = $('uploadZone');
+    const ktpFile          = $('ktpFile');
+    const previewContainer = $('previewContainer');
+    const previewImage     = $('previewImage');
+    const fileInfo         = $('fileInfo');
+    const btnNextStep      = $('btnNextStep');
+    const btnPrevStep      = $('btnPrevStep');
+    const btnSubmit        = $('btnSubmit');
+    const btnSubmitText    = $('btnSubmitText');
+    const btnSubmitLoading = $('btnSubmitLoading');
+
+    // Form fields
+    const fields = {
+        fullName:  $('fullName'),
+        nik:       $('nik'),
+        birthdate: $('birthdate'),
+        phone:     $('phone'),
+        address:   $('address'),
+    };
+
+    const errors = {
+        fullName:  $('errFullName'),
+        nik:       $('errNik'),
+        birthdate: $('errBirthdate'),
+        phone:     $('errPhone'),
+        address:   $('errAddress'),
+        ktp:       $('errKtp'),
+    };
+
+    // ======================================================
+    // INIT — Check KYC Status on Load
+    // ======================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        loadUserInfo();
+        await checkKYCStatus();
+        setupValidation();
+        setupFileUpload();
+    });
+
+    function loadUserInfo() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.name) {
+            $('userName').textContent = user.name;
+        }
+        if (user.email) {
+            $('userEmail').textContent = user.email;
+        }
+    }
+
+    async function checkKYCStatus() {
+        try {
+            const res = await fetch('/api/kyc/status', {
+                method: 'GET',
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (res.status === 401) {
+                window.location.href = '/account/login';
+                return;
+            }
+
+            const data = await res.json();
+
+            kycLoading.style.display = 'none';
+
+            if (data.status && data.data && data.data.kyc) {
+                showStatus(data.data.kyc);
+            } else {
+                showForm();
+            }
+        } catch (err) {
+            console.error('KYC status check failed:', err);
+            kycLoading.style.display = 'none';
+            showForm();
+        }
+    }
+
+    // ======================================================
+    // SHOW FORM / STATUS
+    // ======================================================
+    function showForm() {
+        kycFormSection.style.display = 'block';
+        kycStatusSection.style.display = 'none';
+        goToStep(1);
+    }
+
+    function showStatus(kyc) {
+        kycFormSection.style.display = 'none';
+        kycStatusSection.style.display = 'block';
+
+        $('statusName').textContent       = kyc.full_name || '-';
+        $('statusNik').textContent        = maskNIK(kyc.nik || '');
+        $('statusBirthdate').textContent  = formatDate(kyc.birthdate);
+        $('statusPhone').textContent      = kyc.phone || '-';
+        $('statusAddress').textContent    = kyc.address || '-';
+        $('statusDate').textContent       = formatDateTime(kyc.created_at);
+
+        const badge = $('statusBadge');
+        const iconContainer = $('statusIconContainer');
+
+        if (kyc.status === 'pending') {
+            badge.className = 'status-badge status-pending';
+            badge.textContent = 'Menunggu Verifikasi';
+            $('statusTitle').textContent = 'Dokumen Sedang Diproses';
+            $('statusMessage').textContent = 'Tim kami sedang memverifikasi dokumen Anda. Proses ini membutuhkan waktu 1-3 hari kerja.';
+            iconContainer.innerHTML = '<i class="fa-solid fa-clock fa-4x text-warning"></i>';
+            $('resubmitContainer').style.display = 'none';
+        } else if (kyc.status === 'approved') {
+            badge.className = 'status-badge status-approved';
+            badge.textContent = 'Terverifikasi';
+            $('statusTitle').textContent = 'Verifikasi Berhasil!';
+            $('statusMessage').textContent = 'Identitas Anda telah terverifikasi. Anda sekarang memiliki akses penuh ke semua fitur trading.';
+            iconContainer.innerHTML = '<i class="fa-solid fa-circle-check fa-4x text-success"></i>';
+            $('resubmitContainer').style.display = 'none';
+        } else if (kyc.status === 'rejected') {
+            badge.className = 'status-badge status-rejected';
+            badge.textContent = 'Ditolak';
+            $('statusTitle').textContent = 'Verifikasi Ditolak';
+            $('statusMessage').textContent = 'Mohon perbaiki data dan ajukan ulang.';
+            iconContainer.innerHTML = '<i class="fa-solid fa-circle-xmark fa-4x text-danger"></i>';
+            $('resubmitContainer').style.display = 'block';
+
+            if (kyc.reject_reason) {
+                $('rejectReasonContainer').style.display = 'block';
+                $('rejectReason').textContent = kyc.reject_reason;
+            }
+        }
+    }
+
+    // ======================================================
+    // STEP NAVIGATION
+    // ======================================================
+    function goToStep(step) {
+        currentStep = step;
+        if (step === 1) {
+            step1.style.display = 'block';
+            step2.style.display = 'none';
+            step1Indicator.className = 'step active';
+            step2Indicator.className = 'step';
+            stepLine.className = 'step-line';
+        } else {
+            step1.style.display = 'none';
+            step2.style.display = 'block';
+            step1Indicator.className = 'step completed';
+            step2Indicator.className = 'step active';
+            stepLine.className = 'step-line active';
+        }
+    }
+
+    btnNextStep.addEventListener('click', () => {
+        if (validateStep1()) goToStep(2);
+    });
+
+    btnPrevStep.addEventListener('click', () => goToStep(1));
+
+    // ======================================================
+    // VALIDATION
+    // ======================================================
+    function setupValidation() {
+        Object.values(fields).forEach(f => {
+            f.addEventListener('input', () => { validateStep1(); });
+            f.addEventListener('blur', () => { validateStep1(); });
+        });
+
+        // NIK: hanya angka
+        fields.nik.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 16);
+        });
+
+        // Phone: hanya angka dan +
+        fields.phone.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^\d+]/g, '').slice(0, 15);
+        });
+    }
+
+    function validateStep1() {
+        let valid = true;
+
+        // Full Name
+        const name = fields.fullName.value.trim();
+        if (name.length < 3) {
+            showError('fullName', name ? 'Nama minimal 3 karakter' : 'Nama lengkap wajib diisi');
+            valid = false;
+        } else {
+            clearError('fullName');
+        }
+
+        // NIK
+        const nik = fields.nik.value.trim();
+        if (!/^\d{16}$/.test(nik)) {
+            showError('nik', nik ? 'NIK harus 16 digit angka' : 'NIK wajib diisi');
+            valid = false;
+        } else {
+            clearError('nik');
+        }
+
+        // Birthdate
+        if (!fields.birthdate.value) {
+            showError('birthdate', 'Tanggal lahir wajib diisi');
+            valid = false;
+        } else {
+            clearError('birthdate');
+        }
+
+        // Phone
+        const phone = fields.phone.value.replace(/[\s-]/g, '');
+        if (!/^\+?\d{10,15}$/.test(phone)) {
+            showError('phone', phone ? 'Nomor telepon harus 10-15 digit' : 'Nomor telepon wajib diisi');
+            valid = false;
+        } else {
+            clearError('phone');
+        }
+
+        // Address
+        if (fields.address.value.trim().length < 10) {
+            showError('address', fields.address.value.trim() ? 'Alamat minimal 10 karakter' : 'Alamat wajib diisi');
+            valid = false;
+        } else {
+            clearError('address');
+        }
+
+        btnNextStep.disabled = !valid;
+        return valid;
+    }
+
+    function validateStep2() {
+        if (!selectedFile) {
+            showError('ktp', 'Foto KTP wajib diupload');
+            return false;
+        }
+        clearError('ktp');
+        return true;
+    }
+
+    function showError(field, msg) {
+        errors[field].textContent = msg;
+        errors[field].classList.add('show');
+    }
+
+    function clearError(field) {
+        errors[field].textContent = '';
+        errors[field].classList.remove('show');
+    }
+
+    // ======================================================
+    // FILE UPLOAD (Drag & Drop + Browse)
+    // ======================================================
+    function setupFileUpload() {
+        const browseBtn = $('browseBtn');
+        const removeBtn = $('removeFileBtn');
+
+        browseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            ktpFile.click();
+        });
+
+        uploadZone.addEventListener('click', (e) => {
+            if (e.target.closest('#removeFileBtn') || e.target.closest('#browseBtn')) return;
+            if (!selectedFile) ktpFile.click();
+        });
+
+        // Drag events
+        ['dragover', 'dragenter'].forEach(evt => {
+            uploadZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+        });
+        ['dragleave', 'drop'].forEach(evt => {
+            uploadZone.addEventListener(evt, () => {
+                uploadZone.classList.remove('dragover');
+            });
+        });
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+
+        ktpFile.addEventListener('change', () => {
+            if (ktpFile.files.length) handleFile(ktpFile.files[0]);
+        });
+
+        removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            removeFile();
+        });
+    }
+
+    function handleFile(file) {
+        // Validate file type
+        const allowed = ['image/jpeg', 'image/png', 'application/pdf'];
+        if (!allowed.includes(file.type)) {
+            showError('ktp', 'Format file tidak didukung. Gunakan JPG, PNG, atau PDF.');
+            return;
+        }
+
+        // Validate file size (2MB)
+        const maxSize = 2 * 1024 * 1024;
+        if (file.size > maxSize) {
+            showError('ktp', `Ukuran file terlalu besar (${(file.size / 1024 / 1024).toFixed(1)}MB). Maksimal 2MB.`);
+            return;
+        }
+
+        selectedFile = file;
+        clearError('ktp');
+        uploadZone.classList.add('has-file');
+
+        // Show preview
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // PDF - show icon
+            previewImage.src = '';
+            previewContainer.style.display = 'block';
+            previewImage.style.display = 'none';
+            previewContainer.innerHTML = `
+                <div class="py-3">
+                    <i class="fa-solid fa-file-pdf fa-4x text-danger"></i>
+                </div>
+                <div class="file-info" id="fileInfo"></div>
+            `;
+        }
+
+        fileInfo.textContent = `${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+        $('uploadContent').querySelector('.upload-icon').innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+
+        // Enable submit
+        btnSubmit.disabled = false;
+    }
+
+    function removeFile() {
+        selectedFile = null;
+        ktpFile.value = '';
+        uploadZone.classList.remove('has-file');
+        previewContainer.style.display = 'none';
+        previewImage.src = '';
+        previewImage.style.display = '';
+        previewContainer.innerHTML = `
+            <img id="previewImage" src="" alt="Preview KTP">
+            <div class="file-info" id="fileInfo"></div>
+        `;
+        $('uploadContent').querySelector('.upload-icon').innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i>';
+        btnSubmit.disabled = true;
+    }
+
+    // ======================================================
+    // FORM SUBMIT
+    // ======================================================
+    $('kycForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (isSubmitting) return;
+
+        if (!validateStep1() || !validateStep2()) return;
+
+        isSubmitting = true;
+        btnSubmit.disabled = true;
+        btnSubmitText.style.display = 'none';
+        btnSubmitLoading.style.display = 'inline';
+
+        try {
+            const formData = new FormData();
+            formData.append('full_name', fields.fullName.value.trim());
+            formData.append('nik', fields.nik.value.trim());
+            formData.append('address', fields.address.value.trim());
+            formData.append('birthdate', fields.birthdate.value);
+            formData.append('phone', fields.phone.value.replace(/[\s-]/g, ''));
+            formData.append('ktp_image', selectedFile);
+
+            const res = await fetch('/api/kyc/submit', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData,
+            });
+
+            const data = await res.json();
+
+            if (res.status === 201 && data.status) {
+                showToast('success', 'Dokumen berhasil dikirim! Mengarahkan ke status KYC...');
+                setTimeout(() => {
+                    checkKYCStatus();
+                }, 1500);
+            } else if (res.status === 409) {
+                showToast('error', data.msg || 'Data duplikat terdeteksi');
+            } else if (res.status === 422) {
+                showToast('error', data.msg || 'Data tidak valid');
+            } else if (res.status === 401) {
+                showToast('error', 'Sesi berakhir, silakan login kembali');
+                setTimeout(() => { window.location.href = '/account/login'; }, 1500);
+            } else {
+                showToast('error', data.msg || 'Gagal mengirim dokumen');
+            }
+        } catch (err) {
+            console.error('Submit error:', err);
+            showToast('error', 'Terjadi kesalahan jaringan. Silakan coba lagi.');
+        } finally {
+            isSubmitting = false;
+            btnSubmit.disabled = false;
+            btnSubmitText.style.display = 'inline';
+            btnSubmitLoading.style.display = 'none';
+        }
+    });
+
+    // ======================================================
+    // TOAST NOTIFICATION
+    // ======================================================
+    function showToast(type, message) {
+        const container = $('toastContainer');
+        const id = 'toast-' + Date.now();
+        const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+        const icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+        container.innerHTML += `
+            <div id="${id}" class="toast align-items-center text-white ${bgClass} border-0 show" role="alert" style="min-width: 320px;">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fa-solid ${icon} me-2"></i> ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>`;
+
+        setTimeout(() => {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }, 5000);
+    }
+
+    // ======================================================
+    // HELPERS
+    // ======================================================
+    function maskNIK(nik) {
+        if (nik.length <= 6) return nik;
+        return nik.slice(0, 6) + '*'.repeat(nik.length - 10) + nik.slice(-4);
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '-';
+        try {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        } catch { return dateStr; }
+    }
+
+    function formatDateTime(dateStr) {
+        if (!dateStr) return '-';
+        try {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        } catch { return dateStr; }
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/account/login';
+    }
+    </script>
+</body>
+</html>

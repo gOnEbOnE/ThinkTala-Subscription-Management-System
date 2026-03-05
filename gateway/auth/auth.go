@@ -108,7 +108,12 @@ func isRoleAllowed(path string, role string) bool {
 		return true
 	}
 
-	// /api/admin/* → Admin-only: CEO, SUPERADMIN, OPERASIONAL
+	// /api/admin/kyc* → COMPLIANCE & OPERASIONAL
+	if strings.HasPrefix(path, "/api/admin/kyc") {
+		return role == "COMPLIANCE" || role == "OPERASIONAL"
+	}
+
+	// /api/admin/* → OPERASIONAL only
 	if strings.HasPrefix(path, "/api/admin/") {
 		return role == "OPERASIONAL"
 	}
@@ -116,6 +121,11 @@ func isRoleAllowed(path string, role string) bool {
 	// /api/subscription/catalog → CLIENT, OPERASIONAL, and above can view
 	if strings.HasPrefix(path, "/api/subscription/") {
 		return role == "CLIENT" || role == "OPERASIONAL"
+	}
+
+	// /api/kyc/ → CLIENT can access their own KYC endpoints
+	if strings.HasPrefix(path, "/api/kyc/") {
+		return role == "CLIENT" || role == "COMPLIANCE" || role == "OPERASIONAL"
 	}
 
 	// /client/* → CLIENT role

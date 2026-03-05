@@ -1,0 +1,203 @@
+
+<div class="container-fluid">
+    <div class="row">
+      <div class="col-xl-5"><img class="bg-img-cover bg-center" src="{{.assets_url}}/cdn/files/photos/assets/Web_banner_new.webp" alt="looginpage"></div>
+      <div class="col-xl-7 p-0">    
+        <div class="login-card lg-shadow" style="background:url('{{.assets_url}}/j-assets/images/boarding_bg.jpg');">
+          <div>
+            <div><a class="logo" href="{{.base_url}}/account"><img class="img-fluid for-light" src="{{.assets_url}}/cdn/files/photos/logo/jakedu.webp" width="120px" alt="looginpage"></a></div>
+            <div class="login-main"> 
+              <form action="{{.base_url}}/acc/login/auth" method="POST" id="login-form" class="theme-form">
+                  <input type="hidden" autocomplete="off" value="{{.csrf}}" id="csrf"/>
+                  <input type="hidden" autocomplete="off" value="{{.data.ref}}" name="ref"/>
+                  <input type="hidden" autocomplete="off" value="{{.data.state}}" name="state"/>
+                <h4 class="text-center">Masuk ke Akun Kamu</h4>
+                <p class="text-center">Gunakan ID Login JakEdu</p>
+                <div class="form-group">
+                  <label class="col-form-label">ID Login</label>
+                  <input class="form-control" type="text" id="login_id" name="login_id" placeholder="NPSN/NRK/NIKKI/NIK/Email">
+                </div>
+                 <div class="form-group">
+                  <label class="col-form-label">Kata Sandi</label>
+                  <div class="form-input position-relative">
+                    <input class="form-control" type="password" id="password" name="login[password]" placeholder="*******">
+                    <div class="show-hide" id="show-hide" style="cursor: pointer;">
+                      <i class="fa fa-eye text-success"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group mb-0">
+                  <br>
+                  <a class="link" href="#reset/password">Lupa Kata Sandi</a><br>
+                  <div class="text-end mt-3">
+                    <button class="btn btn-primary btn-block w-100" id="login-btn" type="submit">Masuk</button>
+                  </div>
+                </div>
+                <p class="mt-4 mb-0 text-center">Belum punya akun?<a class="ms-2" href="#register">Buat Akun</a></p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+    <input type="hidden" value="{{.base_url}}" id="base_url"/>
+    <!-- latest jquery-->
+    <script src="{{.assets_url}}/j-assets/tivo/js/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap js-->
+    <script src="{{.assets_url}}/j-assets/tivo/js/bootstrap/bootstrap.bundle.min.js"></script>
+    <!-- feather icon js-->
+    <script src="{{.assets_url}}/j-assets/tivo/js/icons/feather-icon/feather.min.js"></script>
+    <script src="{{.assets_url}}/j-assets/tivo/js/icons/feather-icon/feather-icon.js"></script>
+    <!-- scrollbar js-->
+    <!-- Sidebar jquery-->
+    <script src="{{.assets_url}}/j-assets/tivo/js/config.js"></script>
+    <!-- Template js-->
+    <script src="{{.assets_url}}/j-assets/tivo/js/script.js"></script>
+    <!-- login js-->
+    <script src="{{.assets_url}}/j-assets/tivo/js/notify/bootstrap-notify.min.js"></script>
+    <script src="{{.assets_url}}/j-assets/tivo/js/notify/notify-script.js"></script>
+    <script src="{{.assets_url}}/j-assets/js/alerts.js"></script>
+   <!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/68047a0de2347b190a1a62f1/1ip8nphr7';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+<script>
+(function () {
+    const $ = id => document.getElementById(id);
+
+    const titleEl       = $("title");
+    const passwordField = $("password");
+    const showHideBtn   = $("show-hide");
+    const loginForm     = $("login-form");
+    const loginBtn      = $("login-btn");
+    const csrfEl        = $("csrf");
+
+    let isSubmitted = false; 
+
+    // Ambil jumlah gagal dari localStorage
+    let failCount = parseInt(localStorage.getItem("failCount") || "0");
+    let cooldownUntil = parseInt(localStorage.getItem("cooldownUntil") || "0");
+
+    // Fungsi hitung delay (maks 30 detik)
+    const getFailDelay = () => Math.min(2000 * Math.pow(2, failCount - 1), 30000);
+
+    // Fungsi reset tombol
+    const resetLoginState = (delay = 0) => {
+        setTimeout(() => {
+            loginBtn.innerHTML = "Masuk";
+            loginBtn.disabled = false;
+            isSubmitted = false;
+        }, delay);
+    };
+
+    // Set judul halaman
+    if (titleEl) titleEl.textContent = "{{.title}}";
+
+    // Toggle show/hide password
+    if (showHideBtn && passwordField) {
+        showHideBtn.addEventListener("click", () => {
+            const isText = passwordField.type === "text";
+            passwordField.type = isText ? "password" : "text";
+            showHideBtn.innerHTML = isText
+                ? '<i class="fa fa-eye text-success"></i>'
+                : '<i class="fa fa-eye-slash text-danger"></i>';
+        });
+    }
+
+    // Cek cooldown saat halaman load
+    if (cooldownUntil > Date.now()) {
+        const remaining = cooldownUntil - Date.now();
+        loginBtn.disabled = true;
+        alertWarning(`Tunggu ${Math.ceil(remaining / 1000)} detik sebelum mencoba lagi`);
+        resetLoginState(remaining);
+    }
+
+    // Submit form login
+    if (loginForm && loginBtn) {
+        loginForm.addEventListener("submit", async e => {
+            e.preventDefault();
+
+            if (isSubmitted) return; // Lock agar tidak spam klik
+            isSubmitted = true;
+
+            // Cek kalau masih dalam cooldown
+            if (cooldownUntil > Date.now()) {
+                const remaining = cooldownUntil - Date.now();
+                alertWarning(`Tunggu ${Math.ceil(remaining / 1000)} detik sebelum mencoba lagi`);
+                resetLoginState(remaining);
+                return;
+            }
+
+            // UI lock
+            loginBtn.innerHTML = '<div class="lds-ellipsis" style="margin-left:-50px"><div></div><div></div><div></div><div></div></div>';
+            loginBtn.disabled = true;
+
+            try {
+                const res = await fetch(loginForm.action+"?ref={{.data.ref}}&state={{.data.state}}", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        "X-CSRF-Token": csrfEl?.value || ""
+                    },
+                    body: new FormData(loginForm)
+                });
+
+                if (!res.ok) throw new Error(`Server error: ${res.status}`);
+
+                const json = await res.json();
+                if (csrfEl) csrfEl.value = json.csrf || "";
+
+                if (json.status) {
+                    if (json.ref != "") {
+                        window.location.href = json.ref;
+                        return
+                    }
+                    // Login sukses → reset hitungan gagal
+                    failCount = 0;
+                    localStorage.setItem("failCount", "0");
+                    localStorage.setItem("cooldownUntil", "0");
+                    resetLoginState(0);
+                    page("welcome");
+                    alertSuccess(json.msg);
+                } else {
+                    // Login gagal → tambah hitungan dan simpan ke localStorage
+                    failCount++;
+                    localStorage.setItem("failCount", failCount);
+
+                    const delay = getFailDelay();
+                    cooldownUntil = Date.now() + delay;
+                    localStorage.setItem("cooldownUntil", cooldownUntil);
+
+                    resetLoginState(delay);
+                    alertWarning(`${json.msg} (Tunggu ${delay / 1000} detik)`);
+                }
+            } catch (err) {
+                console.error(err);
+                alertDanger(err);
+
+                // Error dianggap gagal juga
+                failCount++;
+                localStorage.setItem("failCount", failCount);
+
+                const delay = getFailDelay();
+                cooldownUntil = Date.now() + delay;
+                localStorage.setItem("cooldownUntil", cooldownUntil);
+
+                resetLoginState(delay);
+            }
+        });
+    }
+})();
+</script>
+

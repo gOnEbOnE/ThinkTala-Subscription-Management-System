@@ -219,6 +219,12 @@ a:hover{background:#6C63FF;color:#fff;}
 		}
 
 		log.Printf("[AUTH] Access granted: user=%s role=%s path=%s", user.Email, user.RoleCode, r.URL.Path)
+
+		// Inject user info as headers for downstream services
+		r.Header.Set("X-User-Role", user.RoleCode)
+		r.Header.Set("X-User-ID", user.ID)
+		r.Header.Set("X-User-Email", user.Email)
+
 		h.ServeHTTP(w, r)
 	}
 }
@@ -326,6 +332,11 @@ func main() {
 	assetsDir := filepath.Join(frontendDir, "assets")
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsDir))))
 
+	// Serve uploaded files (KYC images, etc.) from users service
+	uploadsDir := "../users/public/uploads"
+	http.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadsDir))))
+	log.Printf("[GW] Static files: /uploads/ -> %s", uploadsDir)
+
 	// ========================================
 	// 3. Protected Dashboard Pages (with Role Auth)
 	// ========================================
@@ -431,12 +442,28 @@ func main() {
 	log.Printf("[GW] Protected API: /api/admin/packages -> http://localhost:5004 (CEO/SUPERADMIN/OPERASIONAL)")
 	log.Printf("[GW] Protected API: /api/subscription/catalog -> http://localhost:5004 (CLIENT+)")
 
+	// --- KYC Admin API (role-protected) - COMPLIANCE & OPERASIONAL can access ---
+	http.HandleFunc("/api/admin/kyc", withRoleAuth(
+		createProxyHandler("http://localhost:2006", true),
+	))
+	http.HandleFunc("/api/admin/kyc/", withRoleAuth(
+		createProxyHandler("http://localhost:2006", true),
+	))
+	log.Printf("[GW] Protected API: /api/admin/kyc -> http://localhost:2006 (CEO/SUPERADMIN/COMPLIANCE/OPERASIONAL)")
+
+	// --- KYC Client API (role-protected) - CLIENT can access their own KYC ---
+	http.HandleFunc("/api/kyc/", withRoleAuth(
+		createProxyHandler("http://localhost:2006", true),
+	))
+	log.Printf("[GW] Protected API: /api/kyc/ -> http://localhost:2006 (CLIENT+)")
+
 	// --- Generic API proxy from routes.json (no role auth) ---
 	for _, route := range config.Routes {
 		if strings.HasPrefix(route.Path, "/api/") {
 			// Skip routes already registered above
 			if strings.HasPrefix(route.Path, "/api/admin/") ||
-				strings.HasPrefix(route.Path, "/api/subscription/") {
+				strings.HasPrefix(route.Path, "/api/subscription/") ||
+				strings.HasPrefix(route.Path, "/api/kyc") {
 				continue
 			}
 			http.HandleFunc(route.Path, createProxyHandler(route.Target, route.CORS))
