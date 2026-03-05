@@ -72,7 +72,7 @@
                 <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Manage Notifications</h4>
                 <small class="text-muted">Create & manage notifications for users</small>
             </div>
-            <button class="btn btn-sm px-3 py-2" style="background: var(--accent-cyan); color: #000; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#notifModal" onclick="resetForm()">
+            <button class="btn btn-sm px-3 py-2" style="background: var(--accent-cyan); color: #000; font-weight: 600; opacity:.45; cursor:not-allowed;" disabled title="Tersedia di Sprint 2">
                 <i class="fa-solid fa-plus me-1"></i> New Notification
             </button>
         </div>
@@ -213,7 +213,7 @@
     <script src="../assets/js/za-theme.js"></script>
     <script src="../assets/js/za-sidebar.js"></script>
     <script>
-        const API_BASE = '/api/ops';
+        const API_BASE = '/api';
         const token = localStorage.getItem('token');
 
         function logout() {
@@ -283,8 +283,8 @@
                         <td>${n.is_active ? '<span class="badge bg-success bg-opacity-25 text-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>'}</td>
                         <td class="small text-muted">${new Date(n.created_at).toLocaleDateString()}</td>
                         <td class="text-end">
-                            <button class="btn btn-sm btn-outline-info me-1" onclick='editNotif(${JSON.stringify(n)})'><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="openDelete('${n.id}')"><i class="fa-solid fa-trash"></i></button>
+                            <button class="btn btn-sm btn-outline-info me-1" disabled title="Tersedia di Sprint 2" style="opacity:.4;cursor:not-allowed;"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" disabled title="Tersedia di Sprint 2" style="opacity:.4;cursor:not-allowed;"><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 `).join('');

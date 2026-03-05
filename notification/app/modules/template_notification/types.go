@@ -28,11 +28,12 @@ type CreateTemplateRequest struct {
 }
 
 // UpdateTemplateRequest adalah payload untuk update template.
+// Validasi wajib sama dengan CreateTemplateRequest (PBI-30).
 type UpdateTemplateRequest struct {
-	Name      string `json:"name"`
-	EventType string `json:"event_type"`
-	Channel   string `json:"channel"`
+	Name      string `json:"name"       binding:"required"`
+	EventType string `json:"event_type" binding:"required"`
+	Channel   string `json:"channel"    binding:"required"`
 	Subject   string `json:"subject"`
-	Content   string `json:"content"`
+	Content   string `json:"content"    binding:"required"`
 	UpdatedBy string `json:"updated_by"`
 }

@@ -560,7 +560,7 @@
                 <td>${channelBadge(t.channel)}</td>
                 <td><span class="small text-muted">${updated}</span></td>
                 <td class="text-end" style="padding-right:20px;">
-                    <button class="btn-action-edit" onclick="openEditModal(${escJson(t)})">
+                    <button class="btn-action-edit" onclick="openEditModal('${t.id}')">
                         <i class="fa-solid fa-pen me-1"></i>Edit
                     </button>
                     <button class="btn-action-delete" onclick="openDeleteModal('${t.id}')">
@@ -580,15 +580,17 @@
     }
 
     // ── Modal: Edit ───────────────────────────────────────────
-    function openEditModal(t) {
+    function openEditModal(id) {
+        const t = allTemplates.find(x => x.id === id);
+        if (!t) return;
         clearForm();
         document.getElementById('tplModalTitle').textContent = 'Edit Template';
-        document.getElementById('tplId').value       = t.id;
-        document.getElementById('tplName').value     = t.name;
+        document.getElementById('tplId').value        = t.id;
+        document.getElementById('tplName').value      = t.name;
         document.getElementById('tplEventType').value = t.event_type;
-        document.getElementById('tplChannel').value  = t.channel;
-        document.getElementById('tplSubject').value  = t.subject || '';
-        document.getElementById('tplContent').value  = t.content;
+        document.getElementById('tplChannel').value   = t.channel;
+        document.getElementById('tplSubject').value   = t.subject || '';
+        document.getElementById('tplContent').value   = t.content;
         onChannelChange();
         new bootstrap.Modal(document.getElementById('tplModal')).show();
     }
@@ -636,9 +638,37 @@
         return ok;
     }
 
+    // ── Handle API 400 validation errors (per-field) ──────────
+    // Maps known server error keywords to the corresponding input field.
+    function handleApiValidationError(errMsg) {
+        const lower = errMsg.toLowerCase();
+        let handled = false;
+
+        const fieldMap = [
+            { keywords: ['name','nama'], fieldId: 'tplName',      errId: 'err-tplName' },
+            { keywords: ['event_type','event type'], fieldId: 'tplEventType', errId: 'err-tplEventType' },
+            { keywords: ['channel'],    fieldId: 'tplChannel',    errId: 'err-tplChannel' },
+            { keywords: ['subject'],    fieldId: 'tplSubject',    errId: 'err-tplSubject' },
+            { keywords: ['content','isi'], fieldId: 'tplContent', errId: 'err-tplContent' },
+        ];
+
+        for (const { keywords, fieldId, errId } of fieldMap) {
+            if (keywords.some(k => lower.includes(k))) {
+                const errEl = document.getElementById(errId);
+                errEl.textContent = errMsg;
+                showError(fieldId, errId);
+                handled = true;
+                break;
+            }
+        }
+
+        if (!handled) {
+            showToast('error', errMsg || 'Validasi gagal. Periksa kembali data Anda.');
+        }
+    }
+
     // ── Save ──────────────────────────────────────────────────
-    async function saveTemplate() {
-        if (!validateForm()) return;
+    async function saveTemplate() {        if (!validateForm()) return;
 
         const id      = document.getElementById('tplId').value;
         const channel = document.getElementById('tplChannel').value;
@@ -663,6 +693,8 @@
                 bootstrap.Modal.getInstance(document.getElementById('tplModal')).hide();
                 showToast('success', json.message || (id ? 'Template berhasil diperbarui.' : 'Template berhasil dibuat.'));
                 await loadTemplates();
+            } else if (res.status === 400) {
+                handleApiValidationError(json.error || '');
             } else if (res.status === 404) {
                 showToast('error', 'Template tidak ditemukan.');
             } else {
