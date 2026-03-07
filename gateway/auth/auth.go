@@ -103,18 +103,43 @@ func isRoleAllowed(path string, role string) bool {
 	// Normalize role
 	role = strings.ToUpper(strings.TrimSpace(role))
 
-	// Check role-based access
+	// SuperAdmin & CEO can access everything
+	if role == "SUPERADMIN" || role == "CEO" {
+		return true
+	}
+
+	// /api/admin/kyc* → COMPLIANCE & OPERASIONAL
+	if strings.HasPrefix(path, "/api/admin/kyc") {
+		return role == "COMPLIANCE" || role == "OPERASIONAL"
+	}
+
+	// /api/admin/* → OPERASIONAL only
+	if strings.HasPrefix(path, "/api/admin/") {
+		return role == "OPERASIONAL"
+	}
+
+	// /api/subscription/catalog → CLIENT, OPERASIONAL, and above can view
+	if strings.HasPrefix(path, "/api/subscription/") {
+		return role == "CLIENT" || role == "OPERASIONAL"
+	}
+
+	// /api/kyc/ → CLIENT can access their own KYC endpoints
+	if strings.HasPrefix(path, "/api/kyc/") {
+		return role == "CLIENT" || role == "COMPLIANCE" || role == "OPERASIONAL"
+	}
+
+	// /client/* → CLIENT role
 	if strings.HasPrefix(path, "/client/") && role == "CLIENT" {
 		return true
 	}
-	if strings.HasPrefix(path, "/ops/") && (role == "OPERASIONAL" || role == "SUPERADMIN" || role == "CEO") {
+
+	// /ops/* → OPERASIONAL role
+	if strings.HasPrefix(path, "/ops/") && role == "OPERASIONAL" {
 		return true
 	}
-	if strings.HasPrefix(path, "/compliance/") && (role == "COMPLIANCE" || role == "SUPERADMIN") {
-		return true
-	}
-	// SuperAdmin can access all
-	if role == "SUPERADMIN" || role == "CEO" {
+
+	// /compliance/* → COMPLIANCE role
+	if strings.HasPrefix(path, "/compliance/") && role == "COMPLIANCE" {
 		return true
 	}
 

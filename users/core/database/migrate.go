@@ -109,11 +109,15 @@ func MigrateAndSeed(db interface{}) {
 		updated_by UUID REFERENCES users(id) ON DELETE SET NULL
 	);
 
-	CREATE TABLE IF NOT EXISTS kyc_documents (
+	CREATE TABLE IF NOT EXISTS kyc_submissions (
 		id UUID PRIMARY KEY,
 		user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-		document_type VARCHAR(50) NOT NULL CHECK (document_type IN ('ktp', 'passport', 'sim', 'selfie')),
-		file_url VARCHAR(500) NOT NULL,
+		full_name VARCHAR(255) NOT NULL,
+		nik VARCHAR(16) UNIQUE NOT NULL,
+		address TEXT NOT NULL,
+		birthdate DATE NOT NULL,
+		phone VARCHAR(20) NOT NULL,
+		ktp_image VARCHAR(500) NOT NULL,
 		status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
 		reject_reason TEXT,
 		reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -122,8 +126,9 @@ func MigrateAndSeed(db interface{}) {
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);
 
-	CREATE INDEX IF NOT EXISTS idx_kyc_user ON kyc_documents(user_id);
-	CREATE INDEX IF NOT EXISTS idx_kyc_status ON kyc_documents(status);
+	CREATE UNIQUE INDEX IF NOT EXISTS idx_kyc_nik ON kyc_submissions(nik);
+	CREATE INDEX IF NOT EXISTS idx_kyc_sub_user ON kyc_submissions(user_id);
+	CREATE INDEX IF NOT EXISTS idx_kyc_sub_status ON kyc_submissions(status);
 	CREATE INDEX IF NOT EXISTS idx_notif_active ON notifications(is_active);
 	CREATE INDEX IF NOT EXISTS idx_subs_active ON subscription_packages(is_active);
 	`

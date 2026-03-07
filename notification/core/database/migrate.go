@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -44,7 +43,8 @@ func Migrate() {
 			created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			created_by  VARCHAR(255),
-			updated_by  VARCHAR(255)
+			updated_by  VARCHAR(255),
+			UNIQUE (event_type, channel)
 		);
 		CREATE INDEX IF NOT EXISTS idx_notif_tpl_channel ON notification_templates(channel);
 		CREATE INDEX IF NOT EXISTS idx_notif_tpl_event   ON notification_templates(event_type);
@@ -54,60 +54,58 @@ func Migrate() {
 	} else {
 		log.Println("[NOTIFICATION] Table notification_templates ready")
 	}
+
+	// Table untuk registry event_type yang pernah di-dispatch oleh service manapun.
+	// Diisi otomatis saat POST /api/notifications/send dipanggil.
+	_, err = db().Exec(context.Background(), `
+		CREATE TABLE IF NOT EXISTS notification_event_types (
+			event_type  VARCHAR(100) PRIMARY KEY,
+			description TEXT,
+			registered_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+	`)
+	if err != nil {
+		log.Printf("[WARN] migrate notification_event_types: %v", err)
+	} else {
+		log.Println("[NOTIFICATION] Table notification_event_types ready")
+	}
+
+	// Table untuk log setiap pengiriman notifikasi (sent | failed | pending).
+	// Dipakai untuk monitoring dan retry mechanism.
+	_, err = db().Exec(context.Background(), `
+		CREATE TABLE IF NOT EXISTS notification_logs (
+			id            VARCHAR(36) PRIMARY KEY,
+			event_type    VARCHAR(100) NOT NULL,
+			channel       VARCHAR(50) NOT NULL,
+			to_address    TEXT NOT NULL,
+			subject       TEXT,
+			content       TEXT,
+			status        VARCHAR(20) NOT NULL DEFAULT 'pending',
+			retry_count   INT NOT NULL DEFAULT 0,
+			max_retries   INT NOT NULL DEFAULT 3,
+			next_retry_at TIMESTAMPTZ,
+			sent_at       TIMESTAMPTZ,
+			error_msg     TEXT,
+			created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_notif_logs_status ON notification_logs(status);
+		CREATE INDEX IF NOT EXISTS idx_notif_logs_retry  ON notification_logs(status, next_retry_at);
+	`)
+	if err != nil {
+		log.Printf("[WARN] migrate notification_logs: %v", err)
+	} else {
+		log.Println("[NOTIFICATION] Table notification_logs ready")
+	}
 }
 
-// Seed mengisi dummy data awal bila table masih kosong.
+// Seed adalah no-op. Template diisi manual via API /api/notification-templates.
+// Event types di-seed dengan event yang sudah pasti, yaitu dari register dan kyc service.
 func Seed() {
-	var count int
-	err := db().QueryRow(context.Background(), "SELECT COUNT(*) FROM notification_templates").Scan(&count)
-	if err != nil || count > 0 {
-		return
+	knownTypes := []string{"otp_verification", "kyc_approved", "kyc_rejected"}
+	for _, et := range knownTypes {
+		db().Exec(context.Background(),
+			`INSERT INTO notification_event_types (event_type) VALUES ($1) ON CONFLICT DO NOTHING`, et)
 	}
-
-	templates := []struct {
-		name, eventType, channel, subject, content string
-	}{
-		{
-			"Welcome Email", "user_register", "email",
-			"Selamat datang di ThinkTala!",
-			"Halo {{name}},\n\nTerima kasih telah mendaftar di platform kami. Email Anda: {{email}}\n\nBest regards,\nThinkTala Team",
-		},
-		{
-			"OTP Verification Email", "otp_verification", "email",
-			"Kode Verifikasi OTP Anda",
-			"Halo {{name}},\n\nKode OTP Anda: {{otp}}\nKode ini berlaku selama 10 menit.\n\nJangan bagikan kode ini kepada siapapun.",
-		},
-		{
-			"KYC Approved Notification", "user_kyc_approved", "email",
-			"Verifikasi KYC Berhasil",
-			"Selamat {{name}},\n\nVerifikasi identitas Anda telah disetujui. Anda sekarang dapat mengakses semua fitur platform.",
-		},
-		{
-			"KYC Rejected Notification", "user_kyc_rejected", "email",
-			"Verifikasi KYC Ditolak",
-			"Halo {{name}},\n\nMohon maaf, verifikasi identitas Anda ditolak karena: {{reason}}.\nSilakan upload ulang dokumen yang valid.",
-		},
-		{
-			"Payment Success Notification", "payment_success", "email",
-			"Pembayaran Berhasil",
-			"Halo {{name}},\n\nPembayaran sebesar {{amount}} telah berhasil diproses. Terima kasih!",
-		},
-	}
-
-	for _, t := range templates {
-		var subj *string
-		if t.subject != "" {
-			subj = &t.subject
-		}
-		_, err := db().Exec(context.Background(), `
-			INSERT INTO notification_templates (id, name, event_type, channel, subject, content, created_by, updated_by)
-			VALUES ($1, $2, $3, $4, $5, $6, 'system', 'system')
-		`, uuid.New().String(), t.name, t.eventType, t.channel, subj, t.content)
-		if err != nil {
-			log.Printf("[WARN] seed template '%s': %v", t.name, err)
-		}
-	}
-	log.Println("[NOTIFICATION] Seeded 7 dummy templates")
 }
 
 // db adalah shorthand internal agar tidak perlu akses global DB langsung di migrate.

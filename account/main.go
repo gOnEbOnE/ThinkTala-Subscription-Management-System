@@ -30,7 +30,7 @@ func main() {
 	utils.LoadEnv(".env")
 
 	// Init JWT Keys (Wajib ada file private.pem & public.pem di root)
-	if err := utils.InitJWTLoadKeys("private.pem", "public.pem"); err != nil {
+	if err := utils.InitJWTLoadKeys("certs/private.pem", "certs/public.pem"); err != nil {
 		log.Fatalf("[FATAL] Gagal memuat kunci JWT: %v", err)
 	}
 

@@ -2,6 +2,7 @@ package template
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -13,9 +14,9 @@ type Controller struct {
 	svc *Service
 }
 
-// NewController membuat instance Controller baru.
-func NewController() *Controller {
-	return &Controller{svc: NewService()}
+// NewController membuat instance Controller baru dengan service yang diberikan.
+func NewController(svc *Service) *Controller {
+	return &Controller{svc: svc}
 }
 
 // List mengembalikan semua template, bisa difilter via query (?channel=email&event_type=otp_verification).
@@ -78,4 +79,51 @@ func (ctrl *Controller) Delete(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Template berhasil dihapus."})
+}
+
+// Send menerima event_type + channel + to + vars, cari template, render, dan kirim.
+func (ctrl *Controller) Send(c *gin.Context) {
+	var req SendRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := ctrl.svc.Send(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Notifikasi berhasil dikirim."})
+}
+
+// EventTypes mengembalikan daftar event_type yang sudah pernah di-dispatch.
+func (ctrl *Controller) EventTypes(c *gin.Context) {
+	list, err := ctrl.svc.ListEventTypes()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": list})
+}
+
+// Logs mengembalikan log pengiriman notifikasi untuk monitoring.
+// Query params: ?status=sent|failed|pending&limit=50&offset=0
+func (ctrl *Controller) Logs(c *gin.Context) {
+	status := c.Query("status")
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
+	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if limit <= 0 || limit > 200 {
+		limit = 50
+	}
+
+	list, total, err := ctrl.svc.GetLogs(status, limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"data":   list,
+		"total":  total,
+		"limit":  limit,
+		"offset": offset,
+	})
 }

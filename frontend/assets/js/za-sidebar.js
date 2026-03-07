@@ -28,6 +28,7 @@ mobileOverlay.addEventListener('click', () => {
     body.classList.remove('sidebar-mobile-open'); 
 });
 
+// Auto-highlight active link based on current URL path
 document.addEventListener('DOMContentLoaded', function() {
     const currentPath = window.location.pathname;
     const navLinks = document.querySelectorAll('.sidebar .nav-link');

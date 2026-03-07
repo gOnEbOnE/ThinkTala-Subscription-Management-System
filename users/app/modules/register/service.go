@@ -1,9 +1,12 @@
 package register
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/master-abror/zaframework/core/utils"
@@ -15,6 +18,58 @@ type Service struct {
 
 func NewService(repo Repository) *Service {
 	return &Service{repo: repo}
+}
+
+// dispatchNotification mengirim event ke Notification Service untuk diproses berdasarkan template.
+// Jika Notification Service tidak tersedia atau template belum ada, fallback ke SMTP langsung.
+func dispatchNotification(eventType, channel, to string, vars map[string]string) {
+
+	// TODO(queue): Aktifkan Redis queue setelah worker siap di-deploy
+	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
+		log.Printf("[NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
+		return
+	}
+	baseURL := utils.GetEnv("NOTIFICATION_SERVICE_URL", "http://localhost:5003")
+
+	payload := map[string]any{
+		"event_type": eventType,
+		"channel":    channel,
+		"to":         to,
+		"vars":       vars,
+	}
+	body, _ := json.Marshal(payload)
+
+	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
+	if err != nil {
+		log.Printf("[NOTIF] Notification service tidak tersedia (%v), fallback SMTP", err)
+		fallbackSendOTPEmail(to, vars)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var result map[string]any
+		json.NewDecoder(resp.Body).Decode(&result)
+		log.Printf("[NOTIF] Gagal kirim via template (%d: %v), fallback SMTP", resp.StatusCode, result["error"])
+		fallbackSendOTPEmail(to, vars)
+	}
+}
+
+// fallbackSendOTPEmail mengirim email OTP langsung via SMTP jika Notification Service tidak tersedia.
+func fallbackSendOTPEmail(to string, vars map[string]string) {
+	name := vars["name"]
+	otp := vars["otp"]
+	smtpClient := utils.NewSMTPClient()
+	subject := "Kode Verifikasi ThinkNalyze"
+	body := fmt.Sprintf(
+		"Halo %s,\n\nKode verifikasi Anda: %s\n\nKode ini berlaku selama 5 menit.\nJangan bagikan kode ini kepada siapa pun.\n\n— ThinkNalyze Team",
+		name, otp,
+	)
+	if err := smtpClient.SendEmail(to, subject, body); err != nil {
+		log.Printf("[OTP] Gagal mengirim email ke %s: %v", to, err)
+	} else {
+		log.Printf("[OTP] Kode verifikasi (fallback) terkirim ke %s", to)
+	}
 }
 
 // ProcessRegisterJob — dipanggil oleh worker untuk proses registrasi
@@ -87,20 +142,11 @@ func (s *Service) ProcessRegisterJob(ctx context.Context, payload any) (any, err
 		return nil, fmt.Errorf("Gagal menyimpan kode OTP")
 	}
 
-	// 8. Kirim OTP via email (async)
-	go func() {
-		smtp := utils.NewSMTPClient()
-		subject := "Kode Verifikasi ThinkNalyze"
-		body := fmt.Sprintf(
-			"Halo %s,\n\nKode verifikasi Anda: %s\n\nKode ini berlaku selama 5 menit.\nJangan bagikan kode ini kepada siapa pun.\n\n— ThinkNalyze Team",
-			fullName, otpCode,
-		)
-		if err := smtp.SendEmail(email, subject, body); err != nil {
-			log.Printf("[OTP] Gagal mengirim email ke %s: %v", email, err)
-		} else {
-			log.Printf("[OTP] Kode verifikasi terkirim ke %s", email)
-		}
-	}()
+	// 8. Kirim OTP via Notification Service (async)
+	go dispatchNotification("otp_verification", "email", email, map[string]string{
+		"name": fullName,
+		"otp":  otpCode,
+	})
 
 	return RegisterResult{
 		UserID:  newUserID,
@@ -176,20 +222,10 @@ func (s *Service) ProcessResendOTPJob(ctx context.Context, payload any) (any, er
 		return nil, fmt.Errorf("Gagal menyimpan kode OTP")
 	}
 
-	// 4. Kirim email
-	go func() {
-		smtp := utils.NewSMTPClient()
-		subject := "Kode Verifikasi Baru - ThinkNalyze"
-		body := fmt.Sprintf(
-			"Kode verifikasi baru Anda: %s\n\nKode ini berlaku selama 5 menit.\n\n— ThinkNalyze Team",
-			otpCode,
-		)
-		if err := smtp.SendEmail(email, subject, body); err != nil {
-			log.Printf("[OTP] Gagal mengirim ulang email ke %s: %v", email, err)
-		} else {
-			log.Printf("[OTP] Kode verifikasi ulang terkirim ke %s", email)
-		}
-	}()
+	// 4. Kirim via Notification Service (async)
+	go dispatchNotification("otp_verification", "email", email, map[string]string{
+		"otp": otpCode,
+	})
 
 	return map[string]any{
 		"message": "Kode OTP baru telah dikirim ke email Anda",

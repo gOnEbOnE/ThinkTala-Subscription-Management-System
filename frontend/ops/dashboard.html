@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Operasional Dashboard | ThinkTala</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/styles.css">
     <style>
         .nav-item-group { position: relative; }
@@ -23,6 +26,7 @@
         body.sidebar-collapsed .nav-link-parent .caret { display: none; }
     </style>
 </head>
+
 <body>
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
@@ -31,7 +35,8 @@
             <div class="brand-wrapper">
                 <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
                 <div class="brand-text-content">
-                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span class="text-cyan">Tala</span></h4>
+                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span
+                            class="text-cyan">Tala</span></h4>
                     <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Operations Panel</p>
                 </div>
             </div>
@@ -52,8 +57,11 @@
             <li class="nav-item"><a class="nav-link" href="subscriptions.html"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
         </ul>
         <ul class="nav flex-column mb-5">
-            <li class="nav-item"><a class="nav-link" href="settings.html"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span></a></li>
-            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="settings.html"><i
+                        class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span></a></li>
+            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i
+                        class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a>
+            </li>
         </ul>
     </nav>
 
@@ -67,7 +75,8 @@
             <div class="dropdown ms-1">
                 <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
                     <div class="rounded-circle p-1" style="border: 2px solid var(--accent-cyan);">
-                        <img src="https://ui-avatars.com/api/?name=OPS&background=0b0e17&color=fff" class="rounded-circle" width="34" height="34">
+                        <img src="https://ui-avatars.com/api/?name=OPS&background=0b0e17&color=fff"
+                            class="rounded-circle" width="34" height="34">
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-3">
@@ -75,8 +84,11 @@
                         <span class="d-block fw-bold text-main" id="userName">Staff Operasional</span>
                         <small class="text-muted" id="userEmail">ops@thinktala.com</small>
                     </li>
-                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
-                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+                    <li>
+                        <hr class="dropdown-divider border-secondary opacity-25">
+                    </li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i
+                                class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -99,7 +111,8 @@
                             <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Total Users</small>
                             <h4 class="fw-bold text-main mb-0" id="statUsers">--</h4>
                         </div>
-                        <div class="rounded-circle bg-info bg-opacity-10 p-3"><i class="fa-solid fa-users text-cyan fa-lg"></i></div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3"><i
+                                class="fa-solid fa-users text-cyan fa-lg"></i></div>
                     </div>
                 </div>
             </div>
@@ -107,10 +120,12 @@
                 <div class="ai-card shadow-lg h-100">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Active Notifications</small>
+                            <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Active
+                                Notifications</small>
                             <h4 class="fw-bold text-warning mb-0" id="statNotifs">--</h4>
                         </div>
-                        <div class="rounded-circle bg-warning bg-opacity-10 p-3"><i class="fa-solid fa-bell text-warning fa-lg"></i></div>
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3"><i
+                                class="fa-solid fa-bell text-warning fa-lg"></i></div>
                     </div>
                 </div>
             </div>
@@ -121,7 +136,8 @@
                             <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Active Packages</small>
                             <h4 class="fw-bold text-success mb-0" id="statPackages">--</h4>
                         </div>
-                        <div class="rounded-circle bg-success bg-opacity-10 p-3"><i class="fa-solid fa-box text-success fa-lg"></i></div>
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3"><i
+                                class="fa-solid fa-box text-success fa-lg"></i></div>
                     </div>
                 </div>
             </div>
@@ -132,7 +148,8 @@
                             <small class="text-muted text-uppercase" style="font-size: 0.7rem;">Pending KYC</small>
                             <h4 class="fw-bold text-danger mb-0" id="statKyc">--</h4>
                         </div>
-                        <div class="rounded-circle bg-danger bg-opacity-10 p-3"><i class="fa-solid fa-clock text-danger fa-lg"></i></div>
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3"><i
+                                class="fa-solid fa-clock text-danger fa-lg"></i></div>
                     </div>
                 </div>
             </div>
@@ -141,13 +158,17 @@
         <!-- Quick Actions -->
         <div class="row g-4 mb-5">
             <div class="col-lg-6">
-                <a href="notifications.html" class="text-decoration-none">
-                    <div class="ai-card shadow-lg h-100 p-4" style="transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <a href="/ops/notifications" class="text-decoration-none">
+                    <div class="ai-card shadow-lg h-100 p-4" style="transition: transform 0.2s; cursor: pointer;"
+                        onmouseover="this.style.transform='translateY(-5px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
                         <div class="d-flex align-items-center">
-                            <div class="rounded-circle bg-warning bg-opacity-10 p-4 me-4"><i class="fa-solid fa-bell fa-2x text-warning"></i></div>
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-4 me-4"><i
+                                    class="fa-solid fa-bell fa-2x text-warning"></i></div>
                             <div>
                                 <h5 class="fw-bold text-main mb-1">Manage Notifications</h5>
-                                <p class="text-muted mb-0 small">Create, edit, and delete system notifications for users</p>
+                                <p class="text-muted mb-0 small">Create, edit, and delete system notifications for users
+                                </p>
                             </div>
                             <i class="fa-solid fa-arrow-right text-muted ms-auto fa-lg"></i>
                         </div>
@@ -155,13 +176,17 @@
                 </a>
             </div>
             <div class="col-lg-6">
-                <a href="subscriptions.html" class="text-decoration-none">
-                    <div class="ai-card shadow-lg h-100 p-4" style="transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                <a href="/ops/subscriptions" class="text-decoration-none">
+                    <div class="ai-card shadow-lg h-100 p-4" style="transition: transform 0.2s; cursor: pointer;"
+                        onmouseover="this.style.transform='translateY(-5px)'"
+                        onmouseout="this.style.transform='translateY(0)'">
                         <div class="d-flex align-items-center">
-                            <div class="rounded-circle bg-success bg-opacity-10 p-4 me-4"><i class="fa-solid fa-crown fa-2x text-success"></i></div>
+                            <div class="rounded-circle bg-success bg-opacity-10 p-4 me-4"><i
+                                    class="fa-solid fa-crown fa-2x text-success"></i></div>
                             <div>
                                 <h5 class="fw-bold text-main mb-1">Manage Subscriptions</h5>
-                                <p class="text-muted mb-0 small">Create, edit, and manage subscription packages & pricing</p>
+                                <p class="text-muted mb-0 small">Create, edit, and manage subscription packages &
+                                    pricing</p>
                             </div>
                             <i class="fa-solid fa-arrow-right text-muted ms-auto fa-lg"></i>
                         </div>
@@ -194,4 +219,5 @@
         }
     </script>
 </body>
+
 </html>

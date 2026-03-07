@@ -219,6 +219,12 @@ a:hover{background:#6C63FF;color:#fff;}
 		}
 
 		log.Printf("[AUTH] Access granted: user=%s role=%s path=%s", user.Email, user.RoleCode, r.URL.Path)
+
+		// Inject user info as headers for downstream services
+		r.Header.Set("X-User-Role", user.RoleCode)
+		r.Header.Set("X-User-ID", user.ID)
+		r.Header.Set("X-User-Email", user.Email)
+
 		h.ServeHTTP(w, r)
 	}
 }
@@ -326,6 +332,11 @@ func main() {
 	assetsDir := filepath.Join(frontendDir, "assets")
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsDir))))
 
+	// Serve uploaded files (KYC images, etc.) from users service
+	uploadsDir := "../users/public/uploads"
+	http.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadsDir))))
+	log.Printf("[GW] Static files: /uploads/ -> %s", uploadsDir)
+
 	// ========================================
 	// 3. Protected Dashboard Pages (with Role Auth)
 	// ========================================
@@ -413,10 +424,48 @@ func main() {
 	})
 
 	// ========================================
-	// 6. API proxy routes
+	// 6. API proxy routes (from routes.json)
 	// ========================================
+
+	// --- SUBSCRIPTION SERVICE (role-protected) ---
+	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
+	http.HandleFunc("/api/admin/packages", withRoleAuth(
+		createProxyHandler("http://localhost:5004", true),
+	))
+	http.HandleFunc("/api/admin/packages/", withRoleAuth(
+		createProxyHandler("http://localhost:5004", true),
+	))
+	// PBI-37: Public catalog — CLIENT, OPERASIONAL, CEO, SUPERADMIN
+	http.HandleFunc("/api/subscription/catalog", withRoleAuth(
+		createProxyHandler("http://localhost:5004", true),
+	))
+	log.Printf("[GW] Protected API: /api/admin/packages -> http://localhost:5004 (CEO/SUPERADMIN/OPERASIONAL)")
+	log.Printf("[GW] Protected API: /api/subscription/catalog -> http://localhost:5004 (CLIENT+)")
+
+	// --- KYC Admin API (role-protected) - COMPLIANCE & OPERASIONAL can access ---
+	http.HandleFunc("/api/admin/kyc", withRoleAuth(
+		createProxyHandler("http://localhost:2006", true),
+	))
+	http.HandleFunc("/api/admin/kyc/", withRoleAuth(
+		createProxyHandler("http://localhost:2006", true),
+	))
+	log.Printf("[GW] Protected API: /api/admin/kyc -> http://localhost:2006 (CEO/SUPERADMIN/COMPLIANCE/OPERASIONAL)")
+
+	// --- KYC Client API (role-protected) - CLIENT can access their own KYC ---
+	http.HandleFunc("/api/kyc/", withRoleAuth(
+		createProxyHandler("http://localhost:2006", true),
+	))
+	log.Printf("[GW] Protected API: /api/kyc/ -> http://localhost:2006 (CLIENT+)")
+
+	// --- Generic API proxy from routes.json (no role auth) ---
 	for _, route := range config.Routes {
 		if strings.HasPrefix(route.Path, "/api/") {
+			// Skip routes already registered above
+			if strings.HasPrefix(route.Path, "/api/admin/") ||
+				strings.HasPrefix(route.Path, "/api/subscription/") ||
+				strings.HasPrefix(route.Path, "/api/kyc") {
+				continue
+			}
 			http.HandleFunc(route.Path, createProxyHandler(route.Target, route.CORS))
 			log.Printf("[GW] API proxy: %s -> %s", route.Path, route.Target)
 		}

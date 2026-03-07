@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
 	"github.com/master-abror/zaframework/app/routes"
@@ -116,11 +117,22 @@ func main() {
 	registerService := register.NewService(registerRepo)
 	registerController := register.NewController(app.Dispatcher, app.Response)
 
+	// --- Feature: KYC ---
+	kycRepo := kyc.NewRepository(app.DB)
+	kycService := kyc.NewService(kycRepo)
+	kycController := kyc.NewController(app.Dispatcher, app.Response)
+	kycAdminController := kyc.NewAdminController(app.Dispatcher, app.Response)
+
 	// Register Job Handlers (Workers)
 	app.RegisterJob("auth", loginService.ProcessLoginJob)
 	app.RegisterJob("register", registerService.ProcessRegisterJob)
 	app.RegisterJob("verify_otp", registerService.ProcessVerifyOTPJob)
 	app.RegisterJob("resend_otp", registerService.ProcessResendOTPJob)
+	app.RegisterJob("kyc_submit", kycService.ProcessKYCSubmitJob)
+	app.RegisterJob("kyc_status", kycService.ProcessKYCStatusJob)
+	app.RegisterJob("admin_kyc_list", kycService.ProcessAdminKYCListJob)
+	app.RegisterJob("admin_kyc_detail", kycService.ProcessAdminKYCDetailJob)
+	app.RegisterJob("admin_kyc_review", kycService.ProcessAdminKYCReviewJob)
 
 	// ============================================================
 	// 3. ROUTING
@@ -128,6 +140,8 @@ func main() {
 	routes.Init(app,
 		loginController,
 		registerController,
+		kycController,
+		kycAdminController,
 	)
 
 	// ============================================================

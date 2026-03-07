@@ -11,9 +11,8 @@ gateway/certs/*.key
 !**/public.pem        # ⭐ FORCE push public key
 
 # --- Binaries & Executables (Hasil Build Go) ---
-bin/                    # Hanya folder bin/ untuk binaries
-dist/                   # Hanya folder dist/
-**/thinknalyze-*       # Named binaries saja
+# **/app
+**/thinknalyze-*
 *.exe
 *.exe~
 *.dll

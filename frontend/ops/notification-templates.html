@@ -348,17 +348,7 @@
                         <div class="col-md-6">
                             <label class="form-label">Event Type <span class="text-danger">*</span></label>
                             <select class="form-select" id="tplEventType">
-                                <option value="">— Pilih Event Type —</option>
-                                <option value="user_register">User Register</option>
-                                <option value="user_kyc_approved">KYC Approved</option>
-                                <option value="user_kyc_rejected">KYC Rejected</option>
-                                <option value="subscription_activated">Subscription Activated</option>
-                                <option value="subscription_expired">Subscription Expired</option>
-                                <option value="payment_success">Payment Success</option>
-                                <option value="payment_failed">Payment Failed</option>
-                                <option value="otp_verification">OTP Verification</option>
-                                <option value="password_reset">Password Reset</option>
-                                <option value="system_alert">System Alert</option>
+                                <option value="">— Memuat Event Type... —</option>
                             </select>
                             <div class="field-error" id="err-tplEventType">Field ini wajib diisi.</div>
                         </div>
@@ -502,6 +492,32 @@
         }
     }
 
+    // ── Load event types dari registry ────────────────────────
+    async function loadEventTypes(selectedValue = '') {
+        const sel = document.getElementById('tplEventType');
+        try {
+            const res = await fetch('/api/help/notification-templates/event-types', {
+                headers: { Authorization: 'Bearer ' + token }
+            });
+            const json = await res.json();
+            const types = json.data || [];
+            sel.innerHTML = '<option value="">— Pilih Event Type —</option>';
+            types.forEach(et => {
+                const label = et.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                const opt = document.createElement('option');
+                opt.value = et;
+                opt.textContent = label;
+                if (et === selectedValue) opt.selected = true;
+                sel.appendChild(opt);
+            });
+            if (types.length === 0) {
+                sel.innerHTML = '<option value="">— Belum ada event type terdaftar —</option>';
+            }
+        } catch(e) {
+            sel.innerHTML = '<option value="">— Gagal memuat event type —</option>';
+        }
+    }
+
     // ── Load templates ────────────────────────────────────────
     async function loadTemplates() {
         const tbody = document.getElementById('tplTableBody');
@@ -574,6 +590,7 @@
     // ── Modal: Add ────────────────────────────────────────────
     function openAddModal() {
         clearForm();
+        loadEventTypes();
         document.getElementById('tplModalTitle').textContent = 'Add Template';
         document.getElementById('tplId').value = '';
         new bootstrap.Modal(document.getElementById('tplModal')).show();
@@ -587,10 +604,10 @@
         document.getElementById('tplModalTitle').textContent = 'Edit Template';
         document.getElementById('tplId').value        = t.id;
         document.getElementById('tplName').value      = t.name;
-        document.getElementById('tplEventType').value = t.event_type;
         document.getElementById('tplChannel').value   = t.channel;
         document.getElementById('tplSubject').value   = t.subject || '';
         document.getElementById('tplContent').value   = t.content;
+        loadEventTypes(t.event_type);
         onChannelChange();
         new bootstrap.Modal(document.getElementById('tplModal')).show();
     }
@@ -765,7 +782,10 @@
     });
 
     // ── Init ──────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', loadTemplates);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTemplates();
+        loadEventTypes();
+    });
     </script>
 </body>
 </html>

@@ -7,8 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"thinknalyze/certs"
@@ -100,20 +100,9 @@ func main() {
 	services := []*Service{}
 	var mu sync.Mutex
 
-	// Start Redis (skip if already running, e.g. via WSL or Docker)
-	var redisCmd *exec.Cmd
-	if checkRedisConnectable() {
-		fmt.Println("[REDIS] Redis already running on port 6379 ✅")
-	} else {
-		fmt.Println("[REDIS] Starting Redis server...")
-		redisCmd = exec.Command("redis-server", "--port", "6379")
-		redisCmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
-		if err := redisCmd.Start(); err != nil {
-			log.Fatalf("[FATAL] Failed to start Redis: %v\nPastikan Redis sudah running (WSL: redis-server, atau Docker: docker run -d -p 6379:6379 redis:alpine)", err)
-		}
-		fmt.Printf("[+] Redis started with PID %d\n", redisCmd.Process.Pid)
-		time.Sleep(500 * time.Millisecond)
-	}
+	// Skip auto-start Redis — assumed to be running via Docker
+	fmt.Println("[REDIS] Using existing Redis (Docker or local)...")
+	var redisCmd *exec.Cmd // placeholder agar teardown tetap aman
 
 	// Service configurations
 	serviceConfigs := []struct {
@@ -145,8 +134,6 @@ func main() {
 			cmd.Dir = config.dir
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
-			cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: false}
-
 			if err := cmd.Start(); err != nil {
 				log.Printf("[-] Failed to start %s: %v", config.name, err)
 				return
@@ -231,24 +218,33 @@ func checkRedisConnectable() bool {
 
 // checkPrerequisites checks if required tools are installed
 func checkPrerequisites() {
+	tools := map[string]string{
+		"Go":    "go version",
+		"Redis": "redis-cli --version",
+	}
+
 	fmt.Println("[*] Checking prerequisites...\n")
 
 	allOk := true
+	for tool, cmd := range tools {
+		var checkCmd *exec.Cmd
+		if runtime.GOOS == "windows" {
+			checkCmd = exec.Command("cmd", "/c", cmd)
+		} else {
+			parts := strings.Fields(cmd)
+			checkCmd = exec.Command(parts[0], parts[1:]...)
+		}
 
-	// Check Go
-	if checkGoInstalled() {
-		fmt.Printf("  ✅ Go - OK\n")
-	} else {
-		fmt.Printf("  ❌ Go - NOT INSTALLED\n")
-		allOk = false
-	}
-
-	// Check Redis via TCP connection (supports WSL, Docker, or native Redis)
-	if checkRedisConnectable() {
-		fmt.Printf("  ✅ Redis - OK (connected to localhost:6379)\n")
-	} else {
-		fmt.Printf("  ❌ Redis - NOT REACHABLE (pastikan Redis sudah running di port 6379)\n")
-		allOk = false
+		if err := checkCmd.Run(); err != nil {
+			if tool == "Redis" {
+				fmt.Printf("  ⚠️  %s - not found locally (assuming Docker Redis is running)\n", tool)
+			} else {
+				fmt.Printf("  ❌ %s - NOT INSTALLED\n", tool)
+				allOk = false
+			}
+		} else {
+			fmt.Printf("  ✅ %s - OK\n", tool)
+		}
 	}
 
 	fmt.Printf("  ℹ️  PostgreSQL - (will be checked by services)\n")

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
 	"github.com/master-abror/zaframework/core"
@@ -14,6 +15,8 @@ import (
 func Init(app *core.App,
 	loginController *login.Controller,
 	registerController *register.Controller,
+	kycController *kyc.Controller,
+	kycAdminController *kyc.AdminController,
 ) {
 
 	// ==============================
@@ -58,5 +61,23 @@ func Init(app *core.App,
 	app.Router.HandleFunc("POST /api/auth/register", registerController.Submit)
 	app.Router.HandleFunc("POST /api/auth/verify-otp", registerController.VerifyOTP)
 	app.Router.HandleFunc("POST /api/auth/resend-otp", registerController.ResendOTP)
+
+	// ==============================
+	// 7. KYC Routes (Protected via Gateway Auth)
+	// ==============================
+	app.Router.HandleFunc("POST /api/kyc/submit", kycController.Submit)
+	app.Router.HandleFunc("GET /api/kyc/status", kycController.Status)
+
+	// Serve uploaded KYC files
+	kycFS := http.FileServer(http.Dir("./public/uploads/kyc"))
+	app.Router.Handle("GET /uploads/kyc/", http.StripPrefix("/uploads/kyc/", kycFS))
+
+	// ==============================
+	// 8. Admin KYC Routes (Protected via Gateway Auth)
+	// ==============================
+	app.Router.Handle("GET /api/admin/kyc", http.HandlerFunc(kycAdminController.ServeHTTP))
+	app.Router.Handle("GET /api/admin/kyc/{id}", http.HandlerFunc(kycAdminController.ServeHTTP))
+	app.Router.Handle("POST /api/admin/kyc/{id}/approve", http.HandlerFunc(kycAdminController.ServeHTTP))
+	app.Router.Handle("POST /api/admin/kyc/{id}/reject", http.HandlerFunc(kycAdminController.ServeHTTP))
 
 }

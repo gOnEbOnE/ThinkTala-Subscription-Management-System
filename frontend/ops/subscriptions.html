@@ -1,14 +1,66 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Subscriptions | ThinkTala Ops</title>
+    <title>Paket Langganan | ThinkTala Ops</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/styles.css">
+    <style>
+        .pkg-table {
+            --bs-table-bg: transparent;
+            --bs-table-striped-bg: transparent;
+            --bs-table-hover-bg: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+        }
+
+        .pkg-table td,
+        .pkg-table th {
+            border-color: var(--border-color) !important;
+            color: inherit;
+            background: transparent !important;
+        }
+
+        .pkg-table tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.03) !important;
+        }
+
+        .pkg-table .pkg-name {
+            color: var(--text-heading) !important;
+            font-weight: 600;
+        }
+
+        .pkg-table .pkg-price-yearly {
+            color: var(--text-muted) !important;
+        }
+
+        .pkg-table .pkg-price-monthly {
+            color: var(--text-main) !important;
+        }
+
+        .btn-action {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .filter-card .form-select,
+        .filter-card .form-control,
+        .filter-card .input-group-text {
+            font-size: 0.88rem;
+        }
+    </style>
 </head>
+
 <body>
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
@@ -17,18 +69,24 @@
             <div class="brand-wrapper">
                 <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
                 <div class="brand-text-content">
-                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span class="text-cyan">Tala</span></h4>
+                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span
+                            class="text-cyan">Tala</span></h4>
                     <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Operations Panel</p>
                 </div>
             </div>
         </div>
         <ul class="nav flex-column flex-grow-1">
-            <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="notifications.html"><i class="fa-solid fa-bell icon-left"></i><span class="link-text">Notifications</span></a></li>
-            <li class="nav-item"><a class="nav-link active" href="subscriptions.html"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="/ops/dashboard"><i
+                        class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="/ops/notifications"><i
+                        class="fa-solid fa-bell icon-left"></i><span class="link-text">Notifications</span></a></li>
+            <li class="nav-item"><a class="nav-link active" href="/ops/subscriptions"><i
+                        class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
         </ul>
         <ul class="nav flex-column mb-5">
-            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>
+            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i
+                        class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a>
+            </li>
         </ul>
     </nav>
 
@@ -43,88 +101,114 @@
     </header>
 
     <div class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
-                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Subscription Packages</h4>
-                <small class="text-muted">Manage subscription plans & pricing</small>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Paket Langganan</h4>
+                <small class="text-muted">Kelola paket langganan dan harga untuk pengguna</small>
             </div>
-            <button class="btn btn-sm px-3 py-2" style="background: var(--accent-cyan); color: #000; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#pkgModal" onclick="resetPkgForm()">
-                <i class="fa-solid fa-plus me-1"></i> New Package
-            </button>
+            <a href="/ops/subscriptions-create" class="btn btn-sm px-3 py-2 fw-bold"
+                style="background: var(--text-heading); color: #000;">
+                <i class="fa-solid fa-plus me-1"></i> Buat Paket Baru
+            </a>
         </div>
 
-        <!-- Package Cards -->
-        <div class="row g-4 mb-5" id="packagesContainer">
-            <div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading packages...</div>
-        </div>
-    </div>
-
-    <!-- Modal Create/Edit Package -->
-    <div class="modal fade" id="pkgModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
-                <div class="modal-header border-secondary" style="border-opacity: 0.2;">
-                    <h5 class="modal-title fw-bold" id="pkgModalTitle" style="color: var(--text-heading);">New Package</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <!-- Filter Section -->
+        <div class="ai-card mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold"
+                        style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem;">Filter
+                        Status</label>
+                    <select class="form-select form-select-sm" id="filterStatus">
+                        <option value="">Semua Status</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
                 </div>
-                <div class="modal-body">
-                    <input type="hidden" id="pkgId">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Package Name</label>
-                            <input type="text" class="form-control" id="pkgName" placeholder="e.g. Pro Plan" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Code</label>
-                            <input type="text" class="form-control" id="pkgCode" placeholder="e.g. PRO" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small text-muted">Description</label>
-                            <textarea class="form-control" id="pkgDesc" rows="2" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);"></textarea>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small text-muted">Price (IDR)</label>
-                            <input type="number" class="form-control" id="pkgPrice" placeholder="299000" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small text-muted">Duration (Days)</label>
-                            <input type="number" class="form-control" id="pkgDuration" placeholder="30" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small text-muted">Status</label>
-                            <select class="form-select" id="pkgActive" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
-                                <option value="true">Active</option>
-                                <option value="false">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small text-muted">Features (one per line)</label>
-                            <textarea class="form-control" id="pkgFeatures" rows="4" placeholder="Real-time Market Insight&#10;Ask Nizza Unlimited&#10;Deep Scanner" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);"></textarea>
-                        </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold"
+                        style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem;">Harga
+                        Minimum</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"
+                            style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);">Rp</span>
+                        <input type="number" class="form-control" id="filterMinPrice" placeholder="0">
                     </div>
                 </div>
-                <div class="modal-footer border-secondary" style="border-opacity: 0.2;">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn px-4" style="background: var(--accent-cyan); color: #000; font-weight: 600;" onclick="savePackage()">
-                        <i class="fa-solid fa-check me-1"></i> Save
-                    </button>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold"
+                        style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem;">Harga
+                        Maximum</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"
+                            style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);">Rp</span>
+                        <input type="number" class="form-control" id="filterMaxPrice" placeholder="999.999.999">
+                    </div>
                 </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-sm px-3 fw-bold w-100" style="background: var(--text-heading); color: #000;"
+                        onclick="applyFilter()">Terapkan Filter</button>
+                    <button class="btn btn-sm btn-outline-secondary px-3" onclick="resetFilter()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="ai-card">
+            <div class="mb-3">
+                <h6 class="fw-bold mb-0" style="color: var(--text-heading)">Daftar Paket</h6>
+                <small class="text-muted" id="tableSubtitle">Memuat data...</small>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 pkg-table">
+                    <thead>
+                        <tr>
+                            <th class="small fw-semibold py-3" style="text-transform:uppercase;font-size:0.72rem;">Nama
+                                Paket</th>
+                            <th class="small fw-semibold py-3" style="text-transform:uppercase;font-size:0.72rem;">Harga
+                                Bulanan</th>
+                            <th class="small fw-semibold py-3" style="text-transform:uppercase;font-size:0.72rem;">Harga
+                                Tahunan</th>
+                            <th class="small fw-semibold py-3"
+                                style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; border-color: var(--border-color);">
+                                Status</th>
+                            <th class="small fw-semibold py-3 text-end"
+                                style="color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem; border-color: var(--border-color);">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="packagesTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3"
+                style="border-top: 1px solid var(--border-color);">
+                <small class="text-muted" id="paginationInfo">Menampilkan 0 paket</small>
+                <div id="paginationControls" class="d-flex gap-1"></div>
             </div>
         </div>
     </div>
 
-    <!-- Delete Confirm -->
+    <!-- Delete Modal -->
     <div class="modal fade" id="deletePkgModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
             <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
                 <div class="modal-body text-center py-4">
                     <i class="fa-solid fa-triangle-exclamation fa-3x text-danger mb-3"></i>
-                    <h6 class="fw-bold text-main">Delete Package?</h6>
-                    <p class="text-muted small">This action cannot be undone.</p>
+                    <h6 class="fw-bold text-main">Hapus Paket?</h6>
+                    <p class="text-muted small mb-0" id="deletePkgName">Tindakan ini tidak dapat dibatalkan.</p>
                     <input type="hidden" id="deletePkgId">
                     <div class="d-flex gap-2 justify-content-center mt-3">
-                        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button class="btn btn-danger" onclick="confirmDeletePkg()">Delete</button>
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-danger btn-sm px-4" onclick="confirmDeletePkg()">Hapus</button>
                     </div>
                 </div>
             </div>
@@ -140,140 +224,137 @@
     <script src="../assets/js/za-theme.js"></script>
     <script src="../assets/js/za-sidebar.js"></script>
     <script>
-        const API_BASE = '/api/ops';
-        const token = localStorage.getItem('token');
+        let allPackages = [];
+        let currentPage = 1;
+        const perPage = 6;
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/account/login';
+        function logout() { window.location.href = '/account/logout'; }
+
+        function formatRp(val) {
+            return 'Rp ' + Number(val).toLocaleString('id-ID');
         }
 
-        function resetPkgForm() {
-            document.getElementById('pkgId').value = '';
-            document.getElementById('pkgName').value = '';
-            document.getElementById('pkgCode').value = '';
-            document.getElementById('pkgDesc').value = '';
-            document.getElementById('pkgPrice').value = '';
-            document.getElementById('pkgDuration').value = '30';
-            document.getElementById('pkgActive').value = 'true';
-            document.getElementById('pkgFeatures').value = '';
-            document.getElementById('pkgModalTitle').textContent = 'New Package';
+        function statusBadge(status) {
+            if (status === 'ACTIVE') return '<span class="badge fw-semibold px-2 py-1" style="background:#00d26a;color:#000;font-size:0.72rem;">ACTIVE</span>';
+            return '<span class="badge fw-semibold px-2 py-1" style="background:transparent;border:1px solid var(--border-color);color:var(--text-muted);font-size:0.72rem;">INACTIVE</span>';
         }
 
-        function editPkg(data) {
-            document.getElementById('pkgId').value = data.id;
-            document.getElementById('pkgName').value = data.name;
-            document.getElementById('pkgCode').value = data.code;
-            document.getElementById('pkgDesc').value = data.description || '';
-            document.getElementById('pkgPrice').value = data.price;
-            document.getElementById('pkgDuration').value = data.duration_days;
-            document.getElementById('pkgActive').value = data.is_active.toString();
-            document.getElementById('pkgFeatures').value = (data.features || []).join('\n');
-            document.getElementById('pkgModalTitle').textContent = 'Edit Package';
-            new bootstrap.Modal(document.getElementById('pkgModal')).show();
-        }
+        function renderTable(packages) {
+            const tbody = document.getElementById('packagesTableBody');
+            const info = document.getElementById('tableSubtitle');
 
-        function openDeletePkg(id) {
-            document.getElementById('deletePkgId').value = id;
-            new bootstrap.Modal(document.getElementById('deletePkgModal')).show();
-        }
+            if (!packages.length) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-solid fa-box-open fa-2x mb-2 d-block"></i>Tidak ada paket ditemukan</td></tr>`;
+                info.textContent = '0 paket ditemukan';
+                document.getElementById('paginationInfo').textContent = 'Menampilkan 0 paket';
+                document.getElementById('paginationControls').innerHTML = '';
+                return;
+            }
 
-        function formatPrice(price) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(price);
-        }
+            const total = packages.length;
+            const totalPages = Math.ceil(total / perPage);
+            const start = (currentPage - 1) * perPage;
+            const pageData = packages.slice(start, start + perPage);
 
-        async function loadPackages() {
-            const container = document.getElementById('packagesContainer');
-            try {
-                const res = await fetch(`${API_BASE}/subscriptions`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                const json = await res.json();
-                const list = json.data || [];
+            info.textContent = `${total} paket ditemukan`;
 
-                if (list.length === 0) {
-                    container.innerHTML = '<div class="col-12 text-center text-muted py-5">No packages found</div>';
-                    return;
-                }
-
-                container.innerHTML = list.map(pkg => `
-                    <div class="col-lg-4 col-md-6">
-                        <div class="ai-card shadow-lg h-100 position-relative">
-                            ${!pkg.is_active ? '<div class="position-absolute top-0 end-0 m-2"><span class="badge bg-secondary">Inactive</span></div>' : ''}
-                            <div class="text-center mb-3">
-                                <i class="fa-solid fa-crown fa-2x ${pkg.price === 0 ? 'text-muted' : pkg.code === 'ELITE' ? 'text-warning' : 'text-cyan'} mb-2"></i>
-                                <h5 class="fw-bold text-main">${pkg.name}</h5>
-                                <h3 class="fw-bold" style="color: var(--accent-cyan);">${pkg.price === 0 ? 'FREE' : formatPrice(pkg.price)}</h3>
-                                <small class="text-muted">${pkg.duration_days === 9999 ? 'Lifetime' : pkg.duration_days + ' days'}</small>
-                            </div>
-                            <p class="text-muted small text-center">${pkg.description || ''}</p>
-                            <hr class="border-secondary opacity-25">
-                            <ul class="list-unstyled small">
-                                ${(pkg.features || []).map(f => `<li class="mb-1"><i class="fa-solid fa-check text-success me-2"></i><span class="text-main">${f}</span></li>`).join('')}
-                            </ul>
-                            <div class="d-flex gap-2 mt-3">
-                                <button class="btn btn-sm btn-outline-info flex-grow-1" onclick='editPkg(${JSON.stringify(pkg)})'><i class="fa-solid fa-pen me-1"></i>Edit</button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="openDeletePkg('${pkg.id}')"><i class="fa-solid fa-trash"></i></button>
-                            </div>
+            tbody.innerHTML = pageData.map(pkg => `
+                <tr>
+                    <td class="py-3 pkg-name">${pkg.name || '—'}</td>
+                    <td class="py-3 pkg-price-monthly">${formatRp(pkg.price)}</td>
+                    <td class="py-3 pkg-price-yearly">${formatRp(pkg.price * 10)}</td>
+                    <td class="py-3">${statusBadge(pkg.status)}</td>
+                    <td class="py-3 text-end">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <a href="/ops/subscriptions-edit?id=${pkg.id}" class="btn btn-sm btn-outline-secondary btn-action">
+                                <i class="fa-solid fa-pen fa-xs"></i>
+                            </a>
+                            ${pkg.status !== 'ACTIVE' ? `
+                            <button class="btn btn-sm btn-outline-secondary btn-action" onclick="openDelete('${pkg.id}','${pkg.name || ''}')">
+                                <i class="fa-solid fa-trash fa-xs"></i>
+                            </button>` : ''}
                         </div>
-                    </div>
-                `).join('');
-            } catch (e) {
-                container.innerHTML = '<div class="col-12 text-center text-danger py-5">Failed to load packages</div>';
+                    </td>
+                </tr>
+            `).join('');
+
+            // Pagination info
+            const end = Math.min(start + perPage, total);
+            document.getElementById('paginationInfo').textContent = `Menampilkan ${start + 1}-${end} dari ${total} paket`;
+
+            // Pagination controls
+            const pages = document.getElementById('paginationControls');
+            let html = `<button class="btn btn-sm btn-outline-secondary" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})" style="font-size:0.8rem;">&langle; Previous</button>`;
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                html += `<button class="btn btn-sm ${i === currentPage ? '' : 'btn-outline-secondary'}" onclick="changePage(${i})" style="min-width:36px;font-size:0.8rem;${i === currentPage ? 'background:var(--text-heading);color:#000;border-color:var(--text-heading);' : ''}">${i}</button>`;
             }
+            if (totalPages > 5) html += `<span class="btn btn-sm btn-outline-secondary disabled" style="font-size:0.8rem;">...</span><button class="btn btn-sm btn-outline-secondary" onclick="changePage(${totalPages})" style="font-size:0.8rem;">${totalPages}</button>`;
+            html += `<button class="btn btn-sm btn-outline-secondary" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})" style="font-size:0.8rem;">Next &rangle;</button>`;
+            pages.innerHTML = html;
         }
 
-        async function savePackage() {
-            const id = document.getElementById('pkgId').value;
-            const featuresText = document.getElementById('pkgFeatures').value;
-            const features = featuresText.split('\n').map(f => f.trim()).filter(f => f);
+        function changePage(page) {
+            currentPage = page;
+            renderTable(allPackages);
+        }
 
-            const body = {
-                name: document.getElementById('pkgName').value,
-                code: document.getElementById('pkgCode').value,
-                description: document.getElementById('pkgDesc').value,
-                price: parseFloat(document.getElementById('pkgPrice').value) || 0,
-                duration_days: parseInt(document.getElementById('pkgDuration').value) || 30,
-                features: features,
-                is_active: document.getElementById('pkgActive').value === 'true'
-            };
+        function applyFilter() {
+            const status = document.getElementById('filterStatus').value;
+            const minP = parseFloat(document.getElementById('filterMinPrice').value) || 0;
+            const maxP = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
+            let filtered = allPackages;
+            if (status) filtered = filtered.filter(p => p.status === status);
+            filtered = filtered.filter(p => p.price >= minP && p.price <= maxP);
+            currentPage = 1;
+            renderTable(filtered);
+        }
 
-            const url = id ? `${API_BASE}/subscriptions/${id}` : `${API_BASE}/subscriptions`;
-            const method = id ? 'PUT' : 'POST';
+        function resetFilter() {
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterMinPrice').value = '';
+            document.getElementById('filterMaxPrice').value = '';
+            currentPage = 1;
+            renderTable(allPackages);
+        }
 
-            try {
-                const res = await fetch(url, {
-                    method,
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify(body)
-                });
-                if (res.ok) {
-                    bootstrap.Modal.getInstance(document.getElementById('pkgModal')).hide();
-                    loadPackages();
-                } else {
-                    alert('Failed to save');
-                }
-            } catch (e) {
-                alert('Error: ' + e.message);
-            }
+        function openDelete(id, name) {
+            document.getElementById('deletePkgId').value = id;
+            document.getElementById('deletePkgName').textContent = `Hapus "${name}"? Tindakan ini tidak dapat dibatalkan.`;
+            new bootstrap.Modal(document.getElementById('deletePkgModal')).show();
         }
 
         async function confirmDeletePkg() {
             const id = document.getElementById('deletePkgId').value;
             try {
-                await fetch(`${API_BASE}/subscriptions/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-                bootstrap.Modal.getInstance(document.getElementById('deletePkgModal')).hide();
-                loadPackages();
+                const res = await fetch(`/api/admin/packages/${id}`, { method: 'DELETE', credentials: 'include' });
+                const json = await res.json();
+                if (json.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('deletePkgModal')).hide();
+                    loadPackages();
+                } else {
+                    alert('Gagal: ' + (json.message || 'Unknown error'));
+                }
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function loadPackages() {
+            try {
+                const res = await fetch('/api/admin/packages', { credentials: 'include' });
+                if (res.redirected || res.status === 401 || res.status === 302) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                const json = await res.json();
+                allPackages = json.data || [];
+                currentPage = 1;
+                renderTable(allPackages);
             } catch (e) {
-                alert('Error: ' + e.message);
+                document.getElementById('packagesTableBody').innerHTML = `<tr><td colspan="5" class="text-center py-5 text-danger"><i class="fa-solid fa-circle-exclamation fa-2x mb-2 d-block"></i>Gagal memuat data. Pastikan subscription service berjalan.</td></tr>`;
             }
         }
 
         document.addEventListener('DOMContentLoaded', loadPackages);
     </script>
 </body>
+
 </html>
