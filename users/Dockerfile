@@ -32,10 +32,13 @@ RUN apk --no-cache add tzdata openssl
 COPY --from=builder /app/users /app/users
 RUN chmod +x /app/users
 
-# Generate RSA keys for JWT
+# Generate RSA keys for JWT + self-signed cert (fallback jika app_secure=true)
 RUN mkdir -p certs && \
     openssl genrsa -out certs/private.pem 2048 && \
-    openssl rsa -in certs/private.pem -pubout -out certs/public.pem
+    openssl rsa -in certs/private.pem -pubout -out certs/public.pem && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout certs/localhost.key -out certs/localhost.crt \
+        -subj "/CN=localhost"
 
 COPY public/ ./public/
 
