@@ -2,6 +2,10 @@
   "version": 2,
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/login", "destination": "/account/login", "permanent": false },
+    { "source": "/register", "destination": "/account/register", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/", "destination": "/landing.html" },
     { "source": "/api/:path*", "destination": "https://propensuy-thinktala-production.up.railway.app/api/:path*" },
