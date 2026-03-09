@@ -1,12 +1,12 @@
 # Go microservices - tidak di-deploy ke Vercel
-account/
-gateway/
-notification/
-operational/
-subscription/
-tickets/
-users/
-certs/
+/account/
+/gateway/
+/notification/
+/operational/
+/subscription/
+/tickets/
+/users/
+/certs/
 
 # Go files
 **/*.go
