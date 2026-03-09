@@ -1,3 +1,12 @@
+// Prevent CSS transitions flashing on page load
+const preventTx = document.createElement('style');
+preventTx.innerHTML = '* { transition: none !important; }';
+document.head.appendChild(preventTx);
+
+window.addEventListener('load', () => {
+    setTimeout(() => preventTx.remove(), 100);
+});
+
 const sidebarToggle = document.getElementById('sidebarToggle');
 const mobileOverlay = document.getElementById('mobileOverlay');
 const body = document.body;

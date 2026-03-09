@@ -66,3 +66,16 @@ logs/
 tmp/
 coverage.out
 profile.out
+
+# --- Binaries & Executables ---
+bin/
+dist/
+main                    # Binary 'main' saja
+jakedu-login
+jakedu-app
+*.exe
+*.test
+*.prof
+
+# ❌ REMOVE: **/app atau *.go yang generic
+# ✅ KEEP: Source code files

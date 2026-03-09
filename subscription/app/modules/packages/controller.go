@@ -185,12 +185,23 @@ func (c *Controller) DeletePackageHandler(w http.ResponseWriter, r *http.Request
 	_, err := c.dispatcher.DispatchAndWait(r.Context(), "delete_package", id, concurrency.PriorityHigh)
 	if err != nil {
 		if err.Error() == "paket tidak ditemukan atau sudah dihapus" {
+			w.WriteHeader(http.StatusNotFound)
 			c.response.JSON(w, r, map[string]interface{}{
 				"success": false,
 				"message": err.Error(),
 			})
 			return
 		}
+		if err.Error() == "tidak dapat menghapus paket yang sedang aktif" {
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
 		c.response.JSON(w, r, map[string]interface{}{
 			"success": false,
 			"message": err.Error(),

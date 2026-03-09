@@ -95,8 +95,19 @@ func (s *packageService) UpdatePackage(ctx context.Context, id string, payload U
 
 // PBI-35: Delete Package (Soft Delete)
 func (s *packageService) DeletePackage(ctx context.Context, id string) error {
+	existing, err := s.repo.GetPackageByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("error validasi paket: %v", err)
+	}
+	if existing == nil {
+		return errors.New("paket tidak ditemukan atau sudah dihapus")
+	}
+	if existing.Status == "ACTIVE" {
+		return errors.New("tidak dapat menghapus paket yang sedang aktif")
+	}
+
 	// Pengecekan dilakukan langsung di Repo affected rows
-	err := s.repo.DeletePackage(ctx, id)
+	err = s.repo.DeletePackage(ctx, id)
 	if err != nil {
 		if err.Error() == "paket tidak ditemukan" {
 			return errors.New("paket tidak ditemukan atau sudah dihapus")

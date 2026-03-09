@@ -1,5 +1,7 @@
 {
-  "allowedOrigins": ["*"],
+  "allowedOrigins": [
+    "*"
+  ],
   "routes": [
     {
       "path": "/api/auth/register",
@@ -59,10 +61,22 @@
       "description": "Admin KYC Detail/Action API"
     },
     {
+      "path": "/api/notifications",
+      "target": "http://localhost:5003",
+      "cors": true,
+      "description": "Notification API (exact path, avoids trailing slash redirect)"
+    },
+    {
       "path": "/api/notifications/",
       "target": "http://localhost:5003",
       "cors": true,
       "description": "Notification API"
+    },
+    {
+      "path": "/api/help/",
+      "target": "http://localhost:5003",
+      "cors": true,
+      "description": "Notification templates & help API"
     },
     {
       "path": "/api/subscriptions/",

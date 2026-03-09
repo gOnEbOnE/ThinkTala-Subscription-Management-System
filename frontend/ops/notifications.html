@@ -1,15 +1,134 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Notifications | ThinkTala Ops</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <style>
+        .nav-link-parent {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .nav-link-parent .caret {
+            margin-left: auto;
+            font-size: 0.7rem;
+            transition: transform 0.25s ease;
+            color: var(--text-muted);
+        }
+
+        .nav-link-parent.open .caret {
+            transform: rotate(90deg);
+        }
+
+        .nav-link-parent.open,
+        .nav-link-parent.parent-active {
+            color: var(--accent-cyan) !important;
+        }
+
+        .nav-submenu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.28s ease;
+        }
+
+        .nav-submenu.open {
+            max-height: 200px;
+        }
+
+        .nav-submenu .nav-link {
+            font-size: 0.82rem;
+            padding: 8px 20px 8px 52px;
+            margin: 1px 15px;
+            color: var(--text-muted);
+        }
+
+        .nav-submenu .nav-link:hover {
+            color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.06);
+        }
+
+        .nav-submenu .nav-link.active {
+            color: var(--accent-cyan) !important;
+            border-left: 3px solid var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.1);
+        }
+
+        body.sidebar-collapsed .nav-submenu {
+            max-height: 0;
+            overflow: hidden;
+            display: none;
+        }
+
+        body.sidebar-collapsed .nav-item-group {
+            position: relative;
+        }
+
+        /* Invisible bridge to prevent hover loss when moving mouse to flyout */
+        body.sidebar-collapsed .nav-item-group::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: -10px;
+            width: 20px;
+            height: 100%;
+            z-index: 10;
+        }
+
+        body.sidebar-collapsed .nav-item-group:hover .nav-submenu {
+            display: block !important;
+            max-height: none !important;
+            overflow: visible !important;
+            position: absolute;
+            left: 70px;
+            /* Bridge the gap */
+            top: 0;
+            min-width: 220px;
+            background: var(--bg-card, #1a1d2e);
+            border: 1px solid var(--border-color, #2a2d3e);
+            border-radius: 8px;
+            padding: 8px 0;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+
+        body.sidebar-collapsed .nav-item-group:hover .nav-submenu .nav-link {
+            justify-content: flex-start !important;
+            padding: 10px 20px !important;
+            margin: 0 !important;
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+
+        body.sidebar-collapsed .nav-link-parent .caret {
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
+    <script>
+        // Prevent all transitions during page load
+        const css = document.createElement('style');
+        css.id = 'prevent-tx';
+        css.appendChild(document.createTextNode('* { transition: none !important; }'));
+        document.head.appendChild(css);
+        window.addEventListener('load', () => setTimeout(() => document.getElementById('prevent-tx')?.remove(), 50));
+
+        if (window.innerWidth > 768 && localStorage.getItem('sidebar_state') === 'collapsed') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+    </script>
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
     <nav class="sidebar">
@@ -17,20 +136,40 @@
             <div class="brand-wrapper">
                 <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
                 <div class="brand-text-content">
-                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span class="text-cyan">Tala</span></h4>
+                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span
+                            class="text-cyan">Tala</span></h4>
                     <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Operations Panel</p>
                 </div>
             </div>
         </div>
         <ul class="nav flex-column flex-grow-1">
-            <li class="nav-item"><a class="nav-link" href="/ops/dashboard"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="/ops/notifications"><i class="fa-solid fa-bell icon-left"></i><span class="link-text">Notifications</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="/ops/subscriptions"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="/ops/dashboard"><i
+                        class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
+            <!-- Notification (expandable) -->
+            <li class="nav-item nav-item-group">
+                <a class="nav-link nav-link-parent open parent-active" onclick="toggleSubmenu(this)">
+                    <i class="fa-solid fa-bell icon-left"></i>
+                    <span class="link-text">Notification</span>
+                    <i class="fa-solid fa-chevron-right caret link-text"></i>
+                </a>
+                <ul class="nav-submenu open" id="notifSubmenu">
+                    <li><a class="nav-link active" href="/ops/notifications"><i class="fa-solid fa-list me-2"
+                                style="font-size:.85rem"></i><span>Monitoring</span></a></li>
+                    <li><a class="nav-link" href="/ops/notification-templates"><i class="fa-solid fa-file-alt me-2"
+                                style="font-size:.85rem"></i><span>Template Management</span></a></li>
+                </ul>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="/ops/subscriptions"><i
+                        class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
         </ul>
         <ul class="nav flex-column mb-5">
-            <li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>
-            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="/ops/settings"><i
+                        class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span></a></li>
+            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i
+                        class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a>
+            </li>
         </ul>
+
     </nav>
 
     <header class="top-navbar d-flex justify-content-between align-items-center">
@@ -38,8 +177,27 @@
             <button class="btn-header" id="sidebarToggle"><i class="fa-solid fa-bars fa-lg"></i></button>
             <span class="badge bg-warning text-dark">OPERASIONAL</span>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 gap-md-3">
             <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+            <div class="dropdown ms-1">
+                <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
+                    <div class="rounded-circle p-1" style="border: 2px solid var(--accent-cyan);">
+                        <img src="https://ui-avatars.com/api/?name=OPS&background=0b0e17&color=fff"
+                            class="rounded-circle" width="34" height="34">
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-3">
+                    <li class="px-3 py-2">
+                        <span class="d-block fw-bold text-main" id="userName">Staff Operasional</span>
+                        <small class="text-muted" id="userEmail">ops@thinktala.com</small>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider border-secondary opacity-25">
+                    </li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i
+                                class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
+                </ul>
+            </div>
         </div>
     </header>
 
@@ -49,7 +207,8 @@
                 <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Manage Notifications</h4>
                 <small class="text-muted">Create & manage notifications for users</small>
             </div>
-            <button class="btn btn-sm px-3 py-2" style="background: var(--accent-cyan); color: #000; font-weight: 600;" data-bs-toggle="modal" data-bs-target="#notifModal" onclick="resetForm()">
+            <button class="btn btn-sm px-3 py-2" style="background: var(--accent-cyan); color: #000; font-weight: 600;"
+                data-bs-toggle="modal" data-bs-target="#notifModal" onclick="resetForm()">
                 <i class="fa-solid fa-plus me-1"></i> New Notification
             </button>
         </div>
@@ -59,11 +218,13 @@
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
                     <label class="form-label small text-muted">Search</label>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by title..." style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by title..."
+                        style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small text-muted">Type</label>
-                    <select class="form-select" id="filterType" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                    <select class="form-select" id="filterType"
+                        style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                         <option value="">All Types</option>
                         <option value="info">Info</option>
                         <option value="warning">Warning</option>
@@ -73,14 +234,16 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small text-muted">Status</label>
-                    <select class="form-select" id="filterStatus" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                    <select class="form-select" id="filterStatus"
+                        style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                         <option value="">All</option>
                         <option value="true">Active</option>
                         <option value="false">Inactive</option>
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <button class="btn btn-outline-secondary w-100" onclick="loadNotifications()"><i class="fa-solid fa-filter me-1"></i> Filter</button>
+                    <button class="btn btn-outline-secondary w-100" onclick="loadNotifications()"><i
+                            class="fa-solid fa-filter me-1"></i> Filter</button>
                 </div>
             </div>
         </div>
@@ -101,7 +264,10 @@
                         </tr>
                     </thead>
                     <tbody id="notifTableBody">
-                        <tr><td colspan="7" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</td></tr>
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4"><i
+                                    class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -113,23 +279,27 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
                 <div class="modal-header border-secondary" style="border-opacity: 0.2;">
-                    <h5 class="modal-title fw-bold" id="modalTitle" style="color: var(--text-heading);">New Notification</h5>
+                    <h5 class="modal-title fw-bold" id="modalTitle" style="color: var(--text-heading);">New Notification
+                    </h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="notifId">
                     <div class="mb-3">
                         <label class="form-label small text-muted">Title</label>
-                        <input type="text" class="form-control" id="notifTitle" placeholder="Notification title" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                        <input type="text" class="form-control" id="notifTitle" placeholder="Notification title"
+                            style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                     </div>
                     <div class="mb-3">
                         <label class="form-label small text-muted">Message</label>
-                        <textarea class="form-control" id="notifMessage" rows="4" placeholder="Notification message..." style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);"></textarea>
+                        <textarea class="form-control" id="notifMessage" rows="4" placeholder="Notification message..."
+                            style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);"></textarea>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label class="form-label small text-muted">Type</label>
-                            <select class="form-select" id="notifType" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                            <select class="form-select" id="notifType"
+                                style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                                 <option value="info">Info</option>
                                 <option value="warning">Warning</option>
                                 <option value="promo">Promo</option>
@@ -138,7 +308,8 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small text-muted">Target Role</label>
-                            <select class="form-select" id="notifTarget" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                            <select class="form-select" id="notifTarget"
+                                style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                                 <option value="all">All Users</option>
                                 <option value="CLIENT">Clients Only</option>
                                 <option value="OPERASIONAL">Staff Only</option>
@@ -146,7 +317,8 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small text-muted">Status</label>
-                            <select class="form-select" id="notifActive" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                            <select class="form-select" id="notifActive"
+                                style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                                 <option value="true">Active</option>
                                 <option value="false">Inactive</option>
                             </select>
@@ -155,7 +327,9 @@
                 </div>
                 <div class="modal-footer border-secondary" style="border-opacity: 0.2;">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn px-4" style="background: var(--accent-cyan); color: #000; font-weight: 600;" onclick="saveNotification()">
+                    <button type="button" class="btn px-4"
+                        style="background: var(--accent-cyan); color: #000; font-weight: 600;"
+                        onclick="saveNotification()">
                         <i class="fa-solid fa-check me-1"></i> Save
                     </button>
                 </div>
@@ -188,9 +362,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/za-theme.js"></script>
-    <script src="/assets/js/za-sidebar.js"></script>
+    <script src="/assets/js/za-sidebar.js?v=2"></script>
     <script>
-        const API_BASE = '/api/ops';
+        function toggleSubmenu(el) {
+            const parent = el.closest('.nav-item-group');
+            const submenu = parent.querySelector('.nav-submenu');
+            el.classList.toggle('open');
+            submenu.classList.toggle('open');
+        }
+
+        const API_BASE = '/api';
         const token = localStorage.getItem('token');
 
         function logout() {
@@ -317,4 +498,5 @@
         document.addEventListener('DOMContentLoaded', loadNotifications);
     </script>
 </body>
+
 </html>

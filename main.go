@@ -40,6 +40,11 @@ func ensureCerts() {
 			private: "account/certs/private.pem",
 			public:  "account/certs/public.pem",
 		},
+		{
+			name:    "subscription",
+			private: "subscription/certs/private.pem",
+			public:  "subscription/certs/public.pem",
+		},
 	}
 
 	for _, cd := range certDirs {
@@ -91,6 +96,7 @@ func main() {
 		{"gateway", "gateway", "2000"},
 		{"users", "users", "2006"},
 		{"subscription", "subscription", "5004"},
+		{"notification", "notification", "5003"},
 	}
 
 	fmt.Println("\nMemulai semua service...\n")

@@ -38,15 +38,20 @@ func NewRepository(db *database.DBWrapper) Repository {
 func (r *packageRepo) CreatePackage(ctx context.Context, data CreatePackageDTO) (*Package, error) {
 	id := uuid.New().String()
 
+	status := data.Status
+	if status == "" {
+		status = "ACTIVE"
+	}
+
 	query := `
-        INSERT INTO subscription.packages (id, name, price, duration, quota, status, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, 'ACTIVE', NOW(), NOW())
-        RETURNING id, name, price, duration, quota, status, created_at, updated_at
+        INSERT INTO subscription.packages (id, name, price, price_yearly, duration, quota, status, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+        RETURNING id, name, price, price_yearly, duration, quota, status, created_at, updated_at
     `
 
 	var p Package
-	err := r.db.Pool.QueryRow(ctx, query, id, data.Name, data.Price, data.Duration, data.Quota).Scan(
-		&p.ID, &p.Name, &p.Price, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
+	err := r.db.Pool.QueryRow(ctx, query, id, data.Name, data.Price, data.PriceYearly, data.Duration, data.Quota, status).Scan(
+		&p.ID, &p.Name, &p.Price, &p.PriceYearly, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
 	)
 
 	if err != nil {
@@ -62,7 +67,7 @@ func (r *packageRepo) GetPackages(ctx context.Context, status, minPrice, maxPric
 
 	// Base query
 	query := `
-        SELECT id, name, price, duration, quota, status, created_at, updated_at 
+        SELECT id, name, price, price_yearly, duration, quota, status, created_at, updated_at 
         FROM subscription.packages 
         WHERE 1=1
     `
@@ -119,7 +124,7 @@ func (r *packageRepo) GetPackages(ctx context.Context, status, minPrice, maxPric
 	for rows.Next() {
 		var p Package
 		err := rows.Scan(
-			&p.ID, &p.Name, &p.Price, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
+			&p.ID, &p.Name, &p.Price, &p.PriceYearly, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("gagal scan data paket: %w", err)
@@ -142,7 +147,7 @@ func (r *packageRepo) GetPackages(ctx context.Context, status, minPrice, maxPric
 // GetPackageByID mencari paket berdasarkan ID spesifik
 func (r *packageRepo) GetPackageByID(ctx context.Context, id string) (*Package, error) {
 	query := `
-        SELECT id, name, price, duration, quota, status, created_at, updated_at 
+        SELECT id, name, price, price_yearly, duration, quota, status, created_at, updated_at 
         FROM subscription.packages 
         WHERE id = $1 AND status != 'DELETED' 
         LIMIT 1
@@ -150,7 +155,7 @@ func (r *packageRepo) GetPackageByID(ctx context.Context, id string) (*Package, 
 
 	var p Package
 	err := r.db.Pool.QueryRow(ctx, query, id).Scan(
-		&p.ID, &p.Name, &p.Price, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
+		&p.ID, &p.Name, &p.Price, &p.PriceYearly, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
 	)
 
 	if err != nil {
@@ -170,16 +175,18 @@ func (r *packageRepo) UpdatePackage(ctx context.Context, id string, data UpdateP
         SET 
             name = $1, 
             price = $2, 
-            duration = $3, 
-            quota = $4,
+            price_yearly = $3,
+            duration = $4, 
+            quota = $5,
+            status = COALESCE(NULLIF($6, ''), status),
             updated_at = NOW() 
-        WHERE id = $5 AND status != 'DELETED'
-        RETURNING id, name, price, duration, quota, status, created_at, updated_at
+        WHERE id = $7 AND status != 'DELETED'
+        RETURNING id, name, price, price_yearly, duration, quota, status, created_at, updated_at
     `
 
 	var p Package
-	err := r.db.Pool.QueryRow(ctx, query, data.Name, data.Price, data.Duration, data.Quota, id).Scan(
-		&p.ID, &p.Name, &p.Price, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
+	err := r.db.Pool.QueryRow(ctx, query, data.Name, data.Price, data.PriceYearly, data.Duration, data.Quota, data.Status, id).Scan(
+		&p.ID, &p.Name, &p.Price, &p.PriceYearly, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
 	)
 
 	if err != nil {
