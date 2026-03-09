@@ -8,6 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"context"
+	"os/signal"
+	"syscall"
+	"notification/core/queue"
 )
 
 func main() {
@@ -23,7 +27,7 @@ func main() {
 
 	r := gin.Default()
 	// TODO(queue): Ganti _ dengan svc dan uncomment workers di bawah saat siap di-deploy
-	_ = routes.Register(r)
+	svc := routes.Register(r)
 
 	// TODO(queue): Aktifkan semua baris berikut setelah workers siap di-deploy:
 	// import (
@@ -32,11 +36,11 @@ func main() {
 	//   "syscall"
 	//   "notification/core/queue"
 	// )
-	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	// defer stop()
-	// svc := routes.Register(r)
-	// go svc.StartRetryWorker(ctx)
-	// go queue.StartWorker(ctx, svc)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	// svc = routes.Register(r)
+	go svc.StartRetryWorker(ctx)
+	go queue.StartWorker(ctx, svc)
 
 	port := database.GetEnv("PORT", "5003")
 	log.Printf("[NOTIFICATION] Service running on :%s", port)

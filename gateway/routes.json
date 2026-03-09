@@ -90,7 +90,6 @@
       "cors": true,
       "description": "Notification API"
     },
-    { "path": "/api/help/", "target": "http://localhost:5003", "cors": true, "description": "Notification templates & help API" },
     {
       "path": "/api/help/",
       "target": "http://localhost:5003",

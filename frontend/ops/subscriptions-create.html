@@ -10,7 +10,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
     <style>
         .main-content .ai-card {
             padding: 16px 20px;
@@ -38,183 +39,13 @@
             margin-bottom: 12px !important;
         }
 
-        /* Sidebar submenu */
-        .nav-link-parent {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .nav-link-parent .caret {
-            margin-left: auto;
-            font-size: 0.7rem;
-            transition: transform 0.25s ease;
-            color: var(--text-muted);
-        }
-
-        .nav-link-parent.open .caret {
-            transform: rotate(90deg);
-        }
-
-        .nav-link-parent.open,
-        .nav-link-parent.parent-active {
-            color: var(--accent-cyan) !important;
-        }
-
-        .nav-submenu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.28s ease;
-        }
-
-        .nav-submenu.open {
-            max-height: 200px;
-        }
-
-        .nav-submenu .nav-link {
-            font-size: 0.82rem;
-            padding: 8px 20px 8px 52px;
-            margin: 1px 15px;
-            color: var(--text-muted);
-        }
-
-        .nav-submenu .nav-link:hover {
-            color: var(--accent-cyan);
-            background: rgba(0, 242, 255, 0.06);
-        }
-
-        .nav-submenu .nav-link.active {
-            color: var(--accent-cyan) !important;
-            border-left: 3px solid var(--accent-cyan);
-            background: rgba(0, 242, 255, 0.1);
-        }
-
-        body.sidebar-collapsed .nav-submenu {
-            max-height: 0;
-            overflow: hidden;
-            display: none;
-        }
-
-        body.sidebar-collapsed .nav-item-group {
-            position: relative;
-        }
-
-        /* Invisible bridge to prevent hover loss when moving mouse to flyout */
-        body.sidebar-collapsed .nav-item-group::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: -10px;
-            width: 20px;
-            height: 100%;
-            z-index: 10;
-        }
-
-        body.sidebar-collapsed .nav-item-group:hover .nav-submenu {
-            display: block !important;
-            max-height: none !important;
-            overflow: visible !important;
-            position: absolute;
-            left: 70px;
-            /* Bridge the gap */
-            top: 0;
-            min-width: 220px;
-            background: var(--bg-card, #1a1d2e);
-            border: 1px solid var(--border-color, #2a2d3e);
-            border-radius: 8px;
-            padding: 8px 0;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            z-index: 1000;
-        }
-
-        body.sidebar-collapsed .nav-item-group:hover .nav-submenu .nav-link {
-            justify-content: flex-start !important;
-            padding: 10px 20px !important;
-            margin: 0 !important;
-            width: 100% !important;
-            box-sizing: border-box;
-        }
-
-        body.sidebar-collapsed .nav-link-parent .caret {
-            display: none;
-        }
+        /* END main-content styles */
     </style>
 </head>
 
 <body>
-    <script>if (window.innerWidth > 768 && localStorage.getItem('sidebar_state') === 'collapsed') { document.body.classList.add('sidebar-collapsed'); }</script>
-    <div class="mobile-overlay" id="mobileOverlay"></div>
-
-    <nav class="sidebar">
-        <div class="sidebar-brand mb-3">
-            <div class="brand-wrapper">
-                <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
-                <div class="brand-text-content">
-                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span
-                            class="text-cyan">Tala</span></h4>
-                    <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Operations Panel</p>
-                </div>
-            </div>
-        </div>
-        <ul class="nav flex-column flex-grow-1">
-            <li class="nav-item"><a class="nav-link" href="/ops/dashboard"><i
-                        class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
-            <!-- Notification (expandable) -->
-            <li class="nav-item nav-item-group">
-                <a class="nav-link nav-link-parent" onclick="toggleSubmenu(this)">
-                    <i class="fa-solid fa-bell icon-left"></i>
-                    <span class="link-text">Notification</span>
-                    <i class="fa-solid fa-chevron-right caret link-text"></i>
-                </a>
-                <ul class="nav-submenu" id="notifSubmenu">
-                    <li><a class="nav-link" href="/ops/notifications"><i class="fa-solid fa-list me-2"
-                                style="font-size:.85rem"></i><span>Monitoring</span></a></li>
-                    <li><a class="nav-link" href="/ops/notification-templates"><i class="fa-solid fa-file-alt me-2"
-                                style="font-size:.85rem"></i><span>Template Management</span></a></li>
-                </ul>
-            </li>
-            <li class="nav-item"><a class="nav-link active" href="/ops/subscriptions"><i
-                        class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
-        </ul>
-        <ul class="nav flex-column mb-5">
-            <li class="nav-item"><a class="nav-link" href="/ops/settings"><i
-                        class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span></a></li>
-            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i
-                        class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a>
-            </li>
-        </ul>
-    </nav>
-
-    <header class="top-navbar d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn-header" id="sidebarToggle"><i class="fa-solid fa-bars fa-lg"></i></button>
-            <span class="badge bg-warning text-dark">OPERASIONAL</span>
-        </div>
-        <div class="d-flex align-items-center gap-2 gap-md-3">
-            <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
-            <div class="dropdown ms-1">
-                <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">
-                    <div class="rounded-circle p-1" style="border: 2px solid var(--accent-cyan);">
-                        <img src="https://ui-avatars.com/api/?name=OPS&background=0b0e17&color=fff"
-                            class="rounded-circle" width="34" height="34">
-                    </div>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-3">
-                    <li class="px-3 py-2">
-                        <span class="d-block fw-bold text-main" id="userName">Staff Operasional</span>
-                        <small class="text-muted" id="userEmail">ops@thinktala.com</small>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider border-secondary opacity-25">
-                    </li>
-                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i
-                                class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
-                </ul>
-            </div>
-        </div>
-    </header>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
 
     <div class="main-content">
         <!-- Back link + Title -->
@@ -409,16 +240,9 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/za-theme.js"></script>
-    <script src="../assets/js/za-sidebar.js?v=2"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
     <script>
-        function toggleSubmenu(el) {
-            const parent = el.closest('.nav-item-group');
-            const submenu = parent.querySelector('.nav-submenu');
-            el.classList.toggle('open');
-            submenu.classList.toggle('open');
-        }
-
         function logout() { window.location.href = '/account/logout'; }
 
         function formatRp(val) { return 'Rp ' + Number(val || 0).toLocaleString('id-ID'); }
