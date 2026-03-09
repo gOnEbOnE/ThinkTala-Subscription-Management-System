@@ -10,7 +10,8 @@ FROM alpine:latest
 WORKDIR /app
 RUN apk --no-cache add tzdata ca-certificates
 COPY --from=builder /app/subscription .
-RUN chmod +x /app/subscription
+COPY entrypoint.sh .
+RUN chmod +x /app/subscription && chmod +x entrypoint.sh && mkdir -p certs
 
 EXPOSE 5004
-CMD ["/app/subscription"]
+ENTRYPOINT ["/app/entrypoint.sh"]
