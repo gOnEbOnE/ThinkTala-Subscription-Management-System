@@ -29,10 +29,10 @@ func NewService(repo Repository) *Service {
 // Urutan: 1) Redis queue → 2) HTTP langsung → 3) SMTP fallback.
 func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 	// 1. Coba Redis queue terlebih dahulu (async, reliable)
-	// if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
-	// 	log.Printf("[KYC NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
-	// 	return
-	// }
+	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
+		log.Printf("[KYC NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
+		return
+	}
 
 	// 2. Fallback: HTTP langsung ke notification service
 	baseURL := utils.GetEnv("NOTIFICATION_SERVICE_URL", "http://localhost:5003")
