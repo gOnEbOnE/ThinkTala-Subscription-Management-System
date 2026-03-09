@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "buildCommand": null,
+  "outputDirectory": "frontend",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/", "destination": "/landing.html" },
+    { "source": "/api/:path*", "destination": "https://YOUR_BACKEND_GATEWAY_URL/api/:path*" },
+    { "source": "/account/login/auth", "destination": "https://YOUR_BACKEND_GATEWAY_URL/account/login/auth" }
+  ]
+}
