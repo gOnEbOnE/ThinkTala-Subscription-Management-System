@@ -26,18 +26,16 @@ FROM alpine:latest
 WORKDIR /app
 
 # Install timezone data
-RUN apk --no-cache add tzdata
+RUN apk --no-cache add tzdata openssl
 
 # Copy binary dari builder
 COPY --from=builder /app/users /app/users
 RUN chmod +x /app/users
 
-# Copy env file (opsional)
-# Copy env file
-COPY .env .env
-
-# ---> TAMBAHKAN BARIS INI UNTUK MENGCOPY FILE PEM <---
-COPY private.pem public.pem ./
+# Generate RSA keys for JWT
+RUN mkdir -p certs && \
+    openssl genrsa -out certs/private.pem 2048 && \
+    openssl rsa -in certs/private.pem -pubout -out certs/public.pem
 
 COPY public/ ./public/
 
