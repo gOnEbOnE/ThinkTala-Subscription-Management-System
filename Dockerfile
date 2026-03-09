@@ -18,8 +18,10 @@ RUN apk --no-cache add tzdata ca-certificates
 
 COPY --from=builder /repo/gateway/thinknalyze-gateway .
 COPY --from=builder /repo/gateway/routes.json .
+COPY --from=builder /repo/gateway/entrypoint.sh .
+RUN chmod +x entrypoint.sh && mkdir -p certs
 
 ENV port=2000
 EXPOSE 2000
 
-CMD ["./thinknalyze-gateway"]
+ENTRYPOINT ["./entrypoint.sh"]

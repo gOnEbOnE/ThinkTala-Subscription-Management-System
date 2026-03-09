@@ -10,14 +10,20 @@ import (
 )
 
 func Env(req string) string {
+	// 1. Cek OS environment dulu (Railway inject vars ke OS)
+	if val := os.Getenv(req); val != "" {
+		return val
+	}
 
+	// 2. Fallback ke .env file jika ada
 	var f *os.File
 	var err error
 
 	f, err = os.Open(".env")
 
 	if err != nil {
-		log.Fatal(err)
+		// .env tidak ada, return empty (sudah cek OS env di atas)
+		return ""
 	}
 	defer f.Close()
 
@@ -29,7 +35,7 @@ func Env(req string) string {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return ""
 }
