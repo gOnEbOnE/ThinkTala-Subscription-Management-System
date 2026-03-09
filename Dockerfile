@@ -20,6 +20,7 @@ COPY --from=builder /repo/gateway/thinknalyze-gateway .
 COPY --from=builder /repo/gateway/routes.json .
 COPY --from=builder /repo/gateway/entrypoint.sh .
 RUN chmod +x entrypoint.sh && mkdir -p certs
+COPY --from=builder /repo/gateway/certs/*.pem certs/
 
 ENV port=2000
 EXPOSE 2000
