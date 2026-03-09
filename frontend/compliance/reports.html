@@ -266,8 +266,9 @@
     }
     function esc(s) { if (!s) return ''; var el = document.createElement('div'); el.textContent = s; return el.innerHTML; }
     function logout() {
-        fetch('/account/logout', { credentials: 'include' }).catch(function(){});
+        fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function(){});
         localStorage.removeItem('token'); localStorage.removeItem('user');
+        sessionStorage.clear();
         window.location.href = '/account/login';
     }
     </script>

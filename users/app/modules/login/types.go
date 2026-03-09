@@ -45,3 +45,22 @@ type LoginResult struct {
 	Token    string         `json:"token"`
 	UserData map[string]any `json:"user_data"`
 }
+
+// RoleInfo — informasi role untuk assume-role
+type RoleInfo struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Code string `json:"code"`
+}
+
+// AssumeRoleInput — payload dari frontend
+type AssumeRoleInput struct {
+	TargetRoleCode string `json:"target_role_code"`
+}
+
+// AssumeRoleResult — output dari service
+type AssumeRoleResult struct {
+	Token       string `json:"token"`
+	RedirectURL string `json:"redirect_url"`
+	AssumedRole string `json:"assumed_role"`
+}

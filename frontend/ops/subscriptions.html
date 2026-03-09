@@ -228,7 +228,7 @@
         let currentPage = 1;
         const perPage = 6;
 
-        function logout() { window.location.href = '/account/logout'; }
+        function logout() { fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function(){}); localStorage.removeItem('token'); localStorage.removeItem('user'); sessionStorage.clear(); window.location.href = '/account/login'; }
 
         function formatRp(val) {
             return 'Rp ' + Number(val).toLocaleString('id-ID');

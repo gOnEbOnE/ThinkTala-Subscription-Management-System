@@ -128,6 +128,7 @@ func main() {
 	app.RegisterJob("register", registerService.ProcessRegisterJob)
 	app.RegisterJob("verify_otp", registerService.ProcessVerifyOTPJob)
 	app.RegisterJob("resend_otp", registerService.ProcessResendOTPJob)
+	app.RegisterJob("assume_role", loginService.ProcessAssumeRoleJob)
 	app.RegisterJob("kyc_submit", kycService.ProcessKYCSubmitJob)
 	app.RegisterJob("kyc_status", kycService.ProcessKYCStatusJob)
 	app.RegisterJob("admin_kyc_list", kycService.ProcessAdminKYCListJob)

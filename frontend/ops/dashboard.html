@@ -68,7 +68,20 @@
     <header class="top-navbar d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-2">
             <button class="btn-header" id="sidebarToggle"><i class="fa-solid fa-bars fa-lg"></i></button>
-            <span class="badge bg-warning text-dark">OPERASIONAL</span>
+            <span class="badge bg-warning text-dark" id="roleBadge">OPERASIONAL</span>
+            <!-- Super Admin Role Simulation Dropdown -->
+            <div class="dropdown d-none" id="assumeRoleDropdown">
+                <button class="btn btn-sm btn-outline-info dropdown-toggle" data-bs-toggle="dropdown" style="font-size:0.8rem;">
+                    <i class="fa-solid fa-user-secret me-1"></i> Simulasi Role
+                </button>
+                <ul class="dropdown-menu dropdown-menu-animate">
+                    <li><h6 class="dropdown-header">Pilih Role untuk Simulasi</h6></li>
+                    <li><a class="dropdown-item" href="#" onclick="assumeRole('ADMIN_OPS','Operasional')"><i class="fa-solid fa-chart-pie me-2 text-info"></i>Operasional</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="assumeRole('ADMIN_COMPLIANCE','Compliance')"><i class="fa-solid fa-shield-halved me-2 text-success"></i>Compliance</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="assumeRole('ADMIN_MANAJEMEN','Manajemen')"><i class="fa-solid fa-briefcase me-2 text-warning"></i>Manajemen</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="assumeRole('ADMIN_CS','Customer Support')"><i class="fa-solid fa-headset me-2 text-primary"></i>Customer Support</a></li>
+                </ul>
+            </div>
         </div>
         <div class="d-flex align-items-center gap-2 gap-md-3">
             <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
@@ -93,6 +106,11 @@
             </div>
         </div>
     </header>
+
+    <!-- Assumed Role Banner -->
+    <div class="d-none text-center py-2" id="assumedRoleBanner" style="background:#fef3c7; color:#92400e; font-weight:600; font-size:0.85rem; position:fixed; top:60px; left:0; right:0; z-index:1040;">
+        <i class="fa-solid fa-user-secret me-1"></i> Anda sedang menggunakan sistem sebagai: <span id="assumedRoleLabel"></span>
+    </div>
 
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -213,10 +231,67 @@
         }
 
         function logout() {
+            fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function(){});
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            sessionStorage.clear();
             window.location.href = '/account/login';
         }
+
+        // Super Admin: Assume Role
+        async function assumeRole(targetRoleCode, displayName) {
+            try {
+                var res = await fetch('/api/auth/assume-role', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ target_role_code: targetRoleCode })
+                });
+                var data = await res.json();
+                if (data.status) {
+                    var user = JSON.parse(localStorage.getItem('user') || '{}');
+                    user.role_code = targetRoleCode;
+                    user.assumed_role = true;
+                    user.assumed_role_name = displayName;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.location.reload();
+                } else {
+                    alert(data.msg || 'Gagal mengganti role');
+                }
+            } catch (err) {
+                alert('Koneksi ke server gagal');
+            }
+        }
+
+        // Init: Check if user is Super Admin
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            // Update UI with user data
+            if (user.name) {
+                document.getElementById('userName').textContent = user.name;
+            }
+            if (user.email) {
+                document.getElementById('userEmail').textContent = user.email;
+            }
+            if (user.role_code) {
+                document.getElementById('roleBadge').textContent = user.role_code;
+            }
+            // Show assume-role dropdown if SUPERADMIN
+            if (user.level_code === 'SUPERADMIN') {
+                var dropdown = document.getElementById('assumeRoleDropdown');
+                if (dropdown) dropdown.classList.remove('d-none');
+                document.getElementById('roleBadge').innerHTML = '<i class="fa-solid fa-shield me-1"></i>SUPERADMIN';
+                document.getElementById('roleBadge').className = 'badge bg-danger text-white';
+            }
+            // Show assumed-role banner if active
+            if (user.assumed_role && user.assumed_role_name) {
+                var banner = document.getElementById('assumedRoleBanner');
+                if (banner) {
+                    banner.classList.remove('d-none');
+                    document.getElementById('assumedRoleLabel').textContent = user.assumed_role_name;
+                }
+            }
+        });
     </script>
 </body>
 

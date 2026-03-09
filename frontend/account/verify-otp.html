@@ -125,17 +125,19 @@
                 const data = await res.json();
 
                 if (data.status === true) {
-                    showToast('Akun berhasil diaktifkan! Mengalihkan ke login...', 'success');
+                    showToast('Akun berhasil diaktifkan!', 'success');
                     sessionStorage.removeItem('otp_email');
-                    setTimeout(() => { window.location.href = '/account/login'; }, 2000);
+                    setTimeout(function() { window.location.href = '/account/login'; }, 1500);
                 } else {
                     showToast(data.msg || 'Verifikasi gagal!');
-                    inputs.forEach(i => i.value = '');
+                    inputs.forEach(function(i) { i.value = ''; });
                     inputs[0].focus();
+                    btnVerify.disabled = false;
+                    btnVerify.textContent = 'Verifikasi';
+                    checkOTPComplete();
                 }
             } catch (err) {
                 showToast('Koneksi ke server gagal!');
-            } finally {
                 btnVerify.disabled = false;
                 btnVerify.textContent = 'Verifikasi';
                 checkOTPComplete();

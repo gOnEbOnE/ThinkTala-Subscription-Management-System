@@ -25,10 +25,10 @@ func NewService(repo Repository) *Service {
 func dispatchNotification(eventType, channel, to string, vars map[string]string) {
 
 	// TODO(queue): Aktifkan Redis queue setelah worker siap di-deploy
-	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
-		log.Printf("[NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
-		return
-	}
+	// if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
+	// 	log.Printf("[NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
+	// 	return
+	// }
 	baseURL := utils.GetEnv("NOTIFICATION_SERVICE_URL", "http://localhost:5003")
 
 	payload := map[string]any{
