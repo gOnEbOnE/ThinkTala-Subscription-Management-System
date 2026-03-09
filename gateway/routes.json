@@ -5,7 +5,105 @@
   "routes": [
     {
       "path": "/api/auth/register",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "description": "Register API"
+    },
+    {
+      "path": "/api/auth/verify-otp",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "description": "Verify OTP"
+    },
+    {
+      "path": "/api/auth/resend-otp",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "description": "Resend OTP"
+    },
+    {
+      "path": "/api/auth",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "description": "Auth API"
+    },
+    {
+      "path": "/api/auth/logout",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "description": "Logout API"
+    },
+    {
+      "path": "/api/auth/assume-role",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "description": "Assume Role API (Super Admin)"
+    },
+    {
+      "path": "/api/auth/roles",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "description": "Get Available Roles (Super Admin)"
+    },
+    {
+      "path": "/account/login/auth",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "description": "Login POST"
+    },
+    {
+      "path": "/api/operational/",
+      "target": "http://operational-service.railway.internal:5005",
+      "cors": true,
+      "description": "Operational API"
+    },
+    {
+      "path": "/api/kyc/",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "auth": true,
+      "description": "KYC API (Users Service)"
+    },
+    {
+      "path": "/api/admin/kyc",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "auth": true,
+      "description": "Admin KYC List API"
+    },
+    {
+      "path": "/api/admin/kyc/",
+      "target": "http://users-service.railway.internal:2006",
+      "cors": true,
+      "auth": true,
+      "description": "Admin KYC Detail/Action API"
+    },
+    {
+      "path": "/api/notifications",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "description": "Notification API (exact path, avoids trailing slash redirect)"
+    },
+    {
+      "path": "/api/notifications/",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "description": "Notification API"
+    },
+    {
+      "path": "/api/help/",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "description": "Notification templates & help API"
+    },
+    {
+      "path": "/api/subscriptions/",
+      "target": "http://subscription-service.railway.internal:5004",
+      "cors": true,
+      "description": "Subscription API"
+    }
+  ]
+}
       "cors": true,
       "description": "Register API"
     },
