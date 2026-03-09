@@ -11,6 +11,8 @@ import (
 
 type Repository interface {
 	FindUser(ctx context.Context, key, value string) (*User, error)
+	FindRoleByCode(ctx context.Context, code string) (*RoleInfo, error)
+	GetAllRoles(ctx context.Context) ([]RoleInfo, error)
 }
 
 type userRepo struct {
@@ -55,4 +57,38 @@ func (r *userRepo) FindUser(ctx context.Context, key, value string) (*User, erro
 		return nil, err
 	}
 	return &u, nil
+}
+
+// FindRoleByCode mengambil role berdasarkan code
+func (r *userRepo) FindRoleByCode(ctx context.Context, code string) (*RoleInfo, error) {
+	var role RoleInfo
+	err := r.db.Pool.QueryRow(ctx,
+		"SELECT id, name, code FROM roles WHERE UPPER(code) = UPPER($1)", code,
+	).Scan(&role.ID, &role.Name, &role.Code)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &role, nil
+}
+
+// GetAllRoles mengambil semua role yang tersedia
+func (r *userRepo) GetAllRoles(ctx context.Context) ([]RoleInfo, error) {
+	rows, err := r.db.Pool.Query(ctx, "SELECT id, name, code FROM roles ORDER BY name")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var roles []RoleInfo
+	for rows.Next() {
+		var role RoleInfo
+		if err := rows.Scan(&role.ID, &role.Name, &role.Code); err != nil {
+			return nil, err
+		}
+		roles = append(roles, role)
+	}
+	return roles, nil
 }

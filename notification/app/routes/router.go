@@ -7,9 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Register mendaftarkan semua routes ke Gin engine.
+// Register mendaftarkan semua routes ke Gin engine dan mengembalikan Service untuk dipakai worker.
 // Dipanggil sekali dari main.go saat service startup.
-func Register(r *gin.Engine) {
+func Register(r *gin.Engine) *tplmod.Service {
+	tplSvc := tplmod.NewService()
 	// ── Static Pages ─────────────────────────────────────────────
 	r.GET("/compliance/dashboard", func(c *gin.Context) {
 		c.File("./public/views/dashboard.html")
@@ -30,7 +31,7 @@ func Register(r *gin.Engine) {
 
 	// ── Notification Templates ────────────────────────────────────
 	// Digunakan untuk mendefinisikan template pesan per event_type & channel.
-	tplCtrl := tplmod.NewController()
+	tplCtrl := tplmod.NewController(tplSvc)
 	tpl := r.Group("/api/help/notification-templates")
 	{
 		tpl.GET("", tplCtrl.List)
@@ -39,4 +40,14 @@ func Register(r *gin.Engine) {
 		tpl.PUT("/:id", tplCtrl.Update)
 		tpl.DELETE("/:id", tplCtrl.Delete)
 	}
+	// POST /api/notifications/send — kirim notifikasi berdasarkan event_type + template
+	api.POST("/send", tplCtrl.Send)
+
+	// GET /api/help/notification-templates/event-types — daftar event_type yang sudah terdaftar
+	tpl.GET("/event-types", tplCtrl.EventTypes)
+
+	// GET /api/notifications/logs — monitoring log pengiriman (dengan filter status opsional)
+	api.GET("/logs", tplCtrl.Logs)
+
+	return tplSvc
 }

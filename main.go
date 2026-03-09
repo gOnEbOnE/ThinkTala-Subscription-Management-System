@@ -95,8 +95,9 @@ func main() {
 		{"account", "account", "2001"},
 		{"gateway", "gateway", "2000"},
 		{"users", "users", "2006"},
-		{"subscription", "subscription", "5004"},
 		{"notification", "notification", "5003"},
+		{"operational", "operational", "5005"},
+		{"subscription", "subscription", "5004"},
 	}
 
 	fmt.Println("\nMemulai semua service...\n")
@@ -174,7 +175,6 @@ func main() {
 
 // checkPrerequisites checks if required tools are installed
 func checkPrerequisites() {
-	// ⭐ MODIFIED: Only check Go & Redis, skip PostgreSQL
 	tools := map[string]string{
 		"Go":    "go version",
 		"Redis": "redis-cli --version",

@@ -61,6 +61,9 @@ func Init(app *core.App,
 	app.Router.HandleFunc("POST /api/auth/register", registerController.Submit)
 	app.Router.HandleFunc("POST /api/auth/verify-otp", registerController.VerifyOTP)
 	app.Router.HandleFunc("POST /api/auth/resend-otp", registerController.ResendOTP)
+	app.Router.HandleFunc("POST /api/auth/logout", loginController.Logout)
+	app.Router.HandleFunc("POST /api/auth/assume-role", loginController.AssumeRole)
+	app.Router.HandleFunc("GET /api/auth/roles", loginController.GetRoles)
 
 	// ==============================
 	// 7. KYC Routes (Protected via Gateway Auth)

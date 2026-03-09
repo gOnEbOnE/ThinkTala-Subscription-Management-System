@@ -368,6 +368,14 @@ func main() {
 
 		// GET /account/logout
 		if r.URL.Path == "/account/logout" {
+			// Delete session from Redis if token exists
+			if tokenCookie, err := r.Cookie("token"); err == nil && tokenCookie.Value != "" {
+				if decryptedKey, err := utils.Decrypt(tokenCookie.Value); err == nil {
+					ctx := r.Context()
+					_ = utils.RedisDel(ctx, string(decryptedKey))
+					log.Printf("[GW] Session deleted from Redis on logout")
+				}
+			}
 			// Clear cookies
 			http.SetCookie(w, &http.Cookie{Name: "token", Value: "", Path: "/", MaxAge: -1})
 			http.SetCookie(w, &http.Cookie{Name: "_authz", Value: "", Path: "/", MaxAge: -1})

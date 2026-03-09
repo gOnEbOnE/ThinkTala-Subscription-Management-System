@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -136,7 +137,12 @@ func MigrateAndSeed(db interface{}) {
 	log.Println("Menjalankan Migrasi PostgreSQL...")
 	_, err := pool.Exec(ctx, migrationSQL)
 	if err != nil {
-		log.Fatalf("Gagal menjalankan migrasi: %v", err)
+		// Ignore duplicate object errors from concurrent migrations (account & users share DB)
+		if strings.Contains(err.Error(), "duplicate key value") || strings.Contains(err.Error(), "already exists") {
+			log.Printf("[WARN] Migrasi race condition (safe to ignore): %v", err)
+		} else {
+			log.Fatalf("Gagal menjalankan migrasi: %v", err)
+		}
 	}
 
 	// ===== SEEDER STATIC (tanpa parameter $1, bisa batch) =====

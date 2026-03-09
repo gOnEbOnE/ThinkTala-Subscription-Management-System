@@ -81,8 +81,9 @@
         document.getElementById('greeting').textContent = 'Hello, ' + (user.name || 'User') + '!';
 
         function logout() {
+            fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function(){});
             localStorage.removeItem('user'); localStorage.removeItem('token');
-            document.cookie.split(";").forEach(c => { document.cookie = c.replace(/^ +/,"").replace(/=.*/,"=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/"); });
+            sessionStorage.clear();
             window.location.href = '/account/login';
         }
     </script>

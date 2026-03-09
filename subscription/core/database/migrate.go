@@ -14,6 +14,12 @@ func MigrateAndSeed(db interface{}) {
 		log.Fatalf("[FATAL] Input MigrateAndSeed bukan *database.DBWrapper")
 	}
 
+	// Safety check: jika DB disabled (Pool nil), skip migration
+	if wrapper == nil || wrapper.Pool == nil {
+		log.Println("[WARN] Database pool is nil, skipping migration & seeding")
+		return
+	}
+
 	pool := wrapper.Pool
 
 	migrationSQL := `

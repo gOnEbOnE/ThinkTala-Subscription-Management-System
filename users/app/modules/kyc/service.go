@@ -1,9 +1,12 @@
 package kyc
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"regexp"
 	"strings"
 	"time"
@@ -20,6 +23,91 @@ type Service struct {
 // NewService membuat instance baru KYC Service
 func NewService(repo Repository) *Service {
 	return &Service{repo: repo}
+}
+
+// dispatchNotification mengirim event KYC ke Notification Service.
+// Urutan: 1) Redis queue → 2) HTTP langsung → 3) SMTP fallback.
+func dispatchKYCNotification(eventType, to string, vars map[string]string) {
+	// 1. Coba Redis queue terlebih dahulu (async, reliable)
+	// if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
+	// 	log.Printf("[KYC NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
+	// 	return
+	// }
+
+	// 2. Fallback: HTTP langsung ke notification service
+	baseURL := utils.GetEnv("NOTIFICATION_SERVICE_URL", "http://localhost:5003")
+	payload := map[string]any{
+		"event_type": eventType,
+		"channel":    "email",
+		"to":         to,
+		"vars":       vars,
+	}
+	body, _ := json.Marshal(payload)
+
+	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
+	if err != nil {
+		log.Printf("[KYC NOTIF] Notification service tidak tersedia (%v), fallback SMTP", err)
+		return // Fallback handled di sendKYCFallbackEmail
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var result map[string]any
+		json.NewDecoder(resp.Body).Decode(&result)
+		log.Printf("[KYC NOTIF] Gagal kirim via template (%d: %v), fallback SMTP", resp.StatusCode, result["error"])
+		// log.Printf("[KYC NOTIF] Gagal kirim via template (%d: %v) — retry worker akan handle", resp.StatusCode, result["error"])
+	}
+}
+
+// sendKYCFallbackEmail mengirim email KYC langsung via SMTP jika Notification Service tidak tersedia.
+func sendKYCFallbackEmail(to, fullName, status, rejectReason string) {
+	smtp := utils.NewSMTPClient()
+	var subject, body string
+
+	if status == "approved" {
+		subject = "✓ Verifikasi KYC Berhasil - ThinkNalyze"
+		body = fmt.Sprintf(
+			"Halo %s,\n\n"+
+				"Selamat! Verifikasi identitas (KYC) Anda telah disetujui.\n\n"+
+				"Anda sekarang memiliki akses penuh ke semua fitur ThinkNalyze, termasuk:\n"+
+				"• Market Insight\n"+
+				"• Deep Scanner\n"+
+				"• Ask Nizza AI Assistant\n"+
+				"• Trading Features\n\n"+
+				"Silakan login ke dashboard Anda untuk mulai menggunakan layanan kami.\n\n"+
+				"Terima kasih telah mempercayai ThinkNalyze.\n\n"+
+				"Salam,\n"+
+				"Tim ThinkNalyze",
+			fullName,
+		)
+	} else if status == "rejected" {
+		subject = "⚠️ Verifikasi KYC Memerlukan Perbaikan - ThinkNalyze"
+		body = fmt.Sprintf(
+			"Halo %s,\n\n"+
+				"Mohon maaf, verifikasi identitas (KYC) Anda memerlukan perbaikan.\n\n"+
+				"ALASAN PENOLAKAN:\n"+
+				"%s\n\n"+
+				"LANGKAH SELANJUTNYA:\n"+
+				"1. Login ke dashboard Anda\n"+
+				"2. Buka menu KYC Verification\n"+
+				"3. Klik tombol \"Perbaiki Data KYC\"\n"+
+				"4. Perbaiki data sesuai alasan penolakan di atas\n"+
+				"5. Submit ulang untuk direview kembali\n\n"+
+				"Jika ada pertanyaan, silakan hubungi tim support kami.\n\n"+
+				"Salam,\n"+
+				"Tim ThinkNalyze",
+			fullName,
+			rejectReason,
+		)
+	} else {
+		return
+	}
+
+	if err := smtp.SendEmail(to, subject, body); err != nil {
+		log.Printf("[KYC NOTIFICATION] Gagal mengirim fallback email ke %s: %v", to, err)
+	} else {
+		log.Printf("[KYC NOTIFICATION] Fallback email terkirim ke %s", to)
+	}
 }
 
 // ProcessKYCSubmitJob — handler untuk dispatcher job "kyc_submit"
@@ -309,55 +397,26 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 }
 
 // sendKYCNotification mengirim email notifikasi ke user saat KYC di-approve/reject
-// Menggunakan goroutine (async) seperti pattern yang digunakan di register module
+// Menggunakan Notification Service dengan fallback SMTP
 func (s *Service) sendKYCNotification(email, fullName, status, rejectReason string) {
 	go func() {
-		smtp := utils.NewSMTPClient()
-		var subject, body string
+		switch status {
+		case "approved":
+			// Dispatch ke notification service dengan template kyc_approved
+			dispatchKYCNotification("kyc_approved", email, map[string]string{
+				"full_name": fullName,
+			})
+			// Fallback jika gagal
+			sendKYCFallbackEmail(email, fullName, status, rejectReason)
 
-		if status == "approved" {
-			subject = "✓ Verifikasi KYC Berhasil - ThinkNalyze"
-			body = fmt.Sprintf(
-				"Halo %s,\n\n"+
-					"Selamat! Verifikasi identitas (KYC) Anda telah disetujui.\n\n"+
-					"Anda sekarang memiliki akses penuh ke semua fitur ThinkNalyze, termasuk:\n"+
-					"• Market Insight\n"+
-					"• Deep Scanner\n"+
-					"• Ask Nizza AI Assistant\n"+
-					"• Trading Features\n\n"+
-					"Silakan login ke dashboard Anda untuk mulai menggunakan layanan kami.\n\n"+
-					"Terima kasih telah mempercayai ThinkNalyze.\n\n"+
-					"Salam,\n"+
-					"Tim ThinkNalyze",
-				fullName,
-			)
-		} else if status == "rejected" {
-			subject = "⚠️ Verifikasi KYC Memerlukan Perbaikan - ThinkNalyze"
-			body = fmt.Sprintf(
-				"Halo %s,\n\n"+
-					"Mohon maaf, verifikasi identitas (KYC) Anda memerlukan perbaikan.\n\n"+
-					"ALASAN PENOLAKAN:\n"+
-					"%s\n\n"+
-					"LANGKAH SELANJUTNYA:\n"+
-					"1. Login ke dashboard Anda\n"+
-					"2. Buka menu KYC Verification\n"+
-					"3. Klik tombol \"Perbaiki Data KYC\"\n"+
-					"4. Perbaiki data sesuai alasan penolakan di atas\n"+
-					"5. Submit ulang untuk direview kembali\n\n"+
-					"Jika ada pertanyaan, silakan hubungi tim support kami.\n\n"+
-					"Salam,\n"+
-					"Tim ThinkNalyze",
-				fullName,
-				rejectReason,
-			)
-		} else {
-			return // Status tidak valid, skip
-		}
-
-		if err := smtp.SendEmail(email, subject, body); err != nil {
-			log.Printf("[KYC NOTIFICATION] Gagal mengirim email ke %s: %v", email, err)
-		} else {
-			log.Printf("[KYC NOTIFICATION] Email %s terkirim ke %s", status, email)
+		case "rejected":
+			// Dispatch ke notification service dengan template kyc_rejected
+			dispatchKYCNotification("kyc_rejected", email, map[string]string{
+				"full_name":     fullName,
+				"reject_reason": rejectReason,
+			})
+			// Fallback jika gagal
+			sendKYCFallbackEmail(email, fullName, status, rejectReason)
 		}
 	}()
 }

@@ -3,6 +3,7 @@ package template
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"notification/core/database"
 
@@ -56,6 +57,49 @@ func (r *Repository) List(channel, eventType string) ([]NotificationTemplate, er
 	return list, nil
 }
 
+// RegisterEventType mencatat event_type ke registry (ON CONFLICT DO NOTHING).
+func (r *Repository) RegisterEventType(eventType string) {
+	r.db.Exec(context.Background(), `
+		INSERT INTO notification_event_types (event_type)
+		VALUES ($1)
+		ON CONFLICT (event_type) DO NOTHING
+	`, eventType)
+}
+
+// ListEventTypes mengembalikan semua event_type yang sudah terdaftar.
+func (r *Repository) ListEventTypes() ([]string, error) {
+	rows, err := r.db.Query(context.Background(),
+		`SELECT event_type FROM notification_event_types ORDER BY registered_at ASC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []string
+	for rows.Next() {
+		var et string
+		rows.Scan(&et)
+		list = append(list, et)
+	}
+	if list == nil {
+		list = []string{}
+	}
+	return list, nil
+}
+
+// GetByEventType mengambil template pertama yang cocok dengan event_type dan channel.
+func (r *Repository) GetByEventType(eventType, channel string) (NotificationTemplate, error) {
+	var t NotificationTemplate
+	err := r.db.QueryRow(context.Background(), `
+		SELECT id, name, event_type, channel, subject, content, created_at, updated_at, created_by, updated_by
+		FROM notification_templates
+		WHERE event_type = $1 AND channel = $2
+		LIMIT 1
+	`, eventType, channel).Scan(&t.ID, &t.Name, &t.EventType, &t.Channel, &t.Subject, &t.Content,
+		&t.CreatedAt, &t.UpdatedAt, &t.CreatedBy, &t.UpdatedBy)
+	return t, err
+}
+
 // GetByID mengambil satu template berdasarkan ID.
 func (r *Repository) GetByID(id string) (NotificationTemplate, error) {
 	var t NotificationTemplate
@@ -74,6 +118,103 @@ func (r *Repository) Exists(id string) bool {
 		"SELECT EXISTS(SELECT 1 FROM notification_templates WHERE id = $1)", id,
 	).Scan(&exists)
 	return exists
+}
+
+// ── Notification Logs ─────────────────────────────────────────────────────────
+
+// SaveLog menyimpan record log baru dengan status 'pending'.
+func (r *Repository) SaveLog(id, eventType, channel, to, subject, content string) {
+	r.db.Exec(context.Background(), `
+		INSERT INTO notification_logs (id, event_type, channel, to_address, subject, content, status)
+		VALUES ($1, $2, $3, $4, $5, $6, 'pending')
+	`, id, eventType, channel, to, subject, content)
+}
+
+// MarkLogSent menandai log sebagai berhasil dikirim.
+func (r *Repository) MarkLogSent(id string) {
+	r.db.Exec(context.Background(), `
+		UPDATE notification_logs SET status='sent', sent_at=NOW(), error_msg=NULL WHERE id=$1
+	`, id)
+}
+
+// MarkLogFailed menandai log gagal dan menjadwalkan retry dengan exponential backoff.
+func (r *Repository) MarkLogFailed(id, errMsg string, retryCount int, nextRetryAt *time.Time) {
+	r.db.Exec(context.Background(), `
+		UPDATE notification_logs
+		SET status='failed', error_msg=$1, retry_count=$2, next_retry_at=$3
+		WHERE id=$4
+	`, errMsg, retryCount, nextRetryAt, id)
+}
+
+// GetRetryableLogs mengambil log yang gagal dan siap di-retry.
+func (r *Repository) GetRetryableLogs() ([]NotificationLog, error) {
+	rows, err := r.db.Query(context.Background(), `
+		SELECT id, event_type, channel, to_address, subject, content, retry_count, max_retries
+		FROM notification_logs
+		WHERE status = 'failed'
+		  AND retry_count < max_retries
+		  AND next_retry_at <= NOW()
+		ORDER BY next_retry_at ASC
+		LIMIT 50
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var list []NotificationLog
+	for rows.Next() {
+		var l NotificationLog
+		var subject, content *string
+		rows.Scan(&l.ID, &l.EventType, &l.Channel, &l.ToAddress, &subject, &content, &l.RetryCount, &l.MaxRetries)
+		if subject != nil {
+			l.Subject = *subject
+		}
+		if content != nil {
+			l.Content = *content
+		}
+		list = append(list, l)
+	}
+	return list, nil
+}
+
+// ListLogs mengambil log notifikasi untuk monitoring, dengan filter status opsional.
+func (r *Repository) ListLogs(status string, limit, offset int) ([]NotificationLog, int, error) {
+	where := "WHERE 1=1"
+	args := []any{}
+	i := 1
+	if status != "" {
+		where += fmt.Sprintf(" AND status=$%d", i)
+		args = append(args, status)
+		i++
+	}
+
+	var total int
+	r.db.QueryRow(context.Background(), "SELECT COUNT(*) FROM notification_logs "+where, args...).Scan(&total)
+
+	args = append(args, limit, offset)
+	rows, err := r.db.Query(context.Background(), `
+		SELECT id, event_type, channel, to_address, status, retry_count, max_retries,
+		       next_retry_at, sent_at, error_msg, created_at
+		FROM notification_logs `+where+fmt.Sprintf(` ORDER BY created_at DESC LIMIT $%d OFFSET $%d`, i, i+1),
+		args...,
+	)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var list []NotificationLog
+	for rows.Next() {
+		var l NotificationLog
+		rows.Scan(&l.ID, &l.EventType, &l.Channel, &l.ToAddress, &l.Status,
+			&l.RetryCount, &l.MaxRetries, &l.NextRetryAt, &l.SentAt, &l.ErrorMsg, &l.CreatedAt)
+		list = append(list, l)
+	}
+	if list == nil {
+		list = []NotificationLog{}
+	}
+	return list, total, nil
 }
 
 // Create menyimpan template baru ke database.

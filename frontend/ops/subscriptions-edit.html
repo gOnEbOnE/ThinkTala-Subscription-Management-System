@@ -417,7 +417,7 @@
             submenu.classList.toggle('open');
         }
 
-        function logout() { window.location.href = '/account/logout'; }
+        function logout() { fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function(){}); localStorage.removeItem('token'); localStorage.removeItem('user'); sessionStorage.clear(); window.location.href = '/account/login'; }
 
         function formatRp(val) { return 'Rp ' + Number(val || 0).toLocaleString('id-ID'); }
 

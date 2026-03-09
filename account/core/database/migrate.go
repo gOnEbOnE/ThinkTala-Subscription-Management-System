@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"strings"
 )
 
 func MigrateAndSeed(db interface{}) {
@@ -59,7 +60,11 @@ func MigrateAndSeed(db interface{}) {
 	log.Println("Menjalankan Migrasi PostgreSQL...")
 	_, err := pool.Exec(ctx, migrationSQL)
 	if err != nil {
-		log.Fatalf("Gagal menjalankan migrasi: %v", err)
+		if strings.Contains(err.Error(), "duplicate key value") || strings.Contains(err.Error(), "already exists") {
+			log.Printf("[WARN] Migrasi race condition (safe to ignore): %v", err)
+		} else {
+			log.Fatalf("Gagal menjalankan migrasi: %v", err)
+		}
 	}
 
 	// 2. Query Seeder (Insert jika belum ada / UPSERT)

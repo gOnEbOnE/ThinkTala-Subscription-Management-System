@@ -22,7 +22,21 @@ func main() {
 	database.Seed()
 
 	r := gin.Default()
-	routes.Register(r)
+	// TODO(queue): Ganti _ dengan svc dan uncomment workers di bawah saat siap di-deploy
+	_ = routes.Register(r)
+
+	// TODO(queue): Aktifkan semua baris berikut setelah workers siap di-deploy:
+	// import (
+	//   "context"
+	//   "os/signal"
+	//   "syscall"
+	//   "notification/core/queue"
+	// )
+	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	// defer stop()
+	// svc := routes.Register(r)
+	// go svc.StartRetryWorker(ctx)
+	// go queue.StartWorker(ctx, svc)
 
 	port := database.GetEnv("PORT", "5003")
 	log.Printf("[NOTIFICATION] Service running on :%s", port)

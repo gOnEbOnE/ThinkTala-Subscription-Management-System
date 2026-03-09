@@ -28,6 +28,24 @@
       "description": "Auth API"
     },
     {
+      "path": "/api/auth/logout",
+      "target": "http://localhost:2006",
+      "cors": true,
+      "description": "Logout API"
+    },
+    {
+      "path": "/api/auth/assume-role",
+      "target": "http://localhost:2006",
+      "cors": true,
+      "description": "Assume Role API (Super Admin)"
+    },
+    {
+      "path": "/api/auth/roles",
+      "target": "http://localhost:2006",
+      "cors": true,
+      "description": "Get Available Roles (Super Admin)"
+    },
+    {
       "path": "/account/login/auth",
       "target": "http://localhost:2006",
       "cors": true,
@@ -72,6 +90,7 @@
       "cors": true,
       "description": "Notification API"
     },
+    { "path": "/api/help/", "target": "http://localhost:5003", "cors": true, "description": "Notification templates & help API" },
     {
       "path": "/api/help/",
       "target": "http://localhost:5003",

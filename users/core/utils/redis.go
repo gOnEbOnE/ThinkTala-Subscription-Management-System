@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -121,4 +122,28 @@ func GetRedisClient() *redis.Client {
 // IsRedisEnabled mengecek apakah redis aktif dari luar package.
 func IsRedisEnabled() bool {
 	return redisEnabled
+}
+
+// PublishNotificationEvent mempublish event notifikasi ke Redis queue (RPUSH).
+// Notification service akan BLPOP dan memproses event ini secara async.
+// Mengembalikan error jika Redis tidak aktif atau push gagal.
+func PublishNotificationEvent(eventType, channel, to string, vars map[string]string) error {
+	if !redisEnabled || redisClient == nil {
+		return fmt.Errorf("redis tidak aktif")
+	}
+	payload, err := json.Marshal(map[string]any{
+		"event_type": eventType,
+		"channel":    channel,
+		"to":         to,
+		"vars":       vars,
+	})
+	if err != nil {
+		return fmt.Errorf("marshal payload gagal: %w", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	if err := redisClient.RPush(ctx, "notification:events", payload).Err(); err != nil {
+		return fmt.Errorf("RPUSH gagal: %w", err)
+	}
+	return nil
 }
