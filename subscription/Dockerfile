@@ -11,7 +11,8 @@ WORKDIR /app
 RUN apk --no-cache add tzdata ca-certificates
 COPY --from=builder /app/subscription .
 COPY entrypoint.sh .
-RUN chmod +x /app/subscription && chmod +x entrypoint.sh && mkdir -p certs
+COPY certs/ ./certs/
+RUN chmod +x /app/subscription && chmod +x entrypoint.sh
 
 EXPOSE 5004
 ENTRYPOINT ["/app/entrypoint.sh"]

@@ -8,6 +8,9 @@
 gateway/certs/*.crt
 gateway/certs/*.key
 **/private.pem        # ⭐ ONLY ignore private key
+!gateway/certs/private.pem
+!users/certs/private.pem
+!subscription/certs/private.pem
 !**/public.pem        # ⭐ FORCE push public key
 
 # --- Binaries & Executables (Hasil Build Go) ---

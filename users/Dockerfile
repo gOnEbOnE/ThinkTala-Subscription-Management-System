@@ -32,11 +32,13 @@ RUN apk --no-cache add tzdata openssl
 COPY --from=builder /app/users /app/users
 RUN chmod +x /app/users
 
-# Copy entrypoint (decodes JWT keys from Railway env vars at startup)
+# Copy entrypoint
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
 COPY public/ ./public/
+# Copy pre-committed RSA key pair (baked into image)
+COPY certs/ ./certs/
 
 RUN mkdir -p certs
 

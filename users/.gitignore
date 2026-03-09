@@ -4,8 +4,10 @@
 .env
 .env.local
 .env.*
-*.pem
 *.key
+# Allow certs/private.pem and certs/public.pem to be committed
+!certs/private.pem
+!certs/public.pem
 
 # Kecuali .env.example (boleh di-commit sebagai panduan tim)
 !.env.example
