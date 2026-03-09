@@ -5,18 +5,18 @@ set -e
 
 mkdir -p certs
 
-# Decode RSA private key (gateway needs it for InitJWTLoadKeys even though it only verifies)
+# Decode RSA private key (strip surrounding quotes Railway may include)
 if [ -n "$JWT_PRIVATE_KEY_B64" ]; then
-    echo "$JWT_PRIVATE_KEY_B64" | base64 -d > certs/private.pem
+    printf '%s' "$JWT_PRIVATE_KEY_B64" | tr -d '"' | base64 -d > certs/private.pem
     echo "[entrypoint] JWT private key loaded from env"
 elif [ ! -f "certs/private.pem" ]; then
     echo "[entrypoint] FATAL: JWT_PRIVATE_KEY_B64 not set and certs/private.pem not found"
     exit 1
 fi
 
-# Decode RSA public key
+# Decode RSA public key (strip surrounding quotes Railway may include)
 if [ -n "$JWT_PUBLIC_KEY_B64" ]; then
-    echo "$JWT_PUBLIC_KEY_B64" | base64 -d > certs/public.pem
+    printf '%s' "$JWT_PUBLIC_KEY_B64" | tr -d '"' | base64 -d > certs/public.pem
     echo "[entrypoint] JWT public key loaded from env"
 elif [ ! -f "certs/public.pem" ]; then
     echo "[entrypoint] FATAL: JWT_PUBLIC_KEY_B64 not set and certs/public.pem not found"
