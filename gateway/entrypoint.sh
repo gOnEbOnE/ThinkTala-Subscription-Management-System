@@ -1,26 +1,31 @@
 #!/bin/sh
-# entrypoint.sh — decode JWT keys from Railway env vars before starting gateway
+# entrypoint.sh — load JWT keys from baked files OR decode from env vars
 
 set -e
 
 mkdir -p certs
 
-# Decode RSA private key (strip ALL whitespace + quotes in case Railway line-wraps long vars)
-if [ -n "$JWT_PRIVATE_KEY_B64" ]; then
-    printf '%s' "$JWT_PRIVATE_KEY_B64" | tr -d '"\n\r ' | base64 -d > certs/private.pem
-    echo "[entrypoint] JWT private key loaded from env"
-elif [ ! -f "certs/private.pem" ]; then
-    echo "[entrypoint] FATAL: JWT_PRIVATE_KEY_B64 not set and certs/private.pem not found"
-    exit 1
-fi
+# Only decode from env if baked files don't exist
+if [ -f "certs/private.pem" ] && [ -f "certs/public.pem" ]; then
+    echo "[entrypoint] Using baked JWT keys from certs/"
+else
+    # Decode RSA private key (strip ALL whitespace + quotes in case Railway line-wraps long vars)
+    if [ -n "$JWT_PRIVATE_KEY_B64" ]; then
+        printf '%s' "$JWT_PRIVATE_KEY_B64" | tr -d '"\n\r ' | base64 -d > certs/private.pem
+        echo "[entrypoint] JWT private key loaded from env"
+    elif [ ! -f "certs/private.pem" ]; then
+        echo "[entrypoint] FATAL: JWT_PRIVATE_KEY_B64 not set and certs/private.pem not found"
+        exit 1
+    fi
 
-# Decode RSA public key (strip ALL whitespace + quotes in case Railway line-wraps long vars)
-if [ -n "$JWT_PUBLIC_KEY_B64" ]; then
-    printf '%s' "$JWT_PUBLIC_KEY_B64" | tr -d '"\n\r ' | base64 -d > certs/public.pem
-    echo "[entrypoint] JWT public key loaded from env"
-elif [ ! -f "certs/public.pem" ]; then
-    echo "[entrypoint] FATAL: JWT_PUBLIC_KEY_B64 not set and certs/public.pem not found"
-    exit 1
+    # Decode RSA public key (strip ALL whitespace + quotes in case Railway line-wraps long vars)
+    if [ -n "$JWT_PUBLIC_KEY_B64" ]; then
+        printf '%s' "$JWT_PUBLIC_KEY_B64" | tr -d '"\n\r ' | base64 -d > certs/public.pem
+        echo "[entrypoint] JWT public key loaded from env"
+    elif [ ! -f "certs/public.pem" ]; then
+        echo "[entrypoint] FATAL: JWT_PUBLIC_KEY_B64 not set and certs/public.pem not found"
+        exit 1
+    fi
 fi
 
 exec ./thinknalyze-gateway "$@"
