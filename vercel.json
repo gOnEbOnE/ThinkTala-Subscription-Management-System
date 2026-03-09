@@ -6,7 +6,7 @@
   "trailingSlash": false,
   "rewrites": [
     { "source": "/", "destination": "/landing.html" },
-    { "source": "/api/:path*", "destination": "https://YOUR_BACKEND_GATEWAY_URL/api/:path*" },
-    { "source": "/account/login/auth", "destination": "https://YOUR_BACKEND_GATEWAY_URL/account/login/auth" }
+    { "source": "/api/:path*", "destination": "https://propensuy-thinktala-production.up.railway.app/api/:path*" },
+    { "source": "/account/login/auth", "destination": "https://propensuy-thinktala-production.up.railway.app/account/login/auth" }
   ]
 }
