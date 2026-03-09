@@ -8,7 +8,23 @@
   ],
   "rewrites": [
     { "source": "/", "destination": "/landing.html" },
-    { "source": "/api/:path*", "destination": "https://propensuy-thinktala-production.up.railway.app/api/:path*" },
-    { "source": "/account/login/auth", "destination": "https://propensuy-thinktala-production.up.railway.app/account/login/auth" }
+    { "source": "/account/login", "destination": "/account/login.html" },
+    { "source": "/account/register", "destination": "/account/register.html" },
+    { "source": "/account/verify-otp", "destination": "/account/verify-otp.html" },
+    { "source": "/ops/dashboard", "destination": "/ops/dashboard.html" },
+    { "source": "/ops/notifications", "destination": "/ops/notifications.html" },
+    { "source": "/ops/subscriptions", "destination": "/ops/subscriptions.html" },
+    { "source": "/ops/subscriptions-create", "destination": "/ops/subscriptions-create.html" },
+    { "source": "/ops/subscriptions-edit", "destination": "/ops/subscriptions-edit.html" },
+    { "source": "/ops/notification-templates", "destination": "/ops/notification-templates.html" },
+    { "source": "/compliance/dashboard", "destination": "/compliance/dashboard.html" },
+    { "source": "/compliance/kyc-detail", "destination": "/compliance/kyc-detail.html" },
+    { "source": "/compliance/reports", "destination": "/compliance/reports.html" },
+    { "source": "/client/dashboard", "destination": "/client/dashboard.html" },
+    { "source": "/client/kyc", "destination": "/client/kyc.html" },
+    { "source": "/client/kyc-status", "destination": "/client/kyc-status.html" },
+    { "source": "/market-insight", "destination": "/market-insight.html" },
+    { "source": "/account/login/auth", "destination": "https://propensuy-thinktala-production.up.railway.app/account/login/auth" },
+    { "source": "/api/:path*", "destination": "https://propensuy-thinktala-production.up.railway.app/api/:path*" }
   ]
 }
