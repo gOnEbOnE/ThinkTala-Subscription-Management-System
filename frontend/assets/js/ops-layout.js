@@ -21,7 +21,7 @@
     }
 
     // ── Role guard: /ops/* is only for OPERASIONAL, CEO, SUPERADMIN ──────
-    var _opsRole = (guardUser.level_code || guardUser.level || '').toString().toUpperCase();
+    var _opsRole = (guardUser.role_code || guardUser.level_code || guardUser.level || '').toString().toUpperCase();
     if (_opsRole !== 'OPERASIONAL' && _opsRole !== 'CEO' && _opsRole !== 'SUPERADMIN') {
         var _opsRedirect = { 'COMPLIANCE': '/compliance/dashboard', 'CLIENT': '/client/dashboard' };
         window.location.href = _opsRedirect[_opsRole] || '/account/login';

@@ -7,7 +7,7 @@
         return;
     }
     // ── Role guard: /compliance/* is only for COMPLIANCE, CEO, SUPERADMIN ──
-    var _compRole = (user.level_code || user.level || '').toString().toUpperCase();
+    var _compRole = (user.role_code || user.level_code || user.level || '').toString().toUpperCase();
     if (_compRole !== 'COMPLIANCE' && _compRole !== 'CEO' && _compRole !== 'SUPERADMIN') {
         var _compRedirect = { 'OPERASIONAL': '/ops/dashboard', 'CLIENT': '/client/dashboard' };
         window.location.href = _compRedirect[_compRole] || '/account/login';
