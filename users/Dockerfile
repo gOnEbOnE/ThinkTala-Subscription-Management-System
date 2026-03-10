@@ -42,9 +42,9 @@ COPY certs/ ./certs/
 
 RUN mkdir -p certs
 
-# Persist uploads directory (attach a Railway Volume at /app/public/uploads)
+# Ensure uploads directory exists at build time
+# (Railway Volume should be mounted at /app/public/uploads via Railway dashboard)
 RUN mkdir -p /app/public/uploads/kyc
-VOLUME ["/app/public/uploads"]
 
 # Expose port aplikasi
 EXPOSE 2006
