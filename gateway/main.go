@@ -435,35 +435,61 @@ func main() {
 	// 6. API proxy routes (from routes.json)
 	// ========================================
 
+	// Helper to look up target from routes.json config
+	getRouteTarget := func(path string) string {
+		for _, route := range config.Routes {
+			if route.Path == path {
+				return route.Target
+			}
+		}
+		return ""
+	}
+
 	// --- SUBSCRIPTION SERVICE (role-protected) ---
 	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
+	subTarget := getRouteTarget("/api/admin/packages")
+	if subTarget == "" {
+		subTarget = "http://subscription-service.railway.internal:5004"
+	}
 	http.HandleFunc("/api/admin/packages", withRoleAuth(
-		createProxyHandler("http://localhost:5004", true),
+		createProxyHandler(subTarget, true),
 	))
 	http.HandleFunc("/api/admin/packages/", withRoleAuth(
-		createProxyHandler("http://localhost:5004", true),
+		createProxyHandler(subTarget, true),
 	))
 	// PBI-37: Public catalog — CLIENT, OPERASIONAL, CEO, SUPERADMIN
+	catalogTarget := getRouteTarget("/api/subscription/catalog")
+	if catalogTarget == "" {
+		catalogTarget = subTarget
+	}
 	http.HandleFunc("/api/subscription/catalog", withRoleAuth(
-		createProxyHandler("http://localhost:5004", true),
+		createProxyHandler(catalogTarget, true),
 	))
-	log.Printf("[GW] Protected API: /api/admin/packages -> http://localhost:5004 (CEO/SUPERADMIN/OPERASIONAL)")
-	log.Printf("[GW] Protected API: /api/subscription/catalog -> http://localhost:5004 (CLIENT+)")
+	log.Printf("[GW] Protected API: /api/admin/packages -> %s (CEO/SUPERADMIN/OPERASIONAL)", subTarget)
+	log.Printf("[GW] Protected API: /api/subscription/catalog -> %s (CLIENT+)", catalogTarget)
 
 	// --- KYC Admin API (role-protected) - COMPLIANCE & OPERASIONAL can access ---
+	kycTarget := getRouteTarget("/api/admin/kyc")
+	if kycTarget == "" {
+		kycTarget = "http://users-service.railway.internal:2006"
+	}
 	http.HandleFunc("/api/admin/kyc", withRoleAuth(
-		createProxyHandler("http://localhost:2006", true),
+		createProxyHandler(kycTarget, true),
 	))
 	http.HandleFunc("/api/admin/kyc/", withRoleAuth(
-		createProxyHandler("http://localhost:2006", true),
+		createProxyHandler(kycTarget, true),
 	))
-	log.Printf("[GW] Protected API: /api/admin/kyc -> http://localhost:2006 (CEO/SUPERADMIN/COMPLIANCE/OPERASIONAL)")
+	log.Printf("[GW] Protected API: /api/admin/kyc -> %s (CEO/SUPERADMIN/COMPLIANCE/OPERASIONAL)", kycTarget)
 
 	// --- KYC Client API (role-protected) - CLIENT can access their own KYC ---
+	kycClientTarget := getRouteTarget("/api/kyc/")
+	if kycClientTarget == "" {
+		kycClientTarget = kycTarget
+	}
 	http.HandleFunc("/api/kyc/", withRoleAuth(
-		createProxyHandler("http://localhost:2006", true),
+		createProxyHandler(kycClientTarget, true),
 	))
-	log.Printf("[GW] Protected API: /api/kyc/ -> http://localhost:2006 (CLIENT+)")
+	log.Printf("[GW] Protected API: /api/kyc/ -> %s (CLIENT+)", kycClientTarget)
 
 	// --- Generic API proxy from routes.json (no role auth) ---
 	for _, route := range config.Routes {
