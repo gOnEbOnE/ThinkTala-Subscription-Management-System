@@ -13,7 +13,7 @@ import (
 )
 
 // ============================================================
-// EmailSender — abstraction over SMTP and Resend HTTP API
+// EmailSender — abstraction over Brevo HTTP API and SMTP
 // ============================================================
 
 // EmailSender is the interface used by the notification service.
@@ -22,20 +22,15 @@ type EmailSender interface {
 	SendHTMLEmail(to, subject, htmlBody string) error
 }
 
-// NewEmailSender returns Resend-based sender if RESEND_API_KEY is set,
+// NewEmailSender returns Brevo-based sender if BREVO_API_KEY is set,
 // otherwise falls back to SMTP.
 func NewEmailSender() EmailSender {
-	// Priority: Brevo > Resend > SMTP
+	// Priority: Brevo > SMTP
 	if key := getEnv("BREVO_API_KEY"); key != "" {
 		from := getEnv("BREVO_FROM_EMAIL", getEnv("SMTP_FROM", "noreply@thinktala.com"))
 		fromName := getEnv("BREVO_FROM_NAME", "ThinkTala")
 		log.Printf("[EMAIL] Using Brevo HTTP API (from: %s <%s>)", fromName, from)
 		return &BrevoClient{APIKey: key, FromEmail: from, FromName: fromName}
-	}
-	if key := getEnv("RESEND_API_KEY"); key != "" {
-		from := getEnv("RESEND_FROM", getEnv("SMTP_FROM", "noreply@thinktala.com"))
-		log.Printf("[EMAIL] Using Resend HTTP API (from: %s)", from)
-		return &ResendClient{APIKey: key, From: from}
 	}
 	log.Println("[EMAIL] Using SMTP (fallback)")
 	return NewSMTPClient()
@@ -107,63 +102,6 @@ func (b *BrevoClient) send(payload brevoPayload) error {
 	if resp.StatusCode >= 400 {
 		respBody, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("brevo error %d: %s", resp.StatusCode, string(respBody))
-	}
-
-	return nil
-}
-
-// ============================================================
-// Resend HTTP API Client
-// ============================================================
-
-type ResendClient struct {
-	APIKey string
-	From   string
-}
-
-type resendPayload struct {
-	From    string   `json:"from"`
-	To      []string `json:"to"`
-	Subject string   `json:"subject"`
-	HTML    string   `json:"html,omitempty"`
-	Text    string   `json:"text,omitempty"`
-}
-
-func (r *ResendClient) SendEmail(to, subject, body string) error {
-	return r.send(resendPayload{
-		From: r.From, To: []string{to}, Subject: subject, Text: body,
-	})
-}
-
-func (r *ResendClient) SendHTMLEmail(to, subject, htmlBody string) error {
-	return r.send(resendPayload{
-		From: r.From, To: []string{to}, Subject: subject, HTML: htmlBody,
-	})
-}
-
-func (r *ResendClient) send(payload resendPayload) error {
-	body, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("resend marshal: %w", err)
-	}
-
-	req, err := http.NewRequest("POST", "https://api.resend.com/emails", bytes.NewReader(body))
-	if err != nil {
-		return fmt.Errorf("resend request: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+r.APIKey)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{Timeout: 15 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("resend send: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("resend error %d: %s", resp.StatusCode, string(respBody))
 	}
 
 	return nil
