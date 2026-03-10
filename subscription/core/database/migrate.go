@@ -79,12 +79,11 @@ func MigrateAndSeed(db interface{}) {
 		log.Fatalf("Gagal menjalankan seeder: %v", err)
 	}
 
-	// 3. Seed dummy orders using real users from DB (for demo/testing)
+	// 3. Seed dummy orders using real CLIENT user IDs
 	ordersSeederSQL := `
-	-- Cleanup old dummy orders with fake user_ids
-	DELETE FROM subscription.orders WHERE user_id::text LIKE 'aaaaaaaa-%';
+	-- Wipe ALL old orders and re-seed with correct client user_ids
+	DELETE FROM subscription.orders WHERE invoice_number LIKE 'INV-2026-000%';
 
-	-- Seed with real user IDs (CLIENT users from production DB)
 	INSERT INTO subscription.orders (id, invoice_number, user_id, package_id, total_price, status, created_at) VALUES
 	    (gen_random_uuid(), 'INV-2026-00001', '019cd5b3-d8f9-7d8d-810b-13fc26d137fa', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', 150000.00,  'PAID',      '2026-01-05 10:00:00'),
 	    (gen_random_uuid(), 'INV-2026-00002', '019cd65b-7a61-7047-a97b-a615cc4eb1fa', 'b2c3d4e5-f678-9012-3456-7890abcdef12', 500000.00,  'PAID',      '2026-01-12 14:30:00'),
@@ -93,8 +92,7 @@ func MigrateAndSeed(db interface{}) {
 	    (gen_random_uuid(), 'INV-2026-00005', '019cd613-fe86-70be-b51e-b3bef12557a4', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', 150000.00,  'PAID',      '2026-02-18 16:45:00'),
 	    (gen_random_uuid(), 'INV-2026-00006', '019cd582-9cba-7749-8924-c96b95643828', 'c3d4e5f6-7890-1234-5678-90abcdef1234', 1200000.00, 'PENDING',   '2026-03-01 08:00:00'),
 	    (gen_random_uuid(), 'INV-2026-00007', '019cd65b-7a61-7047-a97b-a615cc4eb1fa', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', 150000.00,  'EXPIRED',   '2026-03-05 13:20:00'),
-	    (gen_random_uuid(), 'INV-2026-00008', '019cd613-fe86-70be-b51e-b3bef12557a4', 'b2c3d4e5-f678-9012-3456-7890abcdef12', 500000.00,  'PAID',      '2026-03-08 17:00:00')
-	ON CONFLICT (invoice_number) DO NOTHING;
+	    (gen_random_uuid(), 'INV-2026-00008', '019cd613-fe86-70be-b51e-b3bef12557a4', 'b2c3d4e5-f678-9012-3456-7890abcdef12', 500000.00,  'PAID',      '2026-03-08 17:00:00');
 	`
 
 	log.Println("Menjalankan Seeder Orders (Dummy)...")
