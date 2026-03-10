@@ -90,6 +90,11 @@ func (s *packageService) UpdatePackage(ctx context.Context, id string, payload U
 		return nil, errors.New("paket tidak ditemukan atau sudah dihapus")
 	}
 
+	// PBI-34: Tolak update paket yang sedang ACTIVE
+	if existing.Status == "ACTIVE" {
+		return nil, errors.New("tidak dapat mengubah paket yang sedang aktif")
+	}
+
 	return s.repo.UpdatePackage(ctx, id, payload)
 }
 
