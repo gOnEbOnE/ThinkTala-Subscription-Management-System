@@ -79,19 +79,41 @@ func MigrateAndSeed(db interface{}) {
 		log.Fatalf("Gagal menjalankan seeder: %v", err)
 	}
 
-	// 3. Seed dummy orders (for demo/testing)
+	// 3. Seed dummy orders using real users from DB (for demo/testing)
 	ordersSeederSQL := `
-	INSERT INTO subscription.orders (id, invoice_number, user_id, package_id, total_price, status, created_at)
-	VALUES
-	    ('f1a2b3c4-d5e6-7890-aaaa-111111111111', 'INV-2026-00001', 'aaaaaaaa-0000-0000-0000-000000000001', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', 150000.00, 'PAID',      '2026-01-05 10:00:00'),
-	    ('f2a2b3c4-d5e6-7890-bbbb-222222222222', 'INV-2026-00002', 'aaaaaaaa-0000-0000-0000-000000000002', 'b2c3d4e5-f678-9012-3456-7890abcdef12', 500000.00, 'PAID',      '2026-01-12 14:30:00'),
-	    ('f3a2b3c4-d5e6-7890-cccc-333333333333', 'INV-2026-00003', 'aaaaaaaa-0000-0000-0000-000000000003', 'c3d4e5f6-7890-1234-5678-90abcdef1234', 1200000.00,'PENDING',   '2026-02-01 09:15:00'),
-	    ('f4a2b3c4-d5e6-7890-dddd-444444444444', 'INV-2026-00004', 'aaaaaaaa-0000-0000-0000-000000000001', 'b2c3d4e5-f678-9012-3456-7890abcdef12', 500000.00, 'CANCELLED', '2026-02-10 11:00:00'),
-	    ('f5a2b3c4-d5e6-7890-eeee-555555555555', 'INV-2026-00005', 'aaaaaaaa-0000-0000-0000-000000000004', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', 150000.00, 'PAID',      '2026-02-18 16:45:00'),
-	    ('f6a2b3c4-d5e6-7890-ffff-666666666666', 'INV-2026-00006', 'aaaaaaaa-0000-0000-0000-000000000005', 'c3d4e5f6-7890-1234-5678-90abcdef1234', 1200000.00,'PENDING',   '2026-03-01 08:00:00'),
-	    ('f7a2b3c4-d5e6-7890-aaaa-777777777777', 'INV-2026-00007', 'aaaaaaaa-0000-0000-0000-000000000002', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', 150000.00, 'EXPIRED',   '2026-03-05 13:20:00'),
-	    ('f8a2b3c4-d5e6-7890-bbbb-888888888888', 'INV-2026-00008', 'aaaaaaaa-0000-0000-0000-000000000003', 'b2c3d4e5-f678-9012-3456-7890abcdef12', 500000.00, 'PAID',      '2026-03-08 17:00:00')
-	ON CONFLICT (id) DO NOTHING;
+	DO $$
+	DECLARE
+	    uids UUID[];
+	    pkg_basic UUID := 'a1b2c3d4-e5f6-7890-1234-567890abcdef';
+	    pkg_pro   UUID := 'b2c3d4e5-f678-9012-3456-7890abcdef12';
+	    pkg_ent   UUID := 'c3d4e5f6-7890-1234-5678-90abcdef1234';
+	BEGIN
+	    SELECT ARRAY(SELECT id FROM users ORDER BY created_at LIMIT 5) INTO uids;
+
+	    IF array_length(uids, 1) IS NULL OR array_length(uids, 1) = 0 THEN
+	        RAISE NOTICE 'No users found, skipping order seeding';
+	        RETURN;
+	    END IF;
+
+	    -- Delete old dummy orders with fake user_ids, then re-seed
+	    DELETE FROM subscription.orders WHERE user_id::text LIKE 'aaaaaaaa-%';
+
+	    IF EXISTS (SELECT 1 FROM subscription.orders LIMIT 1) THEN
+	        RAISE NOTICE 'Orders already seeded with real users';
+	        RETURN;
+	    END IF;
+
+	    INSERT INTO subscription.orders (id, invoice_number, user_id, package_id, total_price, status, created_at) VALUES
+	        (gen_random_uuid(), 'INV-2026-00001', uids[1], pkg_basic, 150000.00,  'PAID',      '2026-01-05 10:00:00'),
+	        (gen_random_uuid(), 'INV-2026-00002', uids[LEAST(2, array_length(uids,1))], pkg_pro,   500000.00,  'PAID',      '2026-01-12 14:30:00'),
+	        (gen_random_uuid(), 'INV-2026-00003', uids[LEAST(3, array_length(uids,1))], pkg_ent,   1200000.00, 'PENDING',   '2026-02-01 09:15:00'),
+	        (gen_random_uuid(), 'INV-2026-00004', uids[1],                              pkg_pro,   500000.00,  'CANCELLED', '2026-02-10 11:00:00'),
+	        (gen_random_uuid(), 'INV-2026-00005', uids[LEAST(4, array_length(uids,1))], pkg_basic, 150000.00,  'PAID',      '2026-02-18 16:45:00'),
+	        (gen_random_uuid(), 'INV-2026-00006', uids[LEAST(5, array_length(uids,1))], pkg_ent,   1200000.00, 'PENDING',   '2026-03-01 08:00:00'),
+	        (gen_random_uuid(), 'INV-2026-00007', uids[LEAST(2, array_length(uids,1))], pkg_basic, 150000.00,  'EXPIRED',   '2026-03-05 13:20:00'),
+	        (gen_random_uuid(), 'INV-2026-00008', uids[LEAST(3, array_length(uids,1))], pkg_pro,   500000.00,  'PAID',      '2026-03-08 17:00:00')
+	    ON CONFLICT (invoice_number) DO NOTHING;
+	END $$;
 	`
 
 	log.Println("Menjalankan Seeder Orders (Dummy)...")
