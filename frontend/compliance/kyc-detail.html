@@ -304,11 +304,9 @@
         var ktpImage = document.getElementById('ktpImage');
         if (d.ktp_image) {
             var src = d.ktp_image;
-            // Handle relative path - add /uploads/kyc/ prefix if needed
-            if (src.indexOf('http') !== 0 && src.indexOf('/uploads/') !== 0) {
+            // Handle relative filename (legacy) — data URI and http URLs pass through as-is
+            if (src.indexOf('data:') !== 0 && src.indexOf('http') !== 0 && src.indexOf('/uploads/') !== 0) {
                 src = '/uploads/kyc/' + src;
-            } else if (src.indexOf('/') !== 0 && src.indexOf('http') !== 0) {
-                src = '/' + src;
             }
             ktpImage.src = src;
             ktpImage.onload = function () {

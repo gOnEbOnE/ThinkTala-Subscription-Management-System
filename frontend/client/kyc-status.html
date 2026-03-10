@@ -335,7 +335,8 @@
             if (kyc.ktp_image) {
                 let imageSrc = kyc.ktp_image;
                 // Add prefix if needed
-                if (imageSrc.indexOf('http') !== 0 && imageSrc.indexOf('/uploads/') !== 0) {
+                // data URI and http URLs pass through as-is; only legacy filenames need the prefix
+                if (imageSrc.indexOf('data:') !== 0 && imageSrc.indexOf('http') !== 0 && imageSrc.indexOf('/uploads/') !== 0) {
                     imageSrc = '/uploads/kyc/' + imageSrc;
                 }
                 document.getElementById('ktpImage').src = imageSrc;
