@@ -102,13 +102,13 @@ func (s *Service) Send(req SendRequest) error {
 func (s *Service) doSend(channel, to, subject, content string) error {
 	switch channel {
 	case "email":
-		smtp := utils.NewSMTPClient()
+		sender := utils.NewEmailSender()
 		trimmed := strings.TrimSpace(content)
 		isHTML := len(trimmed) > 0 && trimmed[0] == '<'
 		if isHTML {
-			return smtp.SendHTMLEmail(to, subject, content)
+			return sender.SendHTMLEmail(to, subject, content)
 		}
-		return smtp.SendEmail(to, subject, content)
+		return sender.SendEmail(to, subject, content)
 	default:
 		return fmt.Errorf("channel '%s' belum didukung", channel)
 	}
