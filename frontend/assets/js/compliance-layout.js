@@ -6,7 +6,13 @@
         window.location.href = '/account/login';
         return;
     }
-
+    // ── Role guard: /compliance/* is only for COMPLIANCE, CEO, SUPERADMIN ──
+    var _compRole = (user.level_code || user.level || '').toString().toUpperCase();
+    if (_compRole !== 'COMPLIANCE' && _compRole !== 'CEO' && _compRole !== 'SUPERADMIN') {
+        var _compRedirect = { 'OPERASIONAL': '/ops/dashboard', 'CLIENT': '/client/dashboard' };
+        window.location.href = _compRedirect[_compRole] || '/account/login';
+        return;
+    }
     // ── Prevent transition flash on load ──────────────────────────
     var css = document.createElement('style');
     css.id = 'prevent-tx';

@@ -28,10 +28,12 @@ func init() {
 
 // Route configuration structure
 type RouteConfig struct {
-	Path        string `json:"path"`
-	Target      string `json:"target"`
-	CORS        bool   `json:"cors"`
-	Description string `json:"description,omitempty"`
+	Path        string   `json:"path"`
+	Target      string   `json:"target"`
+	CORS        bool     `json:"cors"`
+	Auth        bool     `json:"auth,omitempty"`
+	Roles       []string `json:"roles,omitempty"`
+	Description string   `json:"description,omitempty"`
 }
 
 // Configuration structure
@@ -226,6 +228,84 @@ a:hover{background:#6C63FF;color:#fff;}
 		r.Header.Set("X-User-Email", user.Email)
 
 		h.ServeHTTP(w, r)
+	}
+}
+
+// ========================================
+// Role-list Auth Middleware (reads roles from routes.json)
+// ========================================
+func withRolesAuth(roles []string, h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, err := auth.GetUserFromToken(r)
+		if err != nil {
+			log.Printf("[AUTH] Token error: %v", err)
+			if strings.Contains(r.Header.Get("Accept"), "application/json") {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`{"error":"Unauthorized","message":"Please log in"}`))
+				return
+			}
+			http.Redirect(w, r, "/account/login", http.StatusFound)
+			return
+		}
+
+		// SUPERADMIN and CEO bypass role list check
+		if user.RoleCode == "SUPERADMIN" || user.RoleCode == "CEO" {
+			r.Header.Set("X-User-Role", user.RoleCode)
+			r.Header.Set("X-User-ID", user.ID)
+			r.Header.Set("X-User-Email", user.Email)
+			h.ServeHTTP(w, r)
+			return
+		}
+
+		// If no roles defined, any authenticated user may pass
+		if len(roles) == 0 {
+			r.Header.Set("X-User-Role", user.RoleCode)
+			r.Header.Set("X-User-ID", user.ID)
+			r.Header.Set("X-User-Email", user.Email)
+			h.ServeHTTP(w, r)
+			return
+		}
+
+		// Check if user role is in the allowed list
+		for _, allowed := range roles {
+			if strings.EqualFold(user.RoleCode, allowed) {
+				r.Header.Set("X-User-Role", user.RoleCode)
+				r.Header.Set("X-User-ID", user.ID)
+				r.Header.Set("X-User-Email", user.Email)
+				h.ServeHTTP(w, r)
+				return
+			}
+		}
+
+		log.Printf("[AUTH] Access denied (route roles): user=%s role=%s path=%s allowed=%v",
+			user.Email, user.RoleCode, r.URL.Path, roles)
+
+		if strings.Contains(r.Header.Get("Accept"), "application/json") ||
+			r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte(`{"error":"Forbidden","message":"You don't have access to this resource"}`))
+			return
+		}
+
+		w.WriteHeader(http.StatusForbidden)
+		w.Header().Set("Content-Type", "text/html")
+		fmt.Fprintf(w, `<!DOCTYPE html>
+<html><head><title>403 Forbidden</title>
+<style>
+body{font-family:Inter,sans-serif;background:#1a1a2e;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;}
+.box{text-align:center;padding:40px;}
+h1{font-size:4rem;color:#ff4757;}
+a{color:#6C63FF;text-decoration:none;padding:10px 24px;border:2px solid #6C63FF;border-radius:8px;display:inline-block;margin-top:20px;}
+a:hover{background:#6C63FF;color:#fff;}
+</style></head>
+<body><div class="box">
+<h1>403</h1>
+<h3>Access Denied</h3>
+<p>You don't have permission to access this resource.<br>Your role: <strong>%s</strong></p>
+<a href="/account/login">Back to Login</a>
+</div></body></html>`, user.RoleCode)
 	}
 }
 
@@ -491,7 +571,7 @@ func main() {
 	))
 	log.Printf("[GW] Protected API: /api/kyc/ -> %s (CLIENT+)", kycClientTarget)
 
-	// --- Generic API proxy from routes.json (no role auth) ---
+	// --- Generic API proxy from routes.json (with optional role auth) ---
 	for _, route := range config.Routes {
 		if strings.HasPrefix(route.Path, "/api/") {
 			// Skip routes already registered above
@@ -500,8 +580,15 @@ func main() {
 				strings.HasPrefix(route.Path, "/api/kyc") {
 				continue
 			}
-			http.HandleFunc(route.Path, createProxyHandler(route.Target, route.CORS))
-			log.Printf("[GW] API proxy: %s -> %s", route.Path, route.Target)
+			routeCopy := route // capture loop variable
+			handler := createProxyHandler(routeCopy.Target, routeCopy.CORS)
+			if routeCopy.Auth {
+				http.HandleFunc(routeCopy.Path, withRolesAuth(routeCopy.Roles, handler))
+				log.Printf("[GW] Protected API: %s -> %s (roles: %v)", routeCopy.Path, routeCopy.Target, routeCopy.Roles)
+			} else {
+				http.HandleFunc(routeCopy.Path, handler)
+				log.Printf("[GW] API proxy: %s -> %s", routeCopy.Path, routeCopy.Target)
+			}
 		}
 	}
 
