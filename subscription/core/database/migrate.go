@@ -81,39 +81,20 @@ func MigrateAndSeed(db interface{}) {
 
 	// 3. Seed dummy orders using real users from DB (for demo/testing)
 	ordersSeederSQL := `
-	DO $$
-	DECLARE
-	    uids UUID[];
-	    pkg_basic UUID := 'a1b2c3d4-e5f6-7890-1234-567890abcdef';
-	    pkg_pro   UUID := 'b2c3d4e5-f678-9012-3456-7890abcdef12';
-	    pkg_ent   UUID := 'c3d4e5f6-7890-1234-5678-90abcdef1234';
-	BEGIN
-	    SELECT ARRAY(SELECT id FROM users ORDER BY created_at LIMIT 5) INTO uids;
+	-- Cleanup old dummy orders with fake user_ids
+	DELETE FROM subscription.orders WHERE user_id::text LIKE 'aaaaaaaa-%';
 
-	    IF array_length(uids, 1) IS NULL OR array_length(uids, 1) = 0 THEN
-	        RAISE NOTICE 'No users found, skipping order seeding';
-	        RETURN;
-	    END IF;
-
-	    -- Delete old dummy orders with fake user_ids, then re-seed
-	    DELETE FROM subscription.orders WHERE user_id::text LIKE 'aaaaaaaa-%';
-
-	    IF EXISTS (SELECT 1 FROM subscription.orders LIMIT 1) THEN
-	        RAISE NOTICE 'Orders already seeded with real users';
-	        RETURN;
-	    END IF;
-
-	    INSERT INTO subscription.orders (id, invoice_number, user_id, package_id, total_price, status, created_at) VALUES
-	        (gen_random_uuid(), 'INV-2026-00001', uids[1], pkg_basic, 150000.00,  'PAID',      '2026-01-05 10:00:00'),
-	        (gen_random_uuid(), 'INV-2026-00002', uids[LEAST(2, array_length(uids,1))], pkg_pro,   500000.00,  'PAID',      '2026-01-12 14:30:00'),
-	        (gen_random_uuid(), 'INV-2026-00003', uids[LEAST(3, array_length(uids,1))], pkg_ent,   1200000.00, 'PENDING',   '2026-02-01 09:15:00'),
-	        (gen_random_uuid(), 'INV-2026-00004', uids[1],                              pkg_pro,   500000.00,  'CANCELLED', '2026-02-10 11:00:00'),
-	        (gen_random_uuid(), 'INV-2026-00005', uids[LEAST(4, array_length(uids,1))], pkg_basic, 150000.00,  'PAID',      '2026-02-18 16:45:00'),
-	        (gen_random_uuid(), 'INV-2026-00006', uids[LEAST(5, array_length(uids,1))], pkg_ent,   1200000.00, 'PENDING',   '2026-03-01 08:00:00'),
-	        (gen_random_uuid(), 'INV-2026-00007', uids[LEAST(2, array_length(uids,1))], pkg_basic, 150000.00,  'EXPIRED',   '2026-03-05 13:20:00'),
-	        (gen_random_uuid(), 'INV-2026-00008', uids[LEAST(3, array_length(uids,1))], pkg_pro,   500000.00,  'PAID',      '2026-03-08 17:00:00')
-	    ON CONFLICT (invoice_number) DO NOTHING;
-	END $$;
+	-- Seed with real user IDs (CLIENT users from production DB)
+	INSERT INTO subscription.orders (id, invoice_number, user_id, package_id, total_price, status, created_at) VALUES
+	    (gen_random_uuid(), 'INV-2026-00001', '019cd5b3-d8f9-7d8d-810b-13fc26d137fa', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', 150000.00,  'PAID',      '2026-01-05 10:00:00'),
+	    (gen_random_uuid(), 'INV-2026-00002', '019cd65b-7a61-7047-a97b-a615cc4eb1fa', 'b2c3d4e5-f678-9012-3456-7890abcdef12', 500000.00,  'PAID',      '2026-01-12 14:30:00'),
+	    (gen_random_uuid(), 'INV-2026-00003', '019cd582-9cba-7749-8924-c96b95643828', 'c3d4e5f6-7890-1234-5678-90abcdef1234', 1200000.00, 'PENDING',   '2026-02-01 09:15:00'),
+	    (gen_random_uuid(), 'INV-2026-00004', '019cd5b3-d8f9-7d8d-810b-13fc26d137fa', 'b2c3d4e5-f678-9012-3456-7890abcdef12', 500000.00,  'CANCELLED', '2026-02-10 11:00:00'),
+	    (gen_random_uuid(), 'INV-2026-00005', '019cd613-fe86-70be-b51e-b3bef12557a4', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', 150000.00,  'PAID',      '2026-02-18 16:45:00'),
+	    (gen_random_uuid(), 'INV-2026-00006', '019cd582-9cba-7749-8924-c96b95643828', 'c3d4e5f6-7890-1234-5678-90abcdef1234', 1200000.00, 'PENDING',   '2026-03-01 08:00:00'),
+	    (gen_random_uuid(), 'INV-2026-00007', '019cd65b-7a61-7047-a97b-a615cc4eb1fa', 'a1b2c3d4-e5f6-7890-1234-567890abcdef', 150000.00,  'EXPIRED',   '2026-03-05 13:20:00'),
+	    (gen_random_uuid(), 'INV-2026-00008', '019cd613-fe86-70be-b51e-b3bef12557a4', 'b2c3d4e5-f678-9012-3456-7890abcdef12', 500000.00,  'PAID',      '2026-03-08 17:00:00')
+	ON CONFLICT (invoice_number) DO NOTHING;
 	`
 
 	log.Println("Menjalankan Seeder Orders (Dummy)...")
