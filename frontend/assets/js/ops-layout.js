@@ -12,6 +12,14 @@
 (function () {
     'use strict';
 
+    // ── Route guard: redirect to login if no session ─────────────────
+    var guardUser = null;
+    try { guardUser = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+    if (!guardUser || !guardUser.id) {
+        window.location.href = '/account/login';
+        return;
+    }
+
     // ── Prevent transition flash on load ────────────────────────────
     const preventTx = document.createElement('style');
     preventTx.id = 'prevent-tx';
@@ -138,9 +146,26 @@
         <button class="btn-header" id="sidebarToggle">
             <i class="fa-solid fa-bars fa-lg"></i>
         </button>
-        <span class="badge bg-warning text-dark">OPERASIONAL</span>
+        <span class="badge bg-warning text-dark" id="roleBadge">OPERASIONAL</span>
+        <!-- Assumed Role Indicator -->
+        <span class="badge bg-info text-dark" id="assumedRoleBadge" style="display:none;">
+            <i class="fa-solid fa-user-secret me-1"></i>Sedang sebagai: <strong id="assumedRoleName"></strong>
+        </span>
     </div>
     <div class="d-flex align-items-center gap-2 gap-md-3">
+        <!-- Assume Role Dropdown (SUPERADMIN only) -->
+        <div class="dropdown" id="assumeRoleSection" style="display:none;">
+            <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" style="font-size:0.8rem;">
+                <i class="fa-solid fa-user-secret me-1"></i>Simulasi Peran
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-2">
+                <li><h6 class="dropdown-header">Pilih Simulasi Peran</h6></li>
+                <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('OPERASIONAL')"><i class="fa-solid fa-cogs me-2"></i>Operasional</a></li>
+                <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('COMPLIANCE')"><i class="fa-solid fa-shield-halved me-2"></i>Compliance</a></li>
+                <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('CEO')"><i class="fa-solid fa-briefcase me-2"></i>CEO</a></li>
+                <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('CLIENT')"><i class="fa-solid fa-user me-2"></i>Client</a></li>
+            </ul>
+        </div>
         <button class="btn-header" id="themeToggle">
             <i class="fa-solid fa-moon"></i>
         </button>
@@ -178,6 +203,7 @@
         if (sidebarEl) sidebarEl.outerHTML = sidebarHTML;
         if (navbarEl)  navbarEl.outerHTML  = navbarHTML;
         initLayout();
+        initUserInfo();
     }
 
     // ── Init sidebar toggle & theme toggle ───────────────────────────
@@ -220,15 +246,80 @@
             submenu.classList.toggle('open');
         },
         logout() {
+            fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function () {});
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            sessionStorage.clear();
             window.location.href = '/account/login';
+        },
+        async assumeRole(targetRoleCode) {
+            try {
+                const res = await fetch('/api/auth/assume-role', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ target_role_code: targetRoleCode })
+                });
+                const json = await res.json();
+                if (json.success || json.status) {
+                    // Update localStorage with assumed role info
+                    const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    user.assumed_role = true;
+                    user.role_code = targetRoleCode;
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.location.href = (json.data && json.data.redirect_url) || '/ops/dashboard';
+                } else {
+                    alert(json.message || json.msg || 'Gagal simulasi role');
+                }
+            } catch (e) {
+                alert('Gagal menghubungi server');
+            }
         }
     };
 
     // Also expose as globals for backward-compat inline handlers
     window.toggleSubmenu = window.OpsLayout.toggleSubmenu;
     window.logout        = window.OpsLayout.logout;
+
+    // ── Init user info, route guard, assume role UI ──────────────────
+    function initUserInfo() {
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+        // Route guard: redirect to login if no user
+        if (!user || !user.id) {
+            window.location.href = '/account/login';
+            return;
+        }
+
+        // Populate navbar user info
+        const nameEl = document.getElementById('userName');
+        const emailEl = document.getElementById('userEmail');
+        const avatarEl = document.getElementById('navAvatar');
+        if (nameEl && user.name) nameEl.textContent = user.name;
+        if (emailEl && user.email) emailEl.textContent = user.email;
+        if (avatarEl && user.name) avatarEl.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=0b0e17&color=fff';
+
+        // Show role badge
+        const roleBadge = document.getElementById('roleBadge');
+        if (roleBadge && user.role_code) roleBadge.textContent = user.role_code;
+
+        // SUPERADMIN: show assume role dropdown
+        const levelCode = (user.level_code || '').toUpperCase();
+        if (levelCode === 'SUPERADMIN') {
+            const section = document.getElementById('assumeRoleSection');
+            if (section) section.style.display = '';
+        }
+
+        // Show assumed role badge if active
+        if (user.assumed_role) {
+            const badge = document.getElementById('assumedRoleBadge');
+            const nameSpan = document.getElementById('assumedRoleName');
+            if (badge && nameSpan) {
+                nameSpan.textContent = user.role_code || 'Unknown';
+                badge.style.display = '';
+            }
+        }
+    }
 
     // ── Run on DOM ready ─────────────────────────────────────────────
     if (document.readyState === 'loading') {

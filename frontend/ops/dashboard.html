@@ -130,12 +130,6 @@
     <script src="/assets/js/za-theme.js"></script>
     <script src="/assets/js/ops-layout.js"></script>
     <script>
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/account/login';
-        }
-
         async function loadDashboardStats() {
             // Packages (Active & Total)
             try {

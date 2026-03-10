@@ -184,9 +184,11 @@
         const API_BASE = '/api';
         const token = localStorage.getItem('token');
 
-        function logout() {
+        async function logout() {
+            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch(e) {}
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            sessionStorage.clear();
             window.location.href = '/account/login';
         }
 

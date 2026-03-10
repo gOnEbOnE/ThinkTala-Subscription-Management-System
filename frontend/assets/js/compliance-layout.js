@@ -1,4 +1,12 @@
 (function () {
+    // ── Route guard: redirect to login if no session ─────────────
+    var user = null;
+    try { user = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+    if (!user || !user.id) {
+        window.location.href = '/account/login';
+        return;
+    }
+
     // ── Prevent transition flash on load ──────────────────────────
     var css = document.createElement('style');
     css.id = 'prevent-tx';
@@ -93,6 +101,20 @@
 
     // ── Sidebar toggle ────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function () {
+        // Populate user info from localStorage
+        try {
+            if (user && user.name) {
+                var uName = document.getElementById('userName');
+                var avatar = document.getElementById('avatarImg');
+                if (uName) uName.textContent = user.name;
+                if (avatar) avatar.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=0b0e17&color=fff';
+            }
+            if (user && user.email) {
+                var uEmail = document.getElementById('userEmail');
+                if (uEmail) uEmail.textContent = user.email;
+            }
+        } catch (e) { /* ignore */ }
+
         var btn = document.getElementById('sidebarToggle');
         if (btn) {
             btn.addEventListener('click', function () {

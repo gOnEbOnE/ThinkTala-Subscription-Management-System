@@ -1,4 +1,12 @@
 (function () {
+    // ── Route guard: redirect to login if no session ─────────────
+    var guardUser = null;
+    try { guardUser = JSON.parse(localStorage.getItem('user')); } catch (e) {}
+    if (!guardUser || !guardUser.id) {
+        window.location.href = '/account/login';
+        return;
+    }
+
     // ── Prevent transition flash on load ──────────────────────────
     var css = document.createElement('style');
     css.id = 'prevent-tx';
