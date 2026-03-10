@@ -43,11 +43,10 @@ func (c *Controller) Submit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 2. Validasi & upload file KTP (max 2MB, hanya jpg/png/pdf)
-	// → Uploads to Cloudflare R2 when R2_* env vars are set; falls back to local disk otherwise.
 	allowedExts := []string{".jpg", ".jpeg", ".png", ".pdf"}
 	maxSize := int64(2 * 1024 * 1024) // 2MB
 
-	filename, err := utils.UploadFileToR2(r, "ktp_image", "kyc", allowedExts, maxSize)
+	filename, err := utils.UploadFile(r, "ktp_image", "public/uploads/kyc", allowedExts, maxSize)
 	if err != nil {
 		errMsg := err.Error()
 		// Cek apakah error karena ukuran/format file
