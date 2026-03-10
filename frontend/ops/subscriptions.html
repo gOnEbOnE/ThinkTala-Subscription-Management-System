@@ -238,17 +238,19 @@
                     <td class="py-3">${statusBadge(pkg.status)}</td>
                     <td class="py-3 text-end">
                         <div class="d-flex gap-1 justify-content-end">
-                            ${pkg.status !== 'ACTIVE' ? `
-                            <a href="/ops/subscriptions-edit?id=${pkg.id}" class="btn btn-sm btn-outline-secondary btn-action">
+                            ${pkg.status === 'ACTIVE' ? `
+                            <button class="btn btn-sm btn-outline-warning btn-action" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','ACTIVE')" title="Nonaktifkan paket">
+                                <i class="fa-solid fa-toggle-on fa-xs"></i> Deactivate
+                            </button>` : `
+                            <button class="btn btn-sm btn-outline-success btn-action" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','INACTIVE')" title="Aktifkan paket">
+                                <i class="fa-solid fa-toggle-off fa-xs"></i> Activate
+                            </button>
+                            <a href="/ops/subscriptions-edit?id=${pkg.id}" class="btn btn-sm btn-outline-secondary btn-action" title="Edit paket">
                                 <i class="fa-solid fa-pen fa-xs"></i>
-                            </a>` : `
-                            <a class="btn btn-sm btn-outline-secondary btn-action disabled" style="pointer-events:none;opacity:0.5;" title="Paket ACTIVE tidak dapat diubah">
-                                <i class="fa-solid fa-pen fa-xs"></i>
-                            </a>`}
-                            ${pkg.status !== 'ACTIVE' ? `
-                            <button class="btn btn-sm btn-outline-secondary btn-action" onclick="openDelete('${pkg.id}','${pkg.name || ''}')">
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="openDelete('${pkg.id}','${pkg.name || ''}')" title="Hapus paket">
                                 <i class="fa-solid fa-trash fa-xs"></i>
-                            </button>` : ''}
+                            </button>`}
                         </div>
                     </td>
                 </tr>
@@ -306,6 +308,20 @@
                 const json = await res.json();
                 if (json.success) {
                     bootstrap.Modal.getInstance(document.getElementById('deletePkgModal')).hide();
+                    loadPackages();
+                } else {
+                    alert('Gagal: ' + (json.message || 'Unknown error'));
+                }
+            } catch (e) { alert('Error: ' + e.message); }
+        }
+
+        async function toggleStatus(id, name, currentStatus) {
+            const action = currentStatus === 'ACTIVE' ? 'menonaktifkan' : 'mengaktifkan';
+            if (!confirm(`Yakin ingin ${action} paket "${name}"?`)) return;
+            try {
+                const res = await fetch(`/api/admin/packages/${id}/status`, { method: 'PATCH', credentials: 'include' });
+                const json = await res.json();
+                if (json.success) {
                     loadPackages();
                 } else {
                     alert('Gagal: ' + (json.message || 'Unknown error'));

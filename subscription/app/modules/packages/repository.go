@@ -20,6 +20,7 @@ type Repository interface {
 	GetPackageByID(ctx context.Context, id string) (*Package, error)
 	UpdatePackage(ctx context.Context, id string, data UpdatePackageDTO) (*Package, error)
 	DeletePackage(ctx context.Context, id string) error
+	TogglePackageStatus(ctx context.Context, id string, newStatus string) (*Package, error)
 }
 
 // ==========================================
@@ -196,6 +197,27 @@ func (r *packageRepo) UpdatePackage(ctx context.Context, id string, data UpdateP
 		return nil, fmt.Errorf("gagal mengupdate paket: %w", err)
 	}
 
+	return &p, nil
+}
+
+// TogglePackageStatus mengubah status paket (ACTIVE <-> INACTIVE)
+func (r *packageRepo) TogglePackageStatus(ctx context.Context, id string, newStatus string) (*Package, error) {
+	query := `
+        UPDATE subscription.packages
+        SET status = $1, updated_at = NOW()
+        WHERE id = $2 AND status != 'DELETED'
+        RETURNING id, name, price, price_yearly, duration, quota, status, created_at, updated_at
+    `
+	var p Package
+	err := r.db.Pool.QueryRow(ctx, query, newStatus, id).Scan(
+		&p.ID, &p.Name, &p.Price, &p.PriceYearly, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("gagal mengubah status paket: %w", err)
+	}
 	return &p, nil
 }
 

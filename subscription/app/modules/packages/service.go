@@ -16,6 +16,7 @@ type Service interface {
 	GetCatalogPackages(ctx context.Context) ([]Package, error)
 	UpdatePackage(ctx context.Context, id string, payload UpdatePackageDTO) (*Package, error)
 	DeletePackage(ctx context.Context, id string) error
+	TogglePackageStatus(ctx context.Context, id string) (*Package, error)
 
 	// Worker Job Processors
 	ProcessCreatePackageJob(ctx context.Context, payload interface{}) (interface{}, error)
@@ -23,6 +24,7 @@ type Service interface {
 	ProcessGetCatalogJob(ctx context.Context, payload interface{}) (interface{}, error)
 	ProcessUpdatePackageJob(ctx context.Context, payload interface{}) (interface{}, error)
 	ProcessDeletePackageJob(ctx context.Context, payload interface{}) (interface{}, error)
+	ProcessTogglePackageStatusJob(ctx context.Context, payload interface{}) (interface{}, error)
 }
 
 // ==========================================
@@ -96,6 +98,24 @@ func (s *packageService) UpdatePackage(ctx context.Context, id string, payload U
 	}
 
 	return s.repo.UpdatePackage(ctx, id, payload)
+}
+
+// Toggle Package Status: ACTIVE <-> INACTIVE
+func (s *packageService) TogglePackageStatus(ctx context.Context, id string) (*Package, error) {
+	existing, err := s.repo.GetPackageByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("error validasi paket: %v", err)
+	}
+	if existing == nil {
+		return nil, errors.New("paket tidak ditemukan atau sudah dihapus")
+	}
+
+	newStatus := "INACTIVE"
+	if existing.Status == "INACTIVE" {
+		newStatus = "ACTIVE"
+	}
+
+	return s.repo.TogglePackageStatus(ctx, id, newStatus)
 }
 
 // PBI-35: Delete Package (Soft Delete)

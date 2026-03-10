@@ -40,6 +40,9 @@ func Init(app *core.App, packagesController *packages.Controller) {
 	// PBI-35: Delete Package / Soft Delete (Admin)
 	app.Router.HandleFunc("DELETE /api/admin/packages/{id}", packagesController.DeletePackageHandler)
 
+	// Toggle Package Status (Activate / Deactivate)
+	app.Router.HandleFunc("PATCH /api/admin/packages/{id}/status", packagesController.TogglePackageStatusHandler)
+
 	// PBI-37: Get Active Catalog for Client
 	app.Router.HandleFunc("GET /api/subscription/catalog", packagesController.GetCatalogHandler)
 
