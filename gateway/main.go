@@ -559,7 +559,7 @@ func main() {
 	// --- ORDERS Admin API (role-protected) - OPERASIONAL can access ---
 	ordersTarget := getRouteTarget("/api/admin/orders")
 	if ordersTarget == "" {
-		ordersTarget = "http://operational-service.railway.internal:5005"
+		ordersTarget = "http://operational-service.railway.internal:8080"
 	}
 	http.HandleFunc("/api/admin/orders", withRolesAuth([]string{"OPERASIONAL", "SUPERADMIN", "CEO"},
 		createProxyHandler(ordersTarget, true),
