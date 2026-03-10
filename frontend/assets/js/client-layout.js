@@ -148,8 +148,8 @@
             }
         } catch (e) { /* ignore */ }
 
-        // Show assume role section for SUPERADMIN (or already assumed from SUPERADMIN)
-        if ((user.level_code || '').toUpperCase() === 'SUPERADMIN' || user.assumed_role === true) {
+        // Show assume role section for SUPERADMIN
+        if ((user.level_code || '').toUpperCase() === 'SUPERADMIN') {
             var section = document.getElementById('assumeRoleSection');
             if (section) section.style.display = '';
         }
@@ -173,7 +173,6 @@
             var json = await res.json();
             if (json.success || json.status) {
                 var u = JSON.parse(localStorage.getItem('user') || '{}');
-                if (!u.original_level_code) u.original_level_code = u.level_code;
                 u.assumed_role = true; u.role_code = targetRoleCode;
                 localStorage.setItem('user', JSON.stringify(u));
                 window.location.href = (json.data && json.data.redirect_url) || '/ops/dashboard';
