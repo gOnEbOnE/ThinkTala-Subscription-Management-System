@@ -10,6 +10,7 @@ FROM alpine:latest
 WORKDIR /app
 RUN apk --no-cache add tzdata ca-certificates
 COPY --from=builder /app/operational .
+COPY --from=builder /app/public ./public
 RUN chmod +x /app/operational
 
 EXPOSE 5005

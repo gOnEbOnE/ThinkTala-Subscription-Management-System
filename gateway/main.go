@@ -556,6 +556,19 @@ func main() {
 	))
 	log.Printf("[GW] Protected API: /api/admin/kyc -> %s (CEO/SUPERADMIN/COMPLIANCE/OPERASIONAL)", kycTarget)
 
+	// --- ORDERS Admin API (role-protected) - OPERASIONAL can access ---
+	ordersTarget := getRouteTarget("/api/admin/orders")
+	if ordersTarget == "" {
+		ordersTarget = "http://operational-service.railway.internal:5005"
+	}
+	http.HandleFunc("/api/admin/orders", withRolesAuth([]string{"OPERASIONAL", "SUPERADMIN", "CEO"},
+		createProxyHandler(ordersTarget, true),
+	))
+	http.HandleFunc("/api/admin/orders/", withRolesAuth([]string{"OPERASIONAL", "SUPERADMIN", "CEO"},
+		createProxyHandler(ordersTarget, true),
+	))
+	log.Printf("[GW] Protected API: /api/admin/orders -> %s (CEO/SUPERADMIN/OPERASIONAL)", ordersTarget)
+
 	// --- KYC Client API (role-protected) - CLIENT can access their own KYC ---
 	kycClientTarget := getRouteTarget("/api/kyc/")
 	if kycClientTarget == "" {
