@@ -262,8 +262,9 @@
                 });
                 const json = await res.json();
                 if (json.success || json.status) {
-                    // Update localStorage with assumed role info
+                    // Update localStorage — preserve level_code and store original
                     const user = JSON.parse(localStorage.getItem('user') || '{}');
+                    if (!user.original_level_code) user.original_level_code = user.level_code;
                     user.assumed_role = true;
                     user.role_code = targetRoleCode;
                     localStorage.setItem('user', JSON.stringify(user));
@@ -303,9 +304,10 @@
         const roleBadge = document.getElementById('roleBadge');
         if (roleBadge && user.role_code) roleBadge.textContent = user.role_code;
 
-        // SUPERADMIN: show assume role dropdown
+        // SUPERADMIN: show assume role dropdown (also if already assumed from SUPERADMIN)
         const levelCode = (user.level_code || '').toUpperCase();
-        if (levelCode === 'SUPERADMIN') {
+        const isSuperAdmin = levelCode === 'SUPERADMIN' || user.assumed_role === true;
+        if (isSuperAdmin) {
             const section = document.getElementById('assumeRoleSection');
             if (section) section.style.display = '';
         }
