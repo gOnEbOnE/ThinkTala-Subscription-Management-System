@@ -53,19 +53,8 @@
             '<div class="d-flex align-items-center gap-2">' +
                 '<button class="btn-header" id="sidebarToggle"><i class="fa-solid fa-bars fa-lg"></i></button>' +
                 '<span class="badge bg-danger" style="font-size: 0.7rem;">COMPLIANCE</span>' +
-                '<span class="badge bg-info text-dark" id="assumedRoleBadge" style="display:none;"><i class="fa-solid fa-user-secret me-1"></i>Sedang sebagai: <strong id="assumedRoleName"></strong></span>' +
             '</div>' +
             '<div class="d-flex align-items-center gap-2">' +
-                '<div class="dropdown" id="assumeRoleSection" style="display:none;">' +
-                    '<button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" style="font-size:0.8rem;"><i class="fa-solid fa-user-secret me-1"></i>Simulasi Peran</button>' +
-                    '<ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-2">' +
-                        '<li><h6 class="dropdown-header">Pilih Simulasi Peran</h6></li>' +
-                        '<li><a class="dropdown-item" href="#" onclick="assumeRole(\"OPERASIONAL\")"><i class="fa-solid fa-cogs me-2"></i>Operasional</a></li>' +
-                        '<li><a class="dropdown-item" href="#" onclick="assumeRole(\"COMPLIANCE\")"><i class="fa-solid fa-shield-halved me-2"></i>Compliance</a></li>' +
-                        '<li><a class="dropdown-item" href="#" onclick="assumeRole(\"CEO\")"><i class="fa-solid fa-briefcase me-2"></i>CEO</a></li>' +
-                        '<li><a class="dropdown-item" href="#" onclick="assumeRole(\"CLIENT\")"><i class="fa-solid fa-user me-2"></i>Client</a></li>' +
-                    '</ul>' +
-                '</div>' +
                 '<button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>' +
                 '<div class="dropdown ms-1">' +
                     '<a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">' +
@@ -134,38 +123,7 @@
                     document.body.classList.contains('sidebar-collapsed') ? 'collapsed' : 'expanded');
             });
         }
-
-        // Show assume role section for SUPERADMIN
-        if ((user.level_code || '').toUpperCase() === 'SUPERADMIN') {
-            var section = document.getElementById('assumeRoleSection');
-            if (section) section.style.display = '';
-        }
-        // Show assumed role badge
-        if (user.assumed_role) {
-            var badge = document.getElementById('assumedRoleBadge');
-            var nameSpan = document.getElementById('assumedRoleName');
-            if (badge && nameSpan) { nameSpan.textContent = user.role_code || ''; badge.style.display = ''; }
-        }
     });
-
-    // ── Assume role ───────────────────────────────────────────────
-    window.assumeRole = async function (targetRoleCode) {
-        try {
-            var res = await fetch('/api/auth/assume-role', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ target_role_code: targetRoleCode })
-            });
-            var json = await res.json();
-            if (json.success || json.status) {
-                var u = JSON.parse(localStorage.getItem('user') || '{}');
-                u.assumed_role = true; u.role_code = targetRoleCode;
-                localStorage.setItem('user', JSON.stringify(u));
-                window.location.href = (json.data && json.data.redirect_url) || '/ops/dashboard';
-            } else { alert(json.message || json.msg || 'Gagal simulasi role'); }
-        } catch (e) { alert('Gagal menghubungi server'); }
-    };
 
     // ── Default logout — same across all compliance pages ─────────
     window.logout = function () {
