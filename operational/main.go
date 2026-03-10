@@ -56,11 +56,20 @@ func main() {
 	r.GET("/ops/users", func(c *gin.Context) {
 		c.File("./public/views/users.html")
 	})
+	r.GET("/ops/orders", func(c *gin.Context) {
+		c.File("./public/views/orders.html")
+	})
 
 	// API routes (existing + new)
 	api := r.Group("/api/operational")
 	{
 		api.GET("/stats", getDashboardStats)
+	}
+
+	// Orders API
+	adminOrders := r.Group("/api/admin")
+	{
+		adminOrders.GET("/orders", listOrders)
 	}
 
 	// KYC API (if exists)
@@ -137,6 +146,51 @@ func listKYC(c *gin.Context) {
 		list = []map[string]any{}
 	}
 	c.JSON(http.StatusOK, gin.H{"data": list})
+}
+
+func listOrders(c *gin.Context) {
+	query := `
+		SELECT
+			o.id,
+			o.invoice_number,
+			COALESCE(u.name, 'Unknown') AS client_name,
+			COALESCE(p.name, 'Unknown') AS package_name,
+			o.total_price,
+			o.status,
+			o.created_at
+		FROM subscription.orders o
+		LEFT JOIN users u ON u.id = o.user_id
+		LEFT JOIN subscription.packages p ON p.id = o.package_id
+		ORDER BY o.created_at DESC
+	`
+
+	rows, err := db.Query(context.Background(), query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var list []map[string]any
+	for rows.Next() {
+		var orderID, invoiceNumber, clientName, packageName, status string
+		var totalPrice float64
+		var createdAt time.Time
+		rows.Scan(&orderID, &invoiceNumber, &clientName, &packageName, &totalPrice, &status, &createdAt)
+		list = append(list, map[string]any{
+			"order_id":       orderID,
+			"invoice_number": invoiceNumber,
+			"client_name":    clientName,
+			"package_name":   packageName,
+			"total_price":    totalPrice,
+			"status":         status,
+			"created_at":     createdAt,
+		})
+	}
+	if list == nil {
+		list = []map[string]any{}
+	}
+	c.JSON(http.StatusOK, list)
 }
 
 func reviewKYC(c *gin.Context) {

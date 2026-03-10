@@ -121,6 +121,10 @@
         </li>
 
         <li class="nav-item">
+            <a class="nav-link${isActive('orders')}" href="/ops/orders">
+                <i class="fa-solid fa-receipt nav-icon"></i>
+                <span>Pesanan</span>
+            </a>
             <a class="nav-link${isActive('subscriptions')}" href="/ops/subscriptions">
                 <i class="fa-solid fa-crown icon-left"></i>
                 <span class="link-text">Subscriptions</span>

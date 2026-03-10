@@ -119,6 +119,20 @@
       "cors": true
     },
     {
+      "path": "/api/admin/orders",
+      "target": "http://operational-service.railway.internal:5005",
+      "cors": true,
+      "auth": true,
+      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/admin/orders/",
+      "target": "http://operational-service.railway.internal:5005",
+      "cors": true,
+      "auth": true,
+      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+    },
+    {
       "path": "/api/operational/",
       "target": "http://operational-service.railway.internal:5005",
       "cors": true,
