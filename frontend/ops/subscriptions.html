@@ -237,18 +237,18 @@
                     <td class="py-3 pkg-price-yearly">${formatRp(pkg.price_yearly)}</td>
                     <td class="py-3">${statusBadge(pkg.status)}</td>
                     <td class="py-3 text-end">
-                        <div class="d-flex gap-1 justify-content-end">
+                        <div class="d-flex gap-1 justify-content-end flex-nowrap">
                             ${pkg.status === 'ACTIVE' ? `
-                            <button class="btn btn-sm btn-outline-warning btn-action" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','ACTIVE')" title="Nonaktifkan paket">
-                                <i class="fa-solid fa-toggle-on fa-xs"></i> Deactivate
+                            <button class="btn btn-sm btn-outline-warning px-3" style="white-space:nowrap;" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','ACTIVE')">
+                                <i class="fa-solid fa-toggle-on fa-xs me-1"></i>Deactivate
                             </button>` : `
-                            <button class="btn btn-sm btn-outline-success btn-action" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','INACTIVE')" title="Aktifkan paket">
-                                <i class="fa-solid fa-toggle-off fa-xs"></i> Activate
+                            <button class="btn btn-sm btn-outline-success px-3" style="white-space:nowrap;" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','INACTIVE')">
+                                <i class="fa-solid fa-toggle-off fa-xs me-1"></i>Activate
                             </button>
-                            <a href="/ops/subscriptions-edit?id=${pkg.id}" class="btn btn-sm btn-outline-secondary btn-action" title="Edit paket">
+                            <a href="/ops/subscriptions-edit?id=${pkg.id}" class="btn btn-sm btn-outline-secondary btn-action" title="Edit">
                                 <i class="fa-solid fa-pen fa-xs"></i>
                             </a>
-                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="openDelete('${pkg.id}','${pkg.name || ''}')" title="Hapus paket">
+                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="openDelete('${pkg.id}','${pkg.name || ''}')">
                                 <i class="fa-solid fa-trash fa-xs"></i>
                             </button>`}
                         </div>
