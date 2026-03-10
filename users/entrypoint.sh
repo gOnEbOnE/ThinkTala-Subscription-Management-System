@@ -31,4 +31,7 @@ if [ ! -f "certs/localhost.crt" ]; then
     echo "[entrypoint] Self-signed TLS cert generated"
 fi
 
+# Ensure upload directories exist (important when Railway Volume is mounted)
+mkdir -p public/uploads/kyc
+
 exec /app/users "$@"

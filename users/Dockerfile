@@ -42,6 +42,10 @@ COPY certs/ ./certs/
 
 RUN mkdir -p certs
 
+# Persist uploads directory (attach a Railway Volume at /app/public/uploads)
+RUN mkdir -p /app/public/uploads/kyc
+VOLUME ["/app/public/uploads"]
+
 # Expose port aplikasi
 EXPOSE 2006
 
