@@ -412,14 +412,6 @@ func main() {
 	assetsDir := filepath.Join(frontendDir, "assets")
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsDir))))
 
-	// Proxy /uploads/ to users service (each service runs in its own container on Railway)
-	usersUploadTarget := "http://users-service.railway.internal:2006"
-	if envURL := system.Env("USERS_SERVICE_URL"); envURL != "" {
-		usersUploadTarget = envURL
-	}
-	http.Handle("/uploads/", createProxyHandler(usersUploadTarget, true))
-	log.Printf("[GW] Proxy: /uploads/ -> %s/uploads/...", usersUploadTarget)
-
 	// ========================================
 	// 3. Protected Dashboard Pages (with Role Auth)
 	// ========================================

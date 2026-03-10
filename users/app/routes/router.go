@@ -71,10 +71,6 @@ func Init(app *core.App,
 	app.Router.HandleFunc("POST /api/kyc/submit", kycController.Submit)
 	app.Router.HandleFunc("GET /api/kyc/status", kycController.Status)
 
-	// Serve uploaded KYC files
-	kycFS := http.FileServer(http.Dir("./public/uploads/kyc"))
-	app.Router.Handle("GET /uploads/kyc/", http.StripPrefix("/uploads/kyc/", kycFS))
-
 	// ==============================
 	// 8. Admin KYC Routes (Protected via Gateway Auth)
 	// ==============================

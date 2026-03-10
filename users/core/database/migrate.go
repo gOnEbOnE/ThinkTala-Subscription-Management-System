@@ -118,7 +118,7 @@ func MigrateAndSeed(db interface{}) {
 		address TEXT NOT NULL,
 		birthdate DATE NOT NULL,
 		phone VARCHAR(20) NOT NULL,
-		ktp_image VARCHAR(500) NOT NULL,
+		ktp_image TEXT NOT NULL,
 		status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
 		reject_reason TEXT,
 		reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -132,6 +132,9 @@ func MigrateAndSeed(db interface{}) {
 	CREATE INDEX IF NOT EXISTS idx_kyc_sub_status ON kyc_submissions(status);
 	CREATE INDEX IF NOT EXISTS idx_notif_active ON notifications(is_active);
 	CREATE INDEX IF NOT EXISTS idx_subs_active ON subscription_packages(is_active);
+
+	-- Upgrade ktp_image to TEXT if it was previously VARCHAR(500)
+	ALTER TABLE kyc_submissions ALTER COLUMN ktp_image TYPE TEXT;
 	`
 
 	log.Println("Menjalankan Migrasi PostgreSQL...")
