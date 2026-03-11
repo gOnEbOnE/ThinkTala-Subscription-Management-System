@@ -185,6 +185,25 @@
         </div>
     </div>
 
+    <!-- Toggle Status Modal -->
+    <div class="modal fade" id="toggleStatusModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-rotate fa-3x mb-3" id="toggleIcon" style="color:var(--accent)"></i>
+                    <h6 class="fw-bold text-main" id="toggleTitle">Ubah Status Paket?</h6>
+                    <p class="text-muted small mb-0" id="toggleDesc"></p>
+                    <input type="hidden" id="togglePkgId">
+                    <input type="hidden" id="togglePkgStatus">
+                    <div class="d-flex gap-2 justify-content-center mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-sm px-4" id="toggleConfirmBtn" onclick="confirmToggleStatus()">Ya, Ubah</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Modal -->
     <div class="modal fade" id="deletePkgModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
@@ -350,20 +369,36 @@
             } catch (e) { alert('Error: ' + e.message); }
         }
 
-        async function toggleStatus(id, name, currentStatus) {
-            const action = currentStatus === 'ACTIVE' ? 'menonaktifkan' : 'mengaktifkan';
-            if (!confirm(`Yakin ingin ${action} paket "${name}"?`)) return;
+        function toggleStatus(id, name, currentStatus) {
+            document.getElementById('togglePkgId').value = id;
+            document.getElementById('togglePkgStatus').value = currentStatus;
+            const isDeactivate = currentStatus === 'ACTIVE';
+            document.getElementById('toggleTitle').textContent = isDeactivate ? 'Nonaktifkan Paket?' : 'Aktifkan Paket?';
+            document.getElementById('toggleDesc').textContent = `Yakin ingin ${isDeactivate ? 'menonaktifkan' : 'mengaktifkan'} paket "${name}"?`;
+            document.getElementById('toggleIcon').className = isDeactivate
+                ? 'fa-solid fa-toggle-off fa-3x text-warning mb-3'
+                : 'fa-solid fa-toggle-on fa-3x text-success mb-3';
+            const btn = document.getElementById('toggleConfirmBtn');
+            btn.className = isDeactivate ? 'btn btn-sm btn-warning px-4' : 'btn btn-sm btn-success px-4';
+            btn.textContent = isDeactivate ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan';
+            new bootstrap.Modal(document.getElementById('toggleStatusModal')).show();
+        }
+
+        async function confirmToggleStatus() {
+            const id = document.getElementById('togglePkgId').value;
+            const currentStatus = document.getElementById('togglePkgStatus').value;
             try {
                 const res = await fetch(`/api/admin/packages/${id}/status`, { method: 'PATCH', credentials: 'include' });
                 const json = await res.json();
+                bootstrap.Modal.getInstance(document.getElementById('toggleStatusModal')).hide();
                 if (json.success) {
                     const newSt = currentStatus === 'ACTIVE' ? 'dinonaktifkan' : 'diaktifkan';
                     showToast(`Paket berhasil ${newSt}`, 'success');
                     loadPackages();
                 } else {
-                    alert('Gagal: ' + (json.message || 'Unknown error'));
+                    showToast(json.message || 'Gagal mengubah status paket', 'danger');
                 }
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) { showToast('Error: ' + e.message, 'danger'); }
         }
 
         async function loadPackages() {
