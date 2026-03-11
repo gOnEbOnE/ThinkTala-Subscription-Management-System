@@ -254,6 +254,22 @@
         </div>
     </div>
 
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-3x mb-3" id="alertIcon"></i>
+                    <h6 class="fw-bold" style="color: var(--text-heading)" id="alertTitle">Peringatan</h6>
+                    <p class="text-muted small mb-0" id="alertMessage"></p>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button class="btn btn-sm btn-outline-secondary px-4" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="fixed-footer">
         <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
         <div>Operations Panel v1.0</div>
@@ -264,6 +280,21 @@
     <script src="/assets/js/ops-layout.js"></script>
     <script>
         function logout() { window.location.href = '/account/logout'; }
+
+        function showAlert(msg, type = 'warning') {
+            const icon = document.getElementById('alertIcon');
+            const title = document.getElementById('alertTitle');
+            if (type === 'danger') {
+                icon.className = 'fa-solid fa-circle-xmark fa-3x text-danger mb-3';
+                title.textContent = 'Terjadi Kesalahan';
+            } else {
+                icon.className = 'fa-solid fa-triangle-exclamation fa-3x mb-3';
+                icon.style.color = 'var(--accent-orange)';
+                title.textContent = 'Peringatan';
+            }
+            document.getElementById('alertMessage').textContent = msg;
+            new bootstrap.Modal(document.getElementById('alertModal')).show();
+        }
 
         function formatRp(val) { return 'Rp ' + Number(val || 0).toLocaleString('id-ID'); }
 
@@ -325,10 +356,10 @@
             const status = document.querySelector('[name="pkgStatus"]:checked') ? document.querySelector('[name="pkgStatus"]:checked').value : 'ACTIVE';
             const duration = 1; // monthly
 
-            if (!name) { alert('Nama paket harus diisi!'); return; }
-            if (price <= 0) { alert('Harga bulanan harus lebih dari 0!'); return; }
-            if (price_yearly > 0 && price_yearly < price) { alert('Harga tahunan tidak boleh lebih rendah dari harga bulanan!'); return; }
-            if (quota <= 0) { alert('Kuota harus lebih dari 0!'); return; }
+            if (!name) { showAlert('Nama paket harus diisi!'); return; }
+            if (price <= 0) { showAlert('Harga bulanan harus lebih dari 0!'); return; }
+            if (price_yearly > 0 && price_yearly < price) { showAlert('Harga tahunan tidak boleh lebih rendah dari harga bulanan!'); return; }
+            if (quota <= 0) { showAlert('Kuota harus lebih dari 0!'); return; }
 
             const body = { name, price, price_yearly, duration, quota, status };
 
@@ -344,9 +375,9 @@
                     sessionStorage.setItem('toast', 'Paket berhasil dibuat');
                     window.location.href = '/ops/subscriptions';
                 } else {
-                    alert('Gagal: ' + (json.message || 'Unknown error'));
+                    showAlert(json.message || 'Gagal menyimpan paket', 'danger');
                 }
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) { showAlert('Error: ' + e.message, 'danger'); }
         }
     </script>
 </body>

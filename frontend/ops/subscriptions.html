@@ -205,6 +205,22 @@
         </div>
     </div>
 
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-circle-xmark fa-3x text-danger mb-3" id="alertIcon"></i>
+                    <h6 class="fw-bold" style="color: var(--text-heading)" id="alertTitle">Terjadi Kesalahan</h6>
+                    <p class="text-muted small mb-0" id="alertMessage"></p>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button class="btn btn-sm btn-outline-secondary px-4" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toggle Status Modal -->
     <div class="modal fade" id="toggleStatusModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
@@ -265,6 +281,21 @@
 
         function formatRp(val) {
             return 'Rp ' + Number(val).toLocaleString('id-ID');
+        }
+
+        function showAlert(msg, type = 'danger') {
+            const icon = document.getElementById('alertIcon');
+            const title = document.getElementById('alertTitle');
+            if (type === 'warning') {
+                icon.className = 'fa-solid fa-triangle-exclamation fa-3x mb-3';
+                icon.style.color = 'var(--accent-orange)';
+                title.textContent = 'Peringatan';
+            } else {
+                icon.className = 'fa-solid fa-circle-xmark fa-3x text-danger mb-3';
+                title.textContent = 'Terjadi Kesalahan';
+            }
+            document.getElementById('alertMessage').textContent = msg;
+            new bootstrap.Modal(document.getElementById('alertModal')).show();
         }
 
         function statusBadge(status) {
@@ -386,7 +417,7 @@
                     bootstrap.Modal.getInstance(document.getElementById('deletePkgModal')).hide();
                     showToast(json.message || 'Gagal menghapus paket', 'danger');
                 }
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) { showAlert('Error: ' + e.message); }
         }
 
         function toggleStatus(id, name, currentStatus) {
