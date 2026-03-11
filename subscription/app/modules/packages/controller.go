@@ -209,6 +209,14 @@ func (c *Controller) DeletePackageHandler(w http.ResponseWriter, r *http.Request
 			})
 			return
 		}
+		if err.Error() == "tidak dapat menghapus paket yang masih memiliki pelanggan aktif" {
+			w.WriteHeader(http.StatusConflict)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
 
 		w.WriteHeader(http.StatusInternalServerError)
 		c.response.JSON(w, r, map[string]interface{}{

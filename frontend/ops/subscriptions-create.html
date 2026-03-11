@@ -320,6 +320,7 @@
                 });
                 const json = await res.json();
                 if (json.success) {
+                    sessionStorage.setItem('toast', 'Paket berhasil dibuat');
                     window.location.href = '/ops/subscriptions';
                 } else {
                     alert('Gagal: ' + (json.message || 'Unknown error'));

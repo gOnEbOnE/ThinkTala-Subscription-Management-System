@@ -82,6 +82,16 @@
         <!-- Filter Section -->
         <div class="ai-card mb-4">
             <div class="row g-3 align-items-end">
+                <div class="col-md-12 mb-1">
+                    <label class="form-label small fw-semibold"
+                        style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem;">Cari
+                        Paket</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"
+                            style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);"><i class="fa-solid fa-search"></i></span>
+                        <input type="text" class="form-control" id="filterSearch" placeholder="Cari berdasarkan nama paket..." oninput="applyFilter()">
+                    </div>
+                </div>
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold"
                         style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem;">Filter
@@ -159,6 +169,18 @@
                 style="border-top: 1px solid var(--border-color);">
                 <small class="text-muted" id="paginationInfo">Menampilkan 0 paket</small>
                 <div id="paginationControls" class="d-flex gap-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index:9999;">
+        <div id="toastSuccess" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2" id="toastBody">
+                    <i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Berhasil</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
@@ -277,10 +299,12 @@
         }
 
         function applyFilter() {
+            const search = (document.getElementById('filterSearch').value || '').toLowerCase();
             const status = document.getElementById('filterStatus').value;
             const minP = parseFloat(document.getElementById('filterMinPrice').value) || 0;
             const maxP = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
             let filtered = allPackages;
+            if (search) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(search));
             if (status) filtered = filtered.filter(p => p.status === status);
             filtered = filtered.filter(p => p.price >= minP && p.price <= maxP);
             currentPage = 1;
@@ -288,6 +312,7 @@
         }
 
         function resetFilter() {
+            document.getElementById('filterSearch').value = '';
             document.getElementById('filterStatus').value = '';
             document.getElementById('filterMinPrice').value = '';
             document.getElementById('filterMaxPrice').value = '';
@@ -301,6 +326,14 @@
             new bootstrap.Modal(document.getElementById('deletePkgModal')).show();
         }
 
+        function showToast(msg, type) {
+            const t = document.getElementById('toastSuccess');
+            const body = t.querySelector('.d-flex');
+            body.className = 'd-flex text-white ' + (type === 'danger' ? 'bg-danger' : 'bg-success');
+            document.getElementById('toastMsg').textContent = msg;
+            new bootstrap.Toast(t).show();
+        }
+
         async function confirmDeletePkg() {
             const id = document.getElementById('deletePkgId').value;
             try {
@@ -308,9 +341,11 @@
                 const json = await res.json();
                 if (json.success) {
                     bootstrap.Modal.getInstance(document.getElementById('deletePkgModal')).hide();
+                    showToast('Paket berhasil dihapus', 'success');
                     loadPackages();
                 } else {
-                    alert('Gagal: ' + (json.message || 'Unknown error'));
+                    bootstrap.Modal.getInstance(document.getElementById('deletePkgModal')).hide();
+                    showToast(json.message || 'Gagal menghapus paket', 'danger');
                 }
             } catch (e) { alert('Error: ' + e.message); }
         }
@@ -322,6 +357,8 @@
                 const res = await fetch(`/api/admin/packages/${id}/status`, { method: 'PATCH', credentials: 'include' });
                 const json = await res.json();
                 if (json.success) {
+                    const newSt = currentStatus === 'ACTIVE' ? 'dinonaktifkan' : 'diaktifkan';
+                    showToast(`Paket berhasil ${newSt}`, 'success');
                     loadPackages();
                 } else {
                     alert('Gagal: ' + (json.message || 'Unknown error'));
@@ -345,7 +382,14 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadPackages);
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPackages();
+            const pendingToast = sessionStorage.getItem('toast');
+            if (pendingToast) {
+                sessionStorage.removeItem('toast');
+                setTimeout(() => showToast(pendingToast, 'success'), 500);
+            }
+        });
     </script>
 </body>
 

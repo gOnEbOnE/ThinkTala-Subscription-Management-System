@@ -131,6 +131,15 @@ func (s *packageService) DeletePackage(ctx context.Context, id string) error {
 		return errors.New("tidak dapat menghapus paket yang sedang aktif")
 	}
 
+	// PBI-35: Cek apakah ada pelanggan aktif (PAID/PENDING) yang menggunakan paket ini
+	subscriberCount, err := s.repo.CountActiveSubscribers(ctx, id)
+	if err != nil {
+		return fmt.Errorf("error mengecek pelanggan: %v", err)
+	}
+	if subscriberCount > 0 {
+		return errors.New("tidak dapat menghapus paket yang masih memiliki pelanggan aktif")
+	}
+
 	// Pengecekan dilakukan langsung di Repo affected rows
 	err = s.repo.DeletePackage(ctx, id)
 	if err != nil {

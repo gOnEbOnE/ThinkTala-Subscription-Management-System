@@ -21,6 +21,7 @@ type Repository interface {
 	UpdatePackage(ctx context.Context, id string, data UpdatePackageDTO) (*Package, error)
 	DeletePackage(ctx context.Context, id string) error
 	TogglePackageStatus(ctx context.Context, id string, newStatus string) (*Package, error)
+	CountActiveSubscribers(ctx context.Context, packageID string) (int, error)
 }
 
 // ==========================================
@@ -219,6 +220,17 @@ func (r *packageRepo) TogglePackageStatus(ctx context.Context, id string, newSta
 		return nil, fmt.Errorf("gagal mengubah status paket: %w", err)
 	}
 	return &p, nil
+}
+
+// CountActiveSubscribers menghitung jumlah pelanggan aktif (PAID/PENDING) pada paket tertentu
+func (r *packageRepo) CountActiveSubscribers(ctx context.Context, packageID string) (int, error) {
+	query := `SELECT COUNT(*) FROM subscription.orders WHERE package_id = $1 AND status IN ('PAID', 'PENDING')`
+	var count int
+	err := r.db.Pool.QueryRow(ctx, query, packageID).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("gagal menghitung pelanggan aktif: %w", err)
+	}
+	return count, nil
 }
 
 // DeletePackage melakukan *soft delete* pada data paket
