@@ -55,6 +55,20 @@ func (s *packageService) CreatePackage(ctx context.Context, payload CreatePackag
 		return nil, errors.New("kuota harus lebih besar dari 0")
 	}
 
+	// Validasi: harga tahunan harus >= harga bulanan
+	if payload.PriceYearly > 0 && payload.PriceYearly < payload.Price {
+		return nil, errors.New("harga tahunan tidak boleh lebih rendah dari harga bulanan")
+	}
+
+	// Validasi: nama paket harus unik
+	existing, err := s.repo.GetPackageByName(ctx, payload.Name)
+	if err != nil {
+		return nil, fmt.Errorf("error validasi nama paket: %v", err)
+	}
+	if existing != nil {
+		return nil, errors.New("nama paket sudah digunakan, gunakan nama lain")
+	}
+
 	return s.repo.CreatePackage(ctx, payload)
 }
 
@@ -83,6 +97,11 @@ func (s *packageService) UpdatePackage(ctx context.Context, id string, payload U
 		return nil, errors.New("kuota harus lebih besar dari 0")
 	}
 
+	// Validasi: harga tahunan harus >= harga bulanan
+	if payload.PriceYearly > 0 && payload.PriceYearly < payload.Price {
+		return nil, errors.New("harga tahunan tidak boleh lebih rendah dari harga bulanan")
+	}
+
 	// Cek apakah data eksis sebelum update
 	existing, err := s.repo.GetPackageByID(ctx, id)
 	if err != nil {
@@ -95,6 +114,15 @@ func (s *packageService) UpdatePackage(ctx context.Context, id string, payload U
 	// PBI-34: Tolak update paket yang sedang ACTIVE
 	if existing.Status == "ACTIVE" {
 		return nil, errors.New("tidak dapat mengubah paket yang sedang aktif")
+	}
+
+	// Validasi: nama paket harus unik (exclude paket ini sendiri)
+	duplicateName, err := s.repo.GetPackageByName(ctx, payload.Name)
+	if err != nil {
+		return nil, fmt.Errorf("error validasi nama paket: %v", err)
+	}
+	if duplicateName != nil && duplicateName.ID != id {
+		return nil, errors.New("nama paket sudah digunakan, gunakan nama lain")
 	}
 
 	return s.repo.UpdatePackage(ctx, id, payload)

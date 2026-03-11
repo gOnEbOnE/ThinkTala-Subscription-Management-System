@@ -12,6 +12,28 @@
         rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/styles.css?v=2">
     <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .btn-add-pkg {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 16px rgba(0,242,255,0.35);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-add-pkg:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 24px rgba(0,242,255,0.55);
+            text-decoration: none;
+            color: #000;
+        }
+    </style>
 </head>
 
 <body>
@@ -186,7 +208,7 @@
             <small class="text-muted">* Field wajib diisi</small>
             <div class="d-flex gap-2">
                 <a href="/ops/subscriptions" class="btn btn-sm btn-outline-secondary px-4">Batal</a>
-                <button class="btn btn-sm px-4 fw-bold" style="background: var(--text-heading); color: #000;"
+                <button class="btn btn-sm px-4 fw-bold btn-add-pkg"
                     onclick="savePackage()">
                     <i class="fa-solid fa-check me-1"></i> Simpan Perubahan
                 </button>
@@ -370,6 +392,7 @@
 
             if (!name) { alert('Nama paket harus diisi!'); return; }
             if (price <= 0) { alert('Harga bulanan harus lebih dari 0!'); return; }
+            if (price_yearly > 0 && price_yearly < price) { alert('Harga tahunan tidak boleh lebih rendah dari harga bulanan!'); return; }
             if (quota <= 0) { alert('Kuota harus lebih dari 0!'); return; }
 
             const body = { name, price, price_yearly, duration: 1, quota, status };

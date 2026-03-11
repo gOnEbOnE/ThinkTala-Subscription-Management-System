@@ -45,6 +45,22 @@ func (c *Controller) CreatePackageHandler(w http.ResponseWriter, r *http.Request
 
 	result, err := c.dispatcher.DispatchAndWait(r.Context(), "create_package", payload, concurrency.PriorityHigh)
 	if err != nil {
+		if err.Error() == "nama paket sudah digunakan, gunakan nama lain" {
+			w.WriteHeader(http.StatusConflict)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+		if err.Error() == "harga tahunan tidak boleh lebih rendah dari harga bulanan" {
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
 		c.response.JSON(w, r, map[string]interface{}{
 			"success": false,
 			"message": err.Error(),
@@ -151,6 +167,22 @@ func (c *Controller) UpdatePackageHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 		if err.Error() == "tidak dapat mengubah paket yang sedang aktif" {
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+		if err.Error() == "nama paket sudah digunakan, gunakan nama lain" {
+			w.WriteHeader(http.StatusConflict)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+		if err.Error() == "harga tahunan tidak boleh lebih rendah dari harga bulanan" {
 			w.WriteHeader(http.StatusBadRequest)
 			c.response.JSON(w, r, map[string]interface{}{
 				"success": false,

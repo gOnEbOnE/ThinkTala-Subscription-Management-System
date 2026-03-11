@@ -18,6 +18,7 @@ type Repository interface {
 	CreatePackage(ctx context.Context, data CreatePackageDTO) (*Package, error)
 	GetPackages(ctx context.Context, status, minPrice, maxPrice string) ([]Package, error)
 	GetPackageByID(ctx context.Context, id string) (*Package, error)
+	GetPackageByName(ctx context.Context, name string) (*Package, error)
 	UpdatePackage(ctx context.Context, id string, data UpdatePackageDTO) (*Package, error)
 	DeletePackage(ctx context.Context, id string) error
 	TogglePackageStatus(ctx context.Context, id string, newStatus string) (*Package, error)
@@ -167,6 +168,28 @@ func (r *packageRepo) GetPackageByID(ctx context.Context, id string) (*Package, 
 		return nil, fmt.Errorf("gagal mencari paket: %w", err)
 	}
 
+	return &p, nil
+}
+
+// GetPackageByName mencari paket berdasarkan nama (case-insensitive, exclude DELETED)
+func (r *packageRepo) GetPackageByName(ctx context.Context, name string) (*Package, error) {
+	query := `
+		SELECT id, name, price, price_yearly, duration, quota, status, created_at, updated_at
+		FROM subscription.packages
+		WHERE LOWER(name) = LOWER($1) AND status != 'DELETED'
+		LIMIT 1
+	`
+
+	var p Package
+	err := r.db.Pool.QueryRow(ctx, query, name).Scan(
+		&p.ID, &p.Name, &p.Price, &p.PriceYearly, &p.Duration, &p.Quota, &p.Status, &p.CreatedAt, &p.UpdatedAt,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("gagal mencari paket by name: %w", err)
+	}
 	return &p, nil
 }
 

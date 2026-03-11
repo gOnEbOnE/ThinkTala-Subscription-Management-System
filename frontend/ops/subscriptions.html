@@ -59,6 +59,27 @@
         .filter-card .input-group-text {
             font-size: 0.88rem;
         }
+
+        .btn-add-pkg {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 16px rgba(0,242,255,0.35);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-add-pkg:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 24px rgba(0,242,255,0.55);
+            text-decoration: none;
+            color: #000;
+        }
     </style>
 </head>
 
@@ -73,8 +94,7 @@
                 <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Paket Langganan</h4>
                 <small class="text-muted">Kelola paket langganan dan harga untuk pengguna</small>
             </div>
-            <a href="/ops/subscriptions-create" class="btn btn-sm px-3 py-2 fw-bold"
-                style="background: var(--text-heading); color: #000;">
+            <a href="/ops/subscriptions-create" class="btn btn-sm px-3 py-2 fw-bold btn-add-pkg">
                 <i class="fa-solid fa-plus me-1"></i> Buat Paket Baru
             </a>
         </div>
@@ -123,7 +143,7 @@
                     </div>
                 </div>
                 <div class="col-md-3 d-flex gap-2">
-                    <button class="btn btn-sm px-3 fw-bold w-100" style="background: var(--text-heading); color: #000;"
+                    <button class="btn btn-sm px-3 fw-bold w-100 btn-add-pkg"
                         onclick="applyFilter()">Terapkan Filter</button>
                     <button class="btn btn-sm btn-outline-secondary px-3" onclick="resetFilter()">Reset</button>
                 </div>
