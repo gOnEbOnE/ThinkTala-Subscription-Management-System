@@ -32,6 +32,7 @@
     function isActive(route) { return path === route ? ' active' : ''; }
     // KYC form page (/client/kyc) should also highlight the KYC nav item
     function isKycActive() { return (path === '/client/kyc-status' || path === '/client/kyc') ? ' active' : ''; }
+    function isMembershipActive() { return path === '/client/packages-catalog' ? ' active' : ''; }
 
     // ── Sidebar HTML ──────────────────────────────────────────────
     var sidebarHTML =
@@ -54,7 +55,7 @@
                 '<li class="nav-item"><a class="nav-link' + isKycActive() + '" href="/client/kyc-status"><i class="fa-solid fa-id-card icon-left"></i><span class="link-text">KYC Verification</span></a></li>' +
             '</ul>' +
             '<ul class="nav flex-column mb-5">' +
-                '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isMembershipActive() + '" href="/client/packages-catalog"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>' +
             '</ul>' +
