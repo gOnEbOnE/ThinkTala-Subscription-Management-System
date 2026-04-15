@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Paket Langganan | ThinkTala Ops</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .btn-add-pkg {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 16px rgba(0,242,255,0.35);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-add-pkg:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 24px rgba(0,242,255,0.55);
+            text-decoration: none;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="main-content">
+        <!-- Back + Title + Delete -->
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <a href="/ops/subscriptions" class="small text-muted text-decoration-none mb-2 d-inline-block">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Paket
+                </a>
+                <h4 class="fw-bold mb-1" style="color: var(--text-heading)">Edit Paket Langganan</h4>
+                <small class="text-muted">Update informasi paket yang sudah ada</small>
+            </div>
+            <button class="btn btn-sm btn-outline-danger" id="btnDeletePkgTop" onclick="openDeleteModal()">
+                <i class="fa-solid fa-trash me-1"></i> Hapus Paket
+            </button>
+        </div>
+
+        <!-- Package Info Header -->
+        <div class="ai-card mb-4" id="pkgInfoCard" style="display:none;">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <small class="text-muted d-block" style="font-size:0.72rem;text-transform:uppercase;">ID
+                        Paket</small>
+                    <span class="fw-bold font-mono" style="color: var(--text-heading); font-size:0.9rem;"
+                        id="infoPkgId">-</span>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted d-block" style="font-size:0.72rem;text-transform:uppercase;">Dibuat
+                        Pada</small>
+                    <span class="text-main" id="infoCreatedAt">-</span>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted d-block" style="font-size:0.72rem;text-transform:uppercase;">Terakhir
+                        Diupdate</small>
+                    <span class="text-main" id="infoUpdatedAt">-</span>
+                </div>
+                <div class="col-md-3">
+                    <small class="text-muted d-block" style="font-size:0.72rem;text-transform:uppercase;">Kuota
+                        Tersedia</small>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold" style="color: var(--text-heading); font-size:1.1rem;"
+                            id="infoQuota">-</span>
+                        <span class="text-muted small">users</span>
+                        <span class="badge ms-auto"
+                            style="background: rgba(0,242,255,0.1); color: var(--accent-cyan); font-size:0.75rem;"
+                            id="infoRevenue">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="ai-card mb-4">
+            <h6 class="fw-bold mb-1" style="color: var(--text-heading)">Detail Paket</h6>
+            <small class="text-muted d-block mb-4">Semua field wajib diisi kecuali yang bertanda opsional</small>
+
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Nama Paket <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="pkgName" placeholder="Nama paket">
+                <small class="text-muted">Nama paket yang akan ditampilkan kepada pengguna</small>
+            </div>
+            <div class="mb-0">
+                <label class="form-label small fw-semibold">Deskripsi Paket <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="pkgDesc" rows="3"
+                    placeholder="Contoh: Paket untuk profesional dengan fitur lengkap dan support prioritas"></textarea>
+                <small class="text-muted">Jelaskan manfaat dan target pengguna paket ini</small>
+            </div>
+        </div>
+
+        <!-- Harga -->
+        <div class="ai-card mb-4">
+            <h6 class="fw-bold mb-3" style="color: var(--text-heading)">Harga Paket</h6>
+
+            <!-- Warning jika ada pelanggan aktif -->
+            <div class="p-3 rounded mb-3 d-flex align-items-start gap-2"
+                style="background: rgba(255,153,0,0.07); border: 1px solid rgba(255,153,0,0.2);" id="priceWarning">
+                <i class="fa-solid fa-circle-exclamation" style="color: var(--accent-orange); margin-top:2px;"></i>
+                <small style="color: var(--accent-orange);">
+                    <strong>Perhatian!</strong> Mengubah harga akan mempengaruhi <strong id="subscriberCount">-</strong>
+                    pelanggan aktif.
+                    Perubahan akan berlaku untuk perpanjangan berikutnya.
+                </small>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Harga Bulanan <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"
+                            style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);">Rp</span>
+                        <input type="number" class="form-control" id="pkgPrice" oninput="updateOldPriceHint()">
+                    </div>
+                    <small class="text-muted">Harga per bulan dalam Rupiah</small>
+                    <div class="mt-1" id="oldMonthlyHint"></div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Harga Tahunan <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text"
+                            style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);">Rp</span>
+                        <input type="number" class="form-control" id="pkgPriceYearly">
+                    </div>
+                    <small class="text-muted">Harga per tahun dalam Rupiah</small>
+                    <div class="mt-1" id="oldYearlyHint"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fitur -->
+        <div class="ai-card mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h6 class="fw-bold mb-0" style="color: var(--text-heading)">Fitur Paket</h6>
+                    <small class="text-muted">Daftar fitur yang termasuk dalam paket ini</small>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="addFeature()">
+                    <i class="fa-solid fa-plus me-1"></i> Tambah Fitur
+                </button>
+            </div>
+            <div id="featuresList"></div>
+        </div>
+
+        <!-- Status -->
+        <div class="ai-card mb-4">
+            <h6 class="fw-bold mb-3" style="color: var(--text-heading)">Status Paket</h6>
+            <div class="d-flex flex-column gap-2">
+                <label class="d-flex align-items-start gap-3 p-3 rounded"
+                    style="border: 1px solid var(--border-color); cursor:pointer;" id="statusActiveLabel">
+                    <input type="radio" name="pkgStatus" value="ACTIVE" class="mt-1" onchange="updateStatusUI()">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="fw-semibold" style="color: var(--text-heading);">Active</span>
+                            <span class="badge fw-semibold px-2 py-1"
+                                style="background:#00d26a;color:#000;font-size:0.7rem;">AKTIF</span>
+                        </div>
+                        <small class="text-muted">Paket tersedia dan dapat dibeli oleh pengguna baru</small>
+                    </div>
+                </label>
+                <label class="d-flex align-items-start gap-3 p-3 rounded"
+                    style="border: 1px solid var(--border-color); cursor:pointer;" id="statusInactiveLabel">
+                    <input type="radio" name="pkgStatus" value="INACTIVE" class="mt-1" onchange="updateStatusUI()">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="fw-semibold" style="color: var(--text-heading);">Inactive</span>
+                            <span class="badge fw-semibold px-2 py-1"
+                                style="background:transparent;border:1px solid var(--border-color);color:var(--text-muted);font-size:0.7rem;">NONAKTIF</span>
+                        </div>
+                        <small class="text-muted">Paket tidak ditampilkan, pelanggan existing tetap aktif sampai masa
+                            berlaku habis</small>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Kuota -->
+        <div class="ai-card mb-4">
+            <h6 class="fw-bold mb-3" style="color: var(--text-heading)">Kapasitas</h6>
+            <div>
+                <label class="form-label small fw-semibold">Kuota Pengguna <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="pkgQuota" placeholder="100" min="1">
+                <small class="text-muted">Jumlah maksimal pengguna dalam satu organisasi</small>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center py-3 mb-4"
+            style="border-top: 1px solid var(--border-color);">
+            <small class="text-muted">* Field wajib diisi</small>
+            <div class="d-flex gap-2">
+                <a href="/ops/subscriptions" class="btn btn-sm btn-outline-secondary px-4">Batal</a>
+                <button class="btn btn-sm px-4 fw-bold btn-add-pkg"
+                    onclick="savePackage()">
+                    <i class="fa-solid fa-check me-1"></i> Simpan Perubahan
+                </button>
+            </div>
+        </div>
+
+        <!-- Riwayat Perubahan -->
+        <div class="ai-card mb-5">
+            <h6 class="fw-bold mb-3" style="color: var(--text-heading)">Riwayat Perubahan</h6>
+            <div id="changeHistory">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                        style="width:8px;height:8px;background:var(--accent-cyan);margin-top:6px;flex-shrink:0;"></div>
+                    <div>
+                        <p class="mb-0 small" style="color: var(--text-heading);">Paket dibuat</p>
+                        <small class="text-muted" id="historyCreated">-</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deletePkgModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-triangle-exclamation fa-3x text-danger mb-3"></i>
+                    <h6 class="fw-bold text-main">Hapus Paket?</h6>
+                    <p class="text-muted small">Tindakan ini tidak dapat dibatalkan.</p>
+                    <div class="d-flex gap-2 justify-content-center mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-danger btn-sm px-4" onclick="confirmDelete()">Hapus</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-3x mb-3" id="alertIcon"></i>
+                    <h6 class="fw-bold" style="color: var(--text-heading)" id="alertTitle">Peringatan</h6>
+                    <p class="text-muted small mb-0" id="alertMessage"></p>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button class="btn btn-sm btn-outline-secondary px-4" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>Operations Panel v1.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
+    <script>
+        let pkgId = null;
+        let originalPrice = 0;
+        let originalPriceYearly = 0;
+
+        function logout() { fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function(){}); localStorage.removeItem('token'); localStorage.removeItem('user'); sessionStorage.clear(); window.location.href = '/account/login'; }
+
+        function showAlert(msg, type = 'warning') {
+            const icon = document.getElementById('alertIcon');
+            const title = document.getElementById('alertTitle');
+            if (type === 'danger') {
+                icon.className = 'fa-solid fa-circle-xmark fa-3x text-danger mb-3';
+                title.textContent = 'Terjadi Kesalahan';
+            } else {
+                icon.className = 'fa-solid fa-triangle-exclamation fa-3x mb-3';
+                icon.style.color = 'var(--accent-orange)';
+                title.textContent = 'Peringatan';
+            }
+            document.getElementById('alertMessage').textContent = msg;
+            new bootstrap.Modal(document.getElementById('alertModal')).show();
+        }
+
+        function formatRp(val) { return 'Rp ' + Number(val || 0).toLocaleString('id-ID'); }
+
+        function formatDate(str) {
+            if (!str) return '-';
+            return new Date(str).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function updateStatusUI() {
+            const active = document.querySelector('[name="pkgStatus"][value="ACTIVE"]').checked;
+            document.getElementById('statusActiveLabel').style.borderColor = active ? 'var(--accent-cyan)' : 'var(--border-color)';
+            document.getElementById('statusInactiveLabel').style.borderColor = !active ? 'var(--accent-orange)' : 'var(--border-color)';
+        }
+
+        function updateOldPriceHint() {
+            const newVal = parseFloat(document.getElementById('pkgPrice').value) || 0;
+            if (originalPrice > 0 && newVal !== originalPrice) {
+                document.getElementById('oldMonthlyHint').innerHTML =
+                    `<small style="color:var(--text-muted);text-decoration:line-through;">Harga Lama (Bulanan): ${formatRp(originalPrice)}</small>`;
+                document.getElementById('oldYearlyHint').innerHTML =
+                    `<small style="color:var(--text-muted);text-decoration:line-through;">Harga Lama (Tahunan): ${formatRp(originalPriceYearly)}</small>`;
+            } else {
+                document.getElementById('oldMonthlyHint').innerHTML = '';
+                document.getElementById('oldYearlyHint').innerHTML = '';
+            }
+        }
+
+        function addFeature(text = '') {
+            const list = document.getElementById('featuresList');
+            const count = list.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'feature-item d-flex align-items-center gap-2 mb-2';
+            div.innerHTML = `
+                <span class="text-muted fw-bold" style="min-width:20px;font-size:0.85rem;">${count}.</span>
+                <input type="text" class="form-control form-control-sm" value="${text}" placeholder="Tambahkan fitur...">
+                <button class="btn btn-sm btn-outline-danger" style="width:32px;height:32px;padding:0;" onclick="removeFeature(this)">
+                    <i class="fa-solid fa-times fa-xs"></i>
+                </button>`;
+            list.appendChild(div);
+        }
+
+        function removeFeature(btn) {
+            btn.closest('.feature-item').remove();
+            document.querySelectorAll('#featuresList .feature-item').forEach((item, i) => {
+                item.querySelector('span').textContent = (i + 1) + '.';
+            });
+        }
+
+        function openDeleteModal() {
+            new bootstrap.Modal(document.getElementById('deletePkgModal')).show();
+        }
+
+        async function confirmDelete() {
+            try {
+                const res = await fetch(`/api/admin/packages/${pkgId}`, { method: 'DELETE', credentials: 'include' });
+                const json = await res.json();
+                if (json.success) {
+                    sessionStorage.setItem('toast', 'Paket berhasil dihapus');
+                    window.location.href = '/ops/subscriptions';
+                } else {
+                    showAlert(json.message || 'Gagal menghapus paket', 'danger');
+                }
+            } catch (e) { showAlert('Error: ' + e.message, 'danger'); }
+        }
+
+        async function loadPackage() {
+            pkgId = new URLSearchParams(window.location.search).get('id');
+            if (!pkgId) { window.location.href = '/ops/subscriptions'; return; }
+
+            try {
+                const res = await fetch('/api/admin/packages', { credentials: 'include' });
+                const json = await res.json();
+                const pkg = (json.data || []).find(p => p.id === pkgId);
+                if (!pkg) { showAlert('Paket tidak ditemukan', 'danger'); window.location.href = '/ops/subscriptions'; return; }
+
+                // Fill form
+                document.getElementById('pkgName').value = pkg.name || '';
+                document.getElementById('pkgDesc').value = pkg.description || '';
+                document.getElementById('pkgPrice').value = pkg.price || '';
+                document.getElementById('pkgPriceYearly').value = pkg.price_yearly || '';
+                document.getElementById('pkgQuota').value = pkg.quota || '';
+                originalPrice = pkg.price;
+                originalPriceYearly = pkg.price_yearly || 0;
+
+                // Status
+                const radio = document.querySelector(`[name="pkgStatus"][value="${pkg.status || 'ACTIVE'}"]`);
+                if (radio) radio.checked = true;
+                updateStatusUI();
+
+                // Delete Button Logic
+                const btnDel = document.getElementById('btnDeletePkgTop');
+                if (btnDel) {
+                    if ((pkg.status || 'ACTIVE') === 'ACTIVE') {
+                        btnDel.disabled = true;
+                        btnDel.setAttribute('title', 'Nonaktifkan paket terlebih dahulu untuk menghapus');
+                    } else {
+                        btnDel.disabled = false;
+                        btnDel.removeAttribute('title');
+                    }
+                }
+
+                // Info card
+                document.getElementById('infoPkgId').textContent = '#PKG-' + pkgId.substring(0, 8).toUpperCase();
+                document.getElementById('infoCreatedAt').textContent = formatDate(pkg.created_at);
+                document.getElementById('infoUpdatedAt').textContent = formatDate(pkg.updated_at);
+                document.getElementById('infoQuota').textContent = pkg.quota || '-';
+                document.getElementById('infoRevenue').textContent = 'Revenue Bulanan: ' + formatRp(pkg.price);
+                document.getElementById('pkgInfoCard').style.display = '';
+                document.getElementById('subscriberCount').textContent = pkg.quota || 0;
+
+                // History
+                document.getElementById('historyCreated').textContent = formatDate(pkg.created_at) + ' - oleh Admin User';
+
+                // Features (placeholder since not in current schema)
+                addFeature();
+
+            } catch (e) {
+                showAlert('Error loading package: ' + e.message, 'danger');
+            }
+        }
+
+        async function savePackage() {
+            const name = document.getElementById('pkgName').value.trim();
+            const price = parseFloat(document.getElementById('pkgPrice').value) || 0;
+            const price_yearly = parseFloat(document.getElementById('pkgPriceYearly').value) || 0;
+            const quota = parseInt(document.getElementById('pkgQuota').value) || 0;
+            const status = document.querySelector('[name="pkgStatus"]:checked') ? document.querySelector('[name="pkgStatus"]:checked').value : 'ACTIVE';
+
+            if (!name) { showAlert('Nama paket harus diisi!'); return; }
+            if (price <= 0) { showAlert('Harga bulanan harus lebih dari 0!'); return; }
+            if (price_yearly > 0 && price_yearly < price) { showAlert('Harga tahunan tidak boleh lebih rendah dari harga bulanan!'); return; }
+            if (quota <= 0) { showAlert('Kuota harus lebih dari 0!'); return; }
+
+            const body = { name, price, price_yearly, duration: 1, quota, status };
+
+            try {
+                const res = await fetch(`/api/admin/packages/${pkgId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(body)
+                });
+                const json = await res.json();
+                if (json.success) {
+                    sessionStorage.setItem('toast', 'Paket berhasil diperbarui');
+                    window.location.href = '/ops/subscriptions';
+                } else {
+                    showAlert(json.message || 'Gagal menyimpan perubahan', 'danger');
+                }
+            } catch (e) { showAlert('Error: ' + e.message, 'danger'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPackage);
+    </script>
+</body>
+
+</html>

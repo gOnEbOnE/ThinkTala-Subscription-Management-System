@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports | ThinkTala Compliance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .report-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-bottom: 2rem; }
+        @media (max-width: 768px) { .report-grid { grid-template-columns: 1fr; } }
+        .report-card {
+            padding: 1.5rem; border-radius: 12px;
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            text-align: center; transition: all 0.3s;
+        }
+        .report-card:hover { border-color: var(--accent-cyan); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .report-num { font-size: 2.5rem; font-weight: 700; line-height: 1.1; }
+        .report-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; }
+
+        .chart-container { position: relative; max-width: 220px; margin: 0 auto; }
+
+        .activity-item {
+            padding: 0.85rem 0; border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: flex-start; gap: 0.75rem;
+        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-icon {
+            width: 36px; height: 36px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; flex-shrink: 0;
+        }
+        .activity-icon.approve { background: rgba(34,197,94,0.15); color: #22c55e; }
+        .activity-icon.reject { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .activity-icon.submit { background: rgba(234,179,8,0.15); color: #eab308; }
+    </style>
+</head>
+<body>
+    <div id="compliance-sidebar-placeholder"></div>
+    <div id="compliance-navbar-placeholder"></div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content">
+        <h4 class="fw-bold mb-1" style="color: var(--text-heading);">
+            <i class="fa-solid fa-chart-bar text-cyan me-2"></i>Reports &amp; Analytics
+        </h4>
+        <p class="text-muted small mb-4">Ringkasan data dan statistik KYC</p>
+
+        <!-- Stats -->
+        <div class="report-grid">
+            <div class="report-card">
+                <div class="report-num text-warning" id="rPending">-</div>
+                <div class="report-label">Menunggu Review</div>
+            </div>
+            <div class="report-card">
+                <div class="report-num text-success" id="rApproved">-</div>
+                <div class="report-label">Disetujui</div>
+            </div>
+            <div class="report-card">
+                <div class="report-num text-danger" id="rRejected">-</div>
+                <div class="report-label">Ditolak</div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Chart -->
+            <div class="col-lg-5">
+                <div class="ai-card p-4 h-100">
+                    <h6 class="fw-semibold mb-3" style="color: var(--text-heading);">
+                        <i class="fa-solid fa-chart-pie text-cyan me-2"></i>Rasio Approval
+                    </h6>
+                    <div class="chart-container">
+                        <canvas id="donutChart" width="220" height="220"></canvas>
+                    </div>
+                    <div class="d-flex justify-content-center gap-4 mt-3">
+                        <div class="text-center">
+                            <div style="width:12px;height:12px;background:#22c55e;border-radius:3px;display:inline-block;"></div>
+                            <small class="text-muted ms-1">Approved</small>
+                        </div>
+                        <div class="text-center">
+                            <div style="width:12px;height:12px;background:#ef4444;border-radius:3px;display:inline-block;"></div>
+                            <small class="text-muted ms-1">Rejected</small>
+                        </div>
+                        <div class="text-center">
+                            <div style="width:12px;height:12px;background:#eab308;border-radius:3px;display:inline-block;"></div>
+                            <small class="text-muted ms-1">Pending</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="col-lg-7">
+                <div class="ai-card p-4 h-100">
+                    <h6 class="fw-semibold mb-3" style="color: var(--text-heading);">
+                        <i class="fa-solid fa-clock-rotate-left text-cyan me-2"></i>Aktivitas Terbaru
+                    </h6>
+                    <div id="activityList">
+                        <div class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/compliance-layout.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        loadUserInfo();
+        loadReportStats();
+    });
+
+    function loadUserInfo() {
+        try {
+            var user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.name) {
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('avatarImg').src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name) + '&background=0b0e17&color=fff';
+            }
+            if (user.email) document.getElementById('userEmail').textContent = user.email;
+        } catch (e) {}
+    }
+
+    function loadReportStats() {
+        var counts = { pending: 0, approved: 0, rejected: 0 };
+        var done = 0;
+        ['pending', 'approved', 'rejected'].forEach(function (s) {
+            fetch('/api/admin/kyc?status=' + s + '&limit=1', { credentials: 'include' })
+                .then(function (r) { return r.json(); })
+                .then(function (d) { counts[s] = (d.data && d.data.total) || 0; })
+                .catch(function () {})
+                .finally(function () {
+                    done++;
+                    if (done === 3) {
+                        document.getElementById('rPending').textContent = counts.pending;
+                        document.getElementById('rApproved').textContent = counts.approved;
+                        document.getElementById('rRejected').textContent = counts.rejected;
+                        drawDonut(counts);
+                        loadActivity(counts);
+                    }
+                });
+        });
+    }
+
+    function drawDonut(c) {
+        var canvas = document.getElementById('donutChart');
+        if (!canvas || !canvas.getContext) return;
+        var ctx = canvas.getContext('2d');
+        var total = c.approved + c.rejected + c.pending;
+        if (total === 0) {
+            ctx.beginPath(); ctx.arc(110, 110, 80, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 30; ctx.stroke();
+            ctx.fillStyle = 'var(--text-muted)'; ctx.font = '600 14px Inter';
+            ctx.textAlign = 'center'; ctx.fillText('No Data', 110, 115);
+            return;
+        }
+        var slices = [
+            { val: c.approved, color: '#22c55e' },
+            { val: c.rejected, color: '#ef4444' },
+            { val: c.pending,  color: '#eab308' }
+        ];
+        var start = -Math.PI / 2;
+        slices.forEach(function (s) {
+            if (s.val === 0) return;
+            var angle = (s.val / total) * Math.PI * 2;
+            ctx.beginPath(); ctx.arc(110, 110, 80, start, start + angle);
+            ctx.strokeStyle = s.color; ctx.lineWidth = 30; ctx.lineCap = 'butt'; ctx.stroke();
+            start += angle;
+        });
+        // Center text
+        var pct = total > 0 ? Math.round((c.approved / total) * 100) : 0;
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-heading').trim() || '#fff';
+        ctx.font = '700 24px Inter'; ctx.textAlign = 'center'; ctx.fillText(pct + '%', 110, 105);
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#8b9bb4';
+        ctx.font = '400 11px Inter'; ctx.fillText('APPROVAL', 110, 125);
+    }
+
+    function loadActivity(counts) {
+        // Load all recent KYC items to show as activity
+        fetch('/api/admin/kyc?status=all&limit=8&page=1', { credentials: 'include' })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                var items = (d.data && d.data.items) || [];
+                var list = document.getElementById('activityList');
+                if (items.length === 0) {
+                    list.innerHTML = '<div class="text-center text-muted py-4">Belum ada aktivitas</div>';
+                    return;
+                }
+                list.innerHTML = items.map(function (item) {
+                    var iconClass = 'submit', icon = 'fa-clock', label = 'Pengajuan baru';
+                    if (item.status === 'approved') { iconClass = 'approve'; icon = 'fa-circle-check'; label = 'Disetujui'; }
+                    if (item.status === 'rejected') { iconClass = 'reject'; icon = 'fa-circle-xmark'; label = 'Ditolak'; }
+                    return '<div class="activity-item">' +
+                        '<div class="activity-icon ' + iconClass + '"><i class="fa-solid ' + icon + '"></i></div>' +
+                        '<div style="flex:1;min-width:0;">' +
+                            '<div style="color:var(--text-heading);font-weight:500;font-size:0.9rem;">' + esc(item.full_name) + '</div>' +
+                            '<div class="text-muted" style="font-size:0.78rem;">' + label + ' \u2022 ' + formatDate(item.created_at) + '</div>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+            })
+            .catch(function () {
+                document.getElementById('activityList').innerHTML = '<div class="text-center text-muted py-4">Gagal memuat aktivitas</div>';
+            });
+    }
+
+    function formatDate(d) {
+        if (!d) return '-';
+        try { return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }); }
+        catch (e) { return d; }
+    }
+    function esc(s) { if (!s) return ''; var el = document.createElement('div'); el.textContent = s; return el.innerHTML; }
+    </script>
+</body>
+</html>

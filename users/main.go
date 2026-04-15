@@ -6,20 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	// Import Feature Login (Modular)
-
-	"github.com/master-abror/zaframework/app/modules/account/dashboard"
-	"github.com/master-abror/zaframework/app/modules/account/users"
-	"github.com/master-abror/zaframework/app/modules/account/wrapper"
-	"github.com/master-abror/zaframework/app/modules/landing"
+	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
-	"github.com/master-abror/zaframework/app/modules/reset"
-
-	// Import Router Baru
 	"github.com/master-abror/zaframework/app/routes"
-
-	// Import Framework Core
 	"github.com/master-abror/zaframework/core"
 	"github.com/master-abror/zaframework/core/concurrency"
 	"github.com/master-abror/zaframework/core/database"
@@ -32,25 +22,18 @@ func main() {
 	// 1. INITIALIZATION & CONFIG
 	// ============================================================
 
-	// Load Environment Variables
 	utils.LoadEnv(".env")
 
-	// Init JWT Keys (Wajib ada file private.pem & public.pem di root)
-	if err := utils.InitJWTLoadKeys("private.pem", "public.pem"); err != nil {
+	if err := utils.InitJWTLoadKeys("certs/private.pem", "certs/public.pem"); err != nil {
 		log.Fatalf("[FATAL] Gagal memuat kunci JWT: %v", err)
 	}
 
-	// Init Redis (Sesuai request sebelumnya)
-	// Jika di .env redis=false, ini akan bypass otomatis tanpa error
 	if err := utils.InitRedis(); err != nil {
 		log.Printf("[WARNING] Redis init failed: %v", err)
 	}
 
-	// ------------------------------------------------------------
-	// SESSION INIT (UPDATED)
-	// ------------------------------------------------------------
-	// 1. Tentukan Mode SameSite (Lax/Strict/None)
-	sameSiteMode := http.SameSiteLaxMode // Default
+	// SESSION INIT
+	sameSiteMode := http.SameSiteLaxMode
 	switch utils.GetEnv("SESSION_SAME_SITE", "Lax") {
 	case "Strict":
 		sameSiteMode = http.SameSiteStrictMode
@@ -58,33 +41,27 @@ func main() {
 		sameSiteMode = http.SameSiteNoneMode
 	}
 
-	// 2. Init Session dengan Config Lengkap (Sesuai update manager.go)
+	sessionLife := utils.ToInt(utils.GetEnv("SESSION_LIFETIME", "3600"))
+
 	session.Init(session.Config{
-		Driver: utils.GetEnv("SESSION_DRIVER", "cookie"),
-
-		// Prioritaskan SESSION_KEY, jika kosong pakai APP_KEY
-		SecretKey: utils.GetEnv("SESSION_KEY", utils.GetEnv("APP_KEY")),
-
+		Driver:      utils.GetEnv("SESSION_DRIVER", "cookie"),
+		SecretKey:   utils.GetEnv("SESSION_KEY", utils.GetEnv("APP_KEY")),
 		CookieName:  utils.GetEnv("SESSION_NAME", "za_session"),
-		SessionLife: utils.ToInt(utils.GetEnv("SESSION_LIFETIME", "3600")),
+		SessionLife: sessionLife,
 
-		// Config Advanced (Dari .env)
-		Domain: utils.GetEnv("SESSION_DOMAIN", ""), // Kosongkan jika localhost
-		Path:   utils.GetEnv("SESSION_PATH", "/"),
-
-		// Konversi string "true" ke boolean
+		// Cookie Settings
+		Path:     "/",
+		Domain:   "", // 👈 PENTING: Set kosong
 		Secure:   utils.GetEnv("SESSION_SECURE") == "true",
-		HttpOnly: utils.GetEnv("SESSION_HTTP_ONLY") == "true",
+		HttpOnly: true,
 		SameSite: sameSiteMode,
 	})
 
-	// Helper parsers
-	maxConns, _ := strconv.Atoi(utils.GetEnv("APP_DB_MAX_CONN", "100"))
+	maxConns, _ := strconv.Atoi(utils.GetEnv("read_db_max_conn", "5"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
 
-	// Config Engine
 	cfg := core.Config{
-		AppName:        utils.GetEnv("app_name", "Jakedu Login Service"),
+		AppName:        utils.GetEnv("app_name", "ZaFramework"),
 		Port:           utils.GetEnv("port", "9002"),
 		Env:            utils.GetEnv("app_env", "development"),
 		AssetsURL:      utils.GetEnv("assets_url"),
@@ -122,55 +99,50 @@ func main() {
 		},
 	}
 
-	// Start Engine
 	app := core.New(cfg)
+
+	database.MigrateAndSeed(app.DB)
 
 	// ============================================================
 	// 2. WIRING FEATURES (Dependency Injection)
 	// ============================================================
 
 	// --- Feature: Login ---
-
-	// loginCtrl := login.NewController(app.Dispatcher, app.Response)
-
-	landingCtrl := landing.NewController(app.Dispatcher, app.Response)
-
 	loginRepo := login.NewRepository(app.DB)
 	loginService := login.NewService(loginRepo)
 	loginController := login.NewController(app.Dispatcher, app.Response)
 
+	// --- Feature: Register ---
+	registerRepo := register.NewRepository(app.DB)
+	registerService := register.NewService(registerRepo)
 	registerController := register.NewController(app.Dispatcher, app.Response)
-	resetController := reset.NewController(app.Dispatcher, app.Response)
 
-	wrapperController := wrapper.NewController(app.Dispatcher, app.Response)
-	dashboardController := dashboard.NewController(app.Dispatcher, app.Response)
+	// --- Feature: KYC ---
+	kycRepo := kyc.NewRepository(app.DB)
+	kycService := kyc.NewService(kycRepo)
+	kycController := kyc.NewController(app.Dispatcher, app.Response)
+	kycAdminController := kyc.NewAdminController(app.Dispatcher, app.Response)
 
-	usersRepo := users.NewRepository(app.DB)
-	usersService := users.NewService(usersRepo)
-	usersController := users.NewController(app.Dispatcher, app.Response)
-
-	// Register Job Handler (Worker)
-	// Logic background process didaftarkan di sini
+	// Register Job Handlers (Workers)
 	app.RegisterJob("auth", loginService.ProcessLoginJob)
-	app.RegisterJob("get_inactive_users", usersService.GetInactiveUsersService)
-	// Di file registry worker Anda
-	app.RegisterJob("get_detail_user", usersService.ProcessGetDetailUserJob)
-	app.RegisterJob("update_user", usersService.ProcessUpdateUserJob)
+	app.RegisterJob("register", registerService.ProcessRegisterJob)
+	app.RegisterJob("verify_otp", registerService.ProcessVerifyOTPJob)
+	app.RegisterJob("resend_otp", registerService.ProcessResendOTPJob)
+	app.RegisterJob("assume_role", loginService.ProcessAssumeRoleJob)
+	app.RegisterJob("kyc_submit", kycService.ProcessKYCSubmitJob)
+	app.RegisterJob("kyc_status", kycService.ProcessKYCStatusJob)
+	app.RegisterJob("admin_kyc_list", kycService.ProcessAdminKYCListJob)
+	app.RegisterJob("admin_kyc_detail", kycService.ProcessAdminKYCDetailJob)
+	app.RegisterJob("admin_kyc_review", kycService.ProcessAdminKYCReviewJob)
 
 	// ============================================================
 	// 3. ROUTING
 	// ============================================================
-
-	// Panggil file router terpisah
-	// Kita inject Controller yang sudah di-init di atas ke router
 	routes.Init(app,
-		landingCtrl,
 		loginController,
 		registerController,
-		resetController,
-		wrapperController,
-		dashboardController,
-		usersController,
+		kycController,
+		kycAdminController,
 	)
 
 	// ============================================================

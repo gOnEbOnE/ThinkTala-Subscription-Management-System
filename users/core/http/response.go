@@ -111,6 +111,29 @@ func (h *ResponseHelper) View(w http.ResponseWriter, r *http.Request, filepath s
 	w.Write(minified)
 }
 
+// sendJSON adalah helper untuk memastikan format output JSON selalu seragam dan aman
+func ApiJSON(w http.ResponseWriter, r *http.Request, statusCode int, status bool, msg string, data any) {
+	// Pastikan header selalu application/json
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+
+	response := map[string]any{
+		"status": status,
+		"msg":    msg,
+	}
+
+	// Hanya tampilkan key "data" jika memang ada isinya
+	if data != nil {
+		response["data"] = data
+	}
+
+	// Encode ke JSON
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log error di server jika gagal encode (opsional, gunakan logger standar Anda)
+		http.Error(w, `{"status":false,"msg":"Gagal memproses response server"}`, http.StatusInternalServerError)
+	}
+}
+
 // func (h *ResponseHelper) View(w http.ResponseWriter, r *http.Request, filepath string, title string, data map[string]any) {
 // 	// 1. Ambil Nonce dari context (setelah diproses Middleware)
 // 	// Pastikan key-nya sama dengan yang ada di Middleware

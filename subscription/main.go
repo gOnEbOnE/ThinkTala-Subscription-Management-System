@@ -6,20 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	// Import Feature Login (Modular)
-
-	"github.com/master-abror/zaframework/app/modules/account/dashboard"
-	"github.com/master-abror/zaframework/app/modules/account/users"
-	"github.com/master-abror/zaframework/app/modules/account/wrapper"
-	"github.com/master-abror/zaframework/app/modules/landing"
-	"github.com/master-abror/zaframework/app/modules/login"
-	"github.com/master-abror/zaframework/app/modules/register"
-	"github.com/master-abror/zaframework/app/modules/reset"
-
-	// Import Router Baru
+	"github.com/master-abror/zaframework/app/modules/packages"
 	"github.com/master-abror/zaframework/app/routes"
-
-	// Import Framework Core
 	"github.com/master-abror/zaframework/core"
 	"github.com/master-abror/zaframework/core/concurrency"
 	"github.com/master-abror/zaframework/core/database"
@@ -28,68 +16,43 @@ import (
 )
 
 func main() {
-	// ============================================================
-	// 1. INITIALIZATION & CONFIG
-	// ============================================================
-
-	// Load Environment Variables
+	// 1. INIT
 	utils.LoadEnv(".env")
 
-	// Init JWT Keys (Wajib ada file private.pem & public.pem di root)
-	if err := utils.InitJWTLoadKeys("private.pem", "public.pem"); err != nil {
-		log.Fatalf("[FATAL] Gagal memuat kunci JWT: %v", err)
+	if err := utils.InitJWTLoadKeys("certs/private.pem", "certs/public.pem"); err != nil {
+		log.Printf("[WARNING] JWT keys not found: %v (continuing without JWT validation)", err)
 	}
 
-	// Init Redis (Sesuai request sebelumnya)
-	// Jika di .env redis=false, ini akan bypass otomatis tanpa error
 	if err := utils.InitRedis(); err != nil {
 		log.Printf("[WARNING] Redis init failed: %v", err)
 	}
 
-	// ------------------------------------------------------------
-	// SESSION INIT (UPDATED)
-	// ------------------------------------------------------------
-	// 1. Tentukan Mode SameSite (Lax/Strict/None)
-	sameSiteMode := http.SameSiteLaxMode // Default
-	switch utils.GetEnv("SESSION_SAME_SITE", "Lax") {
-	case "Strict":
+	sameSiteMode := http.SameSiteLaxMode
+	if utils.GetEnv("SESSION_SAME_SITE", "Lax") == "Strict" {
 		sameSiteMode = http.SameSiteStrictMode
-	case "None":
-		sameSiteMode = http.SameSiteNoneMode
 	}
 
-	// 2. Init Session dengan Config Lengkap (Sesuai update manager.go)
 	session.Init(session.Config{
-		Driver: utils.GetEnv("SESSION_DRIVER", "cookie"),
-
-		// Prioritaskan SESSION_KEY, jika kosong pakai APP_KEY
-		SecretKey: utils.GetEnv("SESSION_KEY", utils.GetEnv("APP_KEY")),
-
+		Driver:      utils.GetEnv("SESSION_DRIVER", "cookie"),
+		SecretKey:   utils.GetEnv("SESSION_KEY", utils.GetEnv("APP_KEY")),
 		CookieName:  utils.GetEnv("SESSION_NAME", "za_session"),
 		SessionLife: utils.ToInt(utils.GetEnv("SESSION_LIFETIME", "3600")),
-
-		// Config Advanced (Dari .env)
-		Domain: utils.GetEnv("SESSION_DOMAIN", ""), // Kosongkan jika localhost
-		Path:   utils.GetEnv("SESSION_PATH", "/"),
-
-		// Konversi string "true" ke boolean
-		Secure:   utils.GetEnv("SESSION_SECURE") == "true",
-		HttpOnly: utils.GetEnv("SESSION_HTTP_ONLY") == "true",
-		SameSite: sameSiteMode,
+		Path:        "/",
+		Domain:      "",
+		Secure:      utils.GetEnv("SESSION_SECURE") == "true",
+		HttpOnly:    true,
+		SameSite:    sameSiteMode,
 	})
 
-	// Helper parsers
-	maxConns, _ := strconv.Atoi(utils.GetEnv("APP_DB_MAX_CONN", "100"))
+	maxConns, _ := strconv.Atoi(utils.GetEnv("APP_DB_MAX_CONN", "10"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
 
-	// Config Engine
 	cfg := core.Config{
-		AppName:        utils.GetEnv("app_name", "Jakedu Login Service"),
-		Port:           utils.GetEnv("port", "9002"),
+		AppName:        utils.GetEnv("app_name", "Thinknalyze Subscription Service"),
+		Port:           utils.GetEnv("port", "5004"),
 		Env:            utils.GetEnv("app_env", "development"),
 		AssetsURL:      utils.GetEnv("assets_url"),
-		SsoAuth:        utils.GetEnv("sso_auth"),
-		AllowedOrigins: []string{utils.GetEnv("base_url")},
+		AllowedOrigins: []string{"*"},
 
 		DBConfig: database.Config{
 			Host:            utils.GetEnv("read_db_host"),
@@ -107,74 +70,39 @@ func main() {
 		},
 
 		WorkerConfig: concurrency.Config{
-			HighPriorityWorkers:     workerMult * 4,
-			NormalPriorityWorkers:   workerMult * 2,
-			LowPriorityWorkers:      workerMult,
-			QueueSizePerPriority:    10000,
-			MaxConcurrentJobs:       50000,
-			QueueFullThreshold:      0.8,
-			MaxRetries:              3,
-			JobTimeoutDefault:       10 * time.Second,
-			ShutdownTimeout:         30 * time.Second,
-			EnableAdaptiveRateLimit: true,
-			HealthCheckRate:         5 * time.Second,
-			MetricsRate:             10 * time.Second,
+			HighPriorityWorkers:   workerMult * 4,
+			NormalPriorityWorkers: workerMult * 2,
+			LowPriorityWorkers:    workerMult,
+			QueueSizePerPriority:  10000,
+			MaxConcurrentJobs:     50000,
+			MaxRetries:            3,
+			JobTimeoutDefault:     10 * time.Second,
+			ShutdownTimeout:       30 * time.Second,
+			HealthCheckRate:       5 * time.Second,
+			MetricsRate:           10 * time.Second,
 		},
 	}
 
-	// Start Engine
 	app := core.New(cfg)
 
-	// ============================================================
-	// 2. WIRING FEATURES (Dependency Injection)
-	// ============================================================
+	// 2. MIGRATION & SEEDING
+	database.MigrateAndSeed(app.DB)
 
-	// --- Feature: Login ---
+	// 3. WIRING
+	packagesRepo := packages.NewRepository(app.DB)
+	packagesService := packages.NewService(packagesRepo)
+	packagesController := packages.NewController(app.Dispatcher, app.Response, packagesService)
 
-	// loginCtrl := login.NewController(app.Dispatcher, app.Response)
+	app.RegisterJob("create_package", packagesService.ProcessCreatePackageJob)
+	app.RegisterJob("get_admin_packages", packagesService.ProcessGetAdminPackagesJob)
+	app.RegisterJob("get_catalog_packages", packagesService.ProcessGetCatalogJob)
+	app.RegisterJob("update_package", packagesService.ProcessUpdatePackageJob)
+	app.RegisterJob("delete_package", packagesService.ProcessDeletePackageJob)
+	app.RegisterJob("toggle_package_status", packagesService.ProcessTogglePackageStatusJob)
 
-	landingCtrl := landing.NewController(app.Dispatcher, app.Response)
+	// 4. ROUTING
+	routes.Init(app, packagesController)
 
-	loginRepo := login.NewRepository(app.DB)
-	loginService := login.NewService(loginRepo)
-	loginController := login.NewController(app.Dispatcher, app.Response)
-
-	registerController := register.NewController(app.Dispatcher, app.Response)
-	resetController := reset.NewController(app.Dispatcher, app.Response)
-
-	wrapperController := wrapper.NewController(app.Dispatcher, app.Response)
-	dashboardController := dashboard.NewController(app.Dispatcher, app.Response)
-
-	usersRepo := users.NewRepository(app.DB)
-	usersService := users.NewService(usersRepo)
-	usersController := users.NewController(app.Dispatcher, app.Response)
-
-	// Register Job Handler (Worker)
-	// Logic background process didaftarkan di sini
-	app.RegisterJob("auth", loginService.ProcessLoginJob)
-	app.RegisterJob("get_inactive_users", usersService.GetInactiveUsersService)
-	// Di file registry worker Anda
-	app.RegisterJob("get_detail_user", usersService.ProcessGetDetailUserJob)
-	app.RegisterJob("update_user", usersService.ProcessUpdateUserJob)
-
-	// ============================================================
-	// 3. ROUTING
-	// ============================================================
-
-	// Panggil file router terpisah
-	// Kita inject Controller yang sudah di-init di atas ke router
-	routes.Init(app,
-		landingCtrl,
-		loginController,
-		registerController,
-		resetController,
-		wrapperController,
-		dashboardController,
-		usersController,
-	)
-
-	// ============================================================
-	// 4. RUN SERVER
-	// ============================================================
+	// 5. RUN
 	app.Run()
 }

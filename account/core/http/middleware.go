@@ -12,33 +12,28 @@ import (
 	"github.com/fatih/color" // Pastikan sudah go get
 	"github.com/gorilla/csrf"
 	"github.com/master-abror/zaframework/core/session"
+	"github.com/master-abror/zaframework/core/token"
 	"github.com/master-abror/zaframework/core/utils"
 	"golang.org/x/time/rate" // Pastikan sudah go get
 )
 
 type CurrentUser struct {
-	Browser       string `json:"browser"`
-	Fullname      string `json:"fullname"`
-	Group         string `json:"group"`
-	GroupID       string `json:"group_id"`
-	ID            string `json:"id"`
-	IP            string `json:"ip"`
-	IsActive      string `json:"is_active"`
-	Jabatan       string `json:"jabatan"`
-	JenisAkun     string `json:"jenis_akun"`
-	JenisKelamin  string `json:"jenis_kelamin"`
-	Latitude      string `json:"latitude"`
-	Level         string `json:"level"`
-	LevelID       int    `json:"level_id"`
-	Login         string `json:"login"`
-	LoginID       string `json:"login_id"`
-	Longitude     string `json:"longitude"`
-	MultipleLogin int    `json:"multiple_login"`
-	NIK           string `json:"nik"`
-	OS            string `json:"os"`
-	Photo         string `json:"photo"`
-	Role          string `json:"role"`
-	RoleID        string `json:"role_id"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password,omitempty"`
+	Photo     *string   `json:"photo"`
+	GroupID   string    `json:"group_id"`
+	LevelID   string    `json:"level_id"`
+	RoleID    string    `json:"role_id"`
+	Status    string    `json:"status"`
+	Level     string    `json:"level"`
+	Role      string    `json:"role"`
+	Group     string    `json:"group"`
+	CreatedAt time.Time `json:"created_at"`
+	CreatedBy *string   `json:"created_by"`
+	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedBy *string   `json:"updated_by"`
 }
 
 // Standard Middleware Chain
@@ -387,6 +382,40 @@ func AuthMiddleware(next http.HandlerFunc) http.Handler {
 	})
 }
 
+func UserAuthorize(next http.HandlerFunc) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		currentUser, err := token.GetUserAuthz(r, "token")
+		if err != nil {
+			http.Redirect(w, r, utils.GetEnv("base_url")+"/account/login", http.StatusSeeOther)
+			return
+		}
+
+		duration := time.Since(start)
+		status := http.StatusOK
+
+		// Coloring
+		statusColor := color.New(color.FgGreen).SprintFunc()
+		if status >= 400 {
+			statusColor = color.New(color.FgRed).SprintFunc()
+		}
+
+		log.Printf("%s %s %s (%v) %s",
+			statusColor(status),
+			r.Method,
+			r.URL.Path,
+			duration,
+			r.RemoteAddr,
+		)
+
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, "current_user", currentUser)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func Authorize(r *http.Request, code string) (CurrentUser, error) {
 	var err error
 
@@ -399,6 +428,7 @@ func Authorize(r *http.Request, code string) (CurrentUser, error) {
 		return CurrentUser{}, err
 	}
 
+	// ✅ AMBIL RAW TOKEN DARI REDIS
 	jwt, err := utils.RedisGet(ctx, string(key))
 
 	if err != nil {
@@ -409,52 +439,40 @@ func Authorize(r *http.Request, code string) (CurrentUser, error) {
 
 	fmt.Println("token-login", jwt)
 
-	jwtParts := strings.Split(jwt, ".")
-	if len(jwtParts) != 3 {
-		fmt.Print("middleware-auth-error", jwt)
-		return CurrentUser{}, fmt.Errorf("middleware-auth-error: %s", jwt)
+	// ✅ VALIDASI JWT LANGSUNG (TANPA DEKRIPSI SIGNATURE)
+	claims, err := utils.ValidateJWT(jwt)
+	if err != nil {
+		fmt.Println("jwt-validation-error", err)
+		return CurrentUser{}, err
 	}
 
-	decrypted, err := utils.Decrypt(jwtParts[2]) // Menggunakan AES engine
+	// ✅ REFRESH TOKEN DAN SIMPAN RAW (TANPA ENKRIPSI)
+	newToken, _, err := utils.RefreshJWT(jwt, 15*time.Minute)
 	if err != nil {
 		return CurrentUser{}, err
 	}
 
-	token := jwtParts[0] + "." + jwtParts[1] + "." + string(decrypted)
-
-	claims, err := utils.ValidateJWT(token)
-	if err != nil {
-		return CurrentUser{}, err
-	}
-
-	newToken, _, err := utils.RefreshJWT(token, 15*time.Minute)
-	if err != nil {
-		return CurrentUser{}, err
-	}
-
-	enToken := utils.EncryptTokenSignature(newToken)
-
-	err = utils.RedisSet(ctx, string(key), enToken, 15*time.Minute)
+	err = utils.RedisSet(ctx, string(key), newToken, 15*time.Minute)
 	if err != nil {
 		return CurrentUser{}, err
 	}
 
 	u := claims.User
 
+	photoStr, _ := u["photo"].(string)
+
 	currentUser := CurrentUser{
-		ID:           u["id"].(string),
-		LoginID:      u["login_id"].(string),
-		Fullname:     u["fullname"].(string),
-		Role:         u["role"].(string),
-		RoleID:       u["role_id"].(string),
-		Level:        u["level"].(string),
-		LevelID:      int(u["level_id"].(float64)),
-		Group:        u["group"].(string),
-		GroupID:      u["group_id"].(string),
-		IsActive:     u["is_active"].(string),
-		Jabatan:      u["jabatan"].(string),
-		JenisAkun:    u["jenis_akun"].(string),
-		JenisKelamin: u["jenis_kelamin"].(string),
+		ID:      u["id"].(string),
+		Name:    u["name"].(string),
+		Email:   u["email"].(string),
+		Role:    u["role"].(string),
+		RoleID:  u["role_id"].(string),
+		Level:   u["level"].(string),
+		LevelID: u["level_id"].(string),
+		Group:   u["group"].(string),
+		GroupID: u["group_id"].(string),
+		Status:  u["status"].(string),
+		Photo:   &photoStr,
 	}
 
 	return currentUser, nil
@@ -467,8 +485,6 @@ func DestroyAuthorize(r *http.Request) error {
 	ctx := r.Context()
 
 	var err error
-
-	fmt.Println("key123", code)
 
 	key, err := utils.Decrypt(code.(string))
 	if err != nil {

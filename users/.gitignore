@@ -4,8 +4,10 @@
 .env
 .env.local
 .env.*
-*.pem
 *.key
+# Allow certs/private.pem and certs/public.pem to be committed
+!certs/private.pem
+!certs/public.pem
 
 # Kecuali .env.example (boleh di-commit sebagai panduan tim)
 !.env.example
@@ -66,3 +68,16 @@ logs/
 tmp/
 coverage.out
 profile.out
+
+# --- Binaries & Executables ---
+bin/
+dist/
+main                    # Binary 'main' saja
+jakedu-login
+jakedu-app
+*.exe
+*.test
+*.prof
+
+# ❌ REMOVE: **/app atau *.go yang generic
+# ✅ KEEP: Source code files

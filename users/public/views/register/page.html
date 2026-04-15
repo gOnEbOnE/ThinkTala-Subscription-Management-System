@@ -1,243 +1,399 @@
 <!DOCTYPE html>
-<html lang="id" data-bs-theme="light">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk & Daftar - JakEdu AI</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <title>Register | ThinkNalyze AI</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Custom Font (Optional) */
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow-x: hidden;
+        :root {
+            --bg-body: #ffffff; --bg-banner: #050509;
+            --accent-cyan: #00b4d8; --accent-purple: #bd00ff;
+            --text-heading: #0f172a; --text-main: #334155; --text-muted: #64748b;
+            --border-color: #e2e8f0;
         }
-
-        /* Banner Image Styling */
-        .banner-side {
-            background: url('https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1932&auto=format&fit=crop') no-repeat center center;
-            background-size: cover;
-            position: relative;
-        }
-        
-        /* Overlay untuk teks di atas gambar agar terbaca */
-        .banner-overlay {
-            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-        }
-
-        /* Transisi Form */
-        .auth-card {
-            transition: all 0.3s ease-in-out;
-        }
-
-        /* Floating Button Style (Persis Dashboard) */
-        .theme-toggle-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1050;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: transform 0.2s;
-        }
-        .theme-toggle-btn:hover {
-            transform: scale(1.1);
-        }
-
-        /* Input Group Focus State */
-        .input-group-text {
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-        .form-control:focus + .input-group-text, 
-        .form-control:focus ~ .input-group-text {
-            border-color: var(--bs-primary);
-        }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
+        .login-wrapper { height: 100vh; width: 100%; }
+        .banner-side { background-color: var(--bg-banner); position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding: 60px; overflow: hidden; }
+        #particles-js { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: #070716; filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.8)); z-index: 0; }
+        .banner-side::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(5,5,9,0) 0%, rgba(5,5,9,0.9) 100%); z-index: 1; pointer-events: none; }
+        .banner-content { position: relative; z-index: 2; pointer-events: none; }
+        .testimonial-text { font-size: 1.6rem; font-weight: 300; color: #fff; font-style: italic; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .testimonial-author { font-weight: 700; color: #00f2ff; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
+        .form-side { background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; position: relative; overflow-y: auto; }
+        .form-viewport { width: 100%; max-width: 420px; z-index: 2; }
+        .form-steps-container { display: flex; width: 200%; transition: transform 0.5s cubic-bezier(0.65,0,0.35,1); }
+        .form-step { width: 50%; padding: 5px; }
+        .progress-stepper { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .dot { width: 30px; height: 6px; border-radius: 10px; background: #e2e8f0; transition: 0.3s; }
+        .dot.active { background: var(--accent-cyan); width: 50px; }
+        .brand-logo { font-size: 1.8rem; font-weight: 800; color: var(--text-heading); text-decoration: none; }
+        .form-label { font-size: 0.82rem; color: var(--text-heading); font-weight: 600; margin-bottom: 6px; }
+        .input-group-text { background: #f8fafc; border: 1px solid var(--border-color); color: var(--text-muted); }
+        .form-control { background: #ffffff; border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 0 8px 8px 0; }
+        .form-control:focus { border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(0,180,216,0.1); }
+        .btn-primary-glow { background: linear-gradient(135deg, var(--accent-cyan), #0077b6); border: none; color: #fff; font-weight: 700; padding: 12px; border-radius: 8px; width: 100%; transition: 0.3s; }
+        .btn-primary-glow:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,180,216,0.3); }
+        .btn-primary-glow:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px; border-radius: 8px; transition: 0.2s; }
+        .btn-outline:hover { background: #f8fafc; color: var(--text-heading); }
+        .btn-google { background: #fff; color: #334155; border: 1px solid var(--border-color); font-weight: 600; padding: 12px; border-radius: 8px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-google:hover { background: #f1f5f9; }
+        .divider { display: flex; align-items: center; text-align: center; color: var(--text-muted); margin: 16px 0; font-size: 0.8rem; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border-color); }
+        .divider:not(:empty)::before { margin-right: .5em; }
+        .divider:not(:empty)::after { margin-left: .5em; }
+        .link-cyan { color: var(--accent-cyan); text-decoration: none; font-weight: 600; }
+        .link-cyan:hover { text-decoration: underline; color: #0077b6; }
+        .validation-msg { font-size: 0.75rem; margin-top: 4px; }
+        .validation-msg.error { color: #dc2626; }
+        .validation-msg.success { color: #059669; }
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; }
+        .toast-msg { padding: 14px 20px; border-radius: 10px; color: #fff; font-size: 0.9rem; margin-bottom: 10px; animation: slideIn 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .toast-msg.success { background: #059669; }
+        .toast-msg.error { background: #dc2626; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @media (max-width: 992px) { .banner-side { display: none; } .form-side { background: #f8fafc; } }
     </style>
 </head>
-<body class="bg-body-tertiary">
+<body>
 
-    <div class="container-fluid g-0">
-        <div class="row g-0 vh-100">
-            
-            
+    <div class="toast-container" id="toastContainer"></div>
 
-            <div class="col-lg-6 d-none d-lg-block banner-side">
-                <div class="banner-overlay d-flex flex-column justify-content-end p-5">
-                    <div class="text-white mb-5 pb-5">
-                        <span class="badge bg-primary bg-opacity-75 backdrop-blur rounded-pill px-3 py-2 mb-3">
-                            <i class="bi bi-stars me-1"></i> AI Powered Education
+    <div class="container-fluid p-0">
+        <div class="row g-0 login-wrapper">
+            
+            <!-- LEFT BANNER -->
+            <div class="col-lg-6 banner-side">
+                <div id="particles-js"></div>
+                <div class="banner-content">
+                    <div class="mb-4">
+                        <span class="badge bg-dark border border-secondary px-3 py-2 rounded-pill shadow">
+                            <i class="fa-solid fa-rocket me-2" style="color: #00f2ff;"></i> Future is Here
                         </span>
-                        <h1 class="display-4 fw-bold mb-3">Revolusi Pendidikan <br> dengan Kecerdasan AI</h1>
-                        <p class="lead text-white-50" style="max-width: 500px;">
-                            Kelola data siswa, analisis performa, dan optimalkan kurikulum dengan bantuan teknologi AI terdepan dari JakEdu.
-                        </p>
                     </div>
+                    <blockquote class="testimonial-text">"Intelligence is the ability to adapt to change. ThinkNalyze provides the tools for that adaptation."</blockquote>
+                    <div class="testimonial-author mt-3">— AI Adaptation</div>
                 </div>
             </div>
 
-            <div class="col-lg-6 d-flex align-items-center justify-content-center bg-body p-4">
-                <div class="auth-card w-100" style="max-width: 420px;">
-                    
-                    <div id="registerForm">
-                        <div class="text-center mb-4">
-                            <div class="bg-success-subtle text-success rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="bi bi-person-plus fs-2"></i>
-                            </div>
-                            <h3 class="fw-bold text-emphasis">Buat Akun Baru</h3>
-                            <p class="text-muted small">Bergabunglah dengan platform pendidikan AI masa depan</p>
-                        </div>
-
-                        <form onsubmit="event.preventDefault(); showToast('Pendaftaran Berhasil!', 'Silakan cek email Anda untuk verifikasi.');">
+            <!-- RIGHT FORM -->
+            <div class="col-lg-6 form-side">
+                <div class="progress-stepper">
+                    <div class="dot active" id="dot1"></div>
+                    <div class="dot" id="dot2"></div>
+                </div>
+                <div class="form-viewport">
+                    <div class="form-steps-container" id="stepsWrapper">
+                        
+                        <!-- STEP 1: Credentials -->
+                        <div class="form-step">
                             <div class="mb-3">
-                                <label class="form-label small fw-bold">Nama Lengkap</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
-                                        <i class="bi bi-person text-muted"></i>
-                                    </span>
-                                    <input type="text" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="Nama Anda" required>
-                                </div>
+                                <a href="/" class="brand-logo">Think<span style="color: var(--accent-cyan);">Nalyze</span></a>
+                                <h2 class="fw-bold mb-1 mt-2" style="color: var(--text-heading); font-size: 1.4rem;">Create Account</h2>
+                                <p class="small text-muted mb-0">Set up your credentials to get started.</p>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Email Address</label>
+                            <button class="btn btn-google mb-2" type="button">
+                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="18" alt="G"> Sign up with Google
+                            </button>
+                            <div class="divider">OR</div>
+
+                            <div class="mb-2">
+                                <label class="form-label">Full Name</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
-                                        <i class="bi bi-envelope text-muted"></i>
-                                    </span>
-                                    <input type="email" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="nama@sekolah.id" required>
+                                    <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
+                                    <input type="text" class="form-control" id="fullName" placeholder="Enter your full name">
                                 </div>
+                                <div class="validation-msg" id="fullNameMsg"></div>
                             </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Password</label>
+
+                            <div class="mb-2">
+                                <label class="form-label">Email Address</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
-                                        <i class="bi bi-lock text-muted"></i>
-                                    </span>
-                                    <input type="password" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="••••••••" required>
+                                    <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="email" placeholder="name@company.com">
                                 </div>
+                                <div class="validation-msg" id="emailMsg"></div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                                    <input type="tel" class="form-control" id="phone" placeholder="08xxxxxxxxxx">
+                                </div>
+                                <div class="validation-msg" id="phoneMsg"></div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label small fw-bold">Konfirmasi Password</label>
+                                <label class="form-label">Date of Birth</label>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
-                                        <i class="bi bi-check2-circle text-muted"></i>
-                                    </span>
-                                    <input type="password" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="••••••••" required>
+                                    <span class="input-group-text"><i class="fa-regular fa-calendar"></i></span>
+                                    <input type="date" class="form-control" id="birthdate" max="">
                                 </div>
+                                <div class="validation-msg" id="birthdateMsg"></div>
                             </div>
 
-                            <button type="submit" class="btn btn-success w-100 py-2 rounded-3 fw-bold shadow-sm mb-3">
-                                Daftar Sekarang
+                            <button type="button" class="btn btn-primary-glow" id="btnNext" disabled onclick="nextStep()">
+                                Continue <i class="fa-solid fa-arrow-right ms-2"></i>
                             </button>
 
-                            <div class="text-center">
-                                <span class="text-muted small">Sudah punya akun?</span>
-                                <a href="{{.base_url}}/login" class="text-primary fw-bold text-decoration-none small ms-1">Masuk disini</a>
+                            <div class="text-center mt-3">
+                                <span class="small text-muted">Sudah punya akun?</span>
+                                <a href="/account/login" class="link-cyan small ms-1">Masuk di sini</a>
                             </div>
-                        </form>
-                    </div>
+                        </div>
 
+                        <!-- STEP 2: Password & Confirm -->
+                        <div class="form-step">
+                            <div class="mb-3">
+                                <h2 class="fw-bold mb-1" style="color: var(--text-heading); font-size: 1.4rem;">Almost there!</h2>
+                                <p class="small text-muted">Create a secure password for your account.</p>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" placeholder="Minimal 8 karakter">
+                                    <span class="input-group-text" style="cursor:pointer; border-left:none; border-radius: 0 8px 8px 0; background:#fff;" onclick="togglePw('password', this)">
+                                        <i class="fa-regular fa-eye-slash"></i>
+                                    </span>
+                                </div>
+                                <div class="validation-msg" id="passwordMsg"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Confirm Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-shield-halved"></i></span>
+                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Ulangi password">
+                                    <span class="input-group-text" style="cursor:pointer; border-left:none; border-radius: 0 8px 8px 0; background:#fff;" onclick="togglePw('confirmPassword', this)">
+                                        <i class="fa-regular fa-eye-slash"></i>
+                                    </span>
+                                </div>
+                                <div class="validation-msg" id="confirmMsg"></div>
+                            </div>
+
+                            <div class="mb-4 p-3 rounded" style="background: #f8fafc; border: 1px solid var(--border-color);">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="termsCheck">
+                                    <label class="form-check-label small" for="termsCheck">
+                                        I accept the <a href="#" class="link-cyan">Terms of Service</a> and <a href="#" class="link-cyan">Privacy Policy</a>.
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline w-25" onclick="prevStep()"><i class="fa-solid fa-arrow-left"></i></button>
+                                <button type="button" class="btn btn-primary-glow w-75" id="btnRegister" disabled>Daftar</button>
+                            </div>
+                            <p class="text-center mt-3 small text-muted">Step 2 of 2</p>
+                        </div>
+
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 
-    <button class="btn btn-primary theme-toggle-btn rounded-circle" id="themeToggle" title="Ganti Tema">
-        <i class="bi bi-moon-stars-fill"></i>
-    </button>
-
-    <div class="toast-container position-fixed top-0 end-0 p-3">
-        <div id="liveToast" class="toast align-items-center text-bg-primary border-0 rounded-4 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body d-flex align-items-center">
-                    <i class="bi bi-info-circle-fill fs-5 me-2"></i>
-                    <div>
-                        <strong class="d-block" id="toastTitle">Notifikasi</strong>
-                        <small id="toastMessage">Pesan notifikasi muncul disini.</small>
-                    </div>
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // 1. Logic Toggle Login <-> Register
-        function toggleForms() {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            
-            if (loginForm.classList.contains('d-none')) {
-                // Show Login
-                loginForm.classList.remove('d-none');
-                loginForm.classList.add('animate__animated', 'animate__fadeIn');
-                registerForm.classList.add('d-none');
-            } else {
-                // Show Register
-                loginForm.classList.add('d-none');
-                registerForm.classList.remove('d-none');
-                registerForm.classList.add('animate__animated', 'animate__fadeIn');
-            }
-        }
-
-        // 2. Logic Theme Toggle (Dark/Light)
-        const themeToggleBtn = document.getElementById('themeToggle');
-        const icon = themeToggleBtn.querySelector('i');
-        const html = document.documentElement;
-
-        // Cek Local Storage
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        html.setAttribute('data-bs-theme', savedTheme);
-        updateIcon(savedTheme);
-
-        themeToggleBtn.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            
-            html.setAttribute('data-bs-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateIcon(newTheme);
+        // ========== PARTICLES ==========
+        particlesJS("particles-js", {
+            "particles":{"number":{"value":100,"density":{"enable":true,"value_area":800}},"color":{"value":"#00f2ff"},"shape":{"type":"circle"},"opacity":{"value":0.8,"random":true,"anim":{"enable":true,"speed":1,"opacity_min":0.3}},"size":{"value":3.5,"random":true,"anim":{"enable":true,"speed":2,"size_min":0.1}},"line_linked":{"enable":true,"distance":150,"color":"#00f2ff","opacity":0.5,"width":1.2},"move":{"enable":true,"speed":1.2,"direction":"none","random":true,"out_mode":"out"}},
+            "interactivity":{"events":{"onhover":{"enable":true,"mode":"grab"},"onclick":{"enable":true,"mode":"push"}},"modes":{"grab":{"distance":200,"line_linked":{"opacity":1}},"push":{"particles_nb":4}}},
+            "retina_detect":true
         });
 
-        function updateIcon(theme) {
-            if (theme === 'dark') {
-                icon.classList.remove('bi-moon-stars-fill');
-                icon.classList.add('bi-sun-fill');
-                themeToggleBtn.classList.replace('btn-primary', 'btn-warning');
-                themeToggleBtn.classList.add('text-dark');
-            } else {
-                icon.classList.remove('bi-sun-fill');
-                icon.classList.add('bi-moon-stars-fill');
-                themeToggleBtn.classList.replace('btn-warning', 'btn-primary');
-                themeToggleBtn.classList.remove('text-dark');
+        // ========== DOM REFS ==========
+        const wrapper = document.getElementById('stepsWrapper');
+        const dot1 = document.getElementById('dot1');
+        const dot2 = document.getElementById('dot2');
+        const btnNext = document.getElementById('btnNext');
+        const btnRegister = document.getElementById('btnRegister');
+
+        const elFullName = document.getElementById('fullName');
+        const elEmail = document.getElementById('email');
+        const elPhone = document.getElementById('phone');
+        const elBirthdate = document.getElementById('birthdate');
+        const elPassword = document.getElementById('password');
+        const elConfirm = document.getElementById('confirmPassword');
+        const elTerms = document.getElementById('termsCheck');
+
+        // Set max date untuk birthdate (hari ini)
+        elBirthdate.max = new Date().toISOString().split('T')[0];
+
+        // ========== STEP NAVIGATION ==========
+        function nextStep() {
+            wrapper.style.transform = 'translateX(-50%)';
+            dot1.classList.remove('active');
+            dot2.classList.add('active');
+        }
+        function prevStep() {
+            wrapper.style.transform = 'translateX(0%)';
+            dot2.classList.remove('active');
+            dot1.classList.add('active');
+        }
+
+        // ========== TOGGLE PASSWORD ==========
+        function togglePw(id, el) {
+            const inp = document.getElementById(id);
+            const icon = el.querySelector('i');
+            if (inp.type === 'password') { inp.type = 'text'; icon.classList.replace('fa-eye-slash','fa-eye'); }
+            else { inp.type = 'password'; icon.classList.replace('fa-eye','fa-eye-slash'); }
+        }
+
+        // ========== TOAST ==========
+        function showToast(msg, type = 'error') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast-msg ${type}`;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 4000);
+        }
+
+        // ========== VALIDATION HELPERS ==========
+        function setMsg(id, msg, isError) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.className = 'validation-msg ' + (isError ? 'error' : 'success');
+        }
+        function clearMsg(id) { const el = document.getElementById(id); el.textContent = ''; el.className = 'validation-msg'; }
+
+        function isEmailValid(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+
+        // ========== STEP 1 VALIDATION (Real-time) ==========
+        function validateStep1() {
+            let valid = true;
+
+            if (elFullName.value.trim().length < 3) { valid = false; }
+            if (!isEmailValid(elEmail.value.trim())) { valid = false; }
+            if (elPhone.value.trim().length < 8) { valid = false; }
+            if (!elBirthdate.value) { valid = false; }
+
+            // Check future date
+            if (elBirthdate.value) {
+                const dob = new Date(elBirthdate.value);
+                if (dob > new Date()) { valid = false; }
             }
+
+            btnNext.disabled = !valid;
         }
 
-        // 3. Logic Toast Notification
-        const toastEl = document.getElementById('liveToast');
-        const toastBootstrap = new bootstrap.Toast(toastEl);
-        const toastTitle = document.getElementById('toastTitle');
-        const toastMessage = document.getElementById('toastMessage');
+        elFullName.addEventListener('input', () => {
+            if (elFullName.value.trim().length < 3 && elFullName.value.trim().length > 0) setMsg('fullNameMsg', 'Minimal 3 karakter', true);
+            else clearMsg('fullNameMsg');
+            validateStep1();
+        });
 
-        function showToast(title, message) {
-            toastTitle.innerText = title;
-            toastMessage.innerText = message;
-            toastBootstrap.show();
+        elEmail.addEventListener('input', () => {
+            const v = elEmail.value.trim();
+            if (v && !isEmailValid(v)) setMsg('emailMsg', 'Format email tidak valid (harus mengandung @ dan domain)', true);
+            else clearMsg('emailMsg');
+            validateStep1();
+        });
+
+        elPhone.addEventListener('input', () => {
+            if (elPhone.value.trim().length > 0 && elPhone.value.trim().length < 8) setMsg('phoneMsg', 'Nomor telepon terlalu pendek', true);
+            else clearMsg('phoneMsg');
+            validateStep1();
+        });
+
+        elBirthdate.addEventListener('change', () => {
+            if (elBirthdate.value) {
+                const dob = new Date(elBirthdate.value);
+                if (dob > new Date()) setMsg('birthdateMsg', 'Tanggal lahir tidak boleh di masa depan', true);
+                else clearMsg('birthdateMsg');
+            }
+            validateStep1();
+        });
+
+        // ========== STEP 2 VALIDATION (Real-time) ==========
+        function validateStep2() {
+            let valid = true;
+            const pw = elPassword.value;
+            const cpw = elConfirm.value;
+
+            if (pw.length < 8) valid = false;
+            if (pw !== cpw || cpw === '') valid = false;
+            if (!elTerms.checked) valid = false;
+
+            btnRegister.disabled = !valid;
         }
+
+        elPassword.addEventListener('input', () => {
+            const v = elPassword.value;
+            if (v.length > 0 && v.length < 8) setMsg('passwordMsg', 'Password minimal 8 karakter', true);
+            else if (v.length >= 8) setMsg('passwordMsg', '✓ Password valid', false);
+            else clearMsg('passwordMsg');
+
+            // Also check confirm match
+            if (elConfirm.value && v !== elConfirm.value) setMsg('confirmMsg', 'Password tidak sama', true);
+            else if (elConfirm.value && v === elConfirm.value) setMsg('confirmMsg', '✓ Password cocok', false);
+
+            validateStep2();
+        });
+
+        elConfirm.addEventListener('input', () => {
+            const pw = elPassword.value;
+            const cpw = elConfirm.value;
+            if (cpw && pw !== cpw) setMsg('confirmMsg', 'Password tidak sama', true);
+            else if (cpw && pw === cpw) setMsg('confirmMsg', '✓ Password cocok', false);
+            else clearMsg('confirmMsg');
+            validateStep2();
+        });
+
+        elTerms.addEventListener('change', validateStep2);
+
+        // ========== SUBMIT REGISTER ==========
+        btnRegister.addEventListener('click', async () => {
+            btnRegister.disabled = true;
+            btnRegister.textContent = 'Processing...';
+
+            const payload = {
+                full_name: elFullName.value.trim(),
+                email: elEmail.value.trim().toLowerCase(),
+                password: elPassword.value,
+                no_telp: elPhone.value.trim(),
+                tanggal_lahir: elBirthdate.value
+            };
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (data.status === true) {
+                    showToast('Data diterima, silakan cek email Anda!', 'success');
+                    // Simpan email di sessionStorage untuk halaman OTP
+                    sessionStorage.setItem('otp_email', payload.email);
+                    setTimeout(() => {
+                        window.location.href = '/account/verify-otp';
+                    }, 1500);
+                } else {
+                    showToast(data.msg || 'Registrasi gagal!');
+                }
+            } catch (err) {
+                showToast('Koneksi ke server gagal!');
+            } finally {
+                btnRegister.disabled = false;
+                btnRegister.textContent = 'Daftar';
+                validateStep2();
+            }
+        });
     </script>
 </body>
 </html>

@@ -17,7 +17,6 @@ COPY --from=builder /app/thinknalyze-gateway .
 
 # Copy semua config wajib
 COPY routes.json .
-COPY .env .
 
 # Metadata
 ENV port=2000

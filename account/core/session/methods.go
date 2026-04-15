@@ -71,7 +71,6 @@ func Set(w http.ResponseWriter, r *http.Request, key string, value any) (string,
 
 		errSave := sess.Save(r, w)
 
-		fmt.Println("ada kok", sess.Values[key])
 		return "", errSave
 	}
 

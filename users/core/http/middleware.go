@@ -17,28 +17,22 @@ import (
 )
 
 type CurrentUser struct {
-	Browser       string `json:"browser"`
-	Fullname      string `json:"fullname"`
-	Group         string `json:"group"`
-	GroupID       string `json:"group_id"`
-	ID            string `json:"id"`
-	IP            string `json:"ip"`
-	IsActive      string `json:"is_active"`
-	Jabatan       string `json:"jabatan"`
-	JenisAkun     string `json:"jenis_akun"`
-	JenisKelamin  string `json:"jenis_kelamin"`
-	Latitude      string `json:"latitude"`
-	Level         string `json:"level"`
-	LevelID       int    `json:"level_id"`
-	Login         string `json:"login"`
-	LoginID       string `json:"login_id"`
-	Longitude     string `json:"longitude"`
-	MultipleLogin int    `json:"multiple_login"`
-	NIK           string `json:"nik"`
-	OS            string `json:"os"`
-	Photo         string `json:"photo"`
-	Role          string `json:"role"`
-	RoleID        string `json:"role_id"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password,omitempty"`
+	Photo     *string   `json:"photo"`
+	GroupID   string    `json:"group_id"`
+	LevelID   string    `json:"level_id"`
+	RoleID    string    `json:"role_id"`
+	Status    string    `json:"status"`
+	Level     string    `json:"level"`
+	Role      string    `json:"role"`
+	Group     string    `json:"group"`
+	CreatedAt time.Time `json:"created_at"`
+	CreatedBy *string   `json:"created_by"`
+	UpdatedAt time.Time `json:"updated_at"`
+	UpdatedBy *string   `json:"updated_by"`
 }
 
 // Standard Middleware Chain
@@ -210,6 +204,34 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 			duration,
 			r.RemoteAddr,
 		)
+	})
+}
+
+func ApiMiddleware(next http.HandlerFunc) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 1. Ambil header "Authorization"
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Unauthorized: Header Authorization tidak ditemukan", http.StatusUnauthorized)
+			return
+		}
+
+		// 2. Pastikan formatnya menggunakan skema "Bearer <token>"
+		parts := strings.SplitN(authHeader, " ", 2)
+		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
+			http.Error(w, "Unauthorized: Format token harus 'Bearer <token>'", http.StatusUnauthorized)
+			return
+		}
+
+		// 3. Bandingkan token dari request dengan token statis di server
+		tokenString := parts[1]
+		if tokenString != utils.GetEnv("API_TOKEN") {
+			http.Error(w, "Unauthorized: Token tidak valid", http.StatusUnauthorized)
+			return
+		}
+
+		// 4. Jika cocok, lanjutkan ke handler berikutnya
+		next.ServeHTTP(w, r)
 	})
 }
 
@@ -399,8 +421,8 @@ func Authorize(r *http.Request, code string) (CurrentUser, error) {
 		return CurrentUser{}, err
 	}
 
+	// ✅ AMBIL RAW TOKEN DARI REDIS
 	jwt, err := utils.RedisGet(ctx, string(key))
-
 	if err != nil {
 		fmt.Println("token-err", err)
 		DestroyAuthorize(r)
@@ -409,52 +431,40 @@ func Authorize(r *http.Request, code string) (CurrentUser, error) {
 
 	fmt.Println("token-login", jwt)
 
-	jwtParts := strings.Split(jwt, ".")
-	if len(jwtParts) != 3 {
-		fmt.Print("middleware-auth-error", jwt)
-		return CurrentUser{}, fmt.Errorf("middleware-auth-error: %s", jwt)
+	// ✅ VALIDASI JWT LANGSUNG (TANPA DEKRIPSI SIGNATURE)
+	claims, err := utils.ValidateJWT(jwt)
+	if err != nil {
+		fmt.Println("jwt-validation-error", err)
+		return CurrentUser{}, err
 	}
 
-	decrypted, err := utils.Decrypt(jwtParts[2]) // Menggunakan AES engine
+	// ✅ REFRESH DAN SIMPAN RAW TOKEN
+	newToken, _, err := utils.RefreshJWT(jwt, 15*time.Minute)
 	if err != nil {
 		return CurrentUser{}, err
 	}
 
-	token := jwtParts[0] + "." + jwtParts[1] + "." + string(decrypted)
-
-	claims, err := utils.ValidateJWT(token)
-	if err != nil {
-		return CurrentUser{}, err
-	}
-
-	newToken, _, err := utils.RefreshJWT(token, 15*time.Minute)
-	if err != nil {
-		return CurrentUser{}, err
-	}
-
-	enToken := utils.EncryptTokenSignature(newToken)
-
-	err = utils.RedisSet(ctx, string(key), enToken, 15*time.Minute)
+	err = utils.RedisSet(ctx, string(key), newToken, 15*time.Minute)
 	if err != nil {
 		return CurrentUser{}, err
 	}
 
 	u := claims.User
 
+	photoStr, _ := u["photo"].(string)
+
 	currentUser := CurrentUser{
-		ID:           u["id"].(string),
-		LoginID:      u["login_id"].(string),
-		Fullname:     u["fullname"].(string),
-		Role:         u["role"].(string),
-		RoleID:       u["role_id"].(string),
-		Level:        u["level"].(string),
-		LevelID:      int(u["level_id"].(float64)),
-		Group:        u["group"].(string),
-		GroupID:      u["group_id"].(string),
-		IsActive:     u["is_active"].(string),
-		Jabatan:      u["jabatan"].(string),
-		JenisAkun:    u["jenis_akun"].(string),
-		JenisKelamin: u["jenis_kelamin"].(string),
+		ID:      u["id"].(string),
+		Name:    u["name"].(string),
+		Email:   u["email"].(string),
+		Role:    u["role"].(string),
+		RoleID:  u["role_id"].(string),
+		Level:   u["level"].(string),
+		LevelID: u["level_id"].(string),
+		Group:   u["group"].(string),
+		GroupID: u["group_id"].(string),
+		Status:  u["status"].(string),
+		Photo:   &photoStr,
 	}
 
 	return currentUser, nil

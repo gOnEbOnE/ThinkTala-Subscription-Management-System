@@ -1,180 +1,216 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
-	"strconv"
+	"os"
 	"time"
 
-	// Import Feature Login (Modular)
-
-	"github.com/master-abror/zaframework/app/modules/account/dashboard"
-	"github.com/master-abror/zaframework/app/modules/account/users"
-	"github.com/master-abror/zaframework/app/modules/account/wrapper"
-	"github.com/master-abror/zaframework/app/modules/landing"
-	"github.com/master-abror/zaframework/app/modules/login"
-	"github.com/master-abror/zaframework/app/modules/register"
-	"github.com/master-abror/zaframework/app/modules/reset"
-
-	// Import Router Baru
-	"github.com/master-abror/zaframework/app/routes"
-
-	// Import Framework Core
-	"github.com/master-abror/zaframework/core"
-	"github.com/master-abror/zaframework/core/concurrency"
-	"github.com/master-abror/zaframework/core/database"
-	"github.com/master-abror/zaframework/core/session"
-	"github.com/master-abror/zaframework/core/utils"
+	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 )
 
+var db *pgxpool.Pool
+
 func main() {
-	// ============================================================
-	// 1. INITIALIZATION & CONFIG
-	// ============================================================
+	godotenv.Load()
 
-	// Load Environment Variables
-	utils.LoadEnv(".env")
-
-	// Init JWT Keys (Wajib ada file private.pem & public.pem di root)
-	if err := utils.InitJWTLoadKeys("private.pem", "public.pem"); err != nil {
-		log.Fatalf("[FATAL] Gagal memuat kunci JWT: %v", err)
-	}
-
-	// Init Redis (Sesuai request sebelumnya)
-	// Jika di .env redis=false, ini akan bypass otomatis tanpa error
-	if err := utils.InitRedis(); err != nil {
-		log.Printf("[WARNING] Redis init failed: %v", err)
-	}
-
-	// ------------------------------------------------------------
-	// SESSION INIT (UPDATED)
-	// ------------------------------------------------------------
-	// 1. Tentukan Mode SameSite (Lax/Strict/None)
-	sameSiteMode := http.SameSiteLaxMode // Default
-	switch utils.GetEnv("SESSION_SAME_SITE", "Lax") {
-	case "Strict":
-		sameSiteMode = http.SameSiteStrictMode
-	case "None":
-		sameSiteMode = http.SameSiteNoneMode
-	}
-
-	// 2. Init Session dengan Config Lengkap (Sesuai update manager.go)
-	session.Init(session.Config{
-		Driver: utils.GetEnv("SESSION_DRIVER", "cookie"),
-
-		// Prioritaskan SESSION_KEY, jika kosong pakai APP_KEY
-		SecretKey: utils.GetEnv("SESSION_KEY", utils.GetEnv("APP_KEY")),
-
-		CookieName:  utils.GetEnv("SESSION_NAME", "za_session"),
-		SessionLife: utils.ToInt(utils.GetEnv("SESSION_LIFETIME", "3600")),
-
-		// Config Advanced (Dari .env)
-		Domain: utils.GetEnv("SESSION_DOMAIN", ""), // Kosongkan jika localhost
-		Path:   utils.GetEnv("SESSION_PATH", "/"),
-
-		// Konversi string "true" ke boolean
-		Secure:   utils.GetEnv("SESSION_SECURE") == "true",
-		HttpOnly: utils.GetEnv("SESSION_HTTP_ONLY") == "true",
-		SameSite: sameSiteMode,
-	})
-
-	// Helper parsers
-	maxConns, _ := strconv.Atoi(utils.GetEnv("APP_DB_MAX_CONN", "100"))
-	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
-
-	// Config Engine
-	cfg := core.Config{
-		AppName:        utils.GetEnv("app_name", "Jakedu Login Service"),
-		Port:           utils.GetEnv("port", "9002"),
-		Env:            utils.GetEnv("app_env", "development"),
-		AssetsURL:      utils.GetEnv("assets_url"),
-		SsoAuth:        utils.GetEnv("sso_auth"),
-		AllowedOrigins: []string{utils.GetEnv("base_url")},
-
-		DBConfig: database.Config{
-			Host:            utils.GetEnv("read_db_host"),
-			User:            utils.GetEnv("read_db_user"),
-			Password:        utils.GetEnv("read_db_pass"),
-			DBName:          utils.GetEnv("read_db_name"),
-			Port:            utils.GetEnv("read_db_port"),
-			SSLMode:         utils.GetEnv("read_db_ssl_mode", "disable"),
-			TimeZone:        utils.GetEnv("read_db_timezone", "Asia/Jakarta"),
-			MaxConns:        int32(maxConns),
-			MinConns:        int32(maxConns / 4),
-			MaxConnLifetime: 30 * time.Minute,
-			MaxConnIdleTime: 10 * time.Minute,
-			LogLevel:        "error",
-		},
-
-		WorkerConfig: concurrency.Config{
-			HighPriorityWorkers:     workerMult * 4,
-			NormalPriorityWorkers:   workerMult * 2,
-			LowPriorityWorkers:      workerMult,
-			QueueSizePerPriority:    10000,
-			MaxConcurrentJobs:       50000,
-			QueueFullThreshold:      0.8,
-			MaxRetries:              3,
-			JobTimeoutDefault:       10 * time.Second,
-			ShutdownTimeout:         30 * time.Second,
-			EnableAdaptiveRateLimit: true,
-			HealthCheckRate:         5 * time.Second,
-			MetricsRate:             10 * time.Second,
-		},
-	}
-
-	// Start Engine
-	app := core.New(cfg)
-
-	// ============================================================
-	// 2. WIRING FEATURES (Dependency Injection)
-	// ============================================================
-
-	// --- Feature: Login ---
-
-	// loginCtrl := login.NewController(app.Dispatcher, app.Response)
-
-	landingCtrl := landing.NewController(app.Dispatcher, app.Response)
-
-	loginRepo := login.NewRepository(app.DB)
-	loginService := login.NewService(loginRepo)
-	loginController := login.NewController(app.Dispatcher, app.Response)
-
-	registerController := register.NewController(app.Dispatcher, app.Response)
-	resetController := reset.NewController(app.Dispatcher, app.Response)
-
-	wrapperController := wrapper.NewController(app.Dispatcher, app.Response)
-	dashboardController := dashboard.NewController(app.Dispatcher, app.Response)
-
-	usersRepo := users.NewRepository(app.DB)
-	usersService := users.NewService(usersRepo)
-	usersController := users.NewController(app.Dispatcher, app.Response)
-
-	// Register Job Handler (Worker)
-	// Logic background process didaftarkan di sini
-	app.RegisterJob("auth", loginService.ProcessLoginJob)
-	app.RegisterJob("get_inactive_users", usersService.GetInactiveUsersService)
-	// Di file registry worker Anda
-	app.RegisterJob("get_detail_user", usersService.ProcessGetDetailUserJob)
-	app.RegisterJob("update_user", usersService.ProcessUpdateUserJob)
-
-	// ============================================================
-	// 3. ROUTING
-	// ============================================================
-
-	// Panggil file router terpisah
-	// Kita inject Controller yang sudah di-init di atas ke router
-	routes.Init(app,
-		landingCtrl,
-		loginController,
-		registerController,
-		resetController,
-		wrapperController,
-		dashboardController,
-		usersController,
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		getEnv("DB_USER", "postgres"),
+		getEnv("DB_PASSWORD", "postgres"),
+		getEnv("DB_HOST", "localhost"),
+		getEnv("DB_PORT", "5432"),
+		getEnv("DB_NAME", "thinknalyze"),
+		getEnv("DB_SSLMODE", "disable"),
 	)
 
-	// ============================================================
-	// 4. RUN SERVER
-	// ============================================================
-	app.Run()
+	var err error
+	db, err = pgxpool.New(context.Background(), dsn)
+	if err != nil {
+		log.Fatalf("Gagal koneksi DB: %v", err)
+	}
+	defer db.Close()
+	log.Println("[OPERATIONAL] Connected to database")
+
+	r := gin.Default()
+
+	// Serve static assets
+	r.Static("/ops/assets", "./public/assets")
+
+	// Dashboard pages
+	r.GET("/ops/dashboard", func(c *gin.Context) {
+		c.File("./public/views/dashboard.html")
+	})
+	r.GET("/ops/notifications", func(c *gin.Context) {
+		c.File("./public/views/notifications.html")
+	})
+	r.GET("/ops/notification-templates", func(c *gin.Context) {
+        c.File("./public/views/notification-templates.html")
+    })
+	r.GET("/ops/subscriptions", func(c *gin.Context) {
+		c.File("./public/views/subscriptions.html")
+	})
+	r.GET("/ops/users", func(c *gin.Context) {
+		c.File("./public/views/users.html")
+	})
+	r.GET("/ops/orders", func(c *gin.Context) {
+		c.File("./public/views/orders.html")
+	})
+
+	// API routes (existing + new)
+	api := r.Group("/api/operational")
+	{
+		api.GET("/stats", getDashboardStats)
+	}
+
+	// Orders API
+	adminOrders := r.Group("/api/admin")
+	{
+		adminOrders.GET("/orders", listOrders)
+	}
+
+	// KYC API (if exists)
+	kyc := r.Group("/api/kyc")
+	{
+		kyc.GET("", listKYC)
+		kyc.PUT("/:id/review", reviewKYC)
+	}
+
+	port := getEnv("PORT", "5005")
+	log.Printf("[OPERATIONAL] Service running on :%s", port)
+	r.Run(":" + port)
+}
+
+func getEnv(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
+func getDashboardStats(c *gin.Context) {
+	var totalUsers, totalNotif, totalSubs, pendingKYC int
+
+	db.QueryRow(context.Background(), "SELECT COUNT(*) FROM users").Scan(&totalUsers)
+	db.QueryRow(context.Background(), "SELECT COUNT(*) FROM notifications WHERE is_active=TRUE").Scan(&totalNotif)
+	db.QueryRow(context.Background(), "SELECT COUNT(*) FROM subscription_packages WHERE is_active=TRUE").Scan(&totalSubs)
+	db.QueryRow(context.Background(), "SELECT COUNT(*) FROM kyc_documents WHERE status='pending'").Scan(&pendingKYC)
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"total_users":          totalUsers,
+			"active_notifications": totalNotif,
+			"subscription_plans":   totalSubs,
+			"pending_kyc":          pendingKYC,
+		},
+	})
+}
+
+func listKYC(c *gin.Context) {
+	status := c.DefaultQuery("status", "")
+	var query string
+	var args []any
+
+	if status != "" {
+		query = `SELECT k.id, k.user_id, u.name, u.email, k.document_type, k.file_url, k.status, k.reject_reason, k.created_at
+                 FROM kyc_documents k JOIN users u ON u.id = k.user_id WHERE k.status = $1 ORDER BY k.created_at DESC`
+		args = append(args, status)
+	} else {
+		query = `SELECT k.id, k.user_id, u.name, u.email, k.document_type, k.file_url, k.status, k.reject_reason, k.created_at
+                 FROM kyc_documents k JOIN users u ON u.id = k.user_id ORDER BY k.created_at DESC`
+	}
+
+	rows, err := db.Query(context.Background(), query, args...)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var list []map[string]any
+	for rows.Next() {
+		var id, userID, name, email, docType, fileURL, st string
+		var rejectReason *string
+		var createdAt time.Time
+		rows.Scan(&id, &userID, &name, &email, &docType, &fileURL, &st, &rejectReason, &createdAt)
+		list = append(list, map[string]any{
+			"id": id, "user_id": userID, "name": name, "email": email,
+			"document_type": docType, "file_url": fileURL, "status": st,
+			"reject_reason": rejectReason, "created_at": createdAt,
+		})
+	}
+	if list == nil {
+		list = []map[string]any{}
+	}
+	c.JSON(http.StatusOK, gin.H{"data": list})
+}
+
+func listOrders(c *gin.Context) {
+	query := `
+		SELECT
+			o.id,
+			o.invoice_number,
+			COALESCE(u.name, 'Unknown') AS client_name,
+			COALESCE(p.name, 'Unknown') AS package_name,
+			o.total_price,
+			o.status,
+			o.created_at
+		FROM subscription.orders o
+		LEFT JOIN users u ON u.id = o.user_id
+		LEFT JOIN subscription.packages p ON p.id = o.package_id
+		ORDER BY o.created_at DESC
+	`
+
+	rows, err := db.Query(context.Background(), query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer rows.Close()
+
+	var list []map[string]any
+	for rows.Next() {
+		var orderID, invoiceNumber, clientName, packageName, status string
+		var totalPrice float64
+		var createdAt time.Time
+		rows.Scan(&orderID, &invoiceNumber, &clientName, &packageName, &totalPrice, &status, &createdAt)
+		list = append(list, map[string]any{
+			"order_id":       orderID,
+			"invoice_number": invoiceNumber,
+			"client_name":    clientName,
+			"package_name":   packageName,
+			"total_price":    totalPrice,
+			"status":         status,
+			"created_at":     createdAt,
+		})
+	}
+	if list == nil {
+		list = []map[string]any{}
+	}
+	c.JSON(http.StatusOK, list)
+}
+
+func reviewKYC(c *gin.Context) {
+	id := c.Param("id")
+	var body struct {
+		Status       string `json:"status" binding:"required"`
+		RejectReason string `json:"reject_reason"`
+		ReviewedBy   string `json:"reviewed_by"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err := db.Exec(context.Background(),
+		`UPDATE kyc_documents SET status=$2, reject_reason=$3, reviewed_by=$4, reviewed_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE id=$1`,
+		id, body.Status, body.RejectReason, body.ReviewedBy)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "KYC reviewed"})
 }

@@ -57,7 +57,7 @@ func CreateJWT(payload map[string]any, duration time.Duration) (string, error) {
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			Issuer:    "jakedu-engine",
+			Issuer:    "za-framework",
 		},
 	}
 

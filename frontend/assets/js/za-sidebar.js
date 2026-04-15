@@ -1,3 +1,12 @@
+// Prevent CSS transitions flashing on page load
+const preventTx = document.createElement('style');
+preventTx.innerHTML = '* { transition: none !important; }';
+document.head.appendChild(preventTx);
+
+window.addEventListener('load', () => {
+    setTimeout(() => preventTx.remove(), 100);
+});
+
 const sidebarToggle = document.getElementById('sidebarToggle');
 const mobileOverlay = document.getElementById('mobileOverlay');
 const body = document.body;
@@ -26,4 +35,22 @@ sidebarToggle.addEventListener('click', () => {
 
 mobileOverlay.addEventListener('click', () => { 
     body.classList.remove('sidebar-mobile-open'); 
+});
+
+// Auto-highlight active link based on current URL path
+document.addEventListener('DOMContentLoaded', function() {
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.sidebar .nav-link');
+    
+    navLinks.forEach(function(link) {
+        const href = link.getAttribute('href');
+        
+        // Remove active from all links first
+        link.classList.remove('active');
+        
+        // Add active if href matches current path
+        if (href && href !== '#' && currentPath === href) {
+            link.classList.add('active');
+        }
+    });
 });

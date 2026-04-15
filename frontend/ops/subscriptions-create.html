@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buat Paket Baru | ThinkTala Ops</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .main-content .ai-card {
+            padding: 16px 20px;
+        }
+
+        .main-content .ai-card h6 {
+            margin-bottom: 4px !important;
+        }
+
+        .main-content .form-control,
+        .main-content .form-select {
+            padding: 8px 12px;
+            font-size: 0.88rem;
+        }
+
+        .main-content .form-label {
+            margin-bottom: 4px;
+        }
+
+        .main-content small.text-muted {
+            font-size: 0.78rem;
+        }
+
+        .section-gap {
+            margin-bottom: 12px !important;
+        }
+
+        /* END main-content styles */
+
+        .btn-add-pkg {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 16px rgba(0,242,255,0.35);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-add-pkg:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 24px rgba(0,242,255,0.55);
+            text-decoration: none;
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="main-content">
+        <!-- Back link + Title -->
+        <div class="mb-4">
+            <a href="/ops/subscriptions" class="small text-muted text-decoration-none mb-2 d-inline-block">
+                <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar Paket
+            </a>
+            <h4 class="fw-bold mb-1" style="color: var(--text-heading)">Buat Paket Baru</h4>
+            <small class="text-muted">Isi informasi paket langganan yang akan ditawarkan</small>
+        </div>
+
+        <div class="row g-3">
+            <!-- Form Column -->
+            <div class="col-lg-8">
+                <div class="ai-card">
+                    <!-- Informasi Paket -->
+                    <h6 class="fw-bold mb-1" style="color: var(--text-heading)">Informasi Paket</h6>
+                    <small class="text-muted d-block mb-2">Semua field wajib diisi kecuali yang bertanda
+                        opsional</small>
+                    <div class="mb-2">
+                        <label class="form-label small fw-semibold mb-1">Nama Paket <span
+                                class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="pkgName"
+                            placeholder="Contoh: Paket Professional">
+                        <small class="text-muted" style="font-size:0.75rem;">Nama paket yang akan ditampilkan kepada
+                            pengguna</small>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-semibold mb-1">Deskripsi Paket <span
+                                class="text-danger">*</span></label>
+                        <textarea class="form-control form-control-sm" id="pkgDesc" rows="2"
+                            placeholder="Contoh: Paket untuk profesional dengan fitur lengkap dan support prioritas"
+                            oninput="updatePreview()"></textarea>
+                        <small class="text-muted" style="font-size:0.75rem;">Jelaskan manfaat dan target pengguna paket
+                            ini</small>
+                    </div>
+
+                    <hr style="border-color: var(--border-color); margin: 12px 0;">
+
+                    <!-- Harga Paket -->
+                    <h6 class="fw-bold mb-2" style="color: var(--text-heading)">Harga Paket</h6>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold mb-1">Harga Bulanan <span
+                                    class="text-danger">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"
+                                    style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);">Rp</span>
+                                <input type="number" class="form-control" id="pkgPrice" placeholder="99.000"
+                                    oninput="updatePreview()">
+                            </div>
+                            <small class="text-muted" style="font-size:0.75rem;">Harga per bulan dalam Rupiah</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold mb-1">Harga Tahunan <span
+                                    class="text-danger">*</span></label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"
+                                    style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);">Rp</span>
+                                <input type="number" class="form-control" id="pkgPriceYearly" placeholder="990.000"
+                                    oninput="updatePreview()">
+                            </div>
+                            <small class="text-muted" style="font-size:0.75rem;">Harga per tahun dalam Rupiah</small>
+                        </div>
+                    </div>
+                    <div class="p-2 rounded d-flex align-items-start gap-2 mb-0"
+                        style="background: rgba(0,242,255,0.05); border: 1px solid rgba(0,242,255,0.15);">
+                        <i class="fa-solid fa-lightbulb text-cyan" style="font-size:0.75rem;margin-top:2px;"></i>
+                        <small class="text-muted" style="font-size:0.75rem;"><strong class="text-cyan">Tips:</strong>
+                            Tawarkan diskon untuk pembayaran tahunan (biasanya 2 bulan gratis)</small>
+                    </div>
+
+                    <hr style="border-color: var(--border-color); margin: 12px 0;">
+
+                    <!-- Fitur Paket -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-0" style="color: var(--text-heading)">Fitur Paket</h6>
+                            <small class="text-muted" style="font-size:0.75rem;">Daftar fitur yang termasuk dalam paket
+                                ini</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="addFeature()"
+                            style="font-size:0.78rem;">
+                            <i class="fa-solid fa-plus me-1"></i> Tambah Fitur
+                        </button>
+                    </div>
+                    <div id="featuresList">
+                        <div class="feature-item d-flex align-items-center gap-2 mb-1">
+                            <span class="text-muted fw-bold" style="min-width:18px;font-size:0.82rem;">1.</span>
+                            <input type="text" class="form-control form-control-sm"
+                                placeholder="Contoh: Akses ke semua fitur analitik" oninput="updatePreview()">
+                            <button class="btn btn-sm btn-outline-secondary"
+                                style="width:28px;height:28px;padding:0;flex-shrink:0;" onclick="removeFeature(this)">
+                                <i class="fa-solid fa-times fa-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: var(--border-color); margin: 12px 0;">
+
+                    <!-- Status + Kuota dalam satu baris -->
+                    <div class="row g-3 align-items-start">
+                        <div class="col-md-7">
+                            <h6 class="fw-bold mb-2" style="color: var(--text-heading)">Status Paket</h6>
+                            <div class="d-flex gap-2">
+                                <label class="d-flex align-items-center gap-2 px-3 py-2 rounded flex-fill"
+                                    style="border: 1px solid var(--border-color); cursor:pointer;"
+                                    id="statusActiveLabel">
+                                    <input type="radio" name="pkgStatus" value="ACTIVE" checked
+                                        onchange="updateStatusUI()">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="small fw-semibold"
+                                                style="color: var(--text-heading);">Active</span>
+                                            <span class="badge px-1"
+                                                style="background:#00d26a;color:#000;font-size:0.65rem;">AKTIF</span>
+                                        </div>
+                                        <small class="text-muted" style="font-size:0.72rem;">Tersedia langsung</small>
+                                    </div>
+                                </label>
+                                <label class="d-flex align-items-center gap-2 px-3 py-2 rounded flex-fill"
+                                    style="border: 1px solid var(--border-color); cursor:pointer;"
+                                    id="statusInactiveLabel">
+                                    <input type="radio" name="pkgStatus" value="INACTIVE" onchange="updateStatusUI()">
+                                    <div>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="small fw-semibold"
+                                                style="color: var(--text-heading);">Inactive</span>
+                                            <span class="badge px-1"
+                                                style="background:transparent;border:1px solid var(--border-color);color:var(--text-muted);font-size:0.65rem;">DRAFT</span>
+                                        </div>
+                                        <small class="text-muted" style="font-size:0.72rem;">Simpan sebagai
+                                            draft</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <h6 class="fw-bold mb-2" style="color: var(--text-heading)">Kuota Pengguna <span
+                                    class="text-danger">*</span></h6>
+                            <input type="number" class="form-control form-control-sm" id="pkgQuota" placeholder="100"
+                                min="1">
+                            <small class="text-muted" style="font-size:0.75rem;">Maks. pengguna dalam satu
+                                organisasi</small>
+                        </div>
+                    </div>
+
+                    <hr style="border-color: var(--border-color); margin: 12px 0;">
+
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted" style="font-size:0.75rem;">* Field wajib diisi</small>
+                        <div class="d-flex gap-2">
+                            <a href="/ops/subscriptions" class="btn btn-sm btn-outline-secondary">Batal</a>
+                            <button class="btn btn-sm fw-bold px-4 btn-add-pkg" onclick="savePackage()">
+                                <i class="fa-solid fa-check me-1"></i> Simpan Paket
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Column -->
+            <div class="col-lg-4">
+                <div class="ai-card" style="position: sticky; top: calc(var(--header-height) + 20px);">
+                    <h6 class="fw-bold mb-1" style="color: var(--text-heading)">Preview Paket</h6>
+                    <small class="text-muted d-block mb-2" style="font-size:0.75rem;">Tampilan yang akan dilihat
+                        pengguna</small>
+                    <div class="p-3 rounded text-center"
+                        style="border: 1px solid var(--border-color); background: rgba(255,255,255,0.02);">
+                        <i class="fa-solid fa-crown fa-2x text-cyan mb-2"></i>
+                        <h6 class="fw-bold mb-1" style="color: var(--text-heading);" id="prevName">[Nama Paket]</h6>
+                        <small class="text-muted d-block mb-2" id="prevDesc" style="font-size:0.75rem;">[Deskripsi paket
+                            akan muncul di sini]</small>
+                        <h4 class="fw-bold mb-0" style="color: var(--accent-cyan);" id="prevPrice">Rp [Harga]</h4>
+                        <small class="text-muted" style="font-size:0.72rem;">per bulan</small>
+                        <hr style="border-color: var(--border-color); margin: 8px 0;">
+                        <div class="text-start" id="prevFeatures">
+                            <small class="text-muted fst-italic" style="font-size:0.75rem;">Belum ada fitur
+                                ditambahkan</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-3x mb-3" id="alertIcon"></i>
+                    <h6 class="fw-bold" style="color: var(--text-heading)" id="alertTitle">Peringatan</h6>
+                    <p class="text-muted small mb-0" id="alertMessage"></p>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button class="btn btn-sm btn-outline-secondary px-4" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>Operations Panel v1.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
+    <script>
+        function logout() { window.location.href = '/account/logout'; }
+
+        function showAlert(msg, type = 'warning') {
+            const icon = document.getElementById('alertIcon');
+            const title = document.getElementById('alertTitle');
+            if (type === 'danger') {
+                icon.className = 'fa-solid fa-circle-xmark fa-3x text-danger mb-3';
+                title.textContent = 'Terjadi Kesalahan';
+            } else {
+                icon.className = 'fa-solid fa-triangle-exclamation fa-3x mb-3';
+                icon.style.color = 'var(--accent-orange)';
+                title.textContent = 'Peringatan';
+            }
+            document.getElementById('alertMessage').textContent = msg;
+            new bootstrap.Modal(document.getElementById('alertModal')).show();
+        }
+
+        function formatRp(val) { return 'Rp ' + Number(val || 0).toLocaleString('id-ID'); }
+
+        function updatePreview() {
+            const name = document.getElementById('pkgName').value || '[Nama Paket]';
+            const desc = document.getElementById('pkgDesc').value || '[Deskripsi paket akan muncul di sini]';
+            const price = document.getElementById('pkgPrice').value;
+            const features = [...document.querySelectorAll('#featuresList input')].map(i => i.value).filter(v => v);
+
+            document.getElementById('prevName').textContent = name;
+            document.getElementById('prevDesc').textContent = desc;
+            document.getElementById('prevPrice').textContent = price ? formatRp(price) : 'Rp [Harga]';
+            document.getElementById('prevFeatures').innerHTML = features.length
+                ? features.map(f => `<div class="mb-1 small"><i class="fa-solid fa-check text-success me-2"></i>${f}</div>`).join('')
+                : '<small class="text-muted fst-italic">Belum ada fitur ditambahkan</small>';
+        }
+
+        function addFeature() {
+            const list = document.getElementById('featuresList');
+            const count = list.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'feature-item d-flex align-items-center gap-2 mb-2';
+            div.innerHTML = `
+                <span class="text-muted fw-bold" style="min-width:20px;font-size:0.85rem;">${count}.</span>
+                <input type="text" class="form-control form-control-sm" placeholder="Tambahkan fitur..." oninput="updateFeatureNumbers(); updatePreview()">
+                <button class="btn btn-sm btn-outline-danger" style="width:32px;height:32px;padding:0;" onclick="removeFeature(this)">
+                    <i class="fa-solid fa-times fa-xs"></i>
+                </button>`;
+            list.appendChild(div);
+        }
+
+        function removeFeature(btn) {
+            btn.closest('.feature-item').remove();
+            updateFeatureNumbers();
+            updatePreview();
+        }
+
+        function updateFeatureNumbers() {
+            document.querySelectorAll('#featuresList .feature-item').forEach((item, i) => {
+                item.querySelector('span').textContent = (i + 1) + '.';
+            });
+        }
+
+        function updateStatusUI() {
+            const active = document.querySelector('[name="pkgStatus"][value="ACTIVE"]').checked;
+            document.getElementById('statusActiveLabel').style.borderColor = active ? 'var(--accent-cyan)' : 'var(--border-color)';
+            document.getElementById('statusInactiveLabel').style.borderColor = !active ? 'var(--accent-orange)' : 'var(--border-color)';
+        }
+
+        document.getElementById('pkgName').addEventListener('input', updatePreview);
+        document.getElementById('pkgDesc').addEventListener('input', updatePreview);
+        updateStatusUI();
+
+        async function savePackage() {
+            const name = document.getElementById('pkgName').value.trim();
+            const price = parseFloat(document.getElementById('pkgPrice').value) || 0;
+            const price_yearly = parseFloat(document.getElementById('pkgPriceYearly').value) || 0;
+            const quota = parseInt(document.getElementById('pkgQuota').value) || 0;
+            const status = document.querySelector('[name="pkgStatus"]:checked') ? document.querySelector('[name="pkgStatus"]:checked').value : 'ACTIVE';
+            const duration = 1; // monthly
+
+            if (!name) { showAlert('Nama paket harus diisi!'); return; }
+            if (price <= 0) { showAlert('Harga bulanan harus lebih dari 0!'); return; }
+            if (price_yearly > 0 && price_yearly < price) { showAlert('Harga tahunan tidak boleh lebih rendah dari harga bulanan!'); return; }
+            if (quota <= 0) { showAlert('Kuota harus lebih dari 0!'); return; }
+
+            const body = { name, price, price_yearly, duration, quota, status };
+
+            try {
+                const res = await fetch('/api/admin/packages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(body)
+                });
+                const json = await res.json();
+                if (json.success) {
+                    sessionStorage.setItem('toast', 'Paket berhasil dibuat');
+                    window.location.href = '/ops/subscriptions';
+                } else {
+                    showAlert(json.message || 'Gagal menyimpan paket', 'danger');
+                }
+            } catch (e) { showAlert('Error: ' + e.message, 'danger'); }
+        }
+    </script>
+</body>
+
+</html>

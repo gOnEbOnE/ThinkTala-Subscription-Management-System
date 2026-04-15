@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -36,13 +37,26 @@ func InitRedis() error {
 		dbInt = 0 // Default ke 0 jika config salah
 	}
 
+	// ✅ FIX: Force IPv4
+	if host == "localhost" {
+		host = "127.0.0.1"
+	}
+
 	addr := fmt.Sprintf("%s:%s", host, port)
+
+	// ✅ FIX: Trim password — empty string means NO AUTH
+	pass = strings.TrimSpace(pass)
 
 	// 3. Setup Client
 	redisClient = redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: pass,
-		DB:       dbInt,
+		Addr:         addr,
+		Password:     pass,
+		DB:           dbInt,
+		DialTimeout:  5 * time.Second,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 3 * time.Second,
+		PoolSize:     10,
+		MinIdleConns: 5,
 	})
 
 	// 4. Test Ping

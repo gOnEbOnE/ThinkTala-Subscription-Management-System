@@ -5,21 +5,11 @@ import (
 	"encoding/hex"
 	"regexp"
 	"strings"
-
-	"github.com/google/uuid"
 )
 
 // NewUUID menghasilkan UUID v7 (Sortable by Time).
 // Lebih cepat untuk indexing database dibanding UUID v4 biasa.
 // Contoh: "018d2a6e-..."
-func NewUUID() string {
-	val, err := uuid.NewV7()
-	if err != nil {
-		// Fallback ke V4 jika V7 gagal (sangat jarang terjadi)
-		return uuid.NewString()
-	}
-	return val.String()
-}
 
 // RandomString menghasilkan string acak hex sepanjang n * 2 karakter.
 // Aman untuk token sesi, OTP, atau nama file.

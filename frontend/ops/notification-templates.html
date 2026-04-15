@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification Templates | ThinkTala Ops</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        /* ─── Table Styles ─── */
+        .tpl-table {
+            background: transparent !important;
+        }
+
+        .tpl-table thead tr {
+            background: rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .tpl-table th {
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .tpl-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+            background: var(--bg-panel) !important;
+        }
+
+        .tpl-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tpl-table tbody tr {
+            transition: background 0.15s;
+        }
+
+        .tpl-table tbody tr:hover td {
+            background: rgba(0, 242, 255, 0.05) !important;
+        }
+
+        /* ─── Channel Badges ─── */
+        .badge-email {
+            background: rgba(59, 130, 246, 0.18);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* .badge-whatsapp { background: rgba(34,197,94,0.18);  color: #4ade80; border: 1px solid rgba(34,197,94,0.3); } */
+        .badge-telegram {
+            background: rgba(14, 165, 233, 0.18);
+            color: #38bdf8;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+        }
+
+        .channel-badge {
+            font-size: 0.72rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        /* ─── Action Buttons ─── */
+        .btn-action-edit {
+            background: none;
+            border: none;
+            color: #00f2ff;
+            font-size: 0.82rem;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        .btn-action-edit:hover {
+            opacity: 0.75;
+        }
+
+        .btn-action-delete {
+            background: none;
+            border: none;
+            color: #f87171;
+            font-size: 0.82rem;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        .btn-action-delete:hover {
+            opacity: 0.75;
+        }
+
+        /* ─── Add Template Button ─── */
+        .btn-add-tpl {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 16px rgba(0, 242, 255, 0.35);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+        }
+
+        .btn-add-tpl:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 24px rgba(0, 242, 255, 0.55);
+        }
+
+        /* ─── Modal ─── */
+        .modal-content {
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            border-radius: 14px;
+            backdrop-filter: blur(12px);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+
+        .form-control,
+        .form-select {
+            background: var(--bg-dark) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-main) !important;
+            border-radius: 8px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: rgba(0, 242, 255, 0.5) !important;
+            box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.1) !important;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .field-error {
+            font-size: 0.75rem;
+            color: #f87171;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .field-error.show {
+            display: block;
+        }
+
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: #f87171 !important;
+        }
+
+        /* ─── Filter Bar ─── */
+        .filter-chip {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 5px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .filter-chip:hover,
+        .filter-chip.active {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.08);
+        }
+
+        /* ─── Toast ─── */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast-msg {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            min-width: 260px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideUp 0.25s ease;
+        }
+
+        .toast-msg.success {
+            border-left: 3px solid #4ade80;
+        }
+
+        .toast-msg.error {
+            border-left: 3px solid #f87171;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─── Empty state ─── */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: .3;
+        }
+
+        /* Subject field toggle */
+        #subjectWrapper {
+            transition: opacity .2s;
+        }
+
+        #subjectWrapper.disabled {
+            opacity: .4;
+            pointer-events: none;
+        }
+
+        /* ─── Variable Chips ─── */
+        .var-chip {
+            display: inline-block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            padding: 3px 9px;
+            border-radius: 20px;
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid rgba(0, 242, 255, 0.35);
+            color: var(--accent-cyan);
+            cursor: grab;
+            user-select: none;
+            transition: background .15s, box-shadow .15s;
+        }
+
+        .var-chip:hover {
+            background: rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
+        }
+
+        .var-chip.dragging {
+            opacity: 0.4;
+            cursor: grabbing;
+        }
+
+        #tplContent.drag-over {
+            border-color: var(--accent-cyan) !important;
+            box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.2) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+    <div class="main-content">
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-3">
+            <div>
+                <h4 class="fw-bold mb-1" style="color:var(--text-heading)">Notification Management</h4>
+                <small class="text-muted">Manage notification templates for system events</small>
+            </div>
+            <button class="btn-add-tpl" onclick="openAddModal()">
+                <i class="fa-solid fa-plus me-1"></i> Add Template
+            </button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="ai-card shadow-lg mb-4">
+            <div class="d-flex flex-wrap align-items-center gap-3">
+                <!-- Search -->
+                <div class="flex-grow-1" style="min-width:200px; max-width:300px;">
+                    <div class="position-relative">
+                        <i class="fa-solid fa-search position-absolute" style="left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:.8rem;"></i>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search template name..."
+                            style="padding-left:34px; font-size:.85rem;"
+                            oninput="renderTable()">
+                    </div>
+                </div>
+                <!-- Channel Filter -->
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="filter-chip active" data-channel="" onclick="setFilter('channel','',this)">All</button>
+                    <button class="filter-chip" data-channel="email" onclick="setFilter('channel','email',this)"><i class="fa-solid fa-envelope me-1"></i>Email</button>
+                    <!-- <button class="filter-chip" data-channel="whatsapp" onclick="setFilter('channel','whatsapp',this)"><i class="fa-brands fa-whatsapp me-1"></i>WhatsApp</button> -->
+                    <button class="filter-chip" data-channel="telegram" onclick="setFilter('channel','telegram',this)"><i class="fa-brands fa-telegram me-1"></i>Telegram</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="ai-card shadow-lg p-0" style="overflow:hidden; background:var(--bg-panel);">
+            <div class="table-responsive" style="background:var(--bg-panel);">
+                <table class="table tpl-table mb-0" style="color:var(--text-main); background:transparent; --bs-table-bg:transparent; --bs-table-striped-bg:transparent; --bs-table-hover-bg:transparent;">
+                    <thead>
+                        <tr>
+                            <th>TEMPLATE NAME</th>
+                            <th>EVENT TYPE</th>
+                            <th>CHANNEL</th>
+                            <th>LAST UPDATED</th>
+                            <th class="text-end" style="padding-right:24px;">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tplTableBody">
+                        <tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ FOOTER ═══════════════ -->
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>Operations Panel v1.0</div>
+    </footer>
+
+    <!-- ═══════════════ ADD / EDIT MODAL ═══════════════ -->
+    <div class="modal fade" id="tplModal" tabindex="-1" aria-labelledby="tplModalTitle" aria-modal="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header px-4 py-3">
+                    <h5 class="modal-title fw-bold" id="tplModalTitle" style="color:var(--text-heading)">Add Template</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <input type="hidden" id="tplId">
+
+                    <div class="row g-3">
+                        <!-- Template Name -->
+                        <div class="col-12">
+                            <label class="form-label">Template Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="tplName" placeholder="e.g. Welcome Email">
+                            <div class="field-error" id="err-tplName">Field ini wajib diisi.</div>
+                        </div>
+
+                        <!-- Event Type -->
+                        <div class="col-md-6">
+                            <label class="form-label">Event Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tplEventType" onchange="onEventTypeChange()">
+                                <option value="">— Memuat Event Type... —</option>
+                            </select>
+                            <div class="field-error" id="err-tplEventType">Field ini wajib diisi.</div>
+                        </div>
+
+                        <!-- Channel -->
+                        <div class="col-md-6">
+                            <label class="form-label">Channel <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tplChannel" onchange="onChannelChange()">
+                                <option value="">— Pilih Channel —</option>
+                                <option value="email">Email</option>
+                                <!-- <option value="whatsapp">WhatsApp</option> -->
+                                <option value="telegram">Telegram</option>
+                            </select>
+                            <div class="field-error" id="err-tplChannel">Field ini wajib diisi.</div>
+                        </div>
+
+                        <!-- Subject (email only) -->
+                        <div class="col-12" id="subjectWrapper">
+                            <label class="form-label">Subject <span class="text-danger" id="subjectRequired">*</span>
+                                <span class="text-muted" id="subjectOptional"
+                                    style="display:none;">(opsional)</span></label>
+                            <input type="text" class="form-control" id="tplSubject"
+                                placeholder="e.g. Selamat Datang di ThinkTala">
+                            <div class="field-error" id="err-tplSubject">Subject wajib diisi untuk channel Email.</div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="col-12">
+                            <label class="form-label">Message Content <span class="text-danger">*</span></label>
+                            <!-- Variable chips -->
+                            <div class="mb-2 d-flex flex-wrap gap-2 align-items-center" id="varChipsRow"
+                                style="display:none!important">
+                                <small class="text-muted me-1" style="font-size:.72rem;">Variabel:</small>
+                                <span class="var-chip" draggable="true" data-var="{{name}}"
+                                    data-events="otp_verification" title="otp_verification — nama user">{{name}}</span>
+                                <span class="var-chip" draggable="true" data-var="{{otp}}"
+                                    data-events="otp_verification" title="otp_verification — kode OTP">{{otp}}</span>
+                                <span class="var-chip" draggable="true" data-var="{{full_name}}"
+                                    data-events="kyc_approved kyc_rejected"
+                                    title="kyc_approved / kyc_rejected — nama lengkap">{{full_name}}</span>
+                                <span class="var-chip" draggable="true" data-var="{{reject_reason}}"
+                                    data-events="kyc_rejected"
+                                    title="kyc_rejected — alasan penolakan">{{reject_reason}}</span>
+                            </div>
+                            <textarea class="form-control" id="tplContent" rows="6"
+                                placeholder="Tulis isi pesan..."></textarea>
+                            <div class="field-error" id="err-tplContent">Field ini wajib diisi.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer px-4 py-3">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn px-4 fw-bold" id="btnSaveTpl" style="background:var(--accent-cyan); color:#000;"
+                        onclick="saveTemplate()">
+                        <span id="btnSaveText"><i class="fa-solid fa-check me-1"></i>Save Template</span>
+                        <span id="btnSaveLoading" style="display:none;"><i
+                                class="fa-solid fa-spinner fa-spin me-1"></i>Saving...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════ DELETE CONFIRM MODAL ═══════════════ -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-4 px-4">
+                    <div class="mb-3"
+                        style="width:56px;height:56px;background:rgba(248,113,113,0.1);border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;">
+                        <i class="fa-solid fa-trash fa-xl text-danger"></i>
+                    </div>
+                    <h6 class="fw-bold mb-1" style="color:var(--text-heading)">Hapus Template?</h6>
+                    <p class="text-muted small mb-4">Aksi ini tidak dapat dibatalkan.</p>
+                    <input type="hidden" id="deleteId">
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-danger px-4" onclick="confirmDelete()">Hapus</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- ═══════════════ SCRIPTS ═══════════════ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
+    <script>
+        // ── Config ──────────────────────────────────────────────
+        const API = '/api/help/notification-templates';
+        const token = localStorage.getItem('token');
+
+        // ── State ────────────────────────────────────────────────
+        let allTemplates = [];
+        let activeFilters = { channel: '' };
+
+        // ── Auth user info ────────────────────────────────────────
+        (function loadUserInfo() {
+            try {
+                const u = JSON.parse(localStorage.getItem('user') || '{}');
+                if (u.name) document.getElementById('userName').textContent = u.name;
+                if (u.email) document.getElementById('userEmail').textContent = u.email;
+            } catch (_) { }
+        })();
+
+        // ── Filter ────────────────────────────────────────────────
+        function setFilter(key, value, el) {
+            activeFilters[key] = value;
+            el.closest('.d-flex').querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderTable();
+        }
+
+        // ── Channel helpers ───────────────────────────────────────
+        function channelBadge(ch) {
+            const map = {
+                email: ['badge-email', '<i class="fa-solid fa-envelope me-1"></i>Email'],
+                // whatsapp: ['badge-whatsapp', '<i class="fa-brands fa-whatsapp me-1"></i>WhatsApp'],
+                telegram: ['badge-telegram', '<i class="fa-brands fa-telegram me-1"></i>Telegram'],
+            };
+            const [cls, label] = map[ch] || ['bg-secondary', ch];
+            return `<span class="channel-badge ${cls}">${label}</span>`;
+        }
+
+        function onChannelChange() {
+            const ch = document.getElementById('tplChannel').value;
+            const subjectWrapper = document.getElementById('subjectWrapper');
+            const subjectRequired = document.getElementById('subjectRequired');
+            const subjectOptional = document.getElementById('subjectOptional');
+            if (ch === 'telegram') {
+                subjectWrapper.classList.add('disabled');
+                subjectRequired.style.display = 'none';
+                subjectOptional.style.display = 'inline';
+            } else {
+                subjectWrapper.classList.remove('disabled');
+                subjectRequired.style.display = 'inline';
+                subjectOptional.style.display = 'none';
+            }
+        }
+
+        // ── Load event types dari registry ────────────────────────
+        async function loadEventTypes(selectedValue = '') {
+            const sel = document.getElementById('tplEventType');
+            try {
+                const res = await fetch('/api/help/notification-templates/event-types', {
+                    headers: { Authorization: 'Bearer ' + token }
+                });
+                const json = await res.json();
+                const types = json.data || [];
+                sel.innerHTML = '<option value="">— Pilih Event Type —</option>';
+                types.forEach(et => {
+                    const label = et.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    const opt = document.createElement('option');
+                    opt.value = et;
+                    opt.textContent = label;
+                    if (et === selectedValue) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+                if (types.length === 0) {
+                    sel.innerHTML = '<option value="">— Belum ada event type terdaftar —</option>';
+                }
+            } catch (e) {
+                sel.innerHTML = '<option value="">— Gagal memuat event type —</option>';
+            }
+        }
+
+        // ── Load templates ────────────────────────────────────────
+        async function loadTemplates() {
+            const tbody = document.getElementById('tplTableBody');
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</td></tr>`;
+
+            try {
+                const res = await fetch(API, {
+                    headers: { Authorization: 'Bearer ' + token }
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                allTemplates = json.data || [];
+                renderTable();
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-danger"><i class="fa-solid fa-circle-exclamation me-2"></i>Gagal memuat data: ${e.message}</td></tr>`;
+            }
+        }
+
+        // ── Render filtered table ─────────────────────────────────
+        function renderTable() {
+            const tbody = document.getElementById('tplTableBody');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const chFilter = activeFilters.channel;
+
+            let data = allTemplates.filter(t => {
+                const matchSearch = !search || t.name.toLowerCase().includes(search) || (t.event_type || '').toLowerCase().includes(search);
+                const matchChannel = !chFilter || t.channel === chFilter;
+                return matchSearch && matchChannel;
+            });
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                <tr><td colspan="5">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-file-circle-xmark d-block"></i>
+                        <div class="fw-semibold mb-1">Tidak ada template ditemukan</div>
+                        <small>Coba ubah filter atau tambah template baru.</small>
+                    </div>
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(t => {
+                const updated = t.updated_at
+                    ? new Date(t.updated_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+                    : '—';
+                const eventLabel = (t.event_type || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                return `
+            <tr>
+                <td>
+                    <span class="fw-semibold" style="color:var(--text-heading)">${escHtml(t.name)}</span>
+                </td>
+                <td>
+                    <span class="text-muted small">${escHtml(eventLabel)}</span>
+                </td>
+                <td>${channelBadge(t.channel)}</td>
+                <td><span class="small text-muted">${updated}</span></td>
+                <td class="text-end" style="padding-right:20px;">
+                    <button class="btn-action-edit" onclick="openEditModal('${t.id}')">
+                        <i class="fa-solid fa-pen me-1"></i>Edit
+                    </button>
+                    <button class="btn-action-delete" onclick="openDeleteModal('${t.id}')">
+                        <i class="fa-solid fa-trash me-1"></i>Delete
+                    </button>
+                </td>
+            </tr>`;
+            }).join('');
+        }
+
+        // ── Modal: Add ────────────────────────────────────────────
+        function openAddModal() {
+            clearForm();
+            loadEventTypes();
+            document.getElementById('tplModalTitle').textContent = 'Add Template';
+            document.getElementById('tplId').value = '';
+            new bootstrap.Modal(document.getElementById('tplModal')).show();
+        }
+
+        // ── Modal: Edit ───────────────────────────────────────────
+        function openEditModal(id) {
+            const t = allTemplates.find(x => x.id === id);
+            if (!t) return;
+            clearForm();
+            document.getElementById('tplModalTitle').textContent = 'Edit Template';
+            document.getElementById('tplId').value = t.id;
+            document.getElementById('tplName').value = t.name;
+            document.getElementById('tplChannel').value = t.channel;
+            document.getElementById('tplSubject').value = t.subject || '';
+            document.getElementById('tplContent').value = t.content;
+            loadEventTypes(t.event_type);
+            onChannelChange();
+            new bootstrap.Modal(document.getElementById('tplModal')).show();
+        }
+
+        // ── Modal: Delete ─────────────────────────────────────────
+        function openDeleteModal(id) {
+            document.getElementById('deleteId').value = id;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+
+        // ── Form helpers ──────────────────────────────────────────
+        function clearForm() {
+            ['tplName', 'tplSubject', 'tplContent'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('tplEventType').value = '';
+            document.getElementById('tplChannel').value = '';
+            clearErrors();
+            onChannelChange();
+        }
+
+        function clearErrors() {
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.form-control.is-invalid, .form-select.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        }
+
+        function showError(fieldId, errId) {
+            document.getElementById(fieldId).classList.add('is-invalid');
+            document.getElementById(errId).classList.add('show');
+        }
+
+        // ── Validate ──────────────────────────────────────────────
+        function validateForm() {
+            clearErrors();
+            let ok = true;
+            const name = document.getElementById('tplName').value.trim();
+            const event = document.getElementById('tplEventType').value;
+            const channel = document.getElementById('tplChannel').value;
+            const subject = document.getElementById('tplSubject').value.trim();
+            const content = document.getElementById('tplContent').value.trim();
+
+            if (!name) { showError('tplName', 'err-tplName'); ok = false; }
+            if (!event) { showError('tplEventType', 'err-tplEventType'); ok = false; }
+            if (!channel) { showError('tplChannel', 'err-tplChannel'); ok = false; }
+            if (channel === 'email' && !subject) { showError('tplSubject', 'err-tplSubject'); ok = false; }
+            if (!content) { showError('tplContent', 'err-tplContent'); ok = false; }
+            return ok;
+        }
+
+        // ── Handle API 400 validation errors (per-field) ──────────
+        // Maps known server error keywords to the corresponding input field.
+        function handleApiValidationError(errMsg) {
+            const lower = errMsg.toLowerCase();
+            let handled = false;
+
+            const fieldMap = [
+                { keywords: ['name', 'nama'], fieldId: 'tplName', errId: 'err-tplName' },
+                { keywords: ['event_type', 'event type'], fieldId: 'tplEventType', errId: 'err-tplEventType' },
+                { keywords: ['channel'], fieldId: 'tplChannel', errId: 'err-tplChannel' },
+                { keywords: ['subject'], fieldId: 'tplSubject', errId: 'err-tplSubject' },
+                { keywords: ['content', 'isi'], fieldId: 'tplContent', errId: 'err-tplContent' },
+            ];
+
+            for (const { keywords, fieldId, errId } of fieldMap) {
+                if (keywords.some(k => lower.includes(k))) {
+                    const errEl = document.getElementById(errId);
+                    errEl.textContent = errMsg;
+                    showError(fieldId, errId);
+                    handled = true;
+                    break;
+                }
+            }
+
+            if (!handled) {
+                showToast('error', errMsg || 'Validasi gagal. Periksa kembali data Anda.');
+            }
+        }
+
+        // ── Save ──────────────────────────────────────────────────
+        async function saveTemplate() {
+            if (!validateForm()) return;
+
+            const id = document.getElementById('tplId').value;
+            const channel = document.getElementById('tplChannel').value;
+            const body = {
+                name: document.getElementById('tplName').value.trim(),
+                event_type: document.getElementById('tplEventType').value,
+                channel: channel,
+                subject: channel === 'email' ? document.getElementById('tplSubject').value.trim() : '',
+                content: document.getElementById('tplContent').value.trim(),
+            };
+
+            setSaveLoading(true);
+            try {
+                const res = await fetch(id ? `${API}/${id}` : API, {
+                    method: id ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                    body: JSON.stringify(body)
+                });
+                const json = await res.json();
+
+                if (res.status === 201 || res.status === 200) {
+                    bootstrap.Modal.getInstance(document.getElementById('tplModal')).hide();
+                    showToast('success', json.message || (id ? 'Template berhasil diperbarui.' : 'Template berhasil dibuat.'));
+                    await loadTemplates();
+                } else if (res.status === 400) {
+                    handleApiValidationError(json.error || '');
+                } else if (res.status === 404) {
+                    showToast('error', 'Template tidak ditemukan.');
+                } else {
+                    showToast('error', json.error || 'Terjadi kesalahan.');
+                }
+            } catch (e) {
+                showToast('error', 'Network error: ' + e.message);
+            } finally {
+                setSaveLoading(false);
+            }
+        }
+
+        // ── Delete ────────────────────────────────────────────────
+        async function confirmDelete() {
+            const id = document.getElementById('deleteId').value;
+            try {
+                const res = await fetch(`${API}/${id}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: 'Bearer ' + token }
+                });
+                bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                if (res.ok) {
+                    showToast('success', 'Template berhasil dihapus.');
+                    await loadTemplates();
+                } else {
+                    showToast('error', 'Gagal menghapus template.');
+                }
+            } catch (e) {
+                showToast('error', 'Network error: ' + e.message);
+            }
+        }
+
+        // ── Save button state ─────────────────────────────────────
+        function setSaveLoading(loading) {
+            const btn = document.getElementById('btnSaveTpl');
+            btn.disabled = loading;
+            document.getElementById('btnSaveText').style.display = loading ? 'none' : 'inline';
+            document.getElementById('btnSaveLoading').style.display = loading ? 'inline' : 'none';
+        }
+
+        // ── Toast ─────────────────────────────────────────────────
+        function showToast(type, message) {
+            const container = document.getElementById('toast-container');
+            const icon = type === 'success' ? 'fa-circle-check text-success' : 'fa-circle-exclamation text-danger';
+            const el = document.createElement('div');
+            el.className = `toast-msg ${type}`;
+            el.innerHTML = `<i class="fa-solid ${icon}"></i><span>${message}</span>`;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        }
+
+        // ── Escape helpers ────────────────────────────────────────
+        function escHtml(s) {
+            return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function escJson(obj) {
+            return "'" + JSON.stringify(obj).replace(/'/g, "\\'") + "'";
+        }
+
+        // ── Keyboard shortcut: Escape closes modal ────────────────
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                ['tplModal', 'deleteModal'].forEach(id => {
+                    const m = bootstrap.Modal.getInstance(document.getElementById(id));
+                    if (m) m.hide();
+                });
+            }
+        });
+
+        // ── Variable Chips: filter by event type ──────────────────
+        function onEventTypeChange() {
+            const val = document.getElementById('tplEventType').value;
+            const row = document.getElementById('varChipsRow');
+            if (!val) {
+                row.style.display = 'none';
+                return;
+            }
+            row.style.display = 'flex';
+            document.querySelectorAll('#varChipsRow .var-chip').forEach(chip => {
+                const events = (chip.dataset.events || '').split(' ');
+                chip.style.display = events.includes(val) ? 'inline-block' : 'none';
+            });
+        }
+
+        // ── Variable Chips: click-to-insert & drag-and-drop ──────
+        let _draggingVar = null;
+
+        document.querySelectorAll('.var-chip').forEach(chip => {
+            // Click: insert at cursor position in textarea
+            chip.addEventListener('click', () => {
+                const ta = document.getElementById('tplContent');
+                const v = chip.dataset.var;
+                const start = ta.selectionStart ?? ta.value.length;
+                const end = ta.selectionEnd ?? ta.value.length;
+                ta.value = ta.value.slice(0, start) + v + ta.value.slice(end);
+                ta.selectionStart = ta.selectionEnd = start + v.length;
+                ta.focus();
+            });
+            // Drag start
+            chip.addEventListener('dragstart', e => {
+                _draggingVar = chip.dataset.var;
+                chip.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', _draggingVar);
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+            chip.addEventListener('dragend', () => chip.classList.remove('dragging'));
+        });
+
+        // Drop zone: textarea
+        const _taCt = document.getElementById('tplContent');
+        _taCt.addEventListener('dragover', e => { e.preventDefault(); _taCt.classList.add('drag-over'); e.dataTransfer.dropEffect = 'copy'; });
+        _taCt.addEventListener('dragleave', () => _taCt.classList.remove('drag-over'));
+        _taCt.addEventListener('drop', e => {
+            e.preventDefault();
+            _taCt.classList.remove('drag-over');
+            const v = e.dataTransfer.getData('text/plain') || _draggingVar;
+            if (!v) return;
+            _taCt.focus();
+            const start = _taCt.selectionStart ?? _taCt.value.length;
+            _taCt.value = _taCt.value.slice(0, start) + v + _taCt.value.slice(start);
+            _taCt.selectionStart = _taCt.selectionEnd = start + v.length;
+            _draggingVar = null;
+        });
+
+        // ── Init ──────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTemplates();
+            loadEventTypes();
+        });
+    </script>
+</body>
+
+</html>
