@@ -4,93 +4,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Tagihan | ThinkTala</title>
-    <meta name="description" content="Riwayat tagihan dan pesanan paket langganan ThinkTala">
+    <title>Pembayaran Berhasil | ThinkTala</title>
+    <meta name="description" content="Konfirmasi pesanan dan status pembayaran ThinkTala">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/styles.css">
     <style>
-        .billing-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(0, 242, 255, 0.08);
+        .success-page {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        /* ===== HERO ===== */
+        .success-hero {
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
             border: 1px solid rgba(0, 242, 255, 0.2);
-            color: var(--accent-cyan);
-            padding: 4px 14px;
             border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            text-align: center;
+            padding: 2.5rem 2rem 2rem;
+            margin-bottom: 1.25rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        .order-card {
-            border-radius: 16px;
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            padding: 1.25rem 1.5rem;
-            transition: border-color .2s;
+        .success-hero::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 242, 255, 0.12) 0%, transparent 70%);
+            pointer-events: none;
         }
 
-        .order-card:hover {
-            border-color: rgba(0, 242, 255, 0.3);
-        }
-
-        .invoice-num {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.82rem;
-            color: var(--accent-cyan);
-        }
-
-        .status-badge {
-            padding: 3px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-        }
-
-        .status-PENDING_PAYMENT {
-            background: rgba(234, 179, 8, .12);
-            color: #fbbf24;
-        }
-
-        .status-PAID {
-            background: rgba(16, 185, 129, .12);
-            color: #10b981;
-        }
-
-        .status-CANCELLED {
-            background: rgba(239, 68, 68, .12);
-            color: #f87171;
-        }
-
-        .status-EXPIRED {
-            background: rgba(107, 114, 128, .12);
-            color: #9ca3af;
-        }
-
-        .empty-wrap {
+        .success-icon-ring {
             width: 80px;
             height: 80px;
-            background: rgba(0, 242, 255, 0.06);
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid rgba(16, 185, 129, 0.4);
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
         }
 
-        .latest-banner {
-            background: linear-gradient(135deg, rgba(0, 242, 255, 0.12), rgba(0, 242, 255, 0.04));
-            border: 1px solid rgba(0, 242, 255, 0.3);
+        .success-hero h2 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.4rem;
+        }
+
+        .success-hero p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.88rem;
+            margin: 0;
+        }
+
+        /* ===== SECTIONS ===== */
+        .s-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+
+        .s-card-body {
+            padding: 1.4rem 1.5rem;
+        }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .status-bar .status-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-bar .icon-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(251, 191, 36, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-bar .status-title {
+            font-weight: 700;
+            color: var(--text-heading);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .status-bar .status-sub {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 0;
+        }
+
+        .badge-pending {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: .06em;
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        /* ===== DETAIL PESANAN ===== */
+        .detail-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .invoice-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin: 0;
+        }
+
+        .dl-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--border-color);
+            background: none;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color .2s, border-color .2s;
+        }
+
+        .dl-btn:hover {
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
+        .pkg-box {
+            background: rgba(0, 242, 255, 0.04);
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+        }
+
+        .pkg-box h6 {
+            color: var(--text-heading);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .pkg-price-tag {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+        }
+
+        .pkg-price-tag small {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        @media(max-width:576px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-cell {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem;
+        }
+
+        .info-cell .ic-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .info-cell .ic-val {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .info-cell .ic-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== NEXT STEPS ===== */
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 1.1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .step-circle-main {
+            width: 34px;
+            height: 34px;
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid rgba(0, 242, 255, 0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        .step-header h6 {
+            font-weight: 700;
+            color: var(--text-heading);
+            margin: 0;
+        }
+
+        .step-header p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .step-list {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+        }
+
+        .step-item:last-child {
+            border-bottom: none;
+        }
+
+        .step-num {
+            min-width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-cyan), #0099cc);
+            color: #000;
+            font-weight: 800;
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-text h6 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            margin: 0 0 2px;
+        }
+
+        .step-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .step-text em {
+            color: var(--accent-cyan);
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        /* ===== SUPPORT ===== */
+        .support-card {
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 1.25rem 1.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .support-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 242, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+        }
+
+        .support-contact {
+            font-weight: 700;
+            color: var(--text-heading);
+            font-size: 0.88rem;
+        }
+
+        /* ===== BOTTOM BUTTONS ===== */
+        .btn-outline-gray {
+            border: 1px solid var(--border-color);
+            background: none;
+            border-radius: 10px;
+            padding: 0.7rem 1.4rem;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.88rem;
+            transition: border-color .2s, color .2s;
+        }
+
+        .btn-outline-gray:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #fff;
+        }
+
+        .btn-dashboard {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, #0099cc 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.7rem 1.6rem;
+            color: #000;
+            font-weight: 700;
+            font-size: 0.88rem;
+            transition: opacity .2s, transform .15s;
+        }
+
+        .btn-dashboard:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .bottom-note {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+        }
+
+        .bottom-note a {
+            color: var(--accent-cyan);
         }
     </style>
 </head>
@@ -99,42 +389,151 @@
     <div id="client-sidebar-placeholder"></div>
     <div id="client-navbar-placeholder"></div>
 
-    <div class="main-content">
-        <!-- Header -->
-        <div class="mb-4">
-            <div class="billing-badge"><i class="fa-solid fa-file-invoice-dollar"></i> Riwayat Tagihan</div>
-            <h4 class="fw-bold mb-1" style="color:var(--text-heading)">Tagihan & Pesanan Saya</h4>
-            <small class="text-muted">Semua riwayat pesanan paket langganan Anda</small>
+    <div class="main-content success-page">
+
+        <!-- ① HERO -->
+        <div class="success-hero">
+            <div class="success-icon-ring mx-auto">
+                <i class="fa-solid fa-circle-check fa-2x" style="color:#10b981"></i>
+            </div>
+            <h2>Pembayaran Berhasil!</h2>
+            <p>Terima kasih. Pembayaran Anda telah kami terima dan sedang diproses.</p>
         </div>
 
-        <!-- Latest Order Banner (shown after success redirect) -->
-        <div id="latestBanner" class="latest-banner d-none">
-            <div class="d-flex align-items-start gap-3">
-                <div
-                    style="min-width:40px;height:40px;background:rgba(0,242,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                    <i class="fa-solid fa-circle-check text-cyan"></i>
+        <!-- ② STATUS BAR -->
+        <div class="s-card">
+            <div class="s-card-body status-bar">
+                <div class="status-info">
+                    <div class="icon-wrap">
+                        <i class="fa-regular fa-clock text-warning"></i>
+                    </div>
+                    <div>
+                        <p class="status-title">Status: Menunggu Verifikasi</p>
+                        <p class="status-sub">Tim kami akan memverifikasi pembayaran Anda dalam 1×24 jam.</p>
+                    </div>
                 </div>
-                <div>
-                    <p class="fw-bold mb-1" style="color:var(--accent-cyan)">Pesanan Berhasil Dibuat!</p>
-                    <p class="text-muted small mb-1">No. Invoice: <span class="invoice-num" id="bannerInvoice">—</span>
-                    </p>
-                    <p class="text-muted small mb-0">Total: <strong id="bannerPrice"
-                            style="color:var(--text-main)">—</strong> · Metode: <span id="bannerPayment">—</span></p>
+                <span class="badge-pending">PENDING</span>
+            </div>
+        </div>
+
+        <!-- ③ DETAIL PESANAN -->
+        <div class="s-card">
+            <div class="s-card-body">
+                <h6 class="fw-bold mb-3" style="color:var(--text-heading)">Detail Pesanan</h6>
+
+                <div class="detail-label">Invoice Number</div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="invoice-num" id="invoiceNum">—</p>
+                    <button class="dl-btn" onclick="downloadInvoice()">
+                        <i class="fa-solid fa-download"></i> Download
+                    </button>
+                </div>
+
+                <!-- Package Box -->
+                <div class="pkg-box mb-0">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <div class="detail-label">Paket yang Dibeli</div>
+                            <h6 id="pkgNameSuccess">—</h6>
+                        </div>
+                        <div class="text-end">
+                            <div class="detail-label">Total Pembayaran</div>
+                            <div class="pkg-price-tag" id="totalPriceSuccess">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Grid -->
+                <div class="info-grid">
+                    <div class="info-cell">
+                        <div class="ic-label">Tanggal Pembayaran</div>
+                        <div class="ic-val" id="dateSuccess">—</div>
+                        <div class="ic-sub" id="timeSuccess">—</div>
+                    </div>
+                    <div class="info-cell">
+                        <div class="ic-label">Metode Pembayaran</div>
+                        <div class="ic-val">Transfer Bank</div>
+                        <div class="ic-sub">Bank BCA</div>
+                    </div>
+                    <div class="info-cell">
+                        <div class="ic-label">Email Konfirmasi</div>
+                        <div class="ic-val" id="emailSuccess">—</div>
+                        <div class="ic-sub">Terkirim</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Action Bar -->
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <span class="text-muted small" id="orderCountLabel">Memuat data...</span>
-            <a href="packages-catalog.html" class="btn btn-sm"
-                style="background:var(--accent-cyan);color:#000;font-weight:600;border-radius:8px;">
-                <i class="fa-solid fa-plus me-1"></i>Beli Paket Baru
-            </a>
+        <!-- ④ LANGKAH SELANJUTNYA -->
+        <div class="s-card">
+            <div class="step-header">
+                <div class="step-circle-main">①</div>
+                <div>
+                    <h6>Langkah Selanjutnya</h6>
+                    <p>Ikuti langkah-langkah berikut untuk menyelesaikan proses</p>
+                </div>
+            </div>
+            <div class="step-list">
+                <div class="step-item">
+                    <div class="step-num">1</div>
+                    <div class="step-text">
+                        <h6>Bukti Pembayaran Terkirim</h6>
+                        <p>Bukti transfer Anda telah kami terima dan sedang dalam antrian verifikasi.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">2</div>
+                    <div class="step-text">
+                        <h6>Verifikasi oleh Tim <em>(1×24 Jam)</em></h6>
+                        <p>Tim kami akan memverifikasi pembayaran Anda. Anda akan menerima notifikasi email setelah
+                            verifikasi selesai.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-num">3</div>
+                    <div class="step-text">
+                        <h6>Paket Aktif &amp; Siap Digunakan</h6>
+                        <p>Setelah diverifikasi, paket Anda akan langsung aktif dan dapat digunakan.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Orders list (from API when available / sessionStorage fallback) -->
-        <div id="ordersContainer"></div>
+        <!-- ⑤ SUPPORT -->
+        <div class="support-card">
+            <div class="d-flex align-items-start gap-3">
+                <div class="support-icon"><i class="fa-solid fa-headset"></i></div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold mb-1" style="color:var(--text-heading)">Butuh Bantuan?</h6>
+                    <p class="text-muted small mb-2">Jika ada pertanyaan tentang pembayaran atau proses verifikasi,
+                        silakan hubungi tim support kami.</p>
+                    <div class="d-flex flex-wrap gap-4">
+                        <div>
+                            <div class="detail-label">Email Support</div>
+                            <div class="support-contact">support@thinknalyze.com</div>
+                        </div>
+                        <div>
+                            <div class="detail-label">WhatsApp</div>
+                            <div class="support-contact">+62 812-3456-7890</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ⑥ ACTION BUTTONS -->
+        <div class="d-flex justify-content-center gap-3 flex-wrap mb-3">
+            <button class="btn-outline-gray" onclick="window.location.href='billing-history.html'">
+                <i class="fa-solid fa-file-invoice me-2"></i>Lihat Riwayat Pesanan
+            </button>
+            <button class="btn-dashboard" onclick="window.location.href='/client/dashboard.html'">
+                Kembali ke Dashboard <i class="fa-solid fa-arrow-right ms-1"></i>
+            </button>
+        </div>
+        <div class="bottom-note">
+            Email konfirmasi telah dikirim ke <a id="emailNote">—</a>
+        </div>
+
     </div>
 
     <footer class="fixed-footer">
@@ -147,79 +546,43 @@
     <script src="/assets/js/za-sidebar.js"></script>
     <script src="/assets/js/client-layout.js"></script>
     <script>
-        function formatRupiah(n) {
+        function formatRp(n) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
         }
 
-        function statusBadge(status) {
-            var labels = {
-                'PENDING_PAYMENT': 'Menunggu Pembayaran',
-                'PAID': 'Dibayar',
-                'CANCELLED': 'Dibatalkan',
-                'EXPIRED': 'Kedaluwarsa'
-            };
-            return '<span class="status-badge status-' + status + '">' + (labels[status] || status) + '</span>';
-        }
-
-        function buildOrderCard(o) {
-            var date = o.created_at ? new Date(o.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-            return [
-                '<div class="order-card mb-3">',
-                '  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">',
-                '    <div>',
-                '      <p class="invoice-num mb-1">' + (o.invoice_number || '—') + '</p>',
-                '      <p class="fw-bold mb-0" style="color:var(--text-heading);font-size:1.05rem;">' + formatRupiah(o.total_price || 0) + '</p>',
-                '      <p class="text-muted small mb-0">' + (o.payment_method || '—') + ' · ' + date + '</p>',
-                '    </div>',
-                '    <div>' + statusBadge(o.status || 'PENDING_PAYMENT') + '</div>',
-                '  </div>',
-                '</div>'
-            ].join('\n');
-        }
-
-        function renderOrders(orders) {
-            var container = document.getElementById('ordersContainer');
-            var label = document.getElementById('orderCountLabel');
-            if (!orders || orders.length === 0) {
-                container.innerHTML = [
-                    '<div class="ai-card text-center py-5 px-4">',
-                    '  <div class="empty-wrap mx-auto"><i class="fa-solid fa-file-invoice fa-2x text-muted"></i></div>',
-                    '  <h6 class="fw-semibold mb-1" style="color:var(--text-heading)">Belum Ada Pesanan</h6>',
-                    '  <p class="text-muted small mb-3">Anda belum pernah membuat pesanan. Mulai pilih paket sekarang!</p>',
-                    '  <a href="packages-catalog.html" class="btn btn-sm" style="background:var(--accent-cyan);color:#000;font-weight:600;border-radius:8px;">',
-                    '    <i class="fa-solid fa-box-open me-2"></i>Lihat Katalog',
-                    '  </a>',
-                    '</div>'
-                ].join('\n');
-                label.textContent = '0 pesanan';
-                return;
-            }
-            container.innerHTML = orders.map(buildOrderCard).join('');
-            label.textContent = orders.length + ' pesanan ditemukan';
-        }
-
-        // Show last order banner if redirected from checkout
-        function checkLastOrder() {
-            var raw = sessionStorage.getItem('lastOrder');
-            if (!raw) return;
-            try {
-                var o = JSON.parse(raw);
-                document.getElementById('bannerInvoice').textContent = o.invoice_number || '—';
-                document.getElementById('bannerPrice').textContent = formatRupiah(o.total_price || 0);
-                document.getElementById('bannerPayment').textContent = o.payment_method || '—';
-                document.getElementById('latestBanner').classList.remove('d-none');
-                sessionStorage.removeItem('lastOrder');
-                // Prepend this order to the rendered list
-                return o;
-            } catch (e) { return null; }
+        function downloadInvoice() {
+            var inv = document.getElementById('invoiceNum').textContent;
+            alert('Download invoice ' + inv + ' akan tersedia segera.');
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            var lastOrder = checkLastOrder();
-            // Show the just-created order immediately from sessionStorage
-            // Future: fetch /api/orders/my when that endpoint exists
-            var orders = lastOrder ? [lastOrder] : [];
-            renderOrders(orders);
+            var raw = sessionStorage.getItem('orderSuccess');
+            if (!raw) {
+                // Redirect if no session data
+                window.location.href = 'packages-catalog.html';
+                return;
+            }
+            sessionStorage.removeItem('orderSuccess');
+
+            var o = JSON.parse(raw);
+
+            // Invoice
+            document.getElementById('invoiceNum').textContent = o.invoice_number || '—';
+
+            // Package
+            document.getElementById('pkgNameSuccess').textContent = o.package_name || '—';
+            document.getElementById('totalPriceSuccess').textContent = o.total_price ? formatRp(o.total_price) : '—';
+
+            // Date/time
+            var d = o.created_at ? new Date(o.created_at) : new Date();
+            document.getElementById('dateSuccess').textContent = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+            document.getElementById('timeSuccess').textContent = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+
+            // Email
+            var email = o.customer_email || '—';
+            document.getElementById('emailSuccess').textContent = email;
+            document.getElementById('emailNote').textContent = email;
+            document.getElementById('emailNote').href = 'mailto:' + email;
         });
     </script>
 </body>
