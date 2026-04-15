@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Tagihan | ThinkTala</title>
+    <meta name="description" content="Riwayat tagihan dan pesanan paket langganan ThinkTala">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .billing-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 242, 255, 0.08);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            color: var(--accent-cyan);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .order-card {
+            border-radius: 16px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+            transition: border-color .2s;
+        }
+
+        .order-card:hover {
+            border-color: rgba(0, 242, 255, 0.3);
+        }
+
+        .invoice-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            color: var(--accent-cyan);
+        }
+
+        .status-badge {
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .status-PENDING_PAYMENT {
+            background: rgba(234, 179, 8, .12);
+            color: #fbbf24;
+        }
+
+        .status-PAID {
+            background: rgba(16, 185, 129, .12);
+            color: #10b981;
+        }
+
+        .status-CANCELLED {
+            background: rgba(239, 68, 68, .12);
+            color: #f87171;
+        }
+
+        .status-EXPIRED {
+            background: rgba(107, 114, 128, .12);
+            color: #9ca3af;
+        }
+
+        .empty-wrap {
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 242, 255, 0.06);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .latest-banner {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.12), rgba(0, 242, 255, 0.04));
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="client-sidebar-placeholder"></div>
+    <div id="client-navbar-placeholder"></div>
+
+    <div class="main-content">
+        <!-- Header -->
+        <div class="mb-4">
+            <div class="billing-badge"><i class="fa-solid fa-file-invoice-dollar"></i> Riwayat Tagihan</div>
+            <h4 class="fw-bold mb-1" style="color:var(--text-heading)">Tagihan & Pesanan Saya</h4>
+            <small class="text-muted">Semua riwayat pesanan paket langganan Anda</small>
+        </div>
+
+        <!-- Latest Order Banner (shown after success redirect) -->
+        <div id="latestBanner" class="latest-banner d-none">
+            <div class="d-flex align-items-start gap-3">
+                <div
+                    style="min-width:40px;height:40px;background:rgba(0,242,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-circle-check text-cyan"></i>
+                </div>
+                <div>
+                    <p class="fw-bold mb-1" style="color:var(--accent-cyan)">Pesanan Berhasil Dibuat!</p>
+                    <p class="text-muted small mb-1">No. Invoice: <span class="invoice-num" id="bannerInvoice">—</span>
+                    </p>
+                    <p class="text-muted small mb-0">Total: <strong id="bannerPrice"
+                            style="color:var(--text-main)">—</strong> · Metode: <span id="bannerPayment">—</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <span class="text-muted small" id="orderCountLabel">Memuat data...</span>
+            <a href="packages-catalog.html" class="btn btn-sm"
+                style="background:var(--accent-cyan);color:#000;font-weight:600;border-radius:8px;">
+                <i class="fa-solid fa-plus me-1"></i>Beli Paket Baru
+            </a>
+        </div>
+
+        <!-- Orders list (from API when available / sessionStorage fallback) -->
+        <div id="ordersContainer"></div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/za-sidebar.js"></script>
+    <script src="/assets/js/client-layout.js"></script>
+    <script>
+        function formatRupiah(n) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+        }
+
+        function statusBadge(status) {
+            var labels = {
+                'PENDING_PAYMENT': 'Menunggu Pembayaran',
+                'PAID': 'Dibayar',
+                'CANCELLED': 'Dibatalkan',
+                'EXPIRED': 'Kedaluwarsa'
+            };
+            return '<span class="status-badge status-' + status + '">' + (labels[status] || status) + '</span>';
+        }
+
+        function buildOrderCard(o) {
+            var date = o.created_at ? new Date(o.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+            return [
+                '<div class="order-card mb-3">',
+                '  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">',
+                '    <div>',
+                '      <p class="invoice-num mb-1">' + (o.invoice_number || '—') + '</p>',
+                '      <p class="fw-bold mb-0" style="color:var(--text-heading);font-size:1.05rem;">' + formatRupiah(o.total_price || 0) + '</p>',
+                '      <p class="text-muted small mb-0">' + (o.payment_method || '—') + ' · ' + date + '</p>',
+                '    </div>',
+                '    <div>' + statusBadge(o.status || 'PENDING_PAYMENT') + '</div>',
+                '  </div>',
+                '</div>'
+            ].join('\n');
+        }
+
+        function renderOrders(orders) {
+            var container = document.getElementById('ordersContainer');
+            var label = document.getElementById('orderCountLabel');
+            if (!orders || orders.length === 0) {
+                container.innerHTML = [
+                    '<div class="ai-card text-center py-5 px-4">',
+                    '  <div class="empty-wrap mx-auto"><i class="fa-solid fa-file-invoice fa-2x text-muted"></i></div>',
+                    '  <h6 class="fw-semibold mb-1" style="color:var(--text-heading)">Belum Ada Pesanan</h6>',
+                    '  <p class="text-muted small mb-3">Anda belum pernah membuat pesanan. Mulai pilih paket sekarang!</p>',
+                    '  <a href="packages-catalog.html" class="btn btn-sm" style="background:var(--accent-cyan);color:#000;font-weight:600;border-radius:8px;">',
+                    '    <i class="fa-solid fa-box-open me-2"></i>Lihat Katalog',
+                    '  </a>',
+                    '</div>'
+                ].join('\n');
+                label.textContent = '0 pesanan';
+                return;
+            }
+            container.innerHTML = orders.map(buildOrderCard).join('');
+            label.textContent = orders.length + ' pesanan ditemukan';
+        }
+
+        // Show last order banner if redirected from checkout
+        function checkLastOrder() {
+            var raw = sessionStorage.getItem('lastOrder');
+            if (!raw) return;
+            try {
+                var o = JSON.parse(raw);
+                document.getElementById('bannerInvoice').textContent = o.invoice_number || '—';
+                document.getElementById('bannerPrice').textContent = formatRupiah(o.total_price || 0);
+                document.getElementById('bannerPayment').textContent = o.payment_method || '—';
+                document.getElementById('latestBanner').classList.remove('d-none');
+                sessionStorage.removeItem('lastOrder');
+                // Prepend this order to the rendered list
+                return o;
+            } catch (e) { return null; }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var lastOrder = checkLastOrder();
+            // Show the just-created order immediately from sessionStorage
+            // Future: fetch /api/orders/my when that endpoint exists
+            var orders = lastOrder ? [lastOrder] : [];
+            renderOrders(orders);
+        });
+    </script>
+</body>
+
+</html>

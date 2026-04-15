@@ -48,11 +48,18 @@ func MigrateAndSeed(db interface{}) {
 		invoice_number VARCHAR(100) UNIQUE NOT NULL,
 		user_id UUID NOT NULL,
 		package_id UUID,
+		payment_method VARCHAR(100) NOT NULL DEFAULT '',
 		total_price DECIMAL(15,2) NOT NULL DEFAULT 0,
-		status VARCHAR(50) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PAID', 'CANCELLED', 'EXPIRED')),
+		status VARCHAR(50) DEFAULT 'PENDING_PAYMENT' CHECK (status IN ('PENDING_PAYMENT', 'PAID', 'CANCELLED', 'EXPIRED')),
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);
+
+	-- Safe migration untuk tabel yang sudah ada
+	DO $$ BEGIN
+		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(100) NOT NULL DEFAULT '';
+	EXCEPTION WHEN others THEN NULL;
+	END $$;
 	`
 
 	log.Println("Menjalankan Migrasi PostgreSQL (Subscription)...")

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Paket | ThinkTala</title>
+    <meta name="description" content="Buat pesanan paket langganan ThinkTala">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .checkout-card {
+            border-radius: 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .checkout-header {
+            padding: 2rem 2rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .checkout-body {
+            padding: 1.75rem 2rem;
+        }
+
+        .checkout-footer {
+            padding: 1.25rem 2rem;
+            border-top: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.9rem;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row .label {
+            color: var(--text-muted);
+        }
+
+        .summary-row .value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .summary-row.total .label,
+        .summary-row.total .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 1rem;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            cursor: pointer;
+            transition: border-color .2s, background .2s;
+            margin-bottom: 0.6rem;
+        }
+
+        .payment-option:hover {
+            border-color: rgba(0, 242, 255, 0.4);
+            background: rgba(0, 242, 255, 0.04);
+        }
+
+        .payment-option.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.08);
+        }
+
+        .payment-option input[type="radio"] {
+            accent-color: var(--accent-cyan);
+            width: 18px;
+            height: 18px;
+        }
+
+        .payment-option .pay-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .payment-option .pay-icon {
+            width: 36px;
+            text-align: center;
+            color: var(--accent-cyan);
+            font-size: 1.1rem;
+        }
+
+        .btn-buat {
+            background: var(--accent-cyan);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 2rem;
+            font-size: 1rem;
+            width: 100%;
+            transition: opacity .2s, transform .15s;
+        }
+
+        .btn-buat:not(:disabled):hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .btn-buat:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .pkg-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 242, 255, 0.08);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            color: var(--accent-cyan);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255, 255, 255, .04) 25%, rgba(255, 255, 255, .09) 50%, rgba(255, 255, 255, .04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 8px;
+            height: 20px;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0
+            }
+
+            100% {
+                background-position: -200% 0
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="client-sidebar-placeholder"></div>
+    <div id="client-navbar-placeholder"></div>
+
+    <div class="main-content">
+        <!-- Header -->
+        <div class="mb-4">
+            <div class="pkg-badge"><i class="fa-solid fa-cart-shopping"></i> PBI-45 · Buat Pesanan</div>
+            <h4 class="fw-bold mb-1" style="color:var(--text-heading)">Checkout Paket</h4>
+            <small class="text-muted">Periksa ringkasan pesanan sebelum melanjutkan</small>
+        </div>
+
+        <!-- Loading -->
+        <div id="loadingState" class="text-center py-5">
+            <i class="fa-solid fa-spinner fa-spin fa-2x text-cyan mb-3 d-block"></i>
+            <p class="text-muted mb-0">Memuat detail paket...</p>
+        </div>
+
+        <!-- Error -->
+        <div id="errorState" class="d-none text-center py-5">
+            <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3 d-block"></i>
+            <h6 class="fw-semibold mb-1" style="color:var(--text-heading)">Paket Tidak Ditemukan</h6>
+            <p class="text-muted small mb-3">Paket yang Anda pilih tidak tersedia. Silakan kembali ke katalog.</p>
+            <a href="packages-catalog.html" class="btn btn-outline-light btn-sm">
+                <i class="fa-solid fa-arrow-left me-2"></i>Kembali ke Katalog
+            </a>
+        </div>
+
+        <!-- Checkout Content -->
+        <div id="checkoutContent" class="d-none row g-4 justify-content-center">
+            <div class="col-lg-6">
+                <!-- Ringkasan Pesanan -->
+                <div class="checkout-card mb-4">
+                    <div class="checkout-header">
+                        <h6 class="fw-bold mb-0" style="color:var(--text-heading)">
+                            <i class="fa-solid fa-file-invoice me-2 text-cyan"></i>Ringkasan Pesanan
+                        </h6>
+                    </div>
+                    <div class="checkout-body">
+                        <div class="summary-row">
+                            <span class="label">Nama Paket</span>
+                            <span class="value" id="sumPkgName">—</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Durasi</span>
+                            <span class="value" id="sumDuration">—</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="label">Kuota Permintaan</span>
+                            <span class="value" id="sumQuota">—</span>
+                        </div>
+                        <div class="summary-row total mt-1">
+                            <span class="label"><i class="fa-solid fa-receipt me-1"></i>Total Tagihan</span>
+                            <span class="value" id="sumPrice">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metode Pembayaran -->
+                <div class="checkout-card mb-4">
+                    <div class="checkout-header">
+                        <h6 class="fw-bold mb-0" style="color:var(--text-heading)">
+                            <i class="fa-solid fa-credit-card me-2 text-cyan"></i>Metode Pembayaran
+                        </h6>
+                        <small class="text-muted">Pilih salah satu metode pembayaran di bawah ini</small>
+                    </div>
+                    <div class="checkout-body" id="paymentOptions">
+                        <label class="payment-option" id="opt-transfer">
+                            <input type="radio" name="payment" value="Transfer Bank" onchange="onPaymentSelect(this)">
+                            <span class="pay-icon"><i class="fa-solid fa-building-columns"></i></span>
+                            <span class="pay-label">Transfer Bank</span>
+                        </label>
+                        <label class="payment-option" id="opt-gopay">
+                            <input type="radio" name="payment" value="GoPay" onchange="onPaymentSelect(this)">
+                            <span class="pay-icon"><i class="fa-solid fa-wallet"></i></span>
+                            <span class="pay-label">GoPay</span>
+                        </label>
+                        <label class="payment-option" id="opt-ovo">
+                            <input type="radio" name="payment" value="OVO" onchange="onPaymentSelect(this)">
+                            <span class="pay-icon"><i class="fa-solid fa-mobile-screen-button"></i></span>
+                            <span class="pay-label">OVO</span>
+                        </label>
+                        <label class="payment-option" id="opt-qris">
+                            <input type="radio" name="payment" value="QRIS" onchange="onPaymentSelect(this)">
+                            <span class="pay-icon"><i class="fa-solid fa-qrcode"></i></span>
+                            <span class="pay-label">QRIS</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Tombol Buat Pesanan -->
+                <div class="checkout-card">
+                    <div class="checkout-footer">
+                        <button id="btnBuatPesanan" class="btn-buat" disabled onclick="submitOrder()">
+                            <span id="btnText"><i class="fa-solid fa-check me-2"></i>Buat Pesanan</span>
+                            <span id="btnLoading" style="display:none"><i
+                                    class="fa-solid fa-spinner fa-spin me-2"></i>Memproses...</span>
+                        </button>
+                        <div class="text-center mt-2">
+                            <a href="packages-catalog.html" class="text-muted small">
+                                <i class="fa-solid fa-arrow-left me-1"></i>Kembali ke Katalog
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div id="toastEl" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive">
+            <div class="d-flex">
+                <div class="toast-body fw-semibold" id="toastMsg">—</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/za-sidebar.js"></script>
+    <script src="/assets/js/client-layout.js"></script>
+    <script>
+        // =============================================
+        // STATE
+        // =============================================
+        var selectedPackage = null;
+        var selectedPayment = null;
+
+        // =============================================
+        // HELPERS
+        // =============================================
+        function formatRupiah(n) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+        }
+
+        function showToast(msg, type) {
+            var t = document.getElementById('toastEl');
+            var m = document.getElementById('toastMsg');
+            t.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+            t.classList.add(type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-danger');
+            m.textContent = msg;
+            bootstrap.Toast.getOrCreateInstance(t, { delay: 4000 }).show();
+        }
+
+        // =============================================
+        // PAYMENT OPTION HANDLER
+        // =============================================
+        function onPaymentSelect(radio) {
+            selectedPayment = radio.value;
+            // Highlight selected
+            document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
+            radio.closest('.payment-option').classList.add('selected');
+            // Enable button
+            document.getElementById('btnBuatPesanan').disabled = false;
+        }
+
+        // =============================================
+        // FETCH PACKAGE DETAIL
+        // =============================================
+        async function loadPackage(packageId) {
+            try {
+                var res = await fetch('/api/subscription/catalog', { credentials: 'include' });
+                if (res.status === 401 || res.status === 403) { window.location.replace('/account/login'); return; }
+                var json = await res.json();
+                if (!json.success || !Array.isArray(json.data)) throw new Error('Data tidak valid');
+
+                var pkg = json.data.find(function (p) { return p.id === packageId; });
+                if (!pkg) throw new Error('Paket tidak ditemukan');
+
+                selectedPackage = pkg;
+                renderSummary(pkg);
+
+                document.getElementById('loadingState').classList.add('d-none');
+                document.getElementById('checkoutContent').classList.remove('d-none');
+            } catch (err) {
+                console.error('[Checkout] loadPackage error:', err);
+                document.getElementById('loadingState').classList.add('d-none');
+                document.getElementById('errorState').classList.remove('d-none');
+            }
+        }
+
+        function renderSummary(pkg) {
+            document.getElementById('sumPkgName').textContent = pkg.name;
+            document.getElementById('sumDuration').textContent = (pkg.duration || 0) + ' bulan';
+            document.getElementById('sumQuota').textContent = (pkg.quota || 0).toLocaleString('id-ID') + ' permintaan';
+            document.getElementById('sumPrice').textContent = formatRupiah(pkg.price);
+        }
+
+        // =============================================
+        // SUBMIT ORDER — POST /api/orders (PBI-45)
+        // =============================================
+        async function submitOrder() {
+            if (!selectedPackage || !selectedPayment) return;
+
+            var btn = document.getElementById('btnBuatPesanan');
+            var btnText = document.getElementById('btnText');
+            var btnLoad = document.getElementById('btnLoading');
+
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            btnLoad.style.display = 'inline';
+
+            try {
+                var res = await fetch('/api/orders', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        package_id: selectedPackage.id,
+                        payment_method: selectedPayment
+                    })
+                });
+
+                var json = await res.json();
+
+                if (res.status === 401 || res.status === 403) {
+                    showToast('Sesi Anda telah berakhir. Silakan login ulang.', 'danger');
+                    setTimeout(function () { window.location.replace('/account/login'); }, 1500);
+                    return;
+                }
+
+                if (res.status === 201 && json.success) {
+                    // Simpan data order ke session untuk billing page
+                    if (json.data) sessionStorage.setItem('lastOrder', JSON.stringify(json.data));
+                    showToast('Pesanan berhasil dibuat! Mengarahkan ke riwayat tagihan...', 'success');
+                    setTimeout(function () { window.location.href = 'billing.html'; }, 1800);
+                    return;
+                }
+
+                // 400 / Error
+                var errMsg = (json && json.error_message) ? json.error_message : 'Terjadi kesalahan, coba lagi.';
+                showToast(errMsg, 'danger');
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoad.style.display = 'none';
+
+            } catch (err) {
+                console.error('[Checkout] submitOrder error:', err);
+                showToast('Gagal terhubung ke server.', 'danger');
+                btn.disabled = false;
+                btnText.style.display = 'inline';
+                btnLoad.style.display = 'none';
+            }
+        }
+
+        // =============================================
+        // INIT
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function () {
+            var params = new URLSearchParams(window.location.search);
+            var packageId = params.get('package_id');
+            if (!packageId) {
+                document.getElementById('loadingState').classList.add('d-none');
+                document.getElementById('errorState').classList.remove('d-none');
+                return;
+            }
+            loadPackage(packageId);
+        });
+    </script>
+</body>
+
+</html>

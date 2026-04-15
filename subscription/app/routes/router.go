@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/orders"
 	"github.com/master-abror/zaframework/app/modules/packages"
 	"github.com/master-abror/zaframework/core"
 )
 
 // Init mendaftarkan semua route subscription service
-func Init(app *core.App, packagesController *packages.Controller) {
+func Init(app *core.App, packagesController *packages.Controller, ordersController *orders.Controller) {
 
 	// Static assets
 	fs := http.FileServer(http.Dir("./public/assets"))
@@ -48,4 +49,9 @@ func Init(app *core.App, packagesController *packages.Controller) {
 
 	// Legacy alias sesuai routes.json gateway
 	app.Router.HandleFunc("GET /api/subscriptions", packagesController.GetPackagesAdminHandler)
+
+	// ===================================================
+	// EPIC04 PBI-45: Create Order (Client)
+	// ===================================================
+	app.Router.HandleFunc("POST /api/orders", ordersController.CreateOrderHandler)
 }

@@ -48,70 +48,114 @@
       "target": "http://users-service.railway.internal:2006",
       "cors": true,
       "auth": true,
-      "roles": ["CLIENT", "SUPERADMIN", "CEO"]
+      "roles": [
+        "CLIENT",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/admin/kyc",
       "target": "http://users-service.railway.internal:2006",
       "cors": true,
       "auth": true,
-      "roles": ["COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": [
+        "COMPLIANCE",
+        "OPERASIONAL",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/admin/kyc/",
       "target": "http://users-service.railway.internal:2006",
       "cors": true,
       "auth": true,
-      "roles": ["COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": [
+        "COMPLIANCE",
+        "OPERASIONAL",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/notifications",
       "target": "http://notification-service.railway.internal:5003",
       "cors": true,
       "auth": true,
-      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": [
+        "OPERASIONAL",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/notifications/",
       "target": "http://notification-service.railway.internal:5003",
       "cors": true,
       "auth": true,
-      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": [
+        "OPERASIONAL",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/help/",
       "target": "http://notification-service.railway.internal:5003",
       "cors": true,
       "auth": true,
-      "roles": ["OPERASIONAL", "COMPLIANCE", "CLIENT", "SUPERADMIN", "CEO"]
+      "roles": [
+        "OPERASIONAL",
+        "COMPLIANCE",
+        "CLIENT",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/admin/packages",
       "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
-      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": [
+        "OPERASIONAL",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/admin/packages/",
       "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
-      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": [
+        "OPERASIONAL",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/subscriptions",
       "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
-      "roles": ["CLIENT", "SUPERADMIN", "CEO"]
+      "roles": [
+        "CLIENT",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/subscriptions/",
       "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
-      "roles": ["CLIENT", "SUPERADMIN", "CEO"]
+      "roles": [
+        "CLIENT",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/subscription/catalog",
@@ -123,21 +167,43 @@
       "target": "http://operational-service.railway.internal:8080",
       "cors": true,
       "auth": true,
-      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": [
+        "OPERASIONAL",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/admin/orders/",
       "target": "http://operational-service.railway.internal:8080",
       "cors": true,
       "auth": true,
-      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": [
+        "OPERASIONAL",
+        "SUPERADMIN",
+        "CEO"
+      ]
     },
     {
       "path": "/api/operational/",
       "target": "http://operational-service.railway.internal:8080",
       "cors": true,
       "auth": true,
-      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": [
+        "OPERASIONAL",
+        "SUPERADMIN",
+        "CEO"
+      ]
+    },
+    {
+      "path": "/api/orders",
+      "target": "http://subscription-service.railway.internal:5004",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "CLIENT"
+      ],
+      "description": "PBI-45: Create Order — hanya role CLIENT yang dapat membuat pesanan"
     }
   ]
 }
