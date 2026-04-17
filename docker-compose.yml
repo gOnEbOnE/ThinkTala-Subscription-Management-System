@@ -14,6 +14,7 @@ services:
       - ./gateway/routes.json:/app/routes.json:ro
       - ./gateway/certs:/app/certs:ro
     depends_on:
+      - management
       - notification
       - operational
       - subscription
@@ -68,6 +69,14 @@ services:
     container_name: thinknalyze-users
     environment:
       - PORT=2006
+    networks:
+      - thinknalyze-network
+
+  management:
+    build: ./management
+    container_name: thinknalyze-management
+    environment:
+      - PORT=5006
     networks:
       - thinknalyze-network
 

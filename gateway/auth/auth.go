@@ -103,6 +103,21 @@ func isRoleAllowed(path string, role string) bool {
 	// Normalize role
 	role = strings.ToUpper(strings.TrimSpace(role))
 
+	// Package dashboard is restricted strictly to MANAGEMENT/ADMIN only.
+	if strings.HasPrefix(path, "/api/dashboard/packages") ||
+		strings.HasPrefix(path, "/api/dashboard/package/") ||
+		strings.HasPrefix(path, "/management/dashboard-packages") ||
+		strings.HasPrefix(path, "/dashboard/packages/") {
+		return role == "MANAGEMENT" || role == "ADMIN"
+	}
+
+	// Management dashboard and APIs are restricted to MANAGEMENT/ADMIN/SUPERADMIN only.
+	if strings.HasPrefix(path, "/api/dashboard/") ||
+		strings.HasPrefix(path, "/management/") ||
+		strings.HasPrefix(path, "/dashboard/customer/") {
+		return role == "MANAGEMENT" || role == "ADMIN" || role == "SUPERADMIN"
+	}
+
 	// SuperAdmin & CEO can access everything
 	if role == "SUPERADMIN" || role == "CEO" {
 		return true
