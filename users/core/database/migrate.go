@@ -25,6 +25,10 @@ func MigrateAndSeed(db interface{}) {
 	}
 
 	pool := wrapper.Pool
+	if pool == nil {
+		log.Printf("[WARN] Database pool is nil, skipping migration & seeding")
+		return
+	}
 
 	// ===== MIGRASI (tanpa parameter, bisa batch) =====
 	migrationSQL := `

@@ -119,9 +119,37 @@ func loadConfig() (*Config, error) {
 		return nil, fmt.Errorf("error parsing %s: %v", configPath, err)
 	}
 
+	for i := range cfg.Routes {
+		cfg.Routes[i].Target = normalizeTargetForEnv(cfg.Routes[i].Target)
+	}
+
 	log.Printf("Configuration loaded from: %s", configPath)
 	log.Printf("Loaded %d routes and %d allowed origins", len(cfg.Routes), len(cfg.AllowedOrigins))
 	return &cfg, nil
+}
+
+func normalizeTargetForEnv(target string) string {
+	if target == "" {
+		return target
+	}
+
+	// In local development, Railway internal DNS is not resolvable.
+	if strings.ToLower(os.Getenv("RAILWAY_ENVIRONMENT")) != "" {
+		return target
+	}
+
+	replacements := map[string]string{
+		"users-service.railway.internal:2006":        "localhost:2006",
+		"notification-service.railway.internal:5003": "localhost:5003",
+		"subscription-service.railway.internal:5004": "localhost:5004",
+		"operational-service.railway.internal:8080":  "localhost:5005",
+	}
+
+	for from, to := range replacements {
+		target = strings.ReplaceAll(target, from, to)
+	}
+
+	return target
 }
 
 // ========================================
@@ -524,7 +552,7 @@ func main() {
 	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
 	subTarget := getRouteTarget("/api/admin/packages")
 	if subTarget == "" {
-		subTarget = "http://subscription-service.railway.internal:5004"
+		subTarget = "http://localhost:5004"
 	}
 	http.HandleFunc("/api/admin/packages", withRoleAuth(
 		createProxyHandler(subTarget, true),
@@ -546,7 +574,7 @@ func main() {
 	// --- KYC Admin API (role-protected) - COMPLIANCE & OPERASIONAL can access ---
 	kycTarget := getRouteTarget("/api/admin/kyc")
 	if kycTarget == "" {
-		kycTarget = "http://users-service.railway.internal:2006"
+		kycTarget = "http://localhost:2006"
 	}
 	http.HandleFunc("/api/admin/kyc", withRoleAuth(
 		createProxyHandler(kycTarget, true),
@@ -559,7 +587,7 @@ func main() {
 	// --- ORDERS Admin API (role-protected) - OPERASIONAL can access ---
 	ordersTarget := getRouteTarget("/api/admin/orders")
 	if ordersTarget == "" {
-		ordersTarget = "http://operational-service.railway.internal:8080"
+		ordersTarget = "http://localhost:5005"
 	}
 	http.HandleFunc("/api/admin/orders", withRolesAuth([]string{"OPERASIONAL", "SUPERADMIN", "CEO"},
 		createProxyHandler(ordersTarget, true),

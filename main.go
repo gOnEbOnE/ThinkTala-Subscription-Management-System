@@ -1,11 +1,14 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -70,6 +73,12 @@ type Service struct {
 	pid  int
 }
 
+type ServiceConfig struct {
+	name string
+	dir  string
+	port string
+}
+
 func main() {
 	fmt.Println("=========================================")
 	fmt.Println("  🚀 THINKNALYZE ORCHESTRATOR")
@@ -87,11 +96,7 @@ func main() {
 	var redisCmd *exec.Cmd // placeholder agar teardown tetap aman
 
 	// Service configurations
-	serviceConfigs := []struct {
-		name string
-		dir  string
-		port string
-	}{
+	serviceConfigs := []ServiceConfig{
 		{"account", "account", "2001"},
 		{"gateway", "gateway", "2000"},
 		{"users", "users", "2006"},
@@ -100,16 +105,16 @@ func main() {
 		{"subscription", "subscription", "5004"},
 	}
 
+	if err := ensureServicePortsAvailable(serviceConfigs); err != nil {
+		log.Fatalf("[FATAL] Port check failed: %v", err)
+	}
+
 	fmt.Println("\nMemulai semua service...\n")
 
 	// Start services
 	for _, cfg := range serviceConfigs {
 		wg.Add(1)
-		go func(config struct {
-			name string
-			dir  string
-			port string
-		}) {
+		go func(config ServiceConfig) {
 			defer wg.Done()
 
 			cmd := exec.Command("go", "run", "main.go")
@@ -211,4 +216,123 @@ func checkPrerequisites() {
 	}
 
 	fmt.Println()
+}
+
+func ensureServicePortsAvailable(configs []ServiceConfig) error {
+	fmt.Println("[*] Checking service ports...\n")
+
+	for _, cfg := range configs {
+		if !isPortInUse(cfg.port) {
+			fmt.Printf("  ✅ Port %s (%s) - available\n", cfg.port, cfg.name)
+			continue
+		}
+
+		if runtime.GOOS != "windows" {
+			return fmt.Errorf("port %s (%s) is already in use", cfg.port, cfg.name)
+		}
+
+		pids, err := getListeningPIDsWindows(cfg.port)
+		if err != nil {
+			return fmt.Errorf("failed to inspect port %s (%s): %w", cfg.port, cfg.name, err)
+		}
+
+		releasedByCleanup := false
+		for _, pid := range pids {
+			processName, err := getProcessNameWindows(pid)
+			if err != nil {
+				continue
+			}
+
+			if strings.EqualFold(processName, "main.exe") {
+				fmt.Printf("  ⚠️  Port %s (%s) used by stale %s (PID %d). Terminating...\n", cfg.port, cfg.name, processName, pid)
+				if err := killPIDWindows(pid); err != nil {
+					return fmt.Errorf("failed to terminate stale process PID %d on port %s: %w", pid, cfg.port, err)
+				}
+				releasedByCleanup = true
+			}
+		}
+
+		if releasedByCleanup {
+			time.Sleep(300 * time.Millisecond)
+		}
+
+		if isPortInUse(cfg.port) {
+			if releasedByCleanup {
+				return fmt.Errorf("port %s (%s) still in use after cleanup", cfg.port, cfg.name)
+			}
+			return fmt.Errorf("port %s (%s) is in use by non-orchestrator process", cfg.port, cfg.name)
+		}
+
+		fmt.Printf("  ✅ Port %s (%s) - released\n", cfg.port, cfg.name)
+	}
+
+	fmt.Println()
+	return nil
+}
+
+func isPortInUse(port string) bool {
+	ln, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		return true
+	}
+	_ = ln.Close()
+	return false
+}
+
+func getListeningPIDsWindows(port string) ([]int, error) {
+	cmd := exec.Command("cmd", "/c", fmt.Sprintf("netstat -ano | findstr :%s | findstr LISTENING", port))
+	out, err := cmd.Output()
+	if err != nil {
+		if _, ok := err.(*exec.ExitError); ok {
+			return []int{}, nil
+		}
+		return nil, err
+	}
+
+	pidSet := make(map[int]bool)
+	lines := strings.Split(strings.TrimSpace(string(out)), "\n")
+	for _, line := range lines {
+		fields := strings.Fields(strings.TrimSpace(line))
+		if len(fields) < 5 {
+			continue
+		}
+		pid, err := strconv.Atoi(fields[len(fields)-1])
+		if err != nil {
+			continue
+		}
+		pidSet[pid] = true
+	}
+
+	result := make([]int, 0, len(pidSet))
+	for pid := range pidSet {
+		result = append(result, pid)
+	}
+
+	return result, nil
+}
+
+func getProcessNameWindows(pid int) (string, error) {
+	cmd := exec.Command("tasklist", "/FI", fmt.Sprintf("PID eq %d", pid), "/FO", "CSV", "/NH")
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	line := strings.TrimSpace(string(out))
+	if line == "" || strings.HasPrefix(line, "INFO:") {
+		return "", fmt.Errorf("no process found for pid %d", pid)
+	}
+
+	r := csv.NewReader(strings.NewReader(line))
+	record, err := r.Read()
+	if err != nil || len(record) == 0 {
+		return "", fmt.Errorf("unable to parse process info for pid %d", pid)
+	}
+
+	return strings.TrimSpace(record[0]), nil
+}
+
+func killPIDWindows(pid int) error {
+	cmd := exec.Command("taskkill", "/PID", strconv.Itoa(pid), "/F")
+	return cmd.Run()
 }
