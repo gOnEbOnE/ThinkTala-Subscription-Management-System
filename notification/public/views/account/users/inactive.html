@@ -1,0 +1,868 @@
+<div class="container-fluid">
+    <div class="d-md-flex align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0">
+            <h3 class="fw-bold text-secondary mb-1">Pengguna Non Aktif</h3>
+            </div>
+        <!-- <button class="btn btn-primary shadow-sm rounded-pill px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalTambahData">
+            <i class="bi bi-plus-lg me-2"></i>Tambah Data
+        </button> -->
+    </div>
+
+    <div class="card shadow-lg border-0 bg-body rounded-4 overflow-hidden">
+        <div class="card-header bg-transparent border-bottom border-secondary-subtle py-3 px-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-6">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-sm" style="max-width: 300px;">
+                            <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" id="searchInput" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="Cari nama/nik/nrk/group...">
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger rounded-3 d-none" id="btnBulkDelete">
+                            <i class="bi bi-trash me-1"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center">
+                    <label class="small text-muted me-2 mb-0">Tampilkan:</label>
+                    <select id="limitSelect" class="form-select form-select-sm w-auto bg-body-tertiary border-secondary-subtle text-body rounded-3">
+                        <option value="12">12</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-nowrap mb-0">
+                    <thead>
+                        <tr class="bg-primary-subtle text-primary-emphasis border-bottom border-primary-subtle">
+                            <th scope="col" class="ps-4 py-3" style="width: 40px;">
+                                <div class="form-check">
+                                    <input class="form-check-input border-primary rounded-1" type="checkbox" id="selectAll">
+                                </div>
+                            </th>
+                            <th scope="col" class="py-3 fw-bold">NO</th>
+                            <th scope="col" class="py-3 fw-bold">Nama Lengkap</th>
+                            <th scope="col" class="py-3 fw-bold">NIK</th>
+                            <th scope="col" class="py-3 fw-bold">NRK</th>
+                            <th scope="col" class="py-3 fw-bold">NIKKI</th>
+                            <th scope="col" class="py-3 fw-bold">Group</th>
+                            <th scope="col" class="py-3 fw-bold">Peran</th>
+                            <th scope="col" class="py-3 fw-bold">Level</th>
+                            <th scope="col" class="py-3 fw-bold">Status</th>
+                            <th scope="col" class="py-3 fw-bold text-center pe-4">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0" id="data">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-top border-secondary-subtle py-3 px-4">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-6 d-flex align-items-center mb-3 mb-md-0">
+                    <label class="small text-muted me-2 mb-0">Halaman:</label>
+                    <select id="pageSelect" class="form-select form-select-sm w-auto bg-body-tertiary border-secondary-subtle text-body rounded-3">
+                        </select>
+                    <div class="ms-3 d-flex gap-2" id="paginationControls">
+                         <button id="btnPrev" class="btn btn-sm btn-outline-secondary border-secondary-subtle rounded-3 px-3">
+                            <i class="bi bi-chevron-left small"></i>
+                         </button>
+                         <button id="btnNext" class="btn btn-sm btn-outline-secondary border-secondary-subtle rounded-3 px-3">
+                            <i class="bi bi-chevron-right small"></i>
+                         </button>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 text-md-end text-muted small" id="pageInfo">
+                    Menampilkan <span class="fw-bold text-emphasis">0</span> dari <span class="fw-bold text-emphasis">0</span> data
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalEditUser" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form id="formEditUser">
+                <div class="modal-body">
+                    
+                    <input type="hidden" id="editId" name="id">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Nama Lengkap</label>
+                        <input type="text" class="form-control" id="editNama" name="fullname" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small">NIK</label>
+                            <input type="text" class="form-control" id="editNik" name="nik">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold small">NRK</label>
+                            <input type="text" class="form-control" id="editNrk" name="nrk">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small">Status</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_active" id="editStatus1" value="1">
+                                <label class="form-check-label" for="editStatus1">Aktif</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="is_active" id="editStatus2" value="0">
+                                <label class="form-check-label" for="editStatus2">Pending/Non-Aktif</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="file-pendukung"></div>
+
+
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" id="btnUpdateUser" class="btn btn-warning text-white">Update Data</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+
+    <script data-safe="true" src="{{.assets_url}}/assets/js/za-toast.js" defer></script>
+
+
+<script data-safe="true">
+    (function() {
+        
+        // ==========================================
+        // 1. STATE MANAGEMENT
+        // ==========================================
+        let state = {
+            page: 1,
+            limit: 12,
+            search: '',
+            totalData: 0,
+            totalPages: 0
+        };
+
+        // ==========================================
+        // 2. DOM ELEMENTS
+        // ==========================================
+        const tableBody = document.getElementById('data');
+        const searchInput = document.getElementById('searchInput');
+        const limitSelect = document.getElementById('limitSelect');
+        const pageSelect = document.getElementById('pageSelect');
+        const pageInfo = document.getElementById('pageInfo');
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+        const selectAll = document.getElementById('selectAll');
+        const btnBulkDelete = document.getElementById('btnBulkDelete');
+
+        // Modal Elements
+        const modalEditEl = document.getElementById('modalEditUser');
+        const modalEdit = new bootstrap.Modal(modalEditEl); 
+        const formEdit = document.getElementById('formEditUser');
+        
+        // Tombol Submit (Pastikan di HTML sudah ada id="btnUpdateUser")
+        const btnUpdateUser = document.getElementById('btnUpdateUser');
+
+        // ==========================================
+        // 3. LOGIKA EDIT USER (Fetch Detail)
+        // ==========================================
+        window.editUser = async function(id) {
+            console.log("Fetching detail for:", id);
+
+            formEdit.reset(); // Bersihkan form
+            
+            // Simpan ID ke input hidden agar mudah diambil nanti
+            document.getElementById('editId').value = id;
+
+            try {
+                const response = await fetch(`/account/users/detail/${id}`);
+                
+                if (!response.ok) throw new Error("Gagal mengambil detail user");
+                
+                const result = await response.json();
+
+                if (result.status) {
+                    const user = result.data;
+
+                    // Isi Form
+                    document.getElementById('editNama').value = user.fullname;
+                    document.getElementById('editNik').value = user.nik || '';
+                    document.getElementById('editNrk').value = user.nrk || '';
+
+                    // Isi Radio Button
+                    if (user.is_active || user.status === 'Aktif') {
+                        const rb = formEdit.querySelector('input[name="is_active"][value="1"]');
+                        if(rb) rb.checked = true;
+                    } else {
+                        const rb = formEdit.querySelector('input[name="is_active"][value="0"]');
+                        if(rb) rb.checked = true;
+                    }
+
+                    if (user.dokumen_pendukung != '') {
+
+                        doc = `<label class="form-label fw-bold small">Status</label>
+                            <object 
+                                data="https://edu.jakarta.go.id/cdn/files/register/dokumen_pendukung/`+user.dokumen_pendukung+`" 
+                                type="application/pdf" 
+                                width="100%" 
+                                height="600px">
+                                <p>Browser tidak mendukung PDF.
+                                <a href="https://edu.jakarta.go.id/cdn/files/register/dokumen_pendukung/`+user.dokumen_pendukung+`">Download PDF</a>
+                                </p>
+                            </object>`
+
+                        document.getElementById('file-pendukung').innerHTML = doc || '';
+                    } else {
+                        document.getElementById('file-pendukung').innerHTML = '';
+                    }
+
+                    modalEdit.show();
+                } else {
+                    alert(result.msg);
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Terjadi kesalahan saat mengambil data user.");
+            }
+        };
+
+        // ==========================================
+        // 4. LOGIKA UPDATE USER (MANUAL FETCH - STABIL)
+        // ==========================================
+        // Kita pakai addEventListener manual karena URL-nya dinamis
+        formEdit.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Mencegah reload halaman
+
+            // 1. Ambil ID dari hidden input
+            const id = document.getElementById('editId').value;
+            if(!id) { alert("ID User tidak ditemukan"); return; }
+
+            // 2. UX: Loading State pada Tombol
+            const originalText = btnUpdateUser.innerHTML;
+            btnUpdateUser.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...`;
+            btnUpdateUser.disabled = true;
+
+            // 3. Ambil Data Form (FORM DATA - Sesuai permintaan backend ParseForm)
+            const formData = new FormData(formEdit);
+
+            try {
+                // Delay sedikit biar terlihat prosesnya (Opsional 500ms)
+                await new Promise(r => setTimeout(r, 500));
+
+                // 4. Kirim ke Backend (POST)
+                const response = await fetch(`/account/users/update/${id}`, {
+                    method: 'POST', // Backend mengharapkan POST + FormData
+                    body: formData  // Browser otomatis mengatur Content-Type ke multipart/form-data
+                });
+
+                const result = await response.json();
+
+                if (result.status) {
+                    // SUKSES
+                    modalEdit.hide(); // Tutup Modal
+                    fetchData();      // Reload Tabel
+                    // alert("Data berhasil diupdate!"); // Opsional
+                } else {
+                    // GAGAL DARI BACKEND
+                    alert("Gagal update: " + result.msg);
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Terjadi kesalahan jaringan atau server error.");
+            } finally {
+                // 5. Reset Tombol (Apapun hasilnya)
+                btnUpdateUser.innerHTML = originalText;
+                btnUpdateUser.disabled = false;
+            }
+        });
+
+
+        // ==========================================
+        // 5. FETCH DATA (LISTING TABLE)
+        // ==========================================
+        async function fetchData() {
+            tableBody.innerHTML = `<tr><td colspan="12" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Memuat data...</td></tr>`;
+            
+            try {
+                const query = new URLSearchParams({
+                    page: state.page,
+                    limit: state.limit,
+                    q: state.search
+                });
+
+                const response = await fetch(`/account/users/data/inactive?${query.toString()}`);
+                
+                if (response.redirected && response.url.includes('/login')) {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (!response.ok) throw new Error("Gagal mengambil data");
+
+                // Update Nonce (Security)
+                const newNonce = response.headers.get("X-Page-Nonce");
+                if (newNonce) {
+                    const meta = document.querySelector("meta[name='csp-nonce']");
+                    if (meta) meta.setAttribute("content", newNonce);
+                }
+
+                const result = await response.json();
+                
+                const users = result.data || [];
+                const meta = result.meta || { total_items: 0, total_pages: 1 };
+
+                state.totalData = meta.total_items;
+                state.totalPages = meta.total_pages;
+
+                renderTable(users);
+                renderPagination();
+                resetSelection(); 
+
+            } catch (error) {
+                console.error(error);
+                tableBody.innerHTML = `<tr><td colspan="12" class="text-center py-5 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Gagal memuat data</td></tr>`;
+            }
+        }
+
+        // ==========================================
+        // 6. RENDER FUNCTIONS
+        // ==========================================
+        function renderTable(users) {
+            if (users.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="12" class="text-center py-5 text-muted">Tidak ada data ditemukan</td></tr>`;
+                return;
+            }
+
+            const startNumber = (state.page - 1) * state.limit;
+
+            const html = users.map((user, index) => {
+                const nomor = startNumber + index + 1;
+
+                return `
+                <tr>
+                    <td class="ps-4">
+                        <div class="form-check">
+                            <input class="form-check-input row-checkbox" type="checkbox" value="${user.id}">
+                        </div>
+                    </td>
+                    <td class="fw-bold text-secondary">${nomor}</td>
+                    <td>${escapeHtml(user.fullname)}</td>
+                    <td>${escapeHtml(user.nik)}</td>
+                    <td>${escapeHtml(user.nrk)}</td>
+                    <td>${escapeHtml(user.nikki)}</td>
+                    <td>${escapeHtml(user.group_name)}</td>
+                    <td>${escapeHtml(user.role_name)}</td>
+                    <td>${escapeHtml(user.level_name)}</td>
+                    <td>
+                        <span class="badge rounded-pill ${user.status === 'Aktif' ? 'bg-success-subtle text-success border-success-subtle' : 'bg-warning-subtle text-warning border-warning-subtle'} border">
+                            Pending
+                        </span>
+                    </td>
+                    <td class="text-center pe-4">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-light border-secondary-subtle rounded-3 me-1" onclick="editUser('${user.id}')" title="Edit">
+                                <i class="bi bi-pencil-square text-primary"></i>
+                            </button>
+                            
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+
+            tableBody.innerHTML = html;
+            attachCheckboxListeners();
+        }
+
+        function renderPagination() {
+            const start = (state.page - 1) * state.limit + 1;
+            const end = Math.min(start + state.limit - 1, state.totalData);
+            const displayStart = state.totalData === 0 ? 0 : start;
+            const displayEnd = state.totalData === 0 ? 0 : end;
+
+            pageInfo.innerHTML = `Menampilkan <span class="fw-bold text-emphasis">${displayStart}-${displayEnd}</span> dari <span class="fw-bold text-emphasis">${state.totalData}</span> data`;
+
+            let options = '';
+            for (let i = 1; i <= state.totalPages; i++) {
+                options += `<option value="${i}" ${i === state.page ? 'selected' : ''}>${i}</option>`;
+            }
+            pageSelect.innerHTML = options;
+
+            btnPrev.disabled = state.page <= 1;
+            btnNext.disabled = state.page >= state.totalPages;
+        }
+
+        // ==========================================
+        // 7. EVENT LISTENERS
+        // ==========================================
+        let debounceTimer;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                state.search = e.target.value;
+                state.page = 1;
+                fetchData();
+            }, 500);
+        });
+
+        limitSelect.addEventListener('change', (e) => {
+            state.limit = parseInt(e.target.value);
+            state.page = 1;
+            fetchData();
+        });
+
+        pageSelect.addEventListener('change', (e) => {
+            state.page = parseInt(e.target.value);
+            fetchData();
+        });
+
+        btnPrev.addEventListener('click', () => {
+            if (state.page > 1) {
+                state.page--;
+                fetchData();
+            }
+        });
+
+        btnNext.addEventListener('click', () => {
+            if (state.page < state.totalPages) {
+                state.page++;
+                fetchData();
+            }
+        });
+
+        function attachCheckboxListeners() {
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            rowCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (!this.checked) selectAll.checked = false;
+                    checkSelectAllStatus();
+                    toggleBulkButton();
+                });
+            });
+        }
+
+        selectAll.addEventListener('change', function() {
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            rowCheckboxes.forEach(cb => cb.checked = this.checked);
+            toggleBulkButton();
+        });
+
+        function checkSelectAllStatus() {
+            const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+            if (rowCheckboxes.length > 0 && document.querySelectorAll('.row-checkbox:checked').length === rowCheckboxes.length) {
+                selectAll.checked = true;
+            }
+        }
+
+        function toggleBulkButton() {
+            const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+            if (checkedCount > 0) {
+                btnBulkDelete.classList.remove('d-none');
+                btnBulkDelete.innerHTML = `<i class="bi bi-trash me-1"></i> Hapus (${checkedCount})`;
+            } else {
+                btnBulkDelete.classList.add('d-none');
+            }
+        }
+
+        function resetSelection() {
+            selectAll.checked = false;
+            toggleBulkButton();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        window.deleteUser = function(id) {
+            if(confirm("Yakin hapus data ini?")) {
+                console.log("Delete user:", id);
+            }
+        };
+
+        // Load Initial Data
+        fetchData();
+
+    })();
+</script>
+
+
+<!-- <script data-safe="true">
+(function() {
+    // 1. STATE MANAGEMENT
+    let state = {
+        page: 1,
+        limit: 12,
+        search: '',
+        totalData: 0,
+        totalPages: 0
+    };
+
+    // 2. DOM ELEMENTS
+    const tableBody = document.getElementById('data');
+    const searchInput = document.getElementById('searchInput');
+    const limitSelect = document.getElementById('limitSelect');
+    const pageSelect = document.getElementById('pageSelect');
+    const pageInfo = document.getElementById('pageInfo');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const selectAll = document.getElementById('selectAll');
+    const btnBulkDelete = document.getElementById('btnBulkDelete');
+
+    // 3. FETCH DATA FUNCTION
+    async function fetchData() {
+        // Tampilkan loading skeleton/spinner di tabel
+        tableBody.innerHTML = `<tr><td colspan="11" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Memuat data...</td></tr>`;
+        
+        try {
+            // Sesuaikan endpoint API Anda disini
+            const query = new URLSearchParams({
+                page: state.page,
+                limit: state.limit,
+                q: state.search
+            });
+
+            // Ganti '/api/users' dengan endpoint Golang Anda
+            const response = await fetch(`/account/users/data/inactive?${query.toString()}`);
+            
+            // Cek jika sesi habis (redirect login)
+            if (response.redirected && response.url.includes('/login')) {
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!response.ok) throw new Error("Gagal mengambil data");
+
+            const result = await response.json();
+            
+            // Asumsi format JSON: { data: [], meta: { total_items: 100, total_pages: 10 } }
+            // Sesuaikan dengan respon Golang Anda
+            const users = result.data || [];
+            const meta = result.meta || { total_items: 0, total_pages: 1 };
+
+            state.totalData = meta.total_items;
+            state.totalPages = meta.total_pages;
+
+            renderTable(users);
+            renderPagination();
+            resetSelection(); // Reset checkbox setiap load data baru
+
+        } catch (error) {
+            console.error(error);
+            tableBody.innerHTML = `<tr><td colspan="11" class="text-center py-5 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Gagal memuat data</td></tr>`;
+        }
+    }
+
+    // 4. RENDER TABLE FUNCTION
+    function renderTable(users) {
+        // Ubah colspan menjadi 12 karena sekarang ada tambahan kolom "No"
+        if (users.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="12" class="text-center py-5 text-muted">Tidak ada data ditemukan</td></tr>`;
+            return;
+        }
+
+        // Hitung angka awal berdasarkan halaman saat ini dan limit
+        // Contoh: Page 2, Limit 12 => Start = (2-1)*12 = 12.
+        const startNumber = (state.page - 1) * state.limit;
+
+        // Tambahkan parameter 'index' pada map untuk urutan array (0, 1, 2...)
+        const html = users.map((user, index) => {
+            
+            // Hitung nomor urut final
+            const nomor = startNumber + index + 1;
+
+            return `
+            <tr>
+                <td class="ps-4">
+                    <div class="form-check">
+                        <input class="form-check-input row-checkbox" type="checkbox" value="${user.id}">
+                    </div>
+                </td>
+                
+                <td class="fw-bold text-secondary">${nomor}</td>
+                <td>${escapeHtml(user.fullname)}</td>
+                <td>${escapeHtml(user.nik)}</td>
+                <td>${escapeHtml(user.nrk)}</td>
+                <td>${escapeHtml(user.nikki)}</td>
+                <td>${escapeHtml(user.group_name)}</td>
+                <td>${escapeHtml(user.role_name)}</td>
+                <td>${escapeHtml(user.level_name)}</td>
+                <td>
+                    <span class="badge rounded-pill ${user.status === 'Aktif' ? 'bg-success-subtle text-success border-success-subtle' : 'bg-warning-subtle text-warning border-warning-subtle'} border">
+                        Pending
+                    </span>
+                </td>
+                <td class="text-center pe-4">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-light border-secondary-subtle rounded-3 me-1" onclick="editUser('${user.id}')" title="Edit">
+                            <i class="bi bi-pencil-square text-primary"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light border-secondary-subtle rounded-3" onclick="deleteUser('${user.id}')" title="Hapus">
+                            <i class="bi bi-trash3 text-danger"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `}).join('');
+
+        tableBody.innerHTML = html;
+        
+        // Re-attach listener untuk checkbox baru
+        attachCheckboxListeners();
+    }
+    // 5. RENDER PAGINATION & INFO
+    function renderPagination() {
+        // Update Info Text
+        const start = (state.page - 1) * state.limit + 1;
+        const end = Math.min(start + state.limit - 1, state.totalData);
+        
+        // Handle jika data kosong
+        const displayStart = state.totalData === 0 ? 0 : start;
+        const displayEnd = state.totalData === 0 ? 0 : end;
+
+        pageInfo.innerHTML = `Menampilkan <span class="fw-bold text-emphasis">${displayStart}-${displayEnd}</span> dari <span class="fw-bold text-emphasis">${state.totalData}</span> data`;
+
+        // Update Dropdown Halaman
+        let options = '';
+        for (let i = 1; i <= state.totalPages; i++) {
+            options += `<option value="${i}" ${i === state.page ? 'selected' : ''}>${i}</option>`;
+        }
+        pageSelect.innerHTML = options;
+
+        // Update State Tombol Prev/Next
+        btnPrev.disabled = state.page <= 1;
+        btnNext.disabled = state.page >= state.totalPages;
+    }
+
+    // 6. EVENT LISTENERS
+    
+    // Search dengan Debounce (Supaya tidak request setiap ketik huruf)
+    let debounceTimer;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            state.search = e.target.value;
+            state.page = 1; // Reset ke halaman 1 saat mencari
+            fetchData();
+        }, 500); // Tunggu 500ms setelah user berhenti mengetik
+    });
+
+    // Limit Change
+    limitSelect.addEventListener('change', (e) => {
+        state.limit = parseInt(e.target.value);
+        state.page = 1;
+        fetchData();
+    });
+
+    // Page Select Change
+    pageSelect.addEventListener('change', (e) => {
+        state.page = parseInt(e.target.value);
+        fetchData();
+    });
+
+    // Button Prev
+    btnPrev.addEventListener('click', () => {
+        if (state.page > 1) {
+            state.page--;
+            fetchData();
+        }
+    });
+
+    // Button Next
+    btnNext.addEventListener('click', () => {
+        if (state.page < state.totalPages) {
+            state.page++;
+            fetchData();
+        }
+    });
+
+    // 7. CHECKBOX LOGIC (Dynamic)
+    function attachCheckboxListeners() {
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        
+        rowCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (!this.checked) selectAll.checked = false;
+                checkSelectAllStatus();
+                toggleBulkButton();
+            });
+        });
+    }
+
+    selectAll.addEventListener('change', function() {
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        rowCheckboxes.forEach(cb => cb.checked = this.checked);
+        toggleBulkButton();
+    });
+
+    function checkSelectAllStatus() {
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        if (rowCheckboxes.length > 0 && document.querySelectorAll('.row-checkbox:checked').length === rowCheckboxes.length) {
+            selectAll.checked = true;
+        }
+    }
+
+    function toggleBulkButton() {
+        const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+        if (checkedCount > 0) {
+            btnBulkDelete.classList.remove('d-none');
+            // Update teks tombol hapus (opsional)
+            btnBulkDelete.innerHTML = `<i class="bi bi-trash me-1"></i> Hapus (${checkedCount})`;
+        } else {
+            btnBulkDelete.classList.add('d-none');
+        }
+    }
+
+    function resetSelection() {
+        selectAll.checked = false;
+        toggleBulkButton();
+    }
+
+    // Helper: XSS Protection sederhana
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    const modalEditEl = document.getElementById('modalEditUser');
+    const modalEdit = new bootstrap.Modal(modalEditEl); 
+    const formEdit = document.getElementById('formEditUser');
+    
+   window.editUser = async function(id) {
+        console.log("Fetching detail for:", id);
+
+        // 1. Reset form dulu
+        formEdit.reset();
+        
+        try {
+            // 2. Ambil data detail dari Backend
+            // Pastikan Anda punya endpoint: GET /api/users/detail?id=...
+            const response = await fetch(`/account/users/detail/${id}`);
+            
+            if (!response.ok) throw new Error("Gagal mengambil detail user");
+            
+            const result = await response.json();
+            const user = result.data; // Asumsi backend return { data: { ... } }
+
+            // 3. Isi Form dengan data dari Backend
+            document.getElementById('editId').value = user.id;
+            document.getElementById('editNama').value = user.fullname;
+            document.getElementById('editNik').value = user.nik || '';
+            document.getElementById('editNrk').value = user.nrk || '';
+
+            // Handle Radio Button Status (Boolean/String)
+            if (user.is_active || user.status === 'Aktif') {
+                document.getElementById('editStatus1').checked = true;
+            } else {
+                document.getElementById('editStatus2').checked = true;
+            }
+
+            // 4. Tampilkan Modal
+            modalEdit.show();
+
+        } catch (error) {
+            console.error(error);
+            alert("Terjadi kesalahan saat mengambil data user.");
+        }
+    };
+
+    // --- FUNGSI 2: SIMPAN PERUBAHAN (Submit Form) ---
+    formEdit.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Mencegah reload halaman
+
+        // Ambil data dari form
+        const id = document.getElementById('editId').value;
+        const payload = {
+            fullname: document.getElementById('editNama').value,
+            nik: document.getElementById('editNik').value,
+            nrk: document.getElementById('editNrk').value,
+            is_active: document.querySelector('input[name="editStatus"]:checked').value === '1'
+        };
+
+        // Tombol loading state (Opsional, agar UX bagus)
+        const btnSubmit = formEdit.querySelector('button[type="submit"]');
+        const originalText = btnSubmit.innerText;
+        btnSubmit.innerText = "Menyimpan...";
+        btnSubmit.disabled = true;
+
+        try {
+            // Kirim ke Backend
+            // Pastikan Anda punya endpoint: PUT /api/users/update
+            const response = await fetch(`/api/users/update/${id}`, {
+                method: 'PUT', // atau POST tergantung backend
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 'X-CSRF-Token': ... (Jika pakai CSRF)
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.status) {
+                // Sukses
+                modalEdit.hide(); // Tutup modal
+                fetchData();      // Refresh tabel otomatis
+                
+                // Tampilkan notifikasi sukses sederhana (atau pakai SweetAlert)
+                alert("Data berhasil diupdate!");
+            } else {
+                alert("Gagal update: " + result.msg);
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Terjadi kesalahan jaringan.");
+        } finally {
+            // Kembalikan tombol seperti semula
+            btnSubmit.innerText = originalText;
+            btnSubmit.disabled = false;
+        }
+    });
+
+    window.deleteUser = function(id) {
+        if(confirm("Yakin hapus data ini?")) {
+            // Logika fetch delete disini
+            console.log("Delete user:", id);
+            // fetchData(); // Refresh table setelah hapus
+        }
+    };
+
+    // Load Data Pertama Kali
+    fetchData();
+
+})(); // IIFE (Immediately Invoked Function Expression) untuk scope isolation
+</script> -->
+
+
+

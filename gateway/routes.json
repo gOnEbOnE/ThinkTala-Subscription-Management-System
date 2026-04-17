@@ -138,6 +138,34 @@
       "cors": true,
       "auth": true,
       "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/dashboard/customers",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": ["MANAGEMENT", "SUPERADMIN", "ADMIN"]
+    },
+    {
+      "path": "/api/dashboard/customer/",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": ["MANAGEMENT", "SUPERADMIN", "ADMIN"]
+    },
+    {
+      "path": "/api/dashboard/packages",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": ["MANAGEMENT", "ADMIN"]
+    },
+    {
+      "path": "/api/dashboard/package/",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": ["MANAGEMENT", "ADMIN"]
     }
   ]
 }

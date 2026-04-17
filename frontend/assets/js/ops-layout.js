@@ -20,10 +20,10 @@
         return;
     }
 
-    // ── Role guard: /ops/* is only for OPERASIONAL, CEO, SUPERADMIN ──────
+    // ── Role guard: shared internal layout for OPERASIONAL/CEO/SUPERADMIN/MANAGEMENT ──────
     var _opsRole = (guardUser.role_code || guardUser.level_code || guardUser.level || '').toString().toUpperCase();
-    if (_opsRole !== 'OPERASIONAL' && _opsRole !== 'CEO' && _opsRole !== 'SUPERADMIN') {
-        var _opsRedirect = { 'COMPLIANCE': '/compliance/dashboard', 'CLIENT': '/client/dashboard' };
+    if (_opsRole !== 'OPERASIONAL' && _opsRole !== 'CEO' && _opsRole !== 'SUPERADMIN' && _opsRole !== 'MANAGEMENT' && _opsRole !== 'ADMIN') {
+        var _opsRedirect = { 'COMPLIANCE': '/compliance/dashboard', 'CLIENT': '/client/dashboard', 'MANAGEMENT': '/management/dashboard-customers' };
         window.location.href = _opsRedirect[_opsRole] || '/account/login';
         return;
     }
@@ -52,12 +52,18 @@
         '/ops/subscriptions'          : { activeKey: 'subscriptions' },
         '/ops/subscriptions-create'   : { activeKey: 'subscriptions' },
         '/ops/subscriptions-edit'     : { activeKey: 'subscriptions' },
+        '/management/dashboard-customers': { activeKey: 'management-dashboard' },
+        '/management/dashboard-packages': { activeKey: 'management-packages' },
     };
 
     const currentPath = window.location.pathname;
-    const route = ROUTES[currentPath] || {};
+    const route = ROUTES[currentPath] ||
+        (currentPath.startsWith('/dashboard/customer/') ? { activeKey: 'management-dashboard' } :
+            (currentPath.startsWith('/dashboard/packages/') ? { activeKey: 'management-packages' } : {}));
     const activeKey  = route.activeKey  || '';
     const parentKey  = route.parentKey  || '';
+    const canOpenManagement = _opsRole === 'MANAGEMENT' || _opsRole === 'SUPERADMIN' || _opsRole === 'ADMIN';
+    const canOpenPackageSales = _opsRole === 'MANAGEMENT' || _opsRole === 'ADMIN';
 
     // Helper: mark a link active
     function isActive(key) {
@@ -95,6 +101,20 @@
                 <span class="link-text">Dashboard</span>
             </a>
         </li>
+
+        ${canOpenManagement ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-dashboard')}" href="/management/dashboard-customers">
+                <i class="fa-solid fa-chart-line icon-left"></i>
+                <span class="link-text">Customer Churn</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenPackageSales ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-packages')}" href="/management/dashboard-packages">
+                <i class="fa-solid fa-cubes icon-left"></i>
+                <span class="link-text">Package Sales</span>
+            </a>
+        </li>` : ''}
 
         <!-- Notification (expandable) -->
         <li class="nav-item nav-item-group">
@@ -177,6 +197,7 @@
                 <li><h6 class="dropdown-header">Pilih Simulasi Peran</h6></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('OPERASIONAL')"><i class="fa-solid fa-cogs me-2"></i>Operasional</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('COMPLIANCE')"><i class="fa-solid fa-shield-halved me-2"></i>Compliance</a></li>
+                <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('MANAGEMENT')"><i class="fa-solid fa-chart-line me-2"></i>Management</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('CEO')"><i class="fa-solid fa-briefcase me-2"></i>CEO</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('CLIENT')"><i class="fa-solid fa-user me-2"></i>Client</a></li>
             </ul>

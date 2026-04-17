@@ -277,8 +277,14 @@ func withRolesAuth(roles []string, h http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		// SUPERADMIN and CEO bypass role list check
-		if user.RoleCode == "SUPERADMIN" || user.RoleCode == "CEO" {
+		isPackageDashboardPath := strings.HasPrefix(r.URL.Path, "/api/dashboard/packages") ||
+			strings.HasPrefix(r.URL.Path, "/api/dashboard/package/")
+
+		// SUPERADMIN bypasses role list check globally, except strict package-dashboard APIs.
+		// CEO bypass does not apply to management dashboard APIs.
+		if !isPackageDashboardPath &&
+			(user.RoleCode == "SUPERADMIN" ||
+				(user.RoleCode == "CEO" && !strings.HasPrefix(r.URL.Path, "/api/dashboard/"))) {
 			r.Header.Set("X-User-Role", user.RoleCode)
 			r.Header.Set("X-User-ID", user.ID)
 			r.Header.Set("X-User-Email", user.Email)
@@ -453,6 +459,29 @@ func main() {
 	// /compliance/* → Only COMPLIANCE, SUPERADMIN
 	http.HandleFunc("/compliance/", withRoleAuth(serveFrontendPage(frontendDir, "compliance", "dashboard")))
 
+	// /management/* → Only MANAGEMENT/Admin
+	http.HandleFunc("/management/", withRoleAuth(serveFrontendPage(frontendDir, "management", "dashboard-customers")))
+
+	// /dashboard/customer/{id} → customer detail page for management
+	http.HandleFunc("/dashboard/customer/", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		detailFile := filepath.Join(frontendDir, "management", "customer-detail.html")
+		if _, err := os.Stat(detailFile); err == nil {
+			http.ServeFile(w, r, detailFile)
+			return
+		}
+		http.Error(w, "Page not found", http.StatusNotFound)
+	}))
+
+	// /dashboard/packages/{id} → package detail page for management
+	http.HandleFunc("/dashboard/packages/", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		detailFile := filepath.Join(frontendDir, "management", "package-detail.html")
+		if _, err := os.Stat(detailFile); err == nil {
+			http.ServeFile(w, r, detailFile)
+			return
+		}
+		http.Error(w, "Page not found", http.StatusNotFound)
+	}))
+
 	// ========================================
 	// 4. Account pages (no role auth, just serve HTML)
 	// ========================================
@@ -597,6 +626,28 @@ func main() {
 	))
 	log.Printf("[GW] Protected API: /api/admin/orders -> %s (CEO/SUPERADMIN/OPERASIONAL)", ordersTarget)
 
+	// --- MANAGEMENT Dashboard API (role-protected) ---
+	dashboardTarget := getRouteTarget("/api/dashboard/customers")
+	if dashboardTarget == "" {
+		dashboardTarget = "http://management-service.railway.internal:5006"
+	}
+	http.HandleFunc("/api/dashboard/customers", withRolesAuth([]string{"MANAGEMENT", "SUPERADMIN", "ADMIN"},
+		createProxyHandler(dashboardTarget, true),
+	))
+	http.HandleFunc("/api/dashboard/customer/", withRolesAuth([]string{"MANAGEMENT", "SUPERADMIN", "ADMIN"},
+		createProxyHandler(dashboardTarget, true),
+	))
+	http.HandleFunc("/api/dashboard/packages", withRolesAuth([]string{"MANAGEMENT", "ADMIN"},
+		createProxyHandler(dashboardTarget, true),
+	))
+	http.HandleFunc("/api/dashboard/package/", withRolesAuth([]string{"MANAGEMENT", "ADMIN"},
+		createProxyHandler(dashboardTarget, true),
+	))
+	log.Printf("[GW] Protected API: /api/dashboard/customers -> %s (MANAGEMENT/SUPERADMIN)", dashboardTarget)
+	log.Printf("[GW] Protected API: /api/dashboard/customer/* -> %s (MANAGEMENT/SUPERADMIN)", dashboardTarget)
+	log.Printf("[GW] Protected API: /api/dashboard/packages -> %s (MANAGEMENT/ADMIN)", dashboardTarget)
+	log.Printf("[GW] Protected API: /api/dashboard/package/* -> %s (MANAGEMENT/ADMIN)", dashboardTarget)
+
 	// --- KYC Client API (role-protected) - CLIENT can access their own KYC ---
 	kycClientTarget := getRouteTarget("/api/kyc/")
 	if kycClientTarget == "" {
@@ -613,7 +664,8 @@ func main() {
 			// Skip routes already registered above
 			if strings.HasPrefix(route.Path, "/api/admin/") ||
 				strings.HasPrefix(route.Path, "/api/subscription/") ||
-				strings.HasPrefix(route.Path, "/api/kyc") {
+				strings.HasPrefix(route.Path, "/api/kyc") ||
+				strings.HasPrefix(route.Path, "/api/dashboard/") {
 				continue
 			}
 			routeCopy := route // capture loop variable
@@ -651,6 +703,8 @@ func main() {
 	fmt.Printf("    Ops:        http://localhost:%s/ops/dashboard\n", port)
 	fmt.Printf("    Client:     http://localhost:%s/client/dashboard\n", port)
 	fmt.Printf("    Compliance: http://localhost:%s/compliance/dashboard\n", port)
+	fmt.Printf("    Management: http://localhost:%s/management/dashboard-customers\n", port)
+	fmt.Printf("    Packages:   http://localhost:%s/management/dashboard-packages\n", port)
 	fmt.Println("  Login:        http://localhost:" + port + "/account/login")
 	fmt.Println("=========================================")
 
@@ -665,6 +719,8 @@ func redirectByRole(roleCode string) string {
 		return "/ops/dashboard"
 	case "COMPLIANCE":
 		return "/compliance/dashboard"
+	case "MANAGEMENT", "ADMIN":
+		return "/management/dashboard-customers"
 	case "CLIENT":
 		return "/client/dashboard"
 	case "SUPERADMIN":
