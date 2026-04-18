@@ -72,6 +72,7 @@ func Init(app *core.App,
 	// ==============================
 	app.Router.HandleFunc("POST /api/kyc/submit", kycController.Submit)
 	app.Router.HandleFunc("GET /api/kyc/status", kycController.Status)
+	app.Router.HandleFunc("PUT /api/kyc/resubmit", kycController.Resubmit)
 
 	// ==============================
 	// 8. Admin KYC Routes (Protected via Gateway Auth)

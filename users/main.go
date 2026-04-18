@@ -137,6 +137,7 @@ func main() {
 	app.RegisterJob("assume_role", loginService.ProcessAssumeRoleJob)
 	app.RegisterJob("kyc_submit", kycService.ProcessKYCSubmitJob)
 	app.RegisterJob("kyc_status", kycService.ProcessKYCStatusJob)
+	app.RegisterJob("kyc_resubmit", kycService.ProcessKYCResubmitJob)
 	app.RegisterJob("admin_kyc_list", kycService.ProcessAdminKYCListJob)
 	app.RegisterJob("admin_kyc_detail", kycService.ProcessAdminKYCDetailJob)
 	app.RegisterJob("admin_kyc_review", kycService.ProcessAdminKYCReviewJob)

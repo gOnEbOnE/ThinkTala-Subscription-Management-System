@@ -171,3 +171,103 @@ func (c *Controller) Status(w http.ResponseWriter, r *http.Request) {
 		"kyc":             kycStatus,
 	})
 }
+
+// Resubmit menangani PUT /api/kyc/resubmit — PBI-8
+func (c *Controller) Resubmit(w http.ResponseWriter, r *http.Request) {
+	// 1. Ambil user_id dari header
+	userID := r.Header.Get("X-User-ID")
+	if userID == "" {
+		if ctxUser := r.Context().Value("current_user"); ctxUser != nil {
+			if cu, ok := ctxUser.(resp.CurrentUser); ok {
+				userID = cu.ID
+			}
+		}
+	}
+
+	if userID == "" {
+		resp.ApiJSON(w, r, http.StatusUnauthorized, false, "Sesi tidak valid, silakan login kembali", nil)
+		return
+	}
+
+	// 2. Parse multipart form (max 5MB)
+	if err := r.ParseMultipartForm(5 << 20); err != nil {
+		resp.ApiJSON(w, r, http.StatusUnprocessableEntity, false, "Gagal memproses form", nil)
+		return
+	}
+
+	file, header, err := r.FormFile("ktp_image")
+	if err != nil {
+		resp.ApiJSON(w, r, http.StatusUnprocessableEntity, false, "File KTP tidak ditemukan", nil)
+		return
+	}
+	defer file.Close()
+
+	// PBI-8: File size validation (max 5MB)
+	const maxSize = int64(5 * 1024 * 1024)
+	if header.Size > maxSize {
+		resp.ApiJSON(w, r, http.StatusBadRequest, false, "Ukuran file terlalu besar (Max: 5 MB)", nil)
+		return
+	}
+
+	// PBI-8: File type validation (only JPG/PNG)
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+	allowedExts := map[string]string{".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png"}
+	mimeType, ok := allowedExts[ext]
+	if !ok {
+		resp.ApiJSON(w, r, http.StatusBadRequest, false, "Tipe file tidak diizinkan. Hanya boleh: jpg, jpeg, png", nil)
+		return
+	}
+	if ct := mime.TypeByExtension(ext); ct != "" {
+		mimeType = ct
+	}
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		resp.ApiJSON(w, r, http.StatusInternalServerError, false, "Gagal membaca file KTP", nil)
+		return
+	}
+	filename := "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(fileBytes)
+
+	// 3. Ambil field form lainnya
+	fullName := strings.TrimSpace(r.FormValue("full_name"))
+	nik := strings.TrimSpace(r.FormValue("nik"))
+	address := strings.TrimSpace(r.FormValue("address"))
+	birthdate := strings.TrimSpace(r.FormValue("birthdate"))
+	phone := strings.TrimSpace(r.FormValue("phone"))
+
+	// 4. Dispatch ke service via worker pool
+	payload := map[string]any{
+		"user_id":   userID,
+		"full_name": fullName,
+		"nik":       nik,
+		"address":   address,
+		"birthdate": birthdate,
+		"phone":     phone,
+		"ktp_image": filename,
+	}
+
+	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "kyc_resubmit", payload, concurrency.PriorityHigh)
+	if err != nil {
+		errMsg := err.Error()
+
+		if strings.HasPrefix(errMsg, "BAD_REQUEST:") {
+			resp.ApiJSON(w, r, http.StatusBadRequest, false, strings.TrimPrefix(errMsg, "BAD_REQUEST:"), nil)
+			return
+		}
+		if strings.HasPrefix(errMsg, "DUPLICATE_NIK:") {
+			resp.ApiJSON(w, r, http.StatusConflict, false, strings.TrimPrefix(errMsg, "DUPLICATE_NIK:"), nil)
+			return
+		}
+
+		resp.ApiJSON(w, r, http.StatusUnprocessableEntity, false, errMsg, nil)
+		return
+	}
+
+	// 5. Sukses → 200 OK, instruct client to clear session
+	kycResult := result.(KYCSubmitResult)
+	resp.ApiJSON(w, r, http.StatusOK, true, kycResult.Message, map[string]any{
+		"status":        kycResult.Status,
+		"clear_session": true,
+	})
+}
+

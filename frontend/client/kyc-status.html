@@ -134,14 +134,21 @@
                         <div class="flex-grow-1">
                             <h6 class="fw-bold mb-2" style="color: #ef4444;">Pengajuan KYC Ditolak</h6>
                             <p class="mb-3" style="color: var(--text-muted);">
-                                <!-- <strong>Alasan Penolakan:</strong><br> -->
                                 <span id="rejectionReason">-</span>
                             </p>
-                            <button class="btn btn-sm btn-danger" onclick="window.location.href='/client/kyc'">
-                                <i class="fa-solid fa-pen-to-square me-2"></i>Perbaiki Data KYC
-                            </button>
+                            <a href="/client/kyc-resubmit" id="btnPerbaikiData" class="btn btn-sm btn-danger">
+                                <i class="fa-solid fa-pen-to-square me-2"></i>Perbaiki Data
+                            </a>
                         </div>
                     </div>
+                </div>
+
+                <!-- Perbaiki Data button (disabled when not rejected) -->
+                <div id="disabledPerbaikiContainer" class="mt-3" style="display: none;">
+                    <button class="btn btn-sm btn-danger" disabled title="Tombol ini hanya aktif saat status KYC ditolak">
+                        <i class="fa-solid fa-pen-to-square me-2"></i>Perbaiki Data
+                    </button>
+                    <small class="text-muted d-block mt-1">Tombol ini hanya aktif saat pengajuan KYC Anda ditolak.</small>
                 </div>
 
                 <!-- KYC Data Details -->
@@ -305,6 +312,8 @@
                 statusBadge.innerHTML = '<i class="fa-solid fa-clock"></i><span>Pending</span>';
                 statusMessage.className = 'alert alert-warning mb-0';
                 statusText.textContent = 'Dokumen KYC Anda sedang ditinjau oleh tim kami. Harap menunggu proses verifikasi.';
+                // PBI-8: Show disabled Perbaiki Data button
+                document.getElementById('disabledPerbaikiContainer').style.display = 'block';
             } else if (status === 'approved') {
                 statusBadge.className = 'status-badge approved';
                 statusBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i><span>Approved</span>';
@@ -317,9 +326,9 @@
                 statusMessage.className = 'alert alert-danger mb-0';
                 statusText.textContent = 'Pengajuan KYC Anda ditolak. Silakan perbaiki data sesuai alasan penolakan di bawah.';
                 
-                // Show rejection alert
+                // Show rejection alert with fallback message
                 document.getElementById('rejectionAlert').style.display = 'block';
-                document.getElementById('rejectionReason').textContent = rejectionReason || '';
+                document.getElementById('rejectionReason').textContent = rejectionReason || 'Pengajuan Anda sebelumnya ditolak.';
             }
 
             // Fill in personal data

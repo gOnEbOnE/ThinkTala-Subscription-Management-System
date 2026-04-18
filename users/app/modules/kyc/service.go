@@ -270,6 +270,88 @@ func (s *Service) ProcessKYCStatusJob(ctx context.Context, payload any) (any, er
 	}, nil
 }
 
+// ProcessKYCResubmitJob — PBI-8: handler untuk dispatcher job "kyc_resubmit"
+func (s *Service) ProcessKYCResubmitJob(ctx context.Context, payload any) (any, error) {
+	data, ok := payload.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload format")
+	}
+
+	userID, _ := data["user_id"].(string)
+	fullName, _ := data["full_name"].(string)
+	nik, _ := data["nik"].(string)
+	address, _ := data["address"].(string)
+	birthdate, _ := data["birthdate"].(string)
+	phone, _ := data["phone"].(string)
+	ktpImage, _ := data["ktp_image"].(string)
+
+	// ========== VALIDASI ==========
+	fullName = strings.TrimSpace(fullName)
+	nik = strings.TrimSpace(nik)
+	address = strings.TrimSpace(address)
+	birthdate = strings.TrimSpace(birthdate)
+	phone = strings.TrimSpace(phone)
+
+	if fullName == "" || nik == "" || address == "" || birthdate == "" || phone == "" || ktpImage == "" {
+		return nil, fmt.Errorf("semua field wajib diisi (nama, NIK, alamat, tanggal lahir, telepon, KTP)")
+	}
+
+	// Validasi NIK
+	nikRegex := regexp.MustCompile(`^\d{16}$`)
+	if !nikRegex.MatchString(nik) {
+		return nil, fmt.Errorf("NIK harus 16 digit angka")
+	}
+
+	// Validasi tanggal lahir
+	_, err := time.Parse("2006-01-02", birthdate)
+	if err != nil {
+		return nil, fmt.Errorf("format tanggal lahir tidak valid (gunakan YYYY-MM-DD)")
+	}
+
+	// Validasi nomor telepon
+	phoneRegex := regexp.MustCompile(`^\+?\d{10,15}$`)
+	cleanPhone := strings.ReplaceAll(phone, " ", "")
+	cleanPhone = strings.ReplaceAll(cleanPhone, "-", "")
+	if !phoneRegex.MatchString(cleanPhone) {
+		return nil, fmt.Errorf("nomor telepon tidak valid (10-15 digit)")
+	}
+
+	// Cek duplikat NIK untuk user lain
+	nikExistsForOther, err := s.repo.NIKExistsForOtherUser(ctx, nik, userID)
+	if err != nil {
+		return nil, fmt.Errorf("gagal mengecek NIK: %v", err)
+	}
+	if nikExistsForOther {
+		return nil, fmt.Errorf("DUPLICATE_NIK:NIK sudah terdaftar di sistem")
+	}
+
+	// ========== RESUBMIT (TRANSACTIONAL) ==========
+	_, err = s.repo.ResubmitKYC(ctx, userID, fullName, nik, address, birthdate, cleanPhone, ktpImage)
+	if err != nil {
+		errMsg := err.Error()
+		if errMsg == "NO_KYC_RECORD" {
+			return nil, fmt.Errorf("BAD_REQUEST:Anda belum memiliki pengajuan KYC")
+		}
+		if strings.HasPrefix(errMsg, "STATUS_NOT_REJECTED:") {
+			currentStatus := strings.TrimPrefix(errMsg, "STATUS_NOT_REJECTED:")
+			if currentStatus == "pending" {
+				return nil, fmt.Errorf("BAD_REQUEST:Pengajuan KYC Anda masih dalam proses review dan tidak dapat diubah")
+			}
+			if currentStatus == "approved" {
+				return nil, fmt.Errorf("BAD_REQUEST:Pengajuan KYC Anda sudah disetujui dan tidak dapat diubah")
+			}
+			return nil, fmt.Errorf("BAD_REQUEST:Status KYC saat ini tidak memungkinkan resubmit (status: %s)", currentStatus)
+		}
+		return nil, fmt.Errorf("gagal memperbarui data KYC: %v", err)
+	}
+
+	return KYCSubmitResult{
+		ID:      "",
+		Status:  "pending",
+		Message: "Dokumen KYC berhasil dikirim ulang dan sedang dalam proses verifikasi",
+	}, nil
+}
+
 // ========== ADMIN SERVICE METHODS ==========
 
 // ProcessAdminKYCListJob — handler untuk dispatcher job "admin_kyc_list"

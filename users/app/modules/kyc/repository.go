@@ -18,6 +18,7 @@ type Repository interface {
 	GetByUserID(ctx context.Context, userID string) (*KYCSubmission, error)
 	GetByID(ctx context.Context, id string) (*KYCSubmission, error)
 	UpdateResubmission(ctx context.Context, id string, fullName string, nik string, address string, birthdate string, phone string, ktpImage string) error
+	ResubmitKYC(ctx context.Context, userID string, fullName string, nik string, address string, birthdate string, phone string, ktpImage string) (string, error)
 
 	// Admin methods
 	ListAll(ctx context.Context, status string, search string, page int, limit int) ([]KYCListItem, int, error)
@@ -135,6 +136,56 @@ func (r *kycRepo) UpdateResubmission(ctx context.Context, id string, fullName st
 		WHERE id = $7
 	`, fullName, nik, address, birthdate, phone, ktpImage, id)
 	return err
+}
+
+// ResubmitKYC — PBI-8: Transactional resubmit (check status=rejected AND update in one atomic operation)
+// Returns (oldKTPImage, error). Returns specific error strings for non-rejected statuses.
+func (r *kycRepo) ResubmitKYC(ctx context.Context, userID string, fullName string, nik string, address string, birthdate string, phone string, ktpImage string) (string, error) {
+	tx, err := r.db.Pool.Begin(ctx)
+	if err != nil {
+		return "", fmt.Errorf("gagal memulai transaksi: %v", err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Lock the row and check current status
+	var kycID, currentStatus, oldKTPImage string
+	err = tx.QueryRow(ctx, `
+		SELECT id, status, ktp_image
+		FROM kyc_submissions
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+		LIMIT 1
+		FOR UPDATE
+	`, userID).Scan(&kycID, &currentStatus, &oldKTPImage)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", fmt.Errorf("NO_KYC_RECORD")
+		}
+		return "", err
+	}
+
+	if currentStatus != "rejected" {
+		return "", fmt.Errorf("STATUS_NOT_REJECTED:%s", currentStatus)
+	}
+
+	// Update the record
+	_, err = tx.Exec(ctx, `
+		UPDATE kyc_submissions
+		SET full_name = $1, nik = $2, address = $3, birthdate = $4, phone = $5,
+		    ktp_image = $6, status = 'pending', reject_reason = NULL,
+		    reviewed_by = NULL, reviewed_at = NULL, updated_at = CURRENT_TIMESTAMP
+		WHERE id = $7
+	`, fullName, nik, address, birthdate, phone, ktpImage, kycID)
+	if err != nil {
+		return "", fmt.Errorf("gagal memperbarui data KYC: %v", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return "", fmt.Errorf("gagal commit transaksi: %v", err)
+	}
+
+	return oldKTPImage, nil
 }
 
 // ========== ADMIN METHODS ==========
