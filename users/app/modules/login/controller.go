@@ -102,6 +102,11 @@ func (c *Controller) Auth(w http.ResponseWriter, r *http.Request) {
 	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "auth", payload, concurrency.PriorityHigh)
 	if err != nil {
 		fmt.Printf("[LOGIN ERROR] %v\n", err)
+		// PBI-55: Deactivated users get a specific message
+		if err.Error() == "ACCOUNT_DEACTIVATED" {
+			c.Response.JSON(w, r, map[string]any{"status": false, "msg": "Akun Anda telah dinonaktifkan. Hubungi administrator."})
+			return
+		}
 		c.Response.JSON(w, r, map[string]any{"status": false, "msg": err.Error()})
 		return
 	}

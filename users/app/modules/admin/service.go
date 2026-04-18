@@ -223,3 +223,176 @@ func (s *Service) ProcessGetUserDetailJob(ctx context.Context, payload any) (any
 
 	return user, nil
 }
+
+// ProcessEditUserJob — dipanggil oleh worker untuk edit user internal (PBI-54)
+func (s *Service) ProcessEditUserJob(ctx context.Context, payload any) (any, error) {
+	data, ok := payload.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload format")
+	}
+
+	userID, _ := data["user_id"].(string)
+	performedByID, _ := data["performed_by"].(string)
+	newName, hasName := data["full_name"].(string)
+	newRole, hasRole := data["role"].(string)
+
+	if userID == "" {
+		return nil, fmt.Errorf("User ID diperlukan")
+	}
+
+	// Check user exists
+	user, err := s.repo.FindUserByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("Gagal mengambil data user")
+	}
+	if user == nil {
+		return nil, fmt.Errorf("NOT_FOUND")
+	}
+
+	changes := []string{}
+
+	// Update name if provided
+	if hasName && newName != "" {
+		if err := s.repo.UpdateUserName(ctx, userID, newName); err != nil {
+			log.Printf("[ADMIN] UpdateUserName failed: %v", err)
+			return nil, fmt.Errorf("Gagal mengupdate nama")
+		}
+		changes = append(changes, fmt.Sprintf("name: %s -> %s", user.FullName, newName))
+	}
+
+	// Update role if provided
+	if hasRole && newRole != "" {
+		roleUpper := strings.ToUpper(newRole)
+		if !AllowedRoles[roleUpper] {
+			return nil, fmt.Errorf("Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAJEMEN, ADMIN_CS")
+		}
+		roleID, err := s.repo.FindRoleByCode(ctx, roleUpper)
+		if err != nil || roleID == "" {
+			return nil, fmt.Errorf("Role '%s' tidak ditemukan di database", roleUpper)
+		}
+		if err := s.repo.UpdateUserRole(ctx, userID, roleID); err != nil {
+			log.Printf("[ADMIN] UpdateUserRole failed: %v", err)
+			return nil, fmt.Errorf("Gagal mengupdate role")
+		}
+		changes = append(changes, fmt.Sprintf("role: %s -> %s", user.Role, roleUpper))
+	}
+
+	// Audit log
+	details := strings.Join(changes, "; ")
+	_ = s.repo.InsertAuditLog(ctx, "UPDATE_USER", userID, performedByID, details)
+	log.Printf("[ADMIN] action=UPDATE_USER admin=%s target=%s changes=%s", performedByID, userID, details)
+
+	// Return updated user
+	updated, err := s.repo.FindUserByID(ctx, userID)
+	if err != nil || updated == nil {
+		return nil, fmt.Errorf("Gagal mengambil data user setelah update")
+	}
+
+	return updated, nil
+}
+
+// ProcessDeactivateUserJob — dipanggil oleh worker untuk menonaktifkan user (PBI-55)
+func (s *Service) ProcessDeactivateUserJob(ctx context.Context, payload any) (any, error) {
+	data, ok := payload.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload format")
+	}
+
+	userID, _ := data["user_id"].(string)
+	performedByID, _ := data["performed_by"].(string)
+
+	if userID == "" {
+		return nil, fmt.Errorf("User ID diperlukan")
+	}
+
+	// Check user exists
+	user, err := s.repo.FindUserByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("Gagal mengambil data user")
+	}
+	if user == nil {
+		return nil, fmt.Errorf("NOT_FOUND")
+	}
+
+	// Check if target is SUPERADMIN — cannot deactivate SUPERADMIN
+	roleCode, err := s.repo.GetUserRoleCode(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("Gagal memeriksa role user")
+	}
+	if strings.ToUpper(roleCode) == "SUPERADMIN" {
+		return nil, fmt.Errorf("SUPERADMIN_PROTECTED")
+	}
+
+	// Update status to inactive
+	if err := s.repo.UpdateUserStatus(ctx, userID, "inactive"); err != nil {
+		log.Printf("[ADMIN] DeactivateUser failed: %v", err)
+		return nil, fmt.Errorf("Gagal menonaktifkan akun")
+	}
+
+	// Audit log
+	_ = s.repo.InsertAuditLog(ctx, "DEACTIVATE_USER", userID, performedByID, fmt.Sprintf("User %s (%s) dinonaktifkan", user.FullName, user.Email))
+	log.Printf("[ADMIN] action=DEACTIVATE_USER admin=%s target=%s", performedByID, userID)
+
+	// Dispatch ACCOUNT_DEACTIVATED event to Notification Service (async)
+	go dispatchNotification("ACCOUNT_DEACTIVATED", "email", user.Email, map[string]string{
+		"name":  user.FullName,
+		"email": user.Email,
+	})
+
+	// Return updated user
+	updated, err := s.repo.FindUserByID(ctx, userID)
+	if err != nil || updated == nil {
+		return nil, fmt.Errorf("Gagal mengambil data user setelah update")
+	}
+
+	return updated, nil
+}
+
+// ProcessReactivateUserJob — dipanggil oleh worker untuk mengaktifkan kembali user (PBI-55)
+func (s *Service) ProcessReactivateUserJob(ctx context.Context, payload any) (any, error) {
+	data, ok := payload.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload format")
+	}
+
+	userID, _ := data["user_id"].(string)
+	performedByID, _ := data["performed_by"].(string)
+
+	if userID == "" {
+		return nil, fmt.Errorf("User ID diperlukan")
+	}
+
+	// Check user exists
+	user, err := s.repo.FindUserByID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("Gagal mengambil data user")
+	}
+	if user == nil {
+		return nil, fmt.Errorf("NOT_FOUND")
+	}
+
+	// Update status to active
+	if err := s.repo.UpdateUserStatus(ctx, userID, "active"); err != nil {
+		log.Printf("[ADMIN] ReactivateUser failed: %v", err)
+		return nil, fmt.Errorf("Gagal mengaktifkan kembali akun")
+	}
+
+	// Audit log
+	_ = s.repo.InsertAuditLog(ctx, "REACTIVATE_USER", userID, performedByID, fmt.Sprintf("User %s (%s) diaktifkan kembali", user.FullName, user.Email))
+	log.Printf("[ADMIN] action=REACTIVATE_USER admin=%s target=%s", performedByID, userID)
+
+	// Dispatch ACCOUNT_REACTIVATED event to Notification Service (async)
+	go dispatchNotification("ACCOUNT_REACTIVATED", "email", user.Email, map[string]string{
+		"name":  user.FullName,
+		"email": user.Email,
+	})
+
+	// Return updated user
+	updated, err := s.repo.FindUserByID(ctx, userID)
+	if err != nil || updated == nil {
+		return nil, fmt.Errorf("Gagal mengambil data user setelah update")
+	}
+
+	return updated, nil
+}
+

@@ -88,5 +88,7 @@ func Init(app *core.App,
 	app.Router.HandleFunc("GET /api/admin/users", adminController.GetUsers)
 	app.Router.HandleFunc("GET /api/admin/users/{id}", adminController.GetUserDetail)
 	app.Router.HandleFunc("PUT /api/admin/users/{id}", adminController.EditUser)
+	app.Router.HandleFunc("PATCH /api/admin/users/{id}/deactivate", adminController.DeactivateUser)
+	app.Router.HandleFunc("PATCH /api/admin/users/{id}/reactivate", adminController.ReactivateUser)
 
 }

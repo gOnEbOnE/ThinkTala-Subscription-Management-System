@@ -59,6 +59,11 @@ func (c *Controller) ApiAuth(w http.ResponseWriter, r *http.Request) {
 	// Dispatch ke worker/service
 	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "auth", payload, concurrency.PriorityHigh)
 	if err != nil {
+		// PBI-55: Deactivated users must get 403 (not 401)
+		if err.Error() == "ACCOUNT_DEACTIVATED" {
+			resp.ApiJSON(w, r, http.StatusForbidden, false, "Akun Anda telah dinonaktifkan. Hubungi administrator.", nil)
+			return
+		}
 		// Menggunakan 401 Unauthorized jika gagal login
 		resp.ApiJSON(w, r, http.StatusUnauthorized, false, err.Error(), nil)
 		return

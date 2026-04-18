@@ -17,6 +17,11 @@ type Repository interface {
 	GetInternalUsers(ctx context.Context, params GetUsersParams) ([]UserListItem, error)
 	CountInternalUsers(ctx context.Context, params GetUsersParams) (int, error)
 	FindUserByID(ctx context.Context, userID string) (*UserDetail, error)
+	UpdateUserName(ctx context.Context, userID, name string) error
+	UpdateUserRole(ctx context.Context, userID, roleID string) error
+	UpdateUserStatus(ctx context.Context, userID, status string) error
+	GetUserRoleCode(ctx context.Context, userID string) (string, error)
+	InsertAuditLog(ctx context.Context, actionType, targetUserID, performedByID, details string) error
 }
 
 type adminRepo struct {
@@ -201,3 +206,56 @@ func (r *adminRepo) FindUserByID(ctx context.Context, userID string) (*UserDetai
 	}
 	return &u, nil
 }
+
+// UpdateUserName mengupdate nama user (PBI-54)
+func (r *adminRepo) UpdateUserName(ctx context.Context, userID, name string) error {
+	_, err := r.db.Pool.Exec(ctx, `
+		UPDATE users SET name = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1
+	`, userID, name)
+	return err
+}
+
+// UpdateUserRole mengupdate role user berdasarkan roleID (PBI-54)
+func (r *adminRepo) UpdateUserRole(ctx context.Context, userID, roleID string) error {
+	_, err := r.db.Pool.Exec(ctx, `
+		UPDATE users SET role_id = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1
+	`, userID, roleID)
+	return err
+}
+
+// UpdateUserStatus mengupdate status user (PBI-55)
+func (r *adminRepo) UpdateUserStatus(ctx context.Context, userID, status string) error {
+	_, err := r.db.Pool.Exec(ctx, `
+		UPDATE users SET status = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1
+	`, userID, status)
+	return err
+}
+
+// GetUserRoleCode mengambil role code user berdasarkan ID (PBI-55)
+func (r *adminRepo) GetUserRoleCode(ctx context.Context, userID string) (string, error) {
+	var roleCode string
+	err := r.db.Pool.QueryRow(ctx, `
+		SELECT r.code FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id = $1
+	`, userID).Scan(&roleCode)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", nil
+		}
+		return "", err
+	}
+	return roleCode, nil
+}
+
+// InsertAuditLog menyimpan audit log ke tabel audit_logs (PBI-54)
+func (r *adminRepo) InsertAuditLog(ctx context.Context, actionType, targetUserID, performedByID, details string) error {
+	_, err := r.db.Pool.Exec(ctx, `
+		INSERT INTO audit_logs (action_type, target_user_id, performed_by, details, created_at)
+		VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
+	`, actionType, targetUserID, performedByID, details)
+	if err != nil {
+		// Log but don't fail the main operation
+		fmt.Printf("[ADMIN] audit_log insert failed: %v\n", err)
+	}
+	return nil
+}
+

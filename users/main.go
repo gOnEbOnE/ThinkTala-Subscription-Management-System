@@ -144,6 +144,8 @@ func main() {
 	app.RegisterJob("admin_get_users", adminService.ProcessGetUsersJob)
 	app.RegisterJob("admin_get_user_detail", adminService.ProcessGetUserDetailJob)
 	app.RegisterJob("admin_edit_user", adminService.ProcessEditUserJob)
+	app.RegisterJob("admin_deactivate_user", adminService.ProcessDeactivateUserJob)
+	app.RegisterJob("admin_reactivate_user", adminService.ProcessReactivateUserJob)
 
 	// ============================================================
 	// 3. ROUTING

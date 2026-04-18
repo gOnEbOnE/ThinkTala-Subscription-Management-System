@@ -185,3 +185,168 @@ func (c *Controller) GetUserDetail(w http.ResponseWriter, r *http.Request) {
 	// 4. Return success
 	ehttp.ApiJSON(w, r, http.StatusOK, true, "Berhasil mengambil data user", result)
 }
+
+// EditUser — PUT /api/admin/users/{id} (edit user internal oleh Superadmin, PBI-54)
+func (c *Controller) EditUser(w http.ResponseWriter, r *http.Request) {
+	// 1. Cek role: hanya SUPERADMIN
+	userRole := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Role")))
+	userLevel := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Level")))
+	if userRole != "SUPERADMIN" && userLevel != "SUPERADMIN" {
+		ehttp.ApiJSON(w, r, http.StatusForbidden, false, "Akses ditolak: hanya Superadmin yang dapat mengedit akun internal", nil)
+		return
+	}
+
+	// 2. Extract user ID
+	userID := strings.TrimSpace(r.PathValue("id"))
+	if userID == "" {
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "User ID diperlukan", nil)
+		return
+	}
+
+	// 3. Parse body
+	if !strings.Contains(r.Header.Get("Content-Type"), "application/json") {
+		ehttp.ApiJSON(w, r, http.StatusUnsupportedMediaType, false, "Content-Type harus application/json", nil)
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+	var input EditUserInput
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&input); err != nil {
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Format JSON tidak valid", nil)
+		return
+	}
+
+	// 4. Validate: at least one field
+	hasName := input.FullName != nil
+	hasRole := input.Role != nil
+
+	if !hasName && !hasRole {
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Minimal satu field (full_name atau role) harus diisi", nil)
+		return
+	}
+
+	// 5. Validate full_name if provided
+	if hasName {
+		trimmed := strings.TrimSpace(*input.FullName)
+		if trimmed == "" {
+			ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Nama lengkap tidak boleh kosong", nil)
+			return
+		}
+		input.FullName = &trimmed
+	}
+
+	// 6. Validate role if provided
+	if hasRole {
+		roleVal := strings.TrimSpace(strings.ToUpper(*input.Role))
+		if !AllowedRoles[roleVal] {
+			ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAJEMEN, ADMIN_CS", nil)
+			return
+		}
+		input.Role = &roleVal
+	}
+
+	// 7. Build payload
+	payload := map[string]any{
+		"user_id":      userID,
+		"performed_by": strings.TrimSpace(r.Header.Get("X-User-ID")),
+	}
+	if hasName {
+		payload["full_name"] = *input.FullName
+	}
+	if hasRole {
+		payload["role"] = *input.Role
+	}
+
+	// 8. Dispatch
+	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_edit_user", payload, concurrency.PriorityHigh)
+	if err != nil {
+		if err.Error() == "NOT_FOUND" {
+			ehttp.ApiJSON(w, r, http.StatusNotFound, false, "Akun tidak ditemukan", nil)
+			return
+		}
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, err.Error(), nil)
+		return
+	}
+
+	ehttp.ApiJSON(w, r, http.StatusOK, true, "Akun berhasil diperbarui", result)
+}
+
+// DeactivateUser — PATCH /api/admin/users/{id}/deactivate (PBI-55)
+func (c *Controller) DeactivateUser(w http.ResponseWriter, r *http.Request) {
+	// 1. Cek role: hanya SUPERADMIN
+	userRole := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Role")))
+	userLevel := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Level")))
+	if userRole != "SUPERADMIN" && userLevel != "SUPERADMIN" {
+		ehttp.ApiJSON(w, r, http.StatusForbidden, false, "Akses ditolak: hanya Superadmin yang dapat menonaktifkan akun", nil)
+		return
+	}
+
+	// 2. Extract user ID
+	userID := strings.TrimSpace(r.PathValue("id"))
+	if userID == "" {
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "User ID diperlukan", nil)
+		return
+	}
+
+	// 3. Build payload
+	payload := map[string]any{
+		"user_id":      userID,
+		"performed_by": strings.TrimSpace(r.Header.Get("X-User-ID")),
+	}
+
+	// 4. Dispatch
+	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_deactivate_user", payload, concurrency.PriorityHigh)
+	if err != nil {
+		if err.Error() == "NOT_FOUND" {
+			ehttp.ApiJSON(w, r, http.StatusNotFound, false, "Akun tidak ditemukan", nil)
+			return
+		}
+		if err.Error() == "SUPERADMIN_PROTECTED" {
+			ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Tidak dapat menonaktifkan akun Superadmin", nil)
+			return
+		}
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, err.Error(), nil)
+		return
+	}
+
+	ehttp.ApiJSON(w, r, http.StatusOK, true, "Akun berhasil dinonaktifkan", result)
+}
+
+// ReactivateUser — PATCH /api/admin/users/{id}/reactivate (PBI-55)
+func (c *Controller) ReactivateUser(w http.ResponseWriter, r *http.Request) {
+	// 1. Cek role: hanya SUPERADMIN
+	userRole := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Role")))
+	userLevel := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Level")))
+	if userRole != "SUPERADMIN" && userLevel != "SUPERADMIN" {
+		ehttp.ApiJSON(w, r, http.StatusForbidden, false, "Akses ditolak: hanya Superadmin yang dapat mengaktifkan kembali akun", nil)
+		return
+	}
+
+	// 2. Extract user ID
+	userID := strings.TrimSpace(r.PathValue("id"))
+	if userID == "" {
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "User ID diperlukan", nil)
+		return
+	}
+
+	// 3. Build payload
+	payload := map[string]any{
+		"user_id":      userID,
+		"performed_by": strings.TrimSpace(r.Header.Get("X-User-ID")),
+	}
+
+	// 4. Dispatch
+	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_reactivate_user", payload, concurrency.PriorityHigh)
+	if err != nil {
+		if err.Error() == "NOT_FOUND" {
+			ehttp.ApiJSON(w, r, http.StatusNotFound, false, "Akun tidak ditemukan", nil)
+			return
+		}
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, err.Error(), nil)
+		return
+	}
+
+	ehttp.ApiJSON(w, r, http.StatusOK, true, "Akun berhasil diaktifkan kembali", result)
+}
+

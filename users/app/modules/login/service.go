@@ -42,6 +42,10 @@ func (s *Service) ProcessLoginJob(ctx context.Context, payload any) (any, error)
 
 	// Cek status user harus 'active'
 	if strings.ToLower(user.Status) != "active" {
+		// PBI-55: Deactivated users get a specific 403 message
+		if strings.ToLower(user.Status) == "inactive" {
+			return nil, fmt.Errorf("ACCOUNT_DEACTIVATED")
+		}
 		return nil, fmt.Errorf("Akun belum aktif. Silakan verifikasi email terlebih dahulu.")
 	}
 
