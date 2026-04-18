@@ -87,5 +87,6 @@ func Init(app *core.App,
 	app.Router.HandleFunc("POST /api/admin/users", adminController.CreateUser)
 	app.Router.HandleFunc("GET /api/admin/users", adminController.GetUsers)
 	app.Router.HandleFunc("GET /api/admin/users/{id}", adminController.GetUserDetail)
+	app.Router.HandleFunc("PUT /api/admin/users/{id}", adminController.EditUser)
 
 }

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Akun Internal | ThinkTala Ops</title>
+    <meta name="description" content="Edit akun internal pengguna ThinkTala">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .edit-user-card {
+            background: var(--bg-card, rgba(30, 32, 48, 0.85));
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 640px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .edit-user-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6C63FF, #00b4d8, #6C63FF);
+            background-size: 200% auto;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+            100% { background-position: 0% center; }
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+
+        .form-header .icon-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(108, 99, 255, 0.15), rgba(0, 180, 216, 0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            border: 1px solid rgba(108, 99, 255, 0.2);
+        }
+
+        .form-header .icon-circle i {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #6C63FF, #00b4d8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-header h4 {
+            color: var(--text-heading, #fff);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .form-header p {
+            color: var(--text-muted, #94a3b8);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .form-label-custom {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-heading, #e2e8f0);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-label-custom i {
+            color: #6C63FF;
+            font-size: 0.75rem;
+        }
+
+        .input-custom {
+            background: rgba(15, 17, 28, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e2e8f0 !important;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.92rem;
+            transition: all 0.25s ease;
+        }
+
+        .input-custom::placeholder {
+            color: #64748b !important;
+            opacity: 0.7;
+        }
+
+        .input-custom:focus {
+            background: rgba(15, 17, 28, 0.8);
+            border-color: rgba(108, 99, 255, 0.5);
+            box-shadow: 0 0 0 4px rgba(108, 99, 255, 0.08);
+            outline: none;
+        }
+
+        .input-custom.is-invalid {
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        .input-custom.is-valid {
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+
+        .input-readonly {
+            background: rgba(15, 17, 28, 0.3) !important;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            color: #64748b !important;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        select.input-custom {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 38px;
+        }
+
+        select.input-custom option {
+            background: #1a1c2e;
+            color: #e2e8f0;
+        }
+
+        .validation-msg {
+            font-size: 0.78rem;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .validation-msg.show {
+            display: block;
+        }
+
+        .validation-msg.error {
+            color: #ef4444;
+        }
+
+        .divider-line {
+            border: none;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+            margin: 28px 0;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #6C63FF, #5A52D5);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            padding: 14px 24px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-save:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(108, 99, 255, 0.25);
+            color: #fff;
+        }
+
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            color: #fff;
+        }
+
+        .btn-save .spinner-border {
+            width: 1rem;
+            height: 1rem;
+            border-width: 2px;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            padding: 14px 24px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 99999;
+        }
+
+        .toast-msg {
+            padding: 14px 20px;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            animation: toastSlideIn 0.35s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .toast-msg.success {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .toast-msg.error {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+
+        @keyframes toastSlideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .skeleton-form .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 400% 100%;
+            animation: skeleton-load 1.5s ease-in-out infinite;
+            border-radius: 10px;
+            height: 48px;
+            width: 100%;
+        }
+
+        .skeleton-form .skeleton-label {
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 400% 100%;
+            animation: skeleton-load 1.5s ease-in-out infinite;
+            border-radius: 6px;
+            height: 16px;
+            width: 120px;
+            margin-bottom: 10px;
+        }
+
+        @keyframes skeleton-load {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .error-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .error-state i {
+            font-size: 3rem;
+            color: #ef4444;
+            margin-bottom: 16px;
+        }
+
+        .read-only-hint {
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .read-only-hint i {
+            font-size: 0.65rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-content">
+        <!-- Breadcrumb -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1" style="font-size: 0.82rem;">
+                        <li class="breadcrumb-item"><a href="/ops/dashboard" class="text-decoration-none" style="color: #00b4d8;">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="/ops/manage-users" class="text-decoration-none" style="color: #00b4d8;">Kelola Akun</a></li>
+                        <li class="breadcrumb-item active" style="color: var(--text-muted);" id="breadcrumbName">Edit Akun</li>
+                    </ol>
+                </nav>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading);">Edit Akun Internal</h4>
+                <small class="text-muted">Perbarui informasi akun internal</small>
+            </div>
+        </div>
+
+        <!-- Loading state -->
+        <div id="loadingState" class="edit-user-card skeleton-form">
+            <div class="form-header">
+                <div style="width:64px;height:64px;border-radius:50%;margin:0 auto 16px;" class="skeleton"></div>
+                <div class="skeleton-label" style="width:160px;margin:0 auto 8px;"></div>
+                <div class="skeleton-label" style="width:240px;margin:0 auto;"></div>
+            </div>
+            <div class="mb-3"><div class="skeleton-label"></div><div class="skeleton"></div></div>
+            <div class="mb-3"><div class="skeleton-label"></div><div class="skeleton"></div></div>
+            <hr class="divider-line">
+            <div class="mb-4"><div class="skeleton-label"></div><div class="skeleton"></div></div>
+            <div class="skeleton" style="height:52px;"></div>
+        </div>
+
+        <!-- Error state -->
+        <div id="errorState" class="edit-user-card" style="display:none;">
+            <div class="error-state">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <h5 class="text-danger" id="errorTitle">Error</h5>
+                <p class="text-muted" id="errorMessage">Terjadi kesalahan</p>
+                <a href="/ops/manage-users" class="btn btn-cancel mt-3" style="width:auto;display:inline-block;">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Daftar
+                </a>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div id="editFormContainer" style="display:none;">
+            <div class="edit-user-card">
+                <div class="form-header">
+                    <div class="icon-circle">
+                        <i class="fa-solid fa-user-pen"></i>
+                    </div>
+                    <h4>Edit Akun</h4>
+                    <p id="formSubtitle">Perbarui data akun internal</p>
+                </div>
+
+                <form id="editUserForm" novalidate autocomplete="off">
+                    <!-- Nama Lengkap -->
+                    <div class="mb-3">
+                        <label class="form-label-custom" for="fullName">
+                            <i class="fa-solid fa-user"></i> Nama Lengkap
+                        </label>
+                        <input type="text" class="form-control input-custom" id="fullName" name="full_name"
+                            placeholder="Masukkan nama lengkap">
+                        <div class="validation-msg" id="fullNameMsg"></div>
+                    </div>
+
+                    <!-- Email (Read-Only) -->
+                    <div class="mb-3">
+                        <label class="form-label-custom" for="email">
+                            <i class="fa-solid fa-envelope"></i> Email
+                        </label>
+                        <input type="email" class="form-control input-custom input-readonly" id="email"
+                            readonly disabled>
+                        <div class="read-only-hint">
+                            <i class="fa-solid fa-lock"></i> Email tidak dapat diubah
+                        </div>
+                    </div>
+
+                    <hr class="divider-line">
+
+                    <!-- Role -->
+                    <div class="mb-4">
+                        <label class="form-label-custom" for="role">
+                            <i class="fa-solid fa-shield-halved"></i> Role
+                        </label>
+                        <select class="form-control input-custom" id="role" name="role">
+                            <option value="OPERASIONAL">Operasional</option>
+                            <option value="COMPLIANCE">Compliance</option>
+                            <option value="MANAJEMEN">Manajemen</option>
+                            <option value="ADMIN_CS">Admin CS</option>
+                        </select>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <a href="#" id="btnCancel" class="btn btn-cancel">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Batal
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-save" id="btnSubmit" disabled>
+                                <i class="fa-solid fa-floppy-disk me-2"></i>Simpan Perubahan
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>Operations Panel v1.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
+    <script>
+        // ============================================================
+        // State
+        // ============================================================
+        let originalData = null; // original user data from API
+        const userId = new URLSearchParams(window.location.search).get('id') || '';
+
+        // DOM refs
+        const fullNameInput = document.getElementById('fullName');
+        const emailInput = document.getElementById('email');
+        const roleSelect = document.getElementById('role');
+        const btnSubmit = document.getElementById('btnSubmit');
+        const form = document.getElementById('editUserForm');
+        const fullNameMsg = document.getElementById('fullNameMsg');
+
+        // ============================================================
+        // Helpers
+        // ============================================================
+        function showMsg(el, text, type) {
+            el.textContent = text;
+            el.className = 'validation-msg show ' + type;
+        }
+
+        function hideMsg(el) {
+            el.className = 'validation-msg';
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
+        function showToast(msg, type) {
+            type = type || 'error';
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast-msg ' + type;
+            var icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+            toast.innerHTML = '<i class="fa-solid ' + icon + '"></i><span>' + escapeHtml(msg) + '</span>';
+            container.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 4000);
+        }
+
+        // ============================================================
+        // Change Detection — enable submit only when values differ
+        // ============================================================
+        function checkForChanges() {
+            if (!originalData) {
+                btnSubmit.disabled = true;
+                return;
+            }
+
+            var currentName = fullNameInput.value.trim();
+            var currentRole = roleSelect.value;
+
+            // Validate name not empty
+            if (currentName === '') {
+                showMsg(fullNameMsg, 'Nama lengkap tidak boleh kosong', 'error');
+                fullNameInput.classList.add('is-invalid');
+                fullNameInput.classList.remove('is-valid');
+                btnSubmit.disabled = true;
+                return;
+            } else {
+                hideMsg(fullNameMsg);
+                fullNameInput.classList.remove('is-invalid');
+            }
+
+            var nameChanged = currentName !== originalData.full_name;
+            var roleChanged = currentRole !== originalData.role.toUpperCase();
+
+            btnSubmit.disabled = !(nameChanged || roleChanged);
+        }
+
+        // ============================================================
+        // Load user data
+        // ============================================================
+        async function loadUserData() {
+            if (!userId) {
+                showError('User ID tidak diberikan', 'Silakan kembali ke halaman daftar akun.');
+                return;
+            }
+
+            try {
+                var res = await fetch('/api/admin/users/' + userId, {
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'include'
+                });
+
+                if (res.status === 404) {
+                    showError('Akun tidak ditemukan', 'User dengan ID tersebut tidak ada di database.');
+                    return;
+                }
+
+                if (!res.ok) {
+                    var errData = await res.json().catch(function() { return null; });
+                    throw new Error((errData && errData.msg) || 'HTTP ' + res.status);
+                }
+
+                var json = await res.json();
+                if (!json.status || !json.data) {
+                    throw new Error(json.msg || 'Format response tidak valid');
+                }
+
+                originalData = json.data;
+                prefillForm(originalData);
+
+            } catch (e) {
+                showError('Gagal memuat data', e.message);
+            }
+        }
+
+        function prefillForm(user) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('editFormContainer').style.display = 'block';
+
+            document.getElementById('breadcrumbName').textContent = user.full_name || 'Edit Akun';
+            document.getElementById('formSubtitle').textContent = 'Perbarui data akun ' + (user.full_name || '');
+
+            fullNameInput.value = user.full_name || '';
+            emailInput.value = user.email || '';
+
+            // Set role dropdown
+            var roleUpper = (user.role || '').toUpperCase();
+            roleSelect.value = roleUpper;
+
+            // Set cancel link
+            document.getElementById('btnCancel').href = '/ops/user-detail?id=' + user.user_id;
+
+            // Start change detection
+            checkForChanges();
+        }
+
+        function showError(title, message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('editFormContainer').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+            document.getElementById('errorTitle').textContent = title;
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        // ============================================================
+        // Form Submission
+        // ============================================================
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            var currentName = fullNameInput.value.trim();
+            var currentRole = roleSelect.value;
+
+            // Validate
+            if (currentName === '') {
+                showToast('Nama lengkap tidak boleh kosong');
+                return;
+            }
+
+            // Build payload: only send changed fields
+            var payload = {};
+            var nameChanged = currentName !== originalData.full_name;
+            var roleChanged = currentRole !== originalData.role.toUpperCase();
+
+            if (nameChanged) payload.full_name = currentName;
+            if (roleChanged) payload.role = currentRole;
+
+            if (Object.keys(payload).length === 0) {
+                showToast('Tidak ada perubahan yang terdeteksi');
+                return;
+            }
+
+            // Disable button, show loading
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Menyimpan...';
+
+            try {
+                var res = await fetch('/api/admin/users/' + userId, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+
+                var data = await res.json();
+
+                if (res.ok && data.status === true) {
+                    showToast('Akun berhasil diperbarui', 'success');
+                    setTimeout(function() {
+                        window.location.href = '/ops/manage-users';
+                    }, 1200);
+                } else {
+                    showToast(data.msg || 'Gagal memperbarui akun');
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Simpan Perubahan';
+                    checkForChanges();
+                }
+            } catch (err) {
+                showToast('Koneksi ke server gagal');
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="fa-solid fa-floppy-disk me-2"></i>Simpan Perubahan';
+                checkForChanges();
+            }
+        });
+
+        // ============================================================
+        // Real-time change detection
+        // ============================================================
+        fullNameInput.addEventListener('input', checkForChanges);
+        roleSelect.addEventListener('change', checkForChanges);
+
+        // ============================================================
+        // Init
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', loadUserData);
+    </script>
+</body>
+
+</html>

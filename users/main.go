@@ -143,6 +143,7 @@ func main() {
 	app.RegisterJob("admin_create_user", adminService.ProcessCreateUserJob)
 	app.RegisterJob("admin_get_users", adminService.ProcessGetUsersJob)
 	app.RegisterJob("admin_get_user_detail", adminService.ProcessGetUserDetailJob)
+	app.RegisterJob("admin_edit_user", adminService.ProcessEditUserJob)
 
 	// ============================================================
 	// 3. ROUTING

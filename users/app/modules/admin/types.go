@@ -68,3 +68,9 @@ type UserDetail struct {
 	UpdatedAt   time.Time  `json:"updated_at"`
 	LastLoginAt *time.Time `json:"last_login_at"`
 }
+
+// EditUserInput — payload untuk edit user internal (PBI-54)
+type EditUserInput struct {
+	FullName *string `json:"full_name,omitempty"`
+	Role     *string `json:"role,omitempty"`
+}
