@@ -254,6 +254,7 @@ a:hover{background:#6C63FF;color:#fff;}
 		r.Header.Set("X-User-Role", user.RoleCode)
 		r.Header.Set("X-User-ID", user.ID)
 		r.Header.Set("X-User-Email", user.Email)
+		r.Header.Set("X-User-Level", user.LevelCode)
 
 		h.ServeHTTP(w, r)
 	}
@@ -288,6 +289,7 @@ func withRolesAuth(roles []string, h http.HandlerFunc) http.HandlerFunc {
 			r.Header.Set("X-User-Role", user.RoleCode)
 			r.Header.Set("X-User-ID", user.ID)
 			r.Header.Set("X-User-Email", user.Email)
+			r.Header.Set("X-User-Level", user.LevelCode)
 			h.ServeHTTP(w, r)
 			return
 		}
@@ -297,6 +299,7 @@ func withRolesAuth(roles []string, h http.HandlerFunc) http.HandlerFunc {
 			r.Header.Set("X-User-Role", user.RoleCode)
 			r.Header.Set("X-User-ID", user.ID)
 			r.Header.Set("X-User-Email", user.Email)
+			r.Header.Set("X-User-Level", user.LevelCode)
 			h.ServeHTTP(w, r)
 			return
 		}
@@ -307,6 +310,7 @@ func withRolesAuth(roles []string, h http.HandlerFunc) http.HandlerFunc {
 				r.Header.Set("X-User-Role", user.RoleCode)
 				r.Header.Set("X-User-ID", user.ID)
 				r.Header.Set("X-User-Email", user.Email)
+				r.Header.Set("X-User-Level", user.LevelCode)
 				h.ServeHTTP(w, r)
 				return
 			}
@@ -625,6 +629,16 @@ func main() {
 		createProxyHandler(ordersTarget, true),
 	))
 	log.Printf("[GW] Protected API: /api/admin/orders -> %s (CEO/SUPERADMIN/OPERASIONAL)", ordersTarget)
+
+	// --- ADMIN USER MANAGEMENT (role-protected) - SUPERADMIN only ---
+	adminUsersTarget := getRouteTarget("/api/admin/users")
+	if adminUsersTarget == "" {
+		adminUsersTarget = "http://localhost:2006"
+	}
+	http.HandleFunc("/api/admin/users", withRolesAuth([]string{"SUPERADMIN"},
+		createProxyHandler(adminUsersTarget, true),
+	))
+	log.Printf("[GW] Protected API: /api/admin/users -> %s (SUPERADMIN)", adminUsersTarget)
 
 	// --- MANAGEMENT Dashboard API (role-protected) ---
 	dashboardTarget := getRouteTarget("/api/dashboard/customers")

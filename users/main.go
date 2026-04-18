@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/admin"
 	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
@@ -123,6 +124,11 @@ func main() {
 	kycController := kyc.NewController(app.Dispatcher, app.Response)
 	kycAdminController := kyc.NewAdminController(app.Dispatcher, app.Response)
 
+	// --- Feature: Admin User Management ---
+	adminRepo := admin.NewRepository(app.DB)
+	adminService := admin.NewService(adminRepo)
+	adminController := admin.NewController(app.Dispatcher, app.Response)
+
 	// Register Job Handlers (Workers)
 	app.RegisterJob("auth", loginService.ProcessLoginJob)
 	app.RegisterJob("register", registerService.ProcessRegisterJob)
@@ -134,6 +140,7 @@ func main() {
 	app.RegisterJob("admin_kyc_list", kycService.ProcessAdminKYCListJob)
 	app.RegisterJob("admin_kyc_detail", kycService.ProcessAdminKYCDetailJob)
 	app.RegisterJob("admin_kyc_review", kycService.ProcessAdminKYCReviewJob)
+	app.RegisterJob("admin_create_user", adminService.ProcessCreateUserJob)
 
 	// ============================================================
 	// 3. ROUTING
@@ -143,6 +150,7 @@ func main() {
 		registerController,
 		kycController,
 		kycAdminController,
+		adminController,
 	)
 
 	// ============================================================

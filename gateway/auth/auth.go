@@ -123,6 +123,11 @@ func isRoleAllowed(path string, role string) bool {
 		return true
 	}
 
+	// /api/admin/users → SUPERADMIN only (user management)
+	if strings.HasPrefix(path, "/api/admin/users") {
+		return role == "SUPERADMIN"
+	}
+
 	// /api/admin/kyc* → COMPLIANCE & OPERASIONAL
 	if strings.HasPrefix(path, "/api/admin/kyc") {
 		return role == "COMPLIANCE" || role == "OPERASIONAL"
@@ -187,10 +192,11 @@ func CheckRoleAccess(path string, role string) bool {
 }
 
 type TokenUser struct {
-	ID       string
-	Email    string
-	Role     string
-	RoleCode string
+	ID        string
+	Email     string
+	Role      string
+	RoleCode  string
+	LevelCode string
 }
 
 // GetUserFromToken reads auth cookie, resolves JWT from Redis, validates it,
@@ -229,6 +235,7 @@ func GetUserFromToken(r *http.Request) (*TokenUser, error) {
 	email, _ := u["email"].(string)
 	role, _ := u["role"].(string)
 	roleCode, _ := u["role_code"].(string)
+	levelCode, _ := u["level_code"].(string)
 
 	// Fallback if role_code is absent
 	if roleCode == "" {
@@ -236,9 +243,10 @@ func GetUserFromToken(r *http.Request) (*TokenUser, error) {
 	}
 
 	return &TokenUser{
-		ID:       id,
-		Email:    email,
-		Role:     role,
-		RoleCode: strings.ToUpper(strings.TrimSpace(roleCode)),
+		ID:        id,
+		Email:     email,
+		Role:      role,
+		RoleCode:  strings.ToUpper(strings.TrimSpace(roleCode)),
+		LevelCode: strings.ToUpper(strings.TrimSpace(levelCode)),
 	}, nil
 }

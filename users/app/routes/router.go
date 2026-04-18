@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/admin"
 	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
@@ -17,6 +18,7 @@ func Init(app *core.App,
 	registerController *register.Controller,
 	kycController *kyc.Controller,
 	kycAdminController *kyc.AdminController,
+	adminController *admin.Controller,
 ) {
 
 	// ==============================
@@ -78,5 +80,10 @@ func Init(app *core.App,
 	app.Router.Handle("GET /api/admin/kyc/{id}", http.HandlerFunc(kycAdminController.ServeHTTP))
 	app.Router.Handle("POST /api/admin/kyc/{id}/approve", http.HandlerFunc(kycAdminController.ServeHTTP))
 	app.Router.Handle("POST /api/admin/kyc/{id}/reject", http.HandlerFunc(kycAdminController.ServeHTTP))
+
+	// ==============================
+	// 9. Admin User Management Routes (Protected via Gateway Auth - SUPERADMIN only)
+	// ==============================
+	app.Router.HandleFunc("POST /api/admin/users", adminController.CreateUser)
 
 }

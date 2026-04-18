@@ -52,6 +52,7 @@
         '/ops/subscriptions'          : { activeKey: 'subscriptions' },
         '/ops/subscriptions-create'   : { activeKey: 'subscriptions' },
         '/ops/subscriptions-edit'     : { activeKey: 'subscriptions' },
+        '/ops/create-user'            : { activeKey: 'create-user' },
         '/management/dashboard-customers': { activeKey: 'management-dashboard' },
         '/management/dashboard-packages': { activeKey: 'management-packages' },
     };
@@ -64,6 +65,7 @@
     const parentKey  = route.parentKey  || '';
     const canOpenManagement = _opsRole === 'MANAGEMENT' || _opsRole === 'SUPERADMIN' || _opsRole === 'ADMIN';
     const canOpenPackageSales = _opsRole === 'MANAGEMENT' || _opsRole === 'ADMIN';
+    const canCreateUser = _opsRole === 'SUPERADMIN' || (guardUser && guardUser.level_code && guardUser.level_code.toUpperCase() === 'SUPERADMIN');
 
     // Helper: mark a link active
     function isActive(key) {
@@ -113,6 +115,13 @@
             <a class="nav-link${isActive('management-packages')}" href="/management/dashboard-packages">
                 <i class="fa-solid fa-cubes icon-left"></i>
                 <span class="link-text">Package Sales</span>
+            </a>
+        </li>` : ''}
+
+        ${canCreateUser ? `<li class="nav-item">
+            <a class="nav-link${isActive('create-user')}" href="/ops/create-user">
+                <i class="fa-solid fa-user-plus icon-left"></i>
+                <span class="link-text">Buat Akun Internal</span>
             </a>
         </li>` : ''}
 
