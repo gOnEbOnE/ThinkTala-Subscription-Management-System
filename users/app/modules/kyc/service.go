@@ -280,7 +280,7 @@ func (s *Service) ProcessAdminKYCListJob(ctx context.Context, payload any) (any,
 	}
 
 	role, _ := data["role"].(string)
-	if role != "COMPLIANCE" && role != "SUPERADMIN" {
+	if role != "COMPLIANCE" && role != "ADMIN_KYC" && role != "SUPERADMIN" {
 		return nil, fmt.Errorf("FORBIDDEN:Anda tidak memiliki akses ke halaman ini")
 	}
 
@@ -320,7 +320,7 @@ func (s *Service) ProcessAdminKYCDetailJob(ctx context.Context, payload any) (an
 	}
 
 	role, _ := data["role"].(string)
-	if role != "COMPLIANCE" && role != "SUPERADMIN" {
+	if role != "COMPLIANCE" && role != "ADMIN_KYC" && role != "SUPERADMIN" {
 		return nil, fmt.Errorf("FORBIDDEN:Anda tidak memiliki akses")
 	}
 
@@ -349,7 +349,7 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 	}
 
 	role, _ := data["role"].(string)
-	if role != "COMPLIANCE" && role != "SUPERADMIN" {
+	if role != "COMPLIANCE" && role != "ADMIN_KYC" && role != "SUPERADMIN" {
 		return nil, fmt.Errorf("FORBIDDEN:Anda tidak memiliki akses")
 	}
 

@@ -55,14 +55,14 @@
       "target": "http://localhost:2006",
       "cors": true,
       "auth": true,
-      "roles": ["COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": ["ADMIN_KYC", "COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/admin/kyc/",
       "target": "http://localhost:2006",
       "cors": true,
       "auth": true,
-      "roles": ["COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
+      "roles": ["ADMIN_KYC", "COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/notifications",
