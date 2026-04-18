@@ -98,6 +98,7 @@ func main() {
 	app.RegisterJob("get_catalog_packages", packagesService.ProcessGetCatalogJob)
 	app.RegisterJob("update_package", packagesService.ProcessUpdatePackageJob)
 	app.RegisterJob("delete_package", packagesService.ProcessDeletePackageJob)
+	app.RegisterJob("toggle_package_status", packagesService.ProcessTogglePackageStatusJob)
 
 	// 4. ROUTING
 	routes.Init(app, packagesController)

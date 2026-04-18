@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/login", "destination": "/account/login", "permanent": false },
+    { "source": "/register", "destination": "/account/register", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/", "destination": "/landing.html" },
+    { "source": "/account/login/auth", "destination": "https://propensuy-thinktala-production.up.railway.app/account/login/auth" },
+    { "source": "/api/:path*", "destination": "https://propensuy-thinktala-production.up.railway.app/api/:path*" }
+  ]
+}

@@ -1,15 +1,16 @@
 FROM golang:alpine AS builder
 WORKDIR /app
+RUN apk add --no-cache git
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
-# Download dependensi jika ada go.mod
-RUN if [ -f go.mod ]; then go mod download; fi
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o app main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o notification main.go
 
 FROM alpine:latest
 WORKDIR /app
-RUN apk --no-cache add tzdata
-COPY --from=builder /app/app .
+RUN apk --no-cache add tzdata ca-certificates
+COPY --from=builder /app/notification .
+RUN chmod +x /app/notification
 
-ENV PORT=2001
-EXPOSE 2001
-CMD ["./app"]
+EXPOSE 5003
+CMD ["/app/notification"]

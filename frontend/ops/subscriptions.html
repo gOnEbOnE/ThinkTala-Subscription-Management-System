@@ -10,7 +10,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
     <style>
         .pkg-table {
             --bs-table-bg: transparent;
@@ -58,47 +59,33 @@
         .filter-card .input-group-text {
             font-size: 0.88rem;
         }
+
+        .btn-add-pkg {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 16px rgba(0,242,255,0.35);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-add-pkg:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 24px rgba(0,242,255,0.55);
+            text-decoration: none;
+            color: #000;
+        }
     </style>
 </head>
 
 <body>
-    <div class="mobile-overlay" id="mobileOverlay"></div>
-
-    <nav class="sidebar">
-        <div class="sidebar-brand mb-3">
-            <div class="brand-wrapper">
-                <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
-                <div class="brand-text-content">
-                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span
-                            class="text-cyan">Tala</span></h4>
-                    <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Operations Panel</p>
-                </div>
-            </div>
-        </div>
-        <ul class="nav flex-column flex-grow-1">
-            <li class="nav-item"><a class="nav-link" href="/ops/dashboard"><i
-                        class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="/ops/notifications"><i
-                        class="fa-solid fa-bell icon-left"></i><span class="link-text">Notifications</span></a></li>
-            <li class="nav-item"><a class="nav-link active" href="/ops/subscriptions"><i
-                        class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
-        </ul>
-        <ul class="nav flex-column mb-5">
-            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i
-                        class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a>
-            </li>
-        </ul>
-    </nav>
-
-    <header class="top-navbar d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn-header" id="sidebarToggle"><i class="fa-solid fa-bars fa-lg"></i></button>
-            <span class="badge bg-warning text-dark">OPERASIONAL</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
-        </div>
-    </header>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
 
     <div class="main-content">
         <!-- Page Header -->
@@ -107,8 +94,7 @@
                 <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Paket Langganan</h4>
                 <small class="text-muted">Kelola paket langganan dan harga untuk pengguna</small>
             </div>
-            <a href="/ops/subscriptions-create" class="btn btn-sm px-3 py-2 fw-bold"
-                style="background: var(--text-heading); color: #000;">
+            <a href="/ops/subscriptions-create" class="btn btn-sm px-3 py-2 fw-bold btn-add-pkg">
                 <i class="fa-solid fa-plus me-1"></i> Buat Paket Baru
             </a>
         </div>
@@ -116,6 +102,16 @@
         <!-- Filter Section -->
         <div class="ai-card mb-4">
             <div class="row g-3 align-items-end">
+                <div class="col-md-12 mb-1">
+                    <label class="form-label small fw-semibold"
+                        style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem;">Cari
+                        Paket</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"
+                            style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);"><i class="fa-solid fa-search"></i></span>
+                        <input type="text" class="form-control" id="filterSearch" placeholder="Cari berdasarkan nama paket..." oninput="applyFilter()">
+                    </div>
+                </div>
                 <div class="col-md-3">
                     <label class="form-label small fw-semibold"
                         style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem;">Filter
@@ -147,7 +143,7 @@
                     </div>
                 </div>
                 <div class="col-md-3 d-flex gap-2">
-                    <button class="btn btn-sm px-3 fw-bold w-100" style="background: var(--text-heading); color: #000;"
+                    <button class="btn btn-sm px-3 fw-bold w-100 btn-add-pkg"
                         onclick="applyFilter()">Terapkan Filter</button>
                     <button class="btn btn-sm btn-outline-secondary px-3" onclick="resetFilter()">Reset</button>
                 </div>
@@ -197,6 +193,53 @@
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index:9999;">
+        <div id="toastSuccess" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2" id="toastBody">
+                    <i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Berhasil</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-circle-xmark fa-3x text-danger mb-3" id="alertIcon"></i>
+                    <h6 class="fw-bold" style="color: var(--text-heading)" id="alertTitle">Terjadi Kesalahan</h6>
+                    <p class="text-muted small mb-0" id="alertMessage"></p>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button class="btn btn-sm btn-outline-secondary px-4" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle Status Modal -->
+    <div class="modal fade" id="toggleStatusModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-rotate fa-3x mb-3" id="toggleIcon" style="color:var(--accent)"></i>
+                    <h6 class="fw-bold text-main" id="toggleTitle">Ubah Status Paket?</h6>
+                    <p class="text-muted small mb-0" id="toggleDesc"></p>
+                    <input type="hidden" id="togglePkgId">
+                    <input type="hidden" id="togglePkgStatus">
+                    <div class="d-flex gap-2 justify-content-center mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-sm px-4" id="toggleConfirmBtn" onclick="confirmToggleStatus()">Ya, Ubah</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Modal -->
     <div class="modal fade" id="deletePkgModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
@@ -221,17 +264,38 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/za-theme.js"></script>
-    <script src="../assets/js/za-sidebar.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
     <script>
         let allPackages = [];
         let currentPage = 1;
         const perPage = 6;
 
-        function logout() { window.location.href = '/account/logout'; }
+        async function logout() {
+            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch(e) {}
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            sessionStorage.clear();
+            window.location.href = '/account/login';
+        }
 
         function formatRp(val) {
             return 'Rp ' + Number(val).toLocaleString('id-ID');
+        }
+
+        function showAlert(msg, type = 'danger') {
+            const icon = document.getElementById('alertIcon');
+            const title = document.getElementById('alertTitle');
+            if (type === 'warning') {
+                icon.className = 'fa-solid fa-triangle-exclamation fa-3x mb-3';
+                icon.style.color = 'var(--accent-orange)';
+                title.textContent = 'Peringatan';
+            } else {
+                icon.className = 'fa-solid fa-circle-xmark fa-3x text-danger mb-3';
+                title.textContent = 'Terjadi Kesalahan';
+            }
+            document.getElementById('alertMessage').textContent = msg;
+            new bootstrap.Modal(document.getElementById('alertModal')).show();
         }
 
         function statusBadge(status) {
@@ -262,17 +326,23 @@
                 <tr>
                     <td class="py-3 pkg-name">${pkg.name || '—'}</td>
                     <td class="py-3 pkg-price-monthly">${formatRp(pkg.price)}</td>
-                    <td class="py-3 pkg-price-yearly">${formatRp(pkg.price * 10)}</td>
+                    <td class="py-3 pkg-price-yearly">${formatRp(pkg.price_yearly)}</td>
                     <td class="py-3">${statusBadge(pkg.status)}</td>
                     <td class="py-3 text-end">
-                        <div class="d-flex gap-1 justify-content-end">
-                            <a href="/ops/subscriptions-edit?id=${pkg.id}" class="btn btn-sm btn-outline-secondary btn-action">
+                        <div class="d-flex gap-1 justify-content-end flex-nowrap">
+                            ${pkg.status === 'ACTIVE' ? `
+                            <button class="btn btn-sm btn-outline-warning px-3" style="white-space:nowrap;" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','ACTIVE')">
+                                <i class="fa-solid fa-toggle-on fa-xs me-1"></i>Deactivate
+                            </button>` : `
+                            <button class="btn btn-sm btn-outline-success px-3" style="white-space:nowrap;" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','INACTIVE')">
+                                <i class="fa-solid fa-toggle-off fa-xs me-1"></i>Activate
+                            </button>
+                            <a href="/ops/subscriptions-edit?id=${pkg.id}" class="btn btn-sm btn-outline-secondary btn-action" title="Edit">
                                 <i class="fa-solid fa-pen fa-xs"></i>
                             </a>
-                            ${pkg.status !== 'ACTIVE' ? `
-                            <button class="btn btn-sm btn-outline-secondary btn-action" onclick="openDelete('${pkg.id}','${pkg.name || ''}')">
+                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="openDelete('${pkg.id}','${pkg.name || ''}')">
                                 <i class="fa-solid fa-trash fa-xs"></i>
-                            </button>` : ''}
+                            </button>`}
                         </div>
                     </td>
                 </tr>
@@ -299,10 +369,12 @@
         }
 
         function applyFilter() {
+            const search = (document.getElementById('filterSearch').value || '').toLowerCase();
             const status = document.getElementById('filterStatus').value;
             const minP = parseFloat(document.getElementById('filterMinPrice').value) || 0;
             const maxP = parseFloat(document.getElementById('filterMaxPrice').value) || Infinity;
             let filtered = allPackages;
+            if (search) filtered = filtered.filter(p => (p.name || '').toLowerCase().includes(search));
             if (status) filtered = filtered.filter(p => p.status === status);
             filtered = filtered.filter(p => p.price >= minP && p.price <= maxP);
             currentPage = 1;
@@ -310,6 +382,7 @@
         }
 
         function resetFilter() {
+            document.getElementById('filterSearch').value = '';
             document.getElementById('filterStatus').value = '';
             document.getElementById('filterMinPrice').value = '';
             document.getElementById('filterMaxPrice').value = '';
@@ -323,6 +396,14 @@
             new bootstrap.Modal(document.getElementById('deletePkgModal')).show();
         }
 
+        function showToast(msg, type) {
+            const t = document.getElementById('toastSuccess');
+            const body = t.querySelector('.d-flex');
+            body.className = 'd-flex text-white ' + (type === 'danger' ? 'bg-danger' : 'bg-success');
+            document.getElementById('toastMsg').textContent = msg;
+            new bootstrap.Toast(t).show();
+        }
+
         async function confirmDeletePkg() {
             const id = document.getElementById('deletePkgId').value;
             try {
@@ -330,11 +411,45 @@
                 const json = await res.json();
                 if (json.success) {
                     bootstrap.Modal.getInstance(document.getElementById('deletePkgModal')).hide();
+                    showToast('Paket berhasil dihapus', 'success');
                     loadPackages();
                 } else {
-                    alert('Gagal: ' + (json.message || 'Unknown error'));
+                    bootstrap.Modal.getInstance(document.getElementById('deletePkgModal')).hide();
+                    showToast(json.message || 'Gagal menghapus paket', 'danger');
                 }
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) { showAlert('Error: ' + e.message); }
+        }
+
+        function toggleStatus(id, name, currentStatus) {
+            document.getElementById('togglePkgId').value = id;
+            document.getElementById('togglePkgStatus').value = currentStatus;
+            const isDeactivate = currentStatus === 'ACTIVE';
+            document.getElementById('toggleTitle').textContent = isDeactivate ? 'Nonaktifkan Paket?' : 'Aktifkan Paket?';
+            document.getElementById('toggleDesc').textContent = `Yakin ingin ${isDeactivate ? 'menonaktifkan' : 'mengaktifkan'} paket "${name}"?`;
+            document.getElementById('toggleIcon').className = isDeactivate
+                ? 'fa-solid fa-toggle-off fa-3x text-warning mb-3'
+                : 'fa-solid fa-toggle-on fa-3x text-success mb-3';
+            const btn = document.getElementById('toggleConfirmBtn');
+            btn.className = isDeactivate ? 'btn btn-sm btn-warning px-4' : 'btn btn-sm btn-success px-4';
+            btn.textContent = isDeactivate ? 'Ya, Nonaktifkan' : 'Ya, Aktifkan';
+            new bootstrap.Modal(document.getElementById('toggleStatusModal')).show();
+        }
+
+        async function confirmToggleStatus() {
+            const id = document.getElementById('togglePkgId').value;
+            const currentStatus = document.getElementById('togglePkgStatus').value;
+            try {
+                const res = await fetch(`/api/admin/packages/${id}/status`, { method: 'PATCH', credentials: 'include' });
+                const json = await res.json();
+                bootstrap.Modal.getInstance(document.getElementById('toggleStatusModal')).hide();
+                if (json.success) {
+                    const newSt = currentStatus === 'ACTIVE' ? 'dinonaktifkan' : 'diaktifkan';
+                    showToast(`Paket berhasil ${newSt}`, 'success');
+                    loadPackages();
+                } else {
+                    showToast(json.message || 'Gagal mengubah status paket', 'danger');
+                }
+            } catch (e) { showToast('Error: ' + e.message, 'danger'); }
         }
 
         async function loadPackages() {
@@ -353,7 +468,14 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadPackages);
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPackages();
+            const pendingToast = sessionStorage.getItem('toast');
+            if (pendingToast) {
+                sessionStorage.removeItem('toast');
+                setTimeout(() => showToast(pendingToast, 'success'), 500);
+            }
+        });
     </script>
 </body>
 

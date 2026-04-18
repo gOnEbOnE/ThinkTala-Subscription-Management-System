@@ -10,47 +10,35 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .btn-add-pkg {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 16px rgba(0,242,255,0.35);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-add-pkg:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 24px rgba(0,242,255,0.55);
+            text-decoration: none;
+            color: #000;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="mobile-overlay" id="mobileOverlay"></div>
-
-    <nav class="sidebar">
-        <div class="sidebar-brand mb-3">
-            <div class="brand-wrapper">
-                <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
-                <div class="brand-text-content">
-                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span
-                            class="text-cyan">Tala</span></h4>
-                    <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Operations Panel</p>
-                </div>
-            </div>
-        </div>
-        <ul class="nav flex-column flex-grow-1">
-            <li class="nav-item"><a class="nav-link" href="/ops/dashboard"><i
-                        class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="/ops/notifications"><i
-                        class="fa-solid fa-bell icon-left"></i><span class="link-text">Notifications</span></a></li>
-            <li class="nav-item"><a class="nav-link active" href="/ops/subscriptions"><i
-                        class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
-        </ul>
-        <ul class="nav flex-column mb-5">
-            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i
-                        class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a>
-            </li>
-        </ul>
-    </nav>
-
-    <header class="top-navbar d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn-header" id="sidebarToggle"><i class="fa-solid fa-bars fa-lg"></i></button>
-            <span class="badge bg-warning text-dark">OPERASIONAL</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
-        </div>
-    </header>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
 
     <div class="main-content">
         <!-- Back + Title + Delete -->
@@ -62,7 +50,7 @@
                 <h4 class="fw-bold mb-1" style="color: var(--text-heading)">Edit Paket Langganan</h4>
                 <small class="text-muted">Update informasi paket yang sudah ada</small>
             </div>
-            <button class="btn btn-sm btn-outline-danger" onclick="openDeleteModal()">
+            <button class="btn btn-sm btn-outline-danger" id="btnDeletePkgTop" onclick="openDeleteModal()">
                 <i class="fa-solid fa-trash me-1"></i> Hapus Paket
             </button>
         </div>
@@ -220,7 +208,7 @@
             <small class="text-muted">* Field wajib diisi</small>
             <div class="d-flex gap-2">
                 <a href="/ops/subscriptions" class="btn btn-sm btn-outline-secondary px-4">Batal</a>
-                <button class="btn btn-sm px-4 fw-bold" style="background: var(--text-heading); color: #000;"
+                <button class="btn btn-sm px-4 fw-bold btn-add-pkg"
                     onclick="savePackage()">
                     <i class="fa-solid fa-check me-1"></i> Simpan Perubahan
                 </button>
@@ -260,19 +248,51 @@
         </div>
     </div>
 
+    <!-- Alert Modal -->
+    <div class="modal fade" id="alertModal" tabindex="-1">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-3x mb-3" id="alertIcon"></i>
+                    <h6 class="fw-bold" style="color: var(--text-heading)" id="alertTitle">Peringatan</h6>
+                    <p class="text-muted small mb-0" id="alertMessage"></p>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button class="btn btn-sm btn-outline-secondary px-4" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="fixed-footer">
         <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
         <div>Operations Panel v1.0</div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/za-theme.js"></script>
-    <script src="../assets/js/za-sidebar.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
     <script>
         let pkgId = null;
         let originalPrice = 0;
+        let originalPriceYearly = 0;
 
-        function logout() { window.location.href = '/account/logout'; }
+        function logout() { fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function(){}); localStorage.removeItem('token'); localStorage.removeItem('user'); sessionStorage.clear(); window.location.href = '/account/login'; }
+
+        function showAlert(msg, type = 'warning') {
+            const icon = document.getElementById('alertIcon');
+            const title = document.getElementById('alertTitle');
+            if (type === 'danger') {
+                icon.className = 'fa-solid fa-circle-xmark fa-3x text-danger mb-3';
+                title.textContent = 'Terjadi Kesalahan';
+            } else {
+                icon.className = 'fa-solid fa-triangle-exclamation fa-3x mb-3';
+                icon.style.color = 'var(--accent-orange)';
+                title.textContent = 'Peringatan';
+            }
+            document.getElementById('alertMessage').textContent = msg;
+            new bootstrap.Modal(document.getElementById('alertModal')).show();
+        }
 
         function formatRp(val) { return 'Rp ' + Number(val || 0).toLocaleString('id-ID'); }
 
@@ -293,7 +313,7 @@
                 document.getElementById('oldMonthlyHint').innerHTML =
                     `<small style="color:var(--text-muted);text-decoration:line-through;">Harga Lama (Bulanan): ${formatRp(originalPrice)}</small>`;
                 document.getElementById('oldYearlyHint').innerHTML =
-                    `<small style="color:var(--text-muted);text-decoration:line-through;">Harga Lama (Tahunan): ${formatRp(originalPrice * 10)}</small>`;
+                    `<small style="color:var(--text-muted);text-decoration:line-through;">Harga Lama (Tahunan): ${formatRp(originalPriceYearly)}</small>`;
             } else {
                 document.getElementById('oldMonthlyHint').innerHTML = '';
                 document.getElementById('oldYearlyHint').innerHTML = '';
@@ -330,11 +350,12 @@
                 const res = await fetch(`/api/admin/packages/${pkgId}`, { method: 'DELETE', credentials: 'include' });
                 const json = await res.json();
                 if (json.success) {
+                    sessionStorage.setItem('toast', 'Paket berhasil dihapus');
                     window.location.href = '/ops/subscriptions';
                 } else {
-                    alert('Gagal: ' + (json.message || 'Unknown error'));
+                    showAlert(json.message || 'Gagal menghapus paket', 'danger');
                 }
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) { showAlert('Error: ' + e.message, 'danger'); }
         }
 
         async function loadPackage() {
@@ -345,20 +366,33 @@
                 const res = await fetch('/api/admin/packages', { credentials: 'include' });
                 const json = await res.json();
                 const pkg = (json.data || []).find(p => p.id === pkgId);
-                if (!pkg) { alert('Paket tidak ditemukan'); window.location.href = '/ops/subscriptions'; return; }
+                if (!pkg) { showAlert('Paket tidak ditemukan', 'danger'); window.location.href = '/ops/subscriptions'; return; }
 
                 // Fill form
                 document.getElementById('pkgName').value = pkg.name || '';
                 document.getElementById('pkgDesc').value = pkg.description || '';
                 document.getElementById('pkgPrice').value = pkg.price || '';
-                document.getElementById('pkgPriceYearly').value = pkg.price ? pkg.price * 10 : '';
+                document.getElementById('pkgPriceYearly').value = pkg.price_yearly || '';
                 document.getElementById('pkgQuota').value = pkg.quota || '';
                 originalPrice = pkg.price;
+                originalPriceYearly = pkg.price_yearly || 0;
 
                 // Status
                 const radio = document.querySelector(`[name="pkgStatus"][value="${pkg.status || 'ACTIVE'}"]`);
                 if (radio) radio.checked = true;
                 updateStatusUI();
+
+                // Delete Button Logic
+                const btnDel = document.getElementById('btnDeletePkgTop');
+                if (btnDel) {
+                    if ((pkg.status || 'ACTIVE') === 'ACTIVE') {
+                        btnDel.disabled = true;
+                        btnDel.setAttribute('title', 'Nonaktifkan paket terlebih dahulu untuk menghapus');
+                    } else {
+                        btnDel.disabled = false;
+                        btnDel.removeAttribute('title');
+                    }
+                }
 
                 // Info card
                 document.getElementById('infoPkgId').textContent = '#PKG-' + pkgId.substring(0, 8).toUpperCase();
@@ -376,20 +410,23 @@
                 addFeature();
 
             } catch (e) {
-                alert('Error loading package: ' + e.message);
+                showAlert('Error loading package: ' + e.message, 'danger');
             }
         }
 
         async function savePackage() {
             const name = document.getElementById('pkgName').value.trim();
             const price = parseFloat(document.getElementById('pkgPrice').value) || 0;
+            const price_yearly = parseFloat(document.getElementById('pkgPriceYearly').value) || 0;
             const quota = parseInt(document.getElementById('pkgQuota').value) || 0;
+            const status = document.querySelector('[name="pkgStatus"]:checked') ? document.querySelector('[name="pkgStatus"]:checked').value : 'ACTIVE';
 
-            if (!name) { alert('Nama paket harus diisi!'); return; }
-            if (price <= 0) { alert('Harga bulanan harus lebih dari 0!'); return; }
-            if (quota <= 0) { alert('Kuota harus lebih dari 0!'); return; }
+            if (!name) { showAlert('Nama paket harus diisi!'); return; }
+            if (price <= 0) { showAlert('Harga bulanan harus lebih dari 0!'); return; }
+            if (price_yearly > 0 && price_yearly < price) { showAlert('Harga tahunan tidak boleh lebih rendah dari harga bulanan!'); return; }
+            if (quota <= 0) { showAlert('Kuota harus lebih dari 0!'); return; }
 
-            const body = { name, price, duration: 1, quota };
+            const body = { name, price, price_yearly, duration: 1, quota, status };
 
             try {
                 const res = await fetch(`/api/admin/packages/${pkgId}`, {
@@ -400,11 +437,12 @@
                 });
                 const json = await res.json();
                 if (json.success) {
+                    sessionStorage.setItem('toast', 'Paket berhasil diperbarui');
                     window.location.href = '/ops/subscriptions';
                 } else {
-                    alert('Gagal: ' + (json.message || 'Unknown error'));
+                    showAlert(json.message || 'Gagal menyimpan perubahan', 'danger');
                 }
-            } catch (e) { alert('Error: ' + e.message); }
+            } catch (e) { showAlert('Error: ' + e.message, 'danger'); }
         }
 
         document.addEventListener('DOMContentLoaded', loadPackage);

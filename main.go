@@ -1,109 +1,92 @@
-
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
-	"os/signal"
 	"runtime"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"thinknalyze/certs"
 )
 
 func init() {
+	// Ensure certificates exist
 	ensureCerts()
 }
 
-// ================= CERTIFICATE SETUP =================
-
+// ensureCerts generates RSA keys if they don't exist
 func ensureCerts() {
-	masterPrivate := "users/certs/private.pem"
-	masterPublic := "users/certs/public.pem"
-
-	_, errPriv := os.Stat(masterPrivate)
-	_, errPub := os.Stat(masterPublic)
-
-	if errPriv != nil || errPub != nil {
-		fmt.Println("\n🔐 Generating master JWT key pair (users/certs/)...")
-		os.MkdirAll("users/certs", 0755)
-
-		if err := certs.GenerateAndSaveKeys(masterPrivate, masterPublic); err != nil {
-			log.Fatalf("[FATAL] Failed to generate master certs: %v", err)
-		}
-
-		fmt.Println("✅ Master key pair generated")
-	} else {
-		fmt.Println("✅ Master key pair already exists (users/certs/)")
-	}
-
-	privateKey, err := os.ReadFile(masterPrivate)
-	if err != nil {
-		log.Fatalf("[FATAL] Cannot read master private key: %v", err)
-	}
-
-	publicKey, err := os.ReadFile(masterPublic)
-	if err != nil {
-		log.Fatalf("[FATAL] Cannot read master public key: %v", err)
-	}
-
-	targets := []struct {
-		name string
-		dir  string
+	certDirs := []struct {
+		name    string
+		private string
+		public  string
 	}{
-		{"gateway", "gateway/certs"},
-		{"account", "account/certs"},
+		{
+			name:    "gateway",
+			private: "gateway/certs/private.pem",
+			public:  "gateway/certs/public.pem",
+		},
+		{
+			name:    "users",
+			private: "users/certs/private.pem",
+			public:  "users/certs/public.pem",
+		},
+		{
+			name:    "account",
+			private: "account/certs/private.pem",
+			public:  "account/certs/public.pem",
+		},
+		{
+			name:    "subscription",
+			private: "subscription/certs/private.pem",
+			public:  "subscription/certs/public.pem",
+		},
 	}
 
-	for _, t := range targets {
-		os.MkdirAll(t.dir, 0755)
-
-		privPath := t.dir + "/private.pem"
-		pubPath := t.dir + "/public.pem"
-
-		existingPub, pubErr := os.ReadFile(pubPath)
-		if pubErr == nil && string(existingPub) == string(publicKey) {
-			fmt.Printf("✅ %s certificates already in sync\n", t.name)
-			continue
+	for _, cd := range certDirs {
+		// Skip if both files exist
+		if _, errPriv := os.Stat(cd.private); errPriv == nil {
+			if _, errPub := os.Stat(cd.public); errPub == nil {
+				fmt.Printf("✅ %s certificates already exist\n", cd.name)
+				continue
+			}
 		}
 
-		os.WriteFile(privPath, privateKey, 0600)
-		os.WriteFile(pubPath, publicKey, 0644)
-
-		fmt.Printf("✅ %s certificates synced from master\n", t.name)
+		fmt.Printf("\n🔐 Generating certificates for %s...\n", cd.name)
+		if err := certs.GenerateAndSaveKeys(cd.private, cd.public); err != nil {
+			log.Fatalf("[FATAL] Failed to generate certs for %s: %v", cd.name, err)
+		}
 	}
 }
 
-// ================= SERVICE STRUCT =================
-
+// Service represents a running service
 type Service struct {
 	name string
 	cmd  *exec.Cmd
 	pid  int
 }
 
-// ================= MAIN =================
-
 func main() {
-
 	fmt.Println("=========================================")
 	fmt.Println("  🚀 THINKNALYZE ORCHESTRATOR")
 	fmt.Println("=========================================\n")
 
+	// Check prerequisites
 	checkPrerequisites()
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
-	var services []*Service
+	var wg sync.WaitGroup
+	services := []*Service{}
 	var mu sync.Mutex
 
+	// Skip auto-start Redis — assumed to be running via Docker
+	fmt.Println("[REDIS] Using existing Redis (Docker or local)...")
+	var redisCmd *exec.Cmd // placeholder agar teardown tetap aman
+
+	// Service configurations
 	serviceConfigs := []struct {
 		name string
 		dir  string
@@ -119,72 +102,79 @@ func main() {
 
 	fmt.Println("\nMemulai semua service...\n")
 
+	// Start services
 	for _, cfg := range serviceConfigs {
+		wg.Add(1)
+		go func(config struct {
+			name string
+			dir  string
+			port string
+		}) {
+			defer wg.Done()
 
+			cmd := exec.Command("go", "run", "main.go")
+			cmd.Dir = config.dir
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			if err := cmd.Start(); err != nil {
+				log.Printf("[-] Failed to start %s: %v", config.name, err)
+				return
+			}
 
-		cmd := exec.CommandContext(ctx, "go", "run", "main.go")
-		cmd.Dir = cfg.dir
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
+			fmt.Printf("[+] Service %s berjalan dengan PID %d\n", config.name, cmd.Process.Pid)
 
+			mu.Lock()
+			services = append(services, &Service{
+				name: config.name,
+				cmd:  cmd,
+				pid:  cmd.Process.Pid,
+			})
+			mu.Unlock()
 
-		if err := cmd.Start(); err != nil {
-			log.Printf("[-] Failed to start %s: %v", cfg.name, err)
-			continue
-		}
+			// Wait for process to finish
+			if err := cmd.Wait(); err != nil {
+				fmt.Printf("[-] Service %s berhenti: %v\n", config.name, err)
+			}
+		}(cfg)
 
-		fmt.Printf("[+] Service %s berjalan dengan PID %d\n", cfg.name, cmd.Process.Pid)
-
-		mu.Lock()
-		services = append(services, &Service{
-			name: cfg.name,
-			cmd:  cmd,
-			pid:  cmd.Process.Pid,
-		})
-		mu.Unlock()
-
-		time.Sleep(400 * time.Millisecond)
+		time.Sleep(500 * time.Millisecond)
 	}
 
-	printInfo()
-
-	<-ctx.Done()
-
 	fmt.Println("\n=========================================")
-	fmt.Println("  🛑 SHUTDOWN SIGNAL RECEIVED")
+	fmt.Println("  ✅ ALL SERVICES STARTED")
 	fmt.Println("=========================================")
+	fmt.Println("\n  🌐 Gateway (Port 2000):")
+	fmt.Println("     http://localhost:2000")
+	fmt.Println("\n  🔐 Login:")
+	fmt.Println("     http://localhost:2000/account/login")
+	fmt.Println("\n  📊 Test Credentials:")
+	fmt.Println("     Email: superadmin@thinktala.com")
+	fmt.Println("     Pass:  Super123")
+	fmt.Println("\n=========================================\n")
 
+	// Wait for all services
+	wg.Wait()
+
+	// Cleanup
+	fmt.Println("\n[*] Shutting down services...")
 	for _, svc := range services {
-
 		if svc.cmd.Process != nil {
-
-			fmt.Printf("[*] Terminating %s (PID %d)\n", svc.name, svc.pid)
-
-			svc.cmd.Process.Signal(syscall.SIGTERM)
-
-			done := make(chan error, 1)
-			go func() {
-				done <- svc.cmd.Wait()
-			}()
-
-			select {
-
-			case <-done:
-
-			case <-time.After(3 * time.Second):
-				fmt.Printf("[!] Force killing %s\n", svc.name)
-				svc.cmd.Process.Kill()
-			}
+			svc.cmd.Process.Kill()
+			fmt.Printf("[*] Terminated %s (PID %d)\n", svc.name, svc.pid)
 		}
+	}
+
+	// Kill Redis (only if we started it)
+	if redisCmd != nil && redisCmd.Process != nil {
+		redisCmd.Process.Kill()
+		fmt.Println("[*] Terminated Redis")
 	}
 
 	fmt.Println("\n✅ All services stopped")
 }
 
-// ================= UTILITIES =================
-
+// checkPrerequisites checks if required tools are installed
 func checkPrerequisites() {
-
 	tools := map[string]string{
 		"Go":    "go version",
 		"Redis": "redis-cli --version",
@@ -193,11 +183,8 @@ func checkPrerequisites() {
 	fmt.Println("[*] Checking prerequisites...\n")
 
 	allOk := true
-
 	for tool, cmd := range tools {
-
 		var checkCmd *exec.Cmd
-
 		if runtime.GOOS == "windows" {
 			checkCmd = exec.Command("cmd", "/c", cmd)
 		} else {
@@ -206,48 +193,22 @@ func checkPrerequisites() {
 		}
 
 		if err := checkCmd.Run(); err != nil {
-
 			if tool == "Redis" {
-				fmt.Printf("  ⚠️  %s - not found locally (assuming Docker Redis)\n", tool)
+				fmt.Printf("  ⚠️  %s - not found locally (assuming Docker Redis is running)\n", tool)
 			} else {
 				fmt.Printf("  ❌ %s - NOT INSTALLED\n", tool)
 				allOk = false
 			}
-
 		} else {
 			fmt.Printf("  ✅ %s - OK\n", tool)
 		}
 	}
 
-	fmt.Println("  ℹ️  PostgreSQL - checked by services")
+	fmt.Printf("  ℹ️  PostgreSQL - (will be checked by services)\n")
 
 	if !allOk {
 		log.Fatal("\n[FATAL] Please install missing prerequisites")
 	}
 
 	fmt.Println()
-}
-
-func printInfo() {
-
-	fmt.Println("\n=========================================")
-	fmt.Println("  ✅ ALL SERVICES STARTED")
-	fmt.Println("=========================================")
-
-	fmt.Println("\n🌐 Gateway")
-	fmt.Println("http://localhost:2000")
-
-	fmt.Println("\n🔐 Login")
-	fmt.Println("http://localhost:2000/account/login")
-
-	fmt.Println("\n📊 Test Credentials")
-	fmt.Println("Email: superadmin@thinktala.com")
-	fmt.Println("Pass : Super123")
-
-	fmt.Println("\n📌 Pages")
-	fmt.Println("http://localhost:2000/ops/dashboard")
-	fmt.Println("http://localhost:2000/ops/notifications")
-	fmt.Println("http://localhost:2000/ops/notification-templates")
-
-	fmt.Println("\n=========================================\n")
 }

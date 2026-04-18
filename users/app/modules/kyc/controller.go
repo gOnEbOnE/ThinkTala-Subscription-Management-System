@@ -1,13 +1,16 @@
 package kyc
 
 import (
+	"encoding/base64"
 	"fmt"
+	"io"
+	"mime"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/master-abror/zaframework/core/concurrency"
 	resp "github.com/master-abror/zaframework/core/http"
-	"github.com/master-abror/zaframework/core/utils"
 )
 
 // Controller menangani HTTP request untuk fitur KYC
@@ -42,21 +45,41 @@ func (c *Controller) Submit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. Validasi & upload file KTP (max 2MB, hanya jpg/png/pdf)
-	allowedExts := []string{".jpg", ".jpeg", ".png", ".pdf"}
-	maxSize := int64(2 * 1024 * 1024) // 2MB
-
-	filename, err := utils.UploadFile(r, "ktp_image", "public/uploads/kyc", allowedExts, maxSize)
-	if err != nil {
-		errMsg := err.Error()
-		// Cek apakah error karena ukuran/format file
-		if strings.Contains(errMsg, "terlalu besar") || strings.Contains(errMsg, "tidak diizinkan") || strings.Contains(errMsg, "bukan gambar") {
-			resp.ApiJSON(w, r, http.StatusUnprocessableEntity, false, errMsg, nil)
-			return
-		}
-		resp.ApiJSON(w, r, http.StatusUnprocessableEntity, false, "Gagal mengupload file KTP: "+errMsg, nil)
+	// 2. Validasi & encode file KTP sebagai base64 data URI → disimpan langsung ke DB
+	if err := r.ParseMultipartForm(5 << 20); err != nil {
+		resp.ApiJSON(w, r, http.StatusUnprocessableEntity, false, "Gagal memproses form", nil)
 		return
 	}
+	file, header, err := r.FormFile("ktp_image")
+	if err != nil {
+		resp.ApiJSON(w, r, http.StatusUnprocessableEntity, false, "File KTP tidak ditemukan", nil)
+		return
+	}
+	defer file.Close()
+
+	const maxSize = int64(2 * 1024 * 1024) // 2MB
+	if header.Size > maxSize {
+		resp.ApiJSON(w, r, http.StatusUnprocessableEntity, false, "Ukuran file terlalu besar (Max: 2 MB)", nil)
+		return
+	}
+
+	ext := strings.ToLower(filepath.Ext(header.Filename))
+	allowedExts := map[string]string{".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".pdf": "application/pdf"}
+	mimeType, ok := allowedExts[ext]
+	if !ok {
+		resp.ApiJSON(w, r, http.StatusUnprocessableEntity, false, "Tipe file tidak diizinkan. Hanya boleh: jpg, jpeg, png, pdf", nil)
+		return
+	}
+	if ct := mime.TypeByExtension(ext); ct != "" {
+		mimeType = ct
+	}
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		resp.ApiJSON(w, r, http.StatusInternalServerError, false, "Gagal membaca file KTP", nil)
+		return
+	}
+	filename := "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(fileBytes)
 
 	// 3. Ambil field form lainnya
 	fullName := strings.TrimSpace(r.FormValue("full_name"))

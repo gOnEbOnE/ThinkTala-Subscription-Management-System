@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Paket | ThinkTala Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .pkg-card {
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .pkg-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35) !important;
+        }
+        .pkg-header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        .pkg-header .pkg-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            backdrop-filter: blur(4px);
+        }
+        .pkg-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .pkg-detail-row:last-child {
+            border-bottom: none;
+        }
+        .pkg-detail-row .label {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .pkg-detail-row .value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .btn-pilih {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 0;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #fff;
+            width: 100%;
+            transition: opacity 0.2s, transform 0.15s;
+            cursor: pointer;
+        }
+        .btn-pilih:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+            color: #fff;
+        }
+        .page-header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 242, 255, 0.08);
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            color: var(--accent-cyan);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .empty-icon-wrap {
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 242, 255, 0.06);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="client-sidebar-placeholder"></div>
+    <div id="client-navbar-placeholder"></div>
+
+    <!-- ============================
+         MAIN CONTENT
+         ============================ -->
+    <div class="main-content">
+
+        <!-- Page Header -->
+        <div class="mb-4">
+            <div class="page-header-badge">
+                <i class="fa-solid fa-box-open"></i> Katalog Paket Aktif
+            </div>
+            <h4 class="fw-bold mb-1" style="color: var(--text-heading)">Pilih Paket Langganan</h4>
+            <small class="text-muted">Temukan paket yang paling sesuai dengan kebutuhan analitik Anda</small>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-5">
+            <div class="mb-3">
+                <i class="fa-solid fa-spinner fa-spin fa-2x text-cyan"></i>
+            </div>
+            <p class="text-muted mb-0">Memuat katalog paket...</p>
+        </div>
+
+        <!-- Error State (hidden by default) -->
+        <div id="errorState" class="d-none text-center py-5">
+            <div class="empty-icon-wrap mx-auto">
+                <i class="fa-solid fa-triangle-exclamation fa-2x text-warning"></i>
+            </div>
+            <h6 class="fw-semibold mb-1" style="color: var(--text-heading)">Gagal Memuat Paket</h6>
+            <p class="text-muted small mb-3">Terjadi kesalahan saat mengambil data. Periksa koneksi Anda.</p>
+            <button class="btn btn-sm btn-outline-light" onclick="fetchCatalog()">
+                <i class="fa-solid fa-rotate-right me-2"></i>Coba Lagi
+            </button>
+        </div>
+
+        <!-- Empty State (hidden by default) -->
+        <div id="emptyState" class="d-none">
+            <div class="ai-card text-center py-5 px-4">
+                <div class="empty-icon-wrap mx-auto">
+                    <i class="fa-solid fa-box-open fa-2x text-muted"></i>
+                </div>
+                <h6 class="fw-semibold mb-1" style="color: var(--text-heading)">Belum Ada Paket Aktif</h6>
+                <p class="text-muted small mb-0">Saat ini belum ada paket yang tersedia. Coba lagi nanti.</p>
+            </div>
+        </div>
+
+        <!-- Packages Grid (hidden until data loaded) -->
+        <div id="packagesGrid" class="row g-4 d-none"></div>
+
+    </div>
+    <!-- /main-content -->
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/za-sidebar.js"></script>
+    <script src="/assets/js/client-layout.js"></script>
+    <script>
+        // ============================
+        // HELPERS
+        // ============================
+
+        /**
+         * Format angka ke format mata uang Rupiah.
+         * Contoh: 50000 → "Rp 50.000"
+         */
+        function formatRupiah(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+
+        // Variasi warna & ikon untuk setiap kartu paket
+        var CARD_STYLES = [
+            { gradient: 'linear-gradient(135deg, #00b4d8 0%, #0077b6 100%)', icon: 'fa-rocket' },
+            { gradient: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)', icon: 'fa-crown' },
+            { gradient: 'linear-gradient(135deg, #059669 0%, #047857 100%)', icon: 'fa-bolt' },
+            { gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', icon: 'fa-gem' },
+            { gradient: 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)', icon: 'fa-star' },
+        ];
+
+        // ============================
+        // RENDER CARD
+        // ============================
+        function buildPackageCard(pkg, index) {
+            var style   = CARD_STYLES[index % CARD_STYLES.length];
+            var price   = formatRupiah(pkg.price);
+            var quota   = (pkg.quota || 0).toLocaleString('id-ID') + ' permintaan';
+            var durasi  = (pkg.duration || 0) + ' bulan';
+
+            return [
+                '<div class="col-xl-4 col-md-6">',
+                '  <div class="ai-card pkg-card h-100 d-flex flex-column p-0">',
+                '    <div class="pkg-header" style="background:' + style.gradient + '">',
+                '      <div class="pkg-icon mx-auto">',
+                '        <i class="fa-solid ' + style.icon + ' fa-xl text-white"></i>',
+                '      </div>',
+                '      <h5 class="fw-bold text-white mb-0">' + _escapeHtml(pkg.name) + '</h5>',
+                '    </div>',
+                '    <div class="p-4 d-flex flex-column flex-grow-1">',
+                '      <div class="mb-4">',
+                '        <div class="pkg-detail-row">',
+                '          <span class="label"><i class="fa-solid fa-tag me-2"></i>Harga</span>',
+                '          <span class="value text-cyan">' + price + '</span>',
+                '        </div>',
+                '        <div class="pkg-detail-row">',
+                '          <span class="label"><i class="fa-solid fa-database me-2"></i>Kuota</span>',
+                '          <span class="value">' + quota + '</span>',
+                '        </div>',
+                '        <div class="pkg-detail-row">',
+                '          <span class="label"><i class="fa-solid fa-calendar-days me-2"></i>Durasi</span>',
+                '          <span class="value">' + durasi + '</span>',
+                '        </div>',
+                '      </div>',
+                '      <button',
+                '        class="btn-pilih mt-auto"',
+                '        style="background:' + style.gradient + '"',
+                '        onclick="pilihPaket(\'' + _escapeHtml(pkg.id) + '\')"',
+                '      >',
+                '        <i class="fa-solid fa-cart-shopping me-2"></i>Pilih Paket',
+                '      </button>',
+                '    </div>',
+                '  </div>',
+                '</div>',
+            ].join('\n');
+        }
+
+        /** Mencegah XSS saat mengisi HTML dari nilai API */
+        function _escapeHtml(str) {
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(String(str)));
+            return div.innerHTML;
+        }
+
+        // ============================
+        // AKSI TOMBOL "PILIH PAKET"
+        // ============================
+        function pilihPaket(packageId) {
+            alert('Fitur checkout akan segera tersedia. Package ID: ' + packageId);
+        }
+
+        // ============================
+        // FETCH KATALOG DARI API
+        // ============================
+        async function fetchCatalog() {
+            var loadingEl = document.getElementById('loadingState');
+            var errorEl   = document.getElementById('errorState');
+            var emptyEl   = document.getElementById('emptyState');
+            var gridEl    = document.getElementById('packagesGrid');
+
+            // Reset state
+            loadingEl.classList.remove('d-none');
+            errorEl.classList.add('d-none');
+            emptyEl.classList.add('d-none');
+            gridEl.classList.add('d-none');
+
+            try {
+                var res = await fetch('/api/subscription/catalog', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    window.location.replace('/account/login');
+                    return;
+                }
+
+                if (!res.ok) {
+                    throw new Error('Server error: ' + res.status);
+                }
+
+                var data = await res.json();
+
+                loadingEl.classList.add('d-none');
+
+                if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+                    emptyEl.classList.remove('d-none');
+                    return;
+                }
+
+                // Render semua kartu paket
+                gridEl.innerHTML = data.data.map(function (pkg, i) {
+                    return buildPackageCard(pkg, i);
+                }).join('');
+
+                gridEl.classList.remove('d-none');
+
+            } catch (err) {
+                console.error('[Katalog] Gagal fetch:', err);
+                loadingEl.classList.add('d-none');
+                errorEl.classList.remove('d-none');
+            }
+        }
+
+        // ============================
+        // INISIALISASI HALAMAN
+        // ============================
+        document.addEventListener('DOMContentLoaded', function () {
+            fetchCatalog();
+        });
+    </script>
+</body>
+</html>

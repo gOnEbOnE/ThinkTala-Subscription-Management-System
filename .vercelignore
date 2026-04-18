@@ -1,0 +1,23 @@
+# Go microservices - tidak di-deploy ke Vercel
+/account/
+/gateway/
+/notification/
+/operational/
+/subscription/
+/tickets/
+/users/
+/certs/
+
+# Go files
+**/*.go
+**/go.mod
+**/go.sum
+
+# Docker & config
+docker-compose.yml
+**/.env
+**/Dockerfile
+
+# Misc
+dump.rdb
+*.md

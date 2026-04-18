@@ -1,140 +1,249 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Notifications | ThinkTala Ops</title>
+    <title>Notification Management | ThinkTala Ops</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
     <style>
-        .nav-item-group { position: relative; }
-        .nav-link-parent { cursor: pointer; user-select: none; }
-        .nav-link-parent .caret { margin-left: auto; font-size: .7rem; transition: transform .25s; color: var(--text-muted); }
-        .nav-link-parent.open .caret { transform: rotate(90deg); }
-        .nav-link-parent.open, .nav-link-parent.parent-active { color: var(--accent-cyan) !important; }
-        .nav-submenu { list-style: none; padding: 0; margin: 0; max-height: 0; overflow: hidden; transition: max-height .28s ease; }
-        .nav-submenu.open { max-height: 200px; }
-        .nav-submenu .nav-link { font-size: .82rem; padding: 8px 20px 8px 52px; margin: 1px 15px; color: var(--text-muted); }
-        .nav-submenu .nav-link:hover { color: var(--accent-cyan); background: rgba(0,242,255,.06); }
-        .nav-submenu .nav-link.active { color: var(--accent-cyan) !important; border-left: 3px solid var(--accent-cyan); background: rgba(0,242,255,.1); }
-        body.sidebar-collapsed .nav-submenu { display: none !important; }
-        body.sidebar-collapsed .nav-link-parent .caret { display: none; }
+        .notification-desc {
+            max-width: 440px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .form-control,
+        .form-select {
+            background: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            color: var(--text-main) !important;
+            border-radius: 8px;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: rgba(0, 242, 255, 0.5) !important;
+            box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.1) !important;
+        }
+
+        .form-select {
+            color-scheme: dark;
+        }
+
+        .form-select option {
+            background: #111a36;
+            color: #dbe7ff;
+        }
+
+        .form-select option:checked,
+        .form-select option:hover {
+            background: #1d4ed8;
+            color: #ffffff;
+        }
+
+        .notif-table {
+            background: transparent !important;
+        }
+
+        .notif-table thead tr {
+            background: rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .notif-table th {
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .notif-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+            background: var(--bg-panel) !important;
+        }
+
+        .notif-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .notif-table tbody tr {
+            transition: background 0.15s;
+        }
+
+        .notif-table tbody tr:hover td {
+            background: rgba(0, 242, 255, 0.05) !important;
+        }
+
+        .btn-add-notif {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 16px rgba(0, 242, 255, 0.35);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+        }
+
+        .btn-add-notif:hover {
+            filter: brightness(1.15);
+            box-shadow: 0 0 24px rgba(0, 242, 255, 0.55);
+        }
+
+        .btn-action-edit {
+            background: none;
+            border: none;
+            color: #00f2ff;
+            font-size: 0.82rem;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        .btn-action-edit:hover {
+            opacity: 0.75;
+        }
+
+        .btn-action-delete {
+            background: none;
+            border: none;
+            color: #f87171;
+            font-size: 0.82rem;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+
+        .btn-action-delete:hover {
+            opacity: 0.75;
+        }
+
+        .toast-wrap {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-msg {
+            min-width: 300px;
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            font-size: 0.86rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast-msg.success {
+            background: #059669;
+        }
+
+        .toast-msg.error {
+            background: #dc2626;
+        }
     </style>
 </head>
+
 <body>
-    <div class="mobile-overlay" id="mobileOverlay"></div>
-
-    <nav class="sidebar">
-        <div class="sidebar-brand mb-3">
-            <div class="brand-wrapper">
-                <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
-                <div class="brand-text-content">
-                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span class="text-cyan">Tala</span></h4>
-                    <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Operations Panel</p>
-                </div>
-            </div>
-        </div>
-        <ul class="nav flex-column flex-grow-1">
-            <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
-            <li class="nav-item nav-item-group">
-                <a class="nav-link nav-link-parent open parent-active" onclick="toggleSubmenu(this)">
-                    <i class="fa-solid fa-bell icon-left"></i>
-                    <span class="link-text">Notification</span>
-                    <i class="fa-solid fa-chevron-right caret link-text"></i>
-                </a>
-                <ul class="nav-submenu open" id="notifSubmenu">
-                    <li><a class="nav-link active" href="notifications"><i class="fa-solid fa-list me-2" style="font-size:.85rem"></i><span>Monitoring</span></a></li>
-                    <li><a class="nav-link" href="notification-templates"><i class="fa-solid fa-file-alt me-2" style="font-size:.85rem"></i><span>Template Management</span></a></li>
-                </ul>
-            </li>
-            <li class="nav-item"><a class="nav-link" href="subscriptions.html"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Subscriptions</span></a></li>
-        </ul>
-        <ul class="nav flex-column mb-5">
-            <li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>
-            <li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>
-        </ul>
-    </nav>
-
-    <header class="top-navbar d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn-header" id="sidebarToggle"><i class="fa-solid fa-bars fa-lg"></i></button>
-            <span class="badge bg-warning text-dark">OPERASIONAL</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
-        </div>
-    </header>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
 
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Manage Notifications</h4>
-                <small class="text-muted">Create & manage notifications for users</small>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Notification Management</h4>
+                <small class="text-muted">Kelola notifikasi, promo, dan update informasi untuk client</small>
             </div>
-            <button class="btn btn-sm px-3 py-2" style="background: var(--accent-cyan); color: #000; font-weight: 600; opacity:.45; cursor:not-allowed;" disabled title="Tersedia di Sprint 2">
+            <button class="btn-add-notif"
+                data-bs-toggle="modal" data-bs-target="#notifModal" onclick="resetForm()">
                 <i class="fa-solid fa-plus me-1"></i> New Notification
             </button>
         </div>
 
-        <!-- Filter -->
         <div class="ai-card shadow-lg mb-4">
             <div class="row g-3 align-items-end">
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <label class="form-label small text-muted">Search</label>
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by title..." style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by title or description..."
+                        style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small text-muted">Type</label>
-                    <select class="form-select" id="filterType" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                    <select class="form-select" id="filterType"
+                        style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                         <option value="">All Types</option>
-                        <option value="info">Info</option>
-                        <option value="warning">Warning</option>
-                        <option value="promo">Promo</option>
                         <option value="system">System</option>
+                        <option value="promo">Promo</option>
+                        <option value="warning">Warning</option>
+                        <option value="info">Info</option>
+                        <option value="analysis">Analysis</option>
+                        <option value="education">Education</option>
+                        <option value="event">Event</option>
                     </select>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label small text-muted">Status</label>
-                    <select class="form-select" id="filterStatus" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                    <select class="form-select" id="filterStatus"
+                        style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                         <option value="">All</option>
-                        <option value="true">Active</option>
-                        <option value="false">Inactive</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="expired">Expired</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <button class="btn btn-outline-secondary w-100" onclick="loadNotifications()"><i class="fa-solid fa-filter me-1"></i> Filter</button>
+                <div class="col-md-1">
+                    <button class="btn btn-outline-secondary w-100" onclick="loadNotifications()" title="Refresh"><i
+                            class="fa-solid fa-rotate-right"></i></button>
                 </div>
             </div>
         </div>
 
-        <!-- Table -->
-        <div class="ai-card shadow-lg">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0" style="color: var(--text-main);">
+        <div class="ai-card shadow-lg p-0" style="overflow: hidden; background: var(--bg-panel);">
+            <div class="table-responsive" style="background: var(--bg-panel);">
+                <table class="table notif-table mb-0"
+                    style="color: var(--text-main); background: transparent; --bs-table-bg: transparent; --bs-table-striped-bg: transparent; --bs-table-hover-bg: transparent;">
                     <thead>
-                        <tr class="text-muted small text-uppercase">
+                        <tr>
                             <th style="width: 5%;">#</th>
-                            <th style="width: 25%;">Title</th>
-                            <th style="width: 10%;">Type</th>
-                            <th style="width: 10%;">Target</th>
-                            <th style="width: 10%;">Status</th>
-                            <th style="width: 15%;">Created</th>
-                            <th style="width: 15%;" class="text-end">Actions</th>
+                            <th style="width: 42%;">Title</th>
+                            <th style="width: 13%;">Type</th>
+                            <th style="width: 13%;">Status</th>
+                            <th style="width: 15%;">Created At</th>
+                            <th style="width: 12%; padding-right: 24px;" class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody id="notifTableBody">
-                        <tr><td colspan="7" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</td></tr>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4"><i
+                                    class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Modal Create/Edit -->
     <div class="modal fade" id="notifModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
                 <div class="modal-header border-secondary" style="border-opacity: 0.2;">
                     <h5 class="modal-title fw-bold" id="modalTitle" style="color: var(--text-heading);">New Notification</h5>
@@ -143,43 +252,76 @@
                 <div class="modal-body">
                     <input type="hidden" id="notifId">
                     <div class="mb-3">
-                        <label class="form-label small text-muted">Title</label>
-                        <input type="text" class="form-control" id="notifTitle" placeholder="Notification title" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                        <label class="form-label small text-muted">Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="notifTitle" placeholder="Judul notifikasi"
+                            style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small text-muted">Message</label>
-                        <textarea class="form-control" id="notifMessage" rows="4" placeholder="Notification message..." style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);"></textarea>
+                        <label class="form-label small text-muted">Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="notifDescription" rows="4" placeholder="Isi notifikasi"
+                            style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);"></textarea>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="form-label small text-muted">Type</label>
-                            <select class="form-select" id="notifType" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
-                                <option value="info">Info</option>
-                                <option value="warning">Warning</option>
-                                <option value="promo">Promo</option>
+                            <label class="form-label small text-muted">Type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="notifType"
+                                style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                                 <option value="system">System</option>
+                                <option value="promo">Promo</option>
+                                <option value="warning">Warning</option>
+                                <option value="info">Info</option>
+                                <option value="analysis">Analysis</option>
+                                <option value="education">Education</option>
+                                <option value="event">Event</option>
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small text-muted">Target Role</label>
-                            <select class="form-select" id="notifTarget" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
-                                <option value="all">All Users</option>
-                                <option value="CLIENT">Clients Only</option>
-                                <option value="OPERASIONAL">Staff Only</option>
-                            </select>
+                            <label class="form-label small text-muted">CTA URL</label>
+                            <input type="url" class="form-control" id="notifCtaUrl" placeholder="https://example.com/action"
+                                style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Image URL</label>
+                            <input type="url" class="form-control" id="notifImageUrl" placeholder="https://example.com/banner.png"
+                                style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                        </div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Expiry Date</label>
+                            <input type="datetime-local" class="form-control" id="notifExpiryDate"
+                                style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small text-muted">Status</label>
-                            <select class="form-select" id="notifActive" style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                            <select class="form-select" id="notifActive"
+                                style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
                                 <option value="true">Active</option>
                                 <option value="false">Inactive</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Target Audience</label>
+                            <select class="form-select" id="notifTargetRole"
+                                style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                                <option value="all">All Users</option>
+                                <option value="client">All Client</option>
+                                <option value="client_never_bought">Client - Never Bought</option>
+                                <option value="client_paid_active">Client - Paid Active</option>
+                                <option value="client_pro_active">Client - Pro Active</option>
+                                <option value="client_lapsed">Client - Lapsed</option>
+                                <option value="operasional">Operasional</option>
+                                <option value="compliance">Compliance</option>
+                                <option value="ceo">CEO</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer border-secondary" style="border-opacity: 0.2;">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn px-4" style="background: var(--accent-cyan); color: #000; font-weight: 600;" onclick="saveNotification()">
+                    <button type="button" class="btn px-4"
+                        style="background: var(--accent-cyan); color: #000; font-weight: 600;"
+                        onclick="saveNotification()">
                         <i class="fa-solid fa-check me-1"></i> Save
                     </button>
                 </div>
@@ -187,14 +329,13 @@
         </div>
     </div>
 
-    <!-- Delete Confirm Modal -->
     <div class="modal fade" id="deleteModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
             <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
                 <div class="modal-body text-center py-4">
                     <i class="fa-solid fa-triangle-exclamation fa-3x text-danger mb-3"></i>
-                    <h6 class="fw-bold text-main">Delete Notification?</h6>
-                    <p class="text-muted small">This action cannot be undone.</p>
+                    <h6 class="fw-bold text-main">Hapus notifikasi?</h6>
+                    <p class="text-muted small">Tindakan ini tidak dapat dibatalkan.</p>
                     <input type="hidden" id="deleteId">
                     <div class="d-flex gap-2 justify-content-center mt-3">
                         <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -205,6 +346,8 @@
         </div>
     </div>
 
+    <div id="toastContainer" class="toast-wrap"></div>
+
     <footer class="fixed-footer">
         <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
         <div>Operations Panel v1.0</div>
@@ -212,36 +355,73 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/za-theme.js"></script>
-    <script src="/assets/js/za-sidebar.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
     <script>
-        const API_BASE = '/api';
-        const token = localStorage.getItem('token');
+        const API_BASE = '/api/notifications';
+        let searchTimer = null;
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = '/account/login';
+        function showToast(message, type) {
+            const t = document.createElement('div');
+            t.className = 'toast-msg ' + (type || 'success');
+            t.innerHTML = '<i class="fa-solid ' + (type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check') + '"></i><span>' + escapeHtml(message) + '</span>';
+            document.getElementById('toastContainer').appendChild(t);
+            setTimeout(function () { t.remove(); }, 3200);
+        }
+
+        function escapeHtml(value) {
+            const div = document.createElement('div');
+            div.textContent = value == null ? '' : String(value);
+            return div.innerHTML;
+        }
+
+        function toLocalDateTimeInput(value) {
+            if (!value) return '';
+            const d = new Date(value);
+            if (Number.isNaN(d.getTime())) return '';
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            return y + '-' + m + '-' + day + 'T' + hh + ':' + mm;
         }
 
         function resetForm() {
             document.getElementById('notifId').value = '';
             document.getElementById('notifTitle').value = '';
-            document.getElementById('notifMessage').value = '';
-            document.getElementById('notifType').value = 'info';
-            document.getElementById('notifTarget').value = 'all';
+            document.getElementById('notifDescription').value = '';
+            document.getElementById('notifType').value = 'system';
+            document.getElementById('notifCtaUrl').value = '';
+            document.getElementById('notifImageUrl').value = '';
+            document.getElementById('notifExpiryDate').value = '';
             document.getElementById('notifActive').value = 'true';
+            document.getElementById('notifTargetRole').value = 'all';
             document.getElementById('modalTitle').textContent = 'New Notification';
         }
 
-        function editNotif(data) {
-            document.getElementById('notifId').value = data.id;
-            document.getElementById('notifTitle').value = data.title;
-            document.getElementById('notifMessage').value = data.message;
-            document.getElementById('notifType').value = data.type;
-            document.getElementById('notifTarget').value = data.target_role;
-            document.getElementById('notifActive').value = data.is_active.toString();
-            document.getElementById('modalTitle').textContent = 'Edit Notification';
-            new bootstrap.Modal(document.getElementById('notifModal')).show();
+        function typeBadge(type) {
+            const map = {
+                system: 'bg-secondary bg-opacity-25 text-light',
+                promo: 'bg-success bg-opacity-25 text-success',
+                warning: 'bg-warning bg-opacity-25 text-warning',
+                info: 'bg-info bg-opacity-25 text-info',
+                analysis: 'bg-primary bg-opacity-25 text-primary',
+                education: 'bg-info bg-opacity-25 text-info',
+                event: 'bg-danger bg-opacity-25 text-danger'
+            };
+            const t = (type || 'info').toLowerCase();
+            return '<span class="badge ' + (map[t] || map.info) + '">' + escapeHtml(t) + '</span>';
+        }
+
+        function statusBadge(item) {
+            const st = (item.status || (item.is_active ? 'active' : 'inactive')).toLowerCase();
+            if (st === 'active') {
+                return '<span class="badge bg-success bg-opacity-25 text-success">active</span>';
+            }
+            if (st === 'expired') {
+                return '<span class="badge bg-warning bg-opacity-25 text-warning">expired</span>';
+            }
+            return '<span class="badge bg-secondary">inactive</span>';
         }
 
         function openDelete(id) {
@@ -249,103 +429,168 @@
             new bootstrap.Modal(document.getElementById('deleteModal')).show();
         }
 
-        function typeBadge(type) {
-            const map = {
-                'info': 'bg-info bg-opacity-25 text-info',
-                'warning': 'bg-warning bg-opacity-25 text-warning',
-                'promo': 'bg-success bg-opacity-25 text-success',
-                'system': 'bg-secondary bg-opacity-25 text-light'
-            };
-            return `<span class="badge ${map[type] || 'bg-secondary'}">${type}</span>`;
+        function openEdit(item) {
+            document.getElementById('notifId').value = item.id || '';
+            document.getElementById('notifTitle').value = item.title || '';
+            document.getElementById('notifDescription').value = item.description || item.message || '';
+            document.getElementById('notifType').value = (item.type || 'system').toLowerCase();
+            document.getElementById('notifCtaUrl').value = item.cta_url || '';
+            document.getElementById('notifImageUrl').value = item.image_url || '';
+            document.getElementById('notifExpiryDate').value = toLocalDateTimeInput(item.expiry_date);
+            document.getElementById('notifActive').value = item.is_active ? 'true' : 'false';
+            document.getElementById('notifTargetRole').value = (item.target_role || 'all').toLowerCase();
+            document.getElementById('modalTitle').textContent = 'Edit Notification';
+            new bootstrap.Modal(document.getElementById('notifModal')).show();
+        }
+
+        function renderTable(list) {
+            const tbody = document.getElementById('notifTableBody');
+            if (!Array.isArray(list) || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Tidak ada notifikasi ditemukan</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = list.map(function (n, i) {
+                const desc = escapeHtml((n.description || n.message || '').trim());
+                const createdAt = n.created_at ? new Date(n.created_at).toLocaleString('id-ID') : '-';
+                return [
+                    '<tr>',
+                    '<td class="small">' + (i + 1) + '</td>',
+                    '<td>',
+                    '<div class="fw-semibold" style="color:var(--text-heading)">' + escapeHtml(n.title || '-') + '</div>',
+                    '<div class="small text-muted notification-desc" title="' + desc + '">' + (desc || '-') + '</div>',
+                    '</td>',
+                    '<td>' + typeBadge(n.type) + '</td>',
+                    '<td>' + statusBadge(n) + '</td>',
+                    '<td class="small text-muted">' + escapeHtml(createdAt) + '</td>',
+                    '<td class="text-end" style="padding-right:20px;">',
+                    '<button class="btn-action-edit" onclick="openEditById(\'' + escapeHtml(n.id || '') + '\')"><i class="fa-solid fa-pen me-1"></i>Edit</button>',
+                    '<button class="btn-action-delete" onclick="openDelete(\'' + escapeHtml(n.id || '') + '\')"><i class="fa-solid fa-trash me-1"></i>Delete</button>',
+                    '</td>',
+                    '</tr>'
+                ].join('');
+            }).join('');
+        }
+
+        let cachedNotifications = [];
+        function openEditById(id) {
+            const item = cachedNotifications.find(function (n) { return n.id === id; });
+            if (!item) return;
+            openEdit(item);
+        }
+
+        function buildQuery() {
+            const p = new URLSearchParams();
+            const typeVal = document.getElementById('filterType').value;
+            const statusVal = document.getElementById('filterStatus').value;
+            if (typeVal) p.set('type', typeVal);
+            if (statusVal) p.set('status', statusVal);
+            return p.toString();
+        }
+
+        function applyLocalSearch(list) {
+            const keyword = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            if (!keyword) return list;
+            return list.filter(function (n) {
+                const title = (n.title || '').toLowerCase();
+                const desc = (n.description || n.message || '').toLowerCase();
+                return title.indexOf(keyword) >= 0 || desc.indexOf(keyword) >= 0;
+            });
         }
 
         async function loadNotifications() {
             const tbody = document.getElementById('notifTableBody');
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</td></tr>';
 
             try {
-                const res = await fetch(`${API_BASE}/notifications`, {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
+                const q = buildQuery();
+                const url = q ? (API_BASE + '?' + q) : API_BASE;
+                const res = await fetch(url, { credentials: 'include' });
                 const json = await res.json();
-                const list = json.data || [];
-
-                if (list.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No notifications found</td></tr>';
-                    return;
+                if (!res.ok) {
+                    throw new Error(json.error || 'Gagal memuat daftar');
                 }
-
-                tbody.innerHTML = list.map((n, i) => `
-                    <tr>
-                        <td class="small">${i + 1}</td>
-                        <td><strong class="text-main">${n.title}</strong><br><small class="text-muted">${n.message.substring(0, 60)}...</small></td>
-                        <td>${typeBadge(n.type)}</td>
-                        <td><span class="badge bg-dark border border-secondary">${n.target_role}</span></td>
-                        <td>${n.is_active ? '<span class="badge bg-success bg-opacity-25 text-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>'}</td>
-                        <td class="small text-muted">${new Date(n.created_at).toLocaleDateString()}</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-info me-1" disabled title="Tersedia di Sprint 2" style="opacity:.4;cursor:not-allowed;"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" disabled title="Tersedia di Sprint 2" style="opacity:.4;cursor:not-allowed;"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `).join('');
+                cachedNotifications = Array.isArray(json.data) ? json.data : [];
+                renderTable(applyLocalSearch(cachedNotifications));
             } catch (e) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Failed to load</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Gagal memuat daftar</td></tr>';
             }
         }
 
         async function saveNotification() {
             const id = document.getElementById('notifId').value;
-            const body = {
-                title: document.getElementById('notifTitle').value,
-                message: document.getElementById('notifMessage').value,
-                type: document.getElementById('notifType').value,
-                target_role: document.getElementById('notifTarget').value,
+            const payload = {
+                title: (document.getElementById('notifTitle').value || '').trim(),
+                description: (document.getElementById('notifDescription').value || '').trim(),
+                type: (document.getElementById('notifType').value || '').trim(),
+                cta_url: (document.getElementById('notifCtaUrl').value || '').trim(),
+                image_url: (document.getElementById('notifImageUrl').value || '').trim(),
+                expiry_date: (document.getElementById('notifExpiryDate').value || '').trim(),
+                target_role: (document.getElementById('notifTargetRole').value || '').trim(),
                 is_active: document.getElementById('notifActive').value === 'true'
             };
 
-            const url = id ? `${API_BASE}/notifications/${id}` : `${API_BASE}/notifications`;
+            if (!payload.title || !payload.description || !payload.type) {
+                showToast('Field wajib: title, description, type', 'error');
+                return;
+            }
+
             const method = id ? 'PUT' : 'POST';
+            const url = id ? (API_BASE + '/' + id) : API_BASE;
 
             try {
                 const res = await fetch(url, {
-                    method,
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-                    body: JSON.stringify(body)
+                    method: method,
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
-                if (res.ok) {
-                    bootstrap.Modal.getInstance(document.getElementById('notifModal')).hide();
-                    loadNotifications();
-                } else {
-                    alert('Failed to save');
+                const json = await res.json();
+                if (!res.ok) {
+                    throw new Error(json.error || 'Gagal menyimpan notifikasi');
                 }
+                bootstrap.Modal.getInstance(document.getElementById('notifModal')).hide();
+                showToast(id ? 'Notifikasi berhasil diperbarui' : 'Notifikasi berhasil dibuat', 'success');
+                loadNotifications();
             } catch (e) {
-                alert('Error: ' + e.message);
+                showToast(e.message || 'Gagal menyimpan notifikasi', 'error');
             }
         }
 
         async function confirmDelete() {
             const id = document.getElementById('deleteId').value;
+            if (!id) return;
             try {
-                await fetch(`${API_BASE}/notifications/${id}`, {
+                const res = await fetch(API_BASE + '/' + id, {
                     method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + token }
+                    credentials: 'include'
                 });
+                const json = await res.json();
+                if (!res.ok) {
+                    throw new Error(json.error || 'Gagal menghapus notifikasi');
+                }
                 bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                showToast('Notifikasi berhasil dihapus', 'success');
                 loadNotifications();
             } catch (e) {
-                alert('Error: ' + e.message);
+                showToast(e.message || 'Gagal menghapus notifikasi', 'error');
             }
         }
 
-        function toggleSubmenu(el) {
-            const parent  = el.closest('.nav-item-group');
-            const submenu = parent.querySelector('.nav-submenu');
-            el.classList.toggle('open');
-            submenu.classList.toggle('open');
-        }
-
-        document.addEventListener('DOMContentLoaded', loadNotifications);
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('filterType').addEventListener('change', loadNotifications);
+            document.getElementById('filterStatus').addEventListener('change', loadNotifications);
+            document.getElementById('searchInput').addEventListener('input', function () {
+                if (searchTimer) {
+                    clearTimeout(searchTimer);
+                }
+                searchTimer = setTimeout(function () {
+                    renderTable(applyLocalSearch(cachedNotifications));
+                }, 220);
+            });
+            loadNotifications();
+        });
     </script>
 </body>
+
 </html>

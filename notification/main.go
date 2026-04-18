@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	godotenv.Load()
+	_ = godotenv.Load()
 
 	if err := database.Init(); err != nil {
 		log.Fatalf("[NOTIFICATION] %v", err)
@@ -26,20 +26,7 @@ func main() {
 	database.Seed()
 
 	r := gin.Default()
-	// TODO(queue): Ganti _ dengan svc dan uncomment workers di bawah saat siap di-deploy
-	// __ := routes.Register(r)
 	svc := routes.Register(r)
-	// import (
-	//   "context"
-	//   "os/signal"
-	//   "syscall"
-	//   "notification/core/queue"
-	// )
-	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	// defer stop()
-	// svc := routes.Register(r)
-	// go svc.StartRetryWorker(ctx)
-	// go queue.StartWorker(ctx, svc)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
@@ -48,5 +35,7 @@ func main() {
 
 	port := database.GetEnv("PORT", "5003")
 	log.Printf("[NOTIFICATION] Service running on :%s", port)
-	r.Run(":" + port)
+	if err := r.Run(":" + port); err != nil {
+		log.Fatalf("[NOTIFICATION] Server failed: %v", err)
+	}
 }

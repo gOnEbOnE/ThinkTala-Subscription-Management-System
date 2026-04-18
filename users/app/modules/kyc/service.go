@@ -47,15 +47,25 @@ func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
 	if err != nil {
 		log.Printf("[KYC NOTIF] Notification service tidak tersedia (%v), fallback SMTP", err)
-		return // Fallback handled di sendKYCFallbackEmail
+		// Derive status dari eventType agar fallback email sesuai
+		statusFallback := "approved"
+		if strings.Contains(eventType, "reject") {
+			statusFallback = "rejected"
+		}
+		sendKYCFallbackEmail(to, vars["full_name"], statusFallback, vars["reject_reason"])
+		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		var result map[string]any
 		json.NewDecoder(resp.Body).Decode(&result)
-		log.Printf("[KYC NOTIF] Gagal kirim via template (%d: %v), fallback SMTP", resp.StatusCode, result["error"])
-		// log.Printf("[KYC NOTIF] Gagal kirim via template (%d: %v) — retry worker akan handle", resp.StatusCode, result["error"])
+		log.Printf("[KYC NOTIF] Gagal kirim via template (%d), fallback SMTP", resp.StatusCode)
+		statusFallback := "approved"
+		if strings.Contains(eventType, "reject") {
+			statusFallback = "rejected"
+		}
+		sendKYCFallbackEmail(to, vars["full_name"], statusFallback, vars["reject_reason"])
 	}
 }
 
@@ -396,27 +406,21 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 	}, nil
 }
 
-// sendKYCNotification mengirim email notifikasi ke user saat KYC di-approve/reject
-// Menggunakan Notification Service dengan fallback SMTP
+// sendKYCNotification mengirim email notifikasi ke user saat KYC di-approve/reject.
+// dispatchKYCNotification sudah menangani fallback SMTP secara internal —
+// jangan panggil sendKYCFallbackEmail di sini agar tidak terjadi double message.
 func (s *Service) sendKYCNotification(email, fullName, status, rejectReason string) {
 	go func() {
 		switch status {
 		case "approved":
-			// Dispatch ke notification service dengan template kyc_approved
 			dispatchKYCNotification("kyc_approved", email, map[string]string{
 				"full_name": fullName,
 			})
-			// Fallback jika gagal
-			sendKYCFallbackEmail(email, fullName, status, rejectReason)
-
 		case "rejected":
-			// Dispatch ke notification service dengan template kyc_rejected
 			dispatchKYCNotification("kyc_rejected", email, map[string]string{
 				"full_name":     fullName,
 				"reject_reason": rejectReason,
 			})
-			// Fallback jika gagal
-			sendKYCFallbackEmail(email, fullName, status, rejectReason)
 		}
 	}()
 }

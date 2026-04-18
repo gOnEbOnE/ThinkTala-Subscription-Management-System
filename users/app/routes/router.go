@@ -61,16 +61,15 @@ func Init(app *core.App,
 	app.Router.HandleFunc("POST /api/auth/register", registerController.Submit)
 	app.Router.HandleFunc("POST /api/auth/verify-otp", registerController.VerifyOTP)
 	app.Router.HandleFunc("POST /api/auth/resend-otp", registerController.ResendOTP)
+	app.Router.HandleFunc("POST /api/auth/logout", loginController.Logout)
+	app.Router.HandleFunc("POST /api/auth/assume-role", loginController.AssumeRole)
+	app.Router.HandleFunc("GET /api/auth/roles", loginController.GetRoles)
 
 	// ==============================
 	// 7. KYC Routes (Protected via Gateway Auth)
 	// ==============================
 	app.Router.HandleFunc("POST /api/kyc/submit", kycController.Submit)
 	app.Router.HandleFunc("GET /api/kyc/status", kycController.Status)
-
-	// Serve uploaded KYC files
-	kycFS := http.FileServer(http.Dir("./public/uploads/kyc"))
-	app.Router.Handle("GET /uploads/kyc/", http.StripPrefix("/uploads/kyc/", kycFS))
 
 	// ==============================
 	// 8. Admin KYC Routes (Protected via Gateway Auth)

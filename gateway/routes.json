@@ -1,75 +1,153 @@
 {
-  "allowedOrigins": ["*"],
+  "allowedOrigins": [
+    "*"
+  ],
   "routes": [
     {
       "path": "/api/auth/register",
       "target": "http://localhost:2006",
-      "cors": true,
-      "description": "Register API"
+      "cors": true
     },
     {
       "path": "/api/auth/verify-otp",
       "target": "http://localhost:2006",
-      "cors": true,
-      "description": "Verify OTP"
+      "cors": true
     },
     {
       "path": "/api/auth/resend-otp",
       "target": "http://localhost:2006",
-      "cors": true,
-      "description": "Resend OTP"
+      "cors": true
     },
     {
       "path": "/api/auth",
       "target": "http://localhost:2006",
-      "cors": true,
-      "description": "Auth API"
+      "cors": true
+    },
+    {
+      "path": "/api/auth/logout",
+      "target": "http://localhost:2006",
+      "cors": true
+    },
+    {
+      "path": "/api/auth/assume-role",
+      "target": "http://localhost:2006",
+      "cors": true
+    },
+    {
+      "path": "/api/auth/roles",
+      "target": "http://localhost:2006",
+      "cors": true
     },
     {
       "path": "/account/login/auth",
       "target": "http://localhost:2006",
-      "cors": true,
-      "description": "Login POST"
-    },
-    {
-      "path": "/api/operational/",
-      "target": "http://localhost:5005",
-      "cors": true,
-      "description": "Operational API"
+      "cors": true
     },
     {
       "path": "/api/kyc/",
       "target": "http://localhost:2006",
       "cors": true,
       "auth": true,
-      "description": "KYC API (Users Service)"
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/admin/kyc",
       "target": "http://localhost:2006",
       "cors": true,
       "auth": true,
-      "description": "Admin KYC List API"
+      "roles": ["COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/admin/kyc/",
       "target": "http://localhost:2006",
       "cors": true,
       "auth": true,
-      "description": "Admin KYC Detail/Action API"
+      "roles": ["COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/notifications/public",
+      "target": "http://localhost:5003",
+      "cors": true
+    },
+    {
+      "path": "/api/notifications/public/",
+      "target": "http://localhost:5003",
+      "cors": true
+    },
+    {
+      "path": "/api/notifications",
+      "target": "http://localhost:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/notifications/",
       "target": "http://localhost:5003",
       "cors": true,
-      "description": "Notification API"
+      "auth": true,
+      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
     },
-    { "path": "/api/help/", "target": "http://localhost:5003", "cors": true, "description": "Notification templates & help API" },
+    {
+      "path": "/api/help/",
+      "target": "http://localhost:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["OPERASIONAL", "COMPLIANCE", "CLIENT", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/admin/packages",
+      "target": "http://localhost:5004",
+      "cors": true,
+      "auth": true,
+      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/admin/packages/",
+      "target": "http://localhost:5004",
+      "cors": true,
+      "auth": true,
+      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/subscriptions",
+      "target": "http://localhost:5004",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"]
+    },
     {
       "path": "/api/subscriptions/",
       "target": "http://localhost:5004",
       "cors": true,
-      "description": "Subscription API"
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/subscription/catalog",
+      "target": "http://localhost:5004",
+      "cors": true
+    },
+    {
+      "path": "/api/admin/orders",
+      "target": "http://localhost:5005",
+      "cors": true,
+      "auth": true,
+      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/admin/orders/",
+      "target": "http://localhost:5005",
+      "cors": true,
+      "auth": true,
+      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/operational/",
+      "target": "http://localhost:5005",
+      "cors": true,
+      "auth": true,
+      "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
     }
   ]
 }

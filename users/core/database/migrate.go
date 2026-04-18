@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"log"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -117,7 +118,7 @@ func MigrateAndSeed(db interface{}) {
 		address TEXT NOT NULL,
 		birthdate DATE NOT NULL,
 		phone VARCHAR(20) NOT NULL,
-		ktp_image VARCHAR(500) NOT NULL,
+		ktp_image TEXT NOT NULL,
 		status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
 		reject_reason TEXT,
 		reviewed_by UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -131,12 +132,20 @@ func MigrateAndSeed(db interface{}) {
 	CREATE INDEX IF NOT EXISTS idx_kyc_sub_status ON kyc_submissions(status);
 	CREATE INDEX IF NOT EXISTS idx_notif_active ON notifications(is_active);
 	CREATE INDEX IF NOT EXISTS idx_subs_active ON subscription_packages(is_active);
+
+	-- Upgrade ktp_image to TEXT if it was previously VARCHAR(500)
+	ALTER TABLE kyc_submissions ALTER COLUMN ktp_image TYPE TEXT;
 	`
 
 	log.Println("Menjalankan Migrasi PostgreSQL...")
 	_, err := pool.Exec(ctx, migrationSQL)
 	if err != nil {
-		log.Fatalf("Gagal menjalankan migrasi: %v", err)
+		// Ignore duplicate object errors from concurrent migrations (account & users share DB)
+		if strings.Contains(err.Error(), "duplicate key value") || strings.Contains(err.Error(), "already exists") {
+			log.Printf("[WARN] Migrasi race condition (safe to ignore): %v", err)
+		} else {
+			log.Fatalf("Gagal menjalankan migrasi: %v", err)
+		}
 	}
 
 	// ===== SEEDER STATIC (tanpa parameter $1, bisa batch) =====

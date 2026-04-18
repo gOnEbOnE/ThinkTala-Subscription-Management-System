@@ -45,6 +45,22 @@ func (c *Controller) CreatePackageHandler(w http.ResponseWriter, r *http.Request
 
 	result, err := c.dispatcher.DispatchAndWait(r.Context(), "create_package", payload, concurrency.PriorityHigh)
 	if err != nil {
+		if err.Error() == "nama paket sudah digunakan, gunakan nama lain" {
+			w.WriteHeader(http.StatusConflict)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+		if err.Error() == "harga tahunan tidak boleh lebih rendah dari harga bulanan" {
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
 		c.response.JSON(w, r, map[string]interface{}{
 			"success": false,
 			"message": err.Error(),
@@ -143,6 +159,31 @@ func (c *Controller) UpdatePackageHandler(w http.ResponseWriter, r *http.Request
 	result, err := c.dispatcher.DispatchAndWait(r.Context(), "update_package", reqPayload, concurrency.PriorityHigh)
 	if err != nil {
 		if err.Error() == "paket tidak ditemukan atau sudah dihapus" {
+			w.WriteHeader(http.StatusNotFound)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+		if err.Error() == "tidak dapat mengubah paket yang sedang aktif" {
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+		if err.Error() == "nama paket sudah digunakan, gunakan nama lain" {
+			w.WriteHeader(http.StatusConflict)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+		if err.Error() == "harga tahunan tidak boleh lebih rendah dari harga bulanan" {
+			w.WriteHeader(http.StatusBadRequest)
 			c.response.JSON(w, r, map[string]interface{}{
 				"success": false,
 				"message": err.Error(),
@@ -185,12 +226,31 @@ func (c *Controller) DeletePackageHandler(w http.ResponseWriter, r *http.Request
 	_, err := c.dispatcher.DispatchAndWait(r.Context(), "delete_package", id, concurrency.PriorityHigh)
 	if err != nil {
 		if err.Error() == "paket tidak ditemukan atau sudah dihapus" {
+			w.WriteHeader(http.StatusNotFound)
 			c.response.JSON(w, r, map[string]interface{}{
 				"success": false,
 				"message": err.Error(),
 			})
 			return
 		}
+		if err.Error() == "tidak dapat menghapus paket yang sedang aktif" {
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+		if err.Error() == "tidak dapat menghapus paket yang masih memiliki pelanggan aktif" {
+			w.WriteHeader(http.StatusConflict)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success": false,
+				"message": err.Error(),
+			})
+			return
+		}
+
+		w.WriteHeader(http.StatusInternalServerError)
 		c.response.JSON(w, r, map[string]interface{}{
 			"success": false,
 			"message": err.Error(),
@@ -202,6 +262,44 @@ func (c *Controller) DeletePackageHandler(w http.ResponseWriter, r *http.Request
 	c.response.JSON(w, r, map[string]interface{}{
 		"success": true,
 		"message": "Paket berhasil dihapus",
+	})
+}
+
+// TogglePackageStatusHandler - PATCH /api/admin/packages/{id}/status
+func (c *Controller) TogglePackageStatusHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if id == "" {
+		const prefix = "/api/admin/packages/"
+		const suffix = "/status"
+		path := r.URL.Path
+		if len(path) > len(prefix)+len(suffix) {
+			id = path[len(prefix) : len(path)-len(suffix)]
+		}
+	}
+	if id == "" {
+		c.response.JSON(w, r, map[string]interface{}{
+			"success": false,
+			"message": "ID paket harus disertakan pada URL",
+		})
+		return
+	}
+
+	result, err := c.dispatcher.DispatchAndWait(r.Context(), "toggle_package_status", id, concurrency.PriorityHigh)
+	if err != nil {
+		if err.Error() == "paket tidak ditemukan atau sudah dihapus" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		c.response.JSON(w, r, map[string]interface{}{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.response.JSON(w, r, map[string]interface{}{
+		"success": true,
+		"message": "Status paket berhasil diubah",
+		"data":    result,
 	})
 }
 
@@ -247,4 +345,12 @@ func (s *packageService) ProcessDeletePackageJob(ctx context.Context, payload in
 		return nil, fmt.Errorf("invalid payload type for DeletePackageJob")
 	}
 	return nil, s.DeletePackage(ctx, id)
+}
+
+func (s *packageService) ProcessTogglePackageStatusJob(ctx context.Context, payload interface{}) (interface{}, error) {
+	id, ok := payload.(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload type for TogglePackageStatusJob")
+	}
+	return s.TogglePackageStatus(ctx, id)
 }

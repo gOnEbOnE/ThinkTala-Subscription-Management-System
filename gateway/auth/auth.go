@@ -128,6 +128,26 @@ func isRoleAllowed(path string, role string) bool {
 		return role == "CLIENT" || role == "COMPLIANCE" || role == "OPERASIONAL"
 	}
 
+	// /api/notifications* → OPERASIONAL only (not CLIENT)
+	if strings.HasPrefix(path, "/api/notifications") {
+		return role == "OPERASIONAL"
+	}
+
+	// /api/help/ → OPERASIONAL can manage notification templates
+	if strings.HasPrefix(path, "/api/help/") {
+		return role == "OPERASIONAL"
+	}
+
+	// /api/operational/ → OPERASIONAL only
+	if strings.HasPrefix(path, "/api/operational/") {
+		return role == "OPERASIONAL"
+	}
+
+	// /api/ops/ → OPERASIONAL can access ops APIs
+	if strings.HasPrefix(path, "/api/ops/") {
+		return role == "OPERASIONAL"
+	}
+
 	// /client/* → CLIENT role
 	if strings.HasPrefix(path, "/client/") && role == "CLIENT" {
 		return true

@@ -14,16 +14,35 @@ func Migrate() {
 		CREATE TABLE IF NOT EXISTS notifications (
 			id          VARCHAR(36) PRIMARY KEY,
 			title       TEXT NOT NULL,
-			message     TEXT NOT NULL,
+			description TEXT NOT NULL DEFAULT '',
+			message     TEXT NOT NULL DEFAULT '',
 			type        VARCHAR(50) NOT NULL DEFAULT 'info',
 			target_role VARCHAR(50) NOT NULL DEFAULT 'all',
+			cta_url     TEXT,
+			image_url   TEXT,
+			expiry_date TIMESTAMPTZ,
 			is_active   BOOLEAN NOT NULL DEFAULT TRUE,
 			created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			created_by  VARCHAR(255),
 			updated_by  VARCHAR(255)
 		);
+
+		ALTER TABLE notifications ADD COLUMN IF NOT EXISTS description TEXT;
+		ALTER TABLE notifications ADD COLUMN IF NOT EXISTS cta_url TEXT;
+		ALTER TABLE notifications ADD COLUMN IF NOT EXISTS image_url TEXT;
+		ALTER TABLE notifications ADD COLUMN IF NOT EXISTS expiry_date TIMESTAMPTZ;
+
+		UPDATE notifications
+		SET description = COALESCE(NULLIF(description, ''), message)
+		WHERE description IS NULL OR description = '';
+
+		UPDATE notifications
+		SET message = COALESCE(NULLIF(message, ''), description, '')
+		WHERE message IS NULL OR message = '';
+
 		CREATE INDEX IF NOT EXISTS idx_notifications_active ON notifications(is_active, target_role);
+		CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(type);
 	`)
 	if err != nil {
 		log.Printf("[WARN] migrate notifications: %v", err)

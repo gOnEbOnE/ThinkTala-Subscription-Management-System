@@ -26,23 +26,28 @@ FROM alpine:latest
 WORKDIR /app
 
 # Install timezone data
-RUN apk --no-cache add tzdata
+RUN apk --no-cache add tzdata openssl
 
 # Copy binary dari builder
 COPY --from=builder /app/users /app/users
 RUN chmod +x /app/users
 
-# Copy env file (opsional)
-# Copy env file
-COPY .env .env
-
-# ---> TAMBAHKAN BARIS INI UNTUK MENGCOPY FILE PEM <---
-COPY private.pem public.pem ./
+# Copy entrypoint
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 COPY public/ ./public/
+# Copy pre-committed RSA key pair (baked into image)
+COPY certs/ ./certs/
+
+RUN mkdir -p certs
+
+# Ensure uploads directory exists at build time
+# (Railway Volume should be mounted at /app/public/uploads via Railway dashboard)
+RUN mkdir -p /app/public/uploads/kyc
 
 # Expose port aplikasi
 EXPOSE 2006
 
-# Jalankan aplikasi
-CMD ["/app/users"]
+# Gunakan entrypoint untuk decode JWT keys dari env vars Railway
+ENTRYPOINT ["/app/entrypoint.sh"]
