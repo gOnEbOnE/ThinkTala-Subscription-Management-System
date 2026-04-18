@@ -85,5 +85,6 @@ func Init(app *core.App,
 	// 9. Admin User Management Routes (Protected via Gateway Auth - SUPERADMIN only)
 	// ==============================
 	app.Router.HandleFunc("POST /api/admin/users", adminController.CreateUser)
+	app.Router.HandleFunc("GET /api/admin/users", adminController.GetUsers)
 
 }

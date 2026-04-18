@@ -163,3 +163,45 @@ func (s *Service) ProcessCreateUserJob(ctx context.Context, payload any) (any, e
 		CreatedAt: time.Now(),
 	}, nil
 }
+
+// ProcessGetUsersJob — dipanggil oleh worker untuk mengambil daftar akun internal
+func (s *Service) ProcessGetUsersJob(ctx context.Context, payload any) (any, error) {
+	data, ok := payload.(GetUsersParams)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload format")
+	}
+
+	// Validate / Default pagination
+	if data.Page < 1 {
+		data.Page = 1
+	}
+	if data.PerPage < 1 {
+		data.PerPage = 20
+	}
+
+	// Fetch data
+	users, err := s.repo.GetInternalUsers(ctx, data)
+	if err != nil {
+		log.Printf("[ADMIN] GetUsers failed: %v", err)
+		return nil, fmt.Errorf("Gagal mengambil data user")
+	}
+
+	// Fetch count
+	total, err := s.repo.CountInternalUsers(ctx, data)
+	if err != nil {
+		log.Printf("[ADMIN] CountUsers failed: %v", err)
+		return nil, fmt.Errorf("Gagal menghitung jumlah user")
+	}
+
+	if users == nil {
+		users = []UserListItem{}
+	}
+
+	return GetUsersResponse{
+		Data:    users,
+		Total:   total,
+		Page:    data.Page,
+		PerPage: data.PerPage,
+	}, nil
+}
+

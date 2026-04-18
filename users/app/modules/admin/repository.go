@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/master-abror/zaframework/core/database"
@@ -13,6 +14,8 @@ type Repository interface {
 	FindRoleByCode(ctx context.Context, code string) (string, error)
 	FindDefaultGroupAndLevel(ctx context.Context) (groupID string, levelID string, err error)
 	CreateUser(ctx context.Context, id, name, email, hashedPassword, roleID, groupID, levelID string) error
+	GetInternalUsers(ctx context.Context, params GetUsersParams) ([]UserListItem, error)
+	CountInternalUsers(ctx context.Context, params GetUsersParams) (int, error)
 }
 
 type adminRepo struct {
@@ -98,4 +101,84 @@ func (r *adminRepo) CreateUser(ctx context.Context, id, name, email, hashedPassw
 		VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 	`, id, name, email, hashedPassword, groupID, levelID, roleID)
 	return err
+}
+
+// buildInternalUsersQuery constructs the query and arguments for listing/counting users
+func buildInternalUsersQuery(isCount bool, params GetUsersParams) (string, []any) {
+	selectClause := "SELECT u.id, u.name, u.email, r.code as role, u.status, u.created_at, u.updated_at"
+	if isCount {
+		selectClause = "SELECT COUNT(*)"
+	}
+
+	query := selectClause + `
+		FROM users u
+		JOIN roles r ON u.role_id = r.id
+		WHERE 1=1
+	`
+
+	args := []any{}
+	argID := 1
+
+	if params.Search != "" {
+		searchTerm := "%" + params.Search + "%"
+		query += fmt.Sprintf(" AND (u.name ILIKE $%d OR u.email ILIKE $%d)", argID, argID+1)
+		args = append(args, searchTerm, searchTerm)
+		argID += 2
+	}
+
+	if params.Role != "" {
+		query += fmt.Sprintf(" AND UPPER(r.code) = UPPER($%d)", argID)
+		args = append(args, params.Role)
+		argID++
+	}
+
+	if params.Status != "" {
+		query += fmt.Sprintf(" AND UPPER(u.status) = UPPER($%d)", argID)
+		args = append(args, params.Status)
+		argID++
+	}
+
+	return query, args
+}
+
+// GetInternalUsers mengambil daftar akun internal berdasarkan filter & paginasi
+func (r *adminRepo) GetInternalUsers(ctx context.Context, params GetUsersParams) ([]UserListItem, error) {
+	query, args := buildInternalUsersQuery(false, params)
+
+	// Sorting and pagination
+	query += " ORDER BY u.created_at DESC"
+	
+	if params.PerPage > 0 {
+		offset := (params.Page - 1) * params.PerPage
+		query += fmt.Sprintf(" LIMIT %d OFFSET %d", params.PerPage, offset)
+	}
+
+	rows, err := r.db.Pool.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []UserListItem
+	for rows.Next() {
+		var u UserListItem
+		if err := rows.Scan(&u.UserID, &u.FullName, &u.Email, &u.Role, &u.Status, &u.CreatedAt, &u.LastLoginAt); err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+
+	return users, nil
+}
+
+// CountInternalUsers menghitung total baris untuk paginasi
+func (r *adminRepo) CountInternalUsers(ctx context.Context, params GetUsersParams) (int, error) {
+	query, args := buildInternalUsersQuery(true, params)
+	
+	var count int
+	err := r.db.Pool.QueryRow(ctx, query, args...).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

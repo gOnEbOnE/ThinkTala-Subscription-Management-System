@@ -52,7 +52,8 @@
         '/ops/subscriptions'          : { activeKey: 'subscriptions' },
         '/ops/subscriptions-create'   : { activeKey: 'subscriptions' },
         '/ops/subscriptions-edit'     : { activeKey: 'subscriptions' },
-        '/ops/create-user'            : { activeKey: 'create-user' },
+        '/ops/manage-users'           : { activeKey: 'manage-users' },
+        '/ops/create-user'            : { activeKey: 'manage-users' },
         '/management/dashboard-customers': { activeKey: 'management-dashboard' },
         '/management/dashboard-packages': { activeKey: 'management-packages' },
     };
@@ -119,9 +120,9 @@
         </li>` : ''}
 
         ${canCreateUser ? `<li class="nav-item">
-            <a class="nav-link${isActive('create-user')}" href="/ops/create-user">
-                <i class="fa-solid fa-user-plus icon-left"></i>
-                <span class="link-text">Buat Akun Internal</span>
+            <a class="nav-link${isActive('manage-users')}" href="/ops/manage-users">
+                <i class="fa-solid fa-users icon-left"></i>
+                <span class="link-text">Kelola Akun Internal</span>
             </a>
         </li>` : ''}
 

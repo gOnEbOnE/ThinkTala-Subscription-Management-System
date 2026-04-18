@@ -3,6 +3,7 @@ package admin
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/master-abror/zaframework/core/concurrency"
@@ -112,4 +113,43 @@ func (c *Controller) CreateUser(w http.ResponseWriter, r *http.Request) {
 		"status":     createResult.Status,
 		"created_at": createResult.CreatedAt,
 	})
+}
+
+// GetUsers — GET /api/admin/users (daftar user internal untuk Superadmin)
+func (c *Controller) GetUsers(w http.ResponseWriter, r *http.Request) {
+	// 1. Cek role: hanya SUPERADMIN
+	userRole := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Role")))
+	userLevel := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Level")))
+	if userRole != "SUPERADMIN" && userLevel != "SUPERADMIN" {
+		ehttp.ApiJSON(w, r, http.StatusForbidden, false, "Akses ditolak: hanya Superadmin yang dapat mengakses data akun internal", nil)
+		return
+	}
+
+	// 2. Parse query parameters
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	perPage, _ := strconv.Atoi(r.URL.Query().Get("per_page"))
+	
+	params := GetUsersParams{
+		Page:    page,
+		PerPage: perPage,
+		Role:    strings.TrimSpace(r.URL.Query().Get("role")),
+		Status:  strings.TrimSpace(r.URL.Query().Get("status")),
+		Search:  strings.TrimSpace(r.URL.Query().Get("search")),
+	}
+
+	// 3. Dispatch ke worker
+	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_get_users", params, concurrency.PriorityHigh)
+	if err != nil {
+		ehttp.ApiJSON(w, r, http.StatusInternalServerError, false, err.Error(), nil)
+		return
+	}
+
+	resp, ok := result.(GetUsersResponse)
+	if !ok {
+		ehttp.ApiJSON(w, r, http.StatusInternalServerError, false, "Terjadi kesalahan internal (invalid response format)", nil)
+		return
+	}
+
+	// 4. Return success
+	ehttp.ApiJSON(w, r, http.StatusOK, true, "Berhasil mengambil data", resp)
 }
