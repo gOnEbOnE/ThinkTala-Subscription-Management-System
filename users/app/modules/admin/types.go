@@ -56,3 +56,15 @@ type GetUsersResponse struct {
 	Page    int            `json:"page"`
 	PerPage int            `json:"per_page"`
 }
+
+// UserDetail — data lengkap satu user untuk detail page (PBI-53)
+type UserDetail struct {
+	UserID      string     `json:"user_id"`
+	FullName    string     `json:"full_name"`
+	Email       string     `json:"email"`
+	Role        string     `json:"role"`
+	Status      string     `json:"status"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	LastLoginAt *time.Time `json:"last_login_at"`
+}

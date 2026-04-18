@@ -142,6 +142,7 @@ func main() {
 	app.RegisterJob("admin_kyc_review", kycService.ProcessAdminKYCReviewJob)
 	app.RegisterJob("admin_create_user", adminService.ProcessCreateUserJob)
 	app.RegisterJob("admin_get_users", adminService.ProcessGetUsersJob)
+	app.RegisterJob("admin_get_user_detail", adminService.ProcessGetUserDetailJob)
 
 	// ============================================================
 	// 3. ROUTING

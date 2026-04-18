@@ -54,6 +54,8 @@
         '/ops/subscriptions-edit'     : { activeKey: 'subscriptions' },
         '/ops/manage-users'           : { activeKey: 'manage-users' },
         '/ops/create-user'            : { activeKey: 'manage-users' },
+        '/ops/user-detail'            : { activeKey: 'manage-users' },
+        '/ops/edit-user'              : { activeKey: 'manage-users' },
         '/management/dashboard-customers': { activeKey: 'management-dashboard' },
         '/management/dashboard-packages': { activeKey: 'management-packages' },
     };

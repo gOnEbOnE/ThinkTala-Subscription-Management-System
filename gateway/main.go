@@ -638,6 +638,9 @@ func main() {
 	http.HandleFunc("/api/admin/users", withRolesAuth([]string{"SUPERADMIN"},
 		createProxyHandler(adminUsersTarget, true),
 	))
+	http.HandleFunc("/api/admin/users/", withRolesAuth([]string{"SUPERADMIN"},
+		createProxyHandler(adminUsersTarget, true),
+	))
 	log.Printf("[GW] Protected API: /api/admin/users -> %s (SUPERADMIN)", adminUsersTarget)
 
 	// --- MANAGEMENT Dashboard API (role-protected) ---

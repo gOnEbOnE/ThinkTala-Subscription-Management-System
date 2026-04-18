@@ -205,3 +205,21 @@ func (s *Service) ProcessGetUsersJob(ctx context.Context, payload any) (any, err
 	}, nil
 }
 
+// ProcessGetUserDetailJob — dipanggil oleh worker untuk mengambil detail satu user (PBI-53)
+func (s *Service) ProcessGetUserDetailJob(ctx context.Context, payload any) (any, error) {
+	userID, ok := payload.(string)
+	if !ok || userID == "" {
+		return nil, fmt.Errorf("invalid user ID")
+	}
+
+	user, err := s.repo.FindUserByID(ctx, userID)
+	if err != nil {
+		log.Printf("[ADMIN] GetUserDetail failed: %v", err)
+		return nil, fmt.Errorf("Gagal mengambil data user")
+	}
+	if user == nil {
+		return nil, fmt.Errorf("NOT_FOUND")
+	}
+
+	return user, nil
+}

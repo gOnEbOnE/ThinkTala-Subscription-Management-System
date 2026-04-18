@@ -173,6 +173,13 @@
       "cors": true,
       "auth": true,
       "roles": ["SUPERADMIN"]
+    },
+    {
+      "path": "/api/admin/users/",
+      "target": "http://localhost:2006",
+      "cors": true,
+      "auth": true,
+      "roles": ["SUPERADMIN"]
     }
   ]
 }

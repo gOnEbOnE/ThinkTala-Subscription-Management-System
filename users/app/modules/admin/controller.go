@@ -153,3 +153,35 @@ func (c *Controller) GetUsers(w http.ResponseWriter, r *http.Request) {
 	// 4. Return success
 	ehttp.ApiJSON(w, r, http.StatusOK, true, "Berhasil mengambil data", resp)
 }
+
+// GetUserDetail — GET /api/admin/users/{id} (detail satu user untuk Superadmin, PBI-53)
+func (c *Controller) GetUserDetail(w http.ResponseWriter, r *http.Request) {
+	// 1. Cek role: hanya SUPERADMIN
+	userRole := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Role")))
+	userLevel := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Level")))
+	if userRole != "SUPERADMIN" && userLevel != "SUPERADMIN" {
+		ehttp.ApiJSON(w, r, http.StatusForbidden, false, "Akses ditolak: hanya Superadmin yang dapat mengakses data akun internal", nil)
+		return
+	}
+
+	// 2. Extract user ID from URL path
+	userID := strings.TrimSpace(r.PathValue("id"))
+	if userID == "" {
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "User ID diperlukan", nil)
+		return
+	}
+
+	// 3. Dispatch ke worker
+	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_get_user_detail", userID, concurrency.PriorityHigh)
+	if err != nil {
+		if err.Error() == "NOT_FOUND" {
+			ehttp.ApiJSON(w, r, http.StatusNotFound, false, "Akun tidak ditemukan", nil)
+			return
+		}
+		ehttp.ApiJSON(w, r, http.StatusInternalServerError, false, err.Error(), nil)
+		return
+	}
+
+	// 4. Return success
+	ehttp.ApiJSON(w, r, http.StatusOK, true, "Berhasil mengambil data user", result)
+}

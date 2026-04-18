@@ -16,6 +16,7 @@ type Repository interface {
 	CreateUser(ctx context.Context, id, name, email, hashedPassword, roleID, groupID, levelID string) error
 	GetInternalUsers(ctx context.Context, params GetUsersParams) ([]UserListItem, error)
 	CountInternalUsers(ctx context.Context, params GetUsersParams) (int, error)
+	FindUserByID(ctx context.Context, userID string) (*UserDetail, error)
 }
 
 type adminRepo struct {
@@ -181,4 +182,22 @@ func (r *adminRepo) CountInternalUsers(ctx context.Context, params GetUsersParam
 		return 0, err
 	}
 	return count, nil
+}
+
+// FindUserByID mengambil detail satu user berdasarkan ID (PBI-53)
+func (r *adminRepo) FindUserByID(ctx context.Context, userID string) (*UserDetail, error) {
+	var u UserDetail
+	err := r.db.Pool.QueryRow(ctx, `
+		SELECT u.id, u.name, u.email, r.code as role, u.status, u.created_at, u.updated_at, u.updated_at
+		FROM users u
+		JOIN roles r ON u.role_id = r.id
+		WHERE u.id = $1
+	`, userID).Scan(&u.UserID, &u.FullName, &u.Email, &u.Role, &u.Status, &u.CreatedAt, &u.UpdatedAt, &u.LastLoginAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &u, nil
 }
