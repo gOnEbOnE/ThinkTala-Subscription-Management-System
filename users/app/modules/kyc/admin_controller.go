@@ -188,9 +188,10 @@ func (c *AdminController) Reject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse JSON body for reason
+	// Parse JSON body for reason and rejected fields
 	var body struct {
-		Reason string `json:"reason"`
+		Reason         string   `json:"reason"`
+		RejectedFields []string `json:"rejected_fields"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		resp.ApiJSON(w, r, http.StatusBadRequest, false, "Format request tidak valid", nil)
@@ -203,11 +204,12 @@ func (c *AdminController) Reject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	payload := map[string]any{
-		"role":          role,
-		"kyc_id":        kycID,
-		"reviewer_id":   reviewerID,
-		"action":        "reject",
-		"reject_reason": body.Reason,
+		"role":            role,
+		"kyc_id":          kycID,
+		"reviewer_id":     reviewerID,
+		"action":          "reject",
+		"reject_reason":   body.Reason,
+		"rejected_fields": body.RejectedFields,
 	}
 
 	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_kyc_review", payload, concurrency.PriorityHigh)

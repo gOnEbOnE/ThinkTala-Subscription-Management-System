@@ -23,7 +23,7 @@ type Repository interface {
 	// Admin methods
 	ListAll(ctx context.Context, status string, search string, page int, limit int) ([]KYCListItem, int, error)
 	GetDetailByID(ctx context.Context, id string) (*KYCDetailResult, error)
-	UpdateStatus(ctx context.Context, id string, status string, reviewerID string, rejectReason string) error
+	UpdateStatus(ctx context.Context, id string, status string, reviewerID string, rejectReason string, rejectedFields []string) error
 }
 
 type kycRepo struct {
@@ -85,14 +85,14 @@ func (r *kycRepo) GetByUserID(ctx context.Context, userID string) (*KYCSubmissio
 	var sub KYCSubmission
 	err := r.db.Pool.QueryRow(ctx, `
 		SELECT id, user_id, full_name, nik, address, birthdate::TEXT, phone, ktp_image, 
-		       status, reject_reason, reviewed_by, reviewed_at, created_at, updated_at
+		       status, reject_reason, rejected_fields, reviewed_by, reviewed_at, created_at, updated_at
 		FROM kyc_submissions
 		WHERE user_id = $1
 		ORDER BY created_at DESC
 		LIMIT 1
 	`, userID).Scan(
 		&sub.ID, &sub.UserID, &sub.FullName, &sub.NIK, &sub.Address, &sub.Birthdate,
-		&sub.Phone, &sub.KTPImage, &sub.Status, &sub.RejectReason,
+		&sub.Phone, &sub.KTPImage, &sub.Status, &sub.RejectReason, &sub.RejectedFields,
 		&sub.ReviewedBy, &sub.ReviewedAt, &sub.CreatedAt, &sub.UpdatedAt,
 	)
 	if err != nil {
@@ -109,12 +109,12 @@ func (r *kycRepo) GetByID(ctx context.Context, id string) (*KYCSubmission, error
 	var sub KYCSubmission
 	err := r.db.Pool.QueryRow(ctx, `
 		SELECT id, user_id, full_name, nik, address, birthdate::TEXT, phone, ktp_image,
-		       status, reject_reason, reviewed_by, reviewed_at, created_at, updated_at
+		       status, reject_reason, rejected_fields, reviewed_by, reviewed_at, created_at, updated_at
 		FROM kyc_submissions
 		WHERE id = $1
 	`, id).Scan(
 		&sub.ID, &sub.UserID, &sub.FullName, &sub.NIK, &sub.Address, &sub.Birthdate,
-		&sub.Phone, &sub.KTPImage, &sub.Status, &sub.RejectReason,
+		&sub.Phone, &sub.KTPImage, &sub.Status, &sub.RejectReason, &sub.RejectedFields,
 		&sub.ReviewedBy, &sub.ReviewedAt, &sub.CreatedAt, &sub.UpdatedAt,
 	)
 	if err != nil {
@@ -131,7 +131,7 @@ func (r *kycRepo) UpdateResubmission(ctx context.Context, id string, fullName st
 	_, err := r.db.Pool.Exec(ctx, `
 		UPDATE kyc_submissions
 		SET full_name = $1, nik = $2, address = $3, birthdate = $4, phone = $5,
-		    ktp_image = $6, status = 'pending', reject_reason = NULL,
+		    ktp_image = $6, status = 'pending', reject_reason = NULL, rejected_fields = NULL,
 		    reviewed_by = NULL, reviewed_at = NULL, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $7
 	`, fullName, nik, address, birthdate, phone, ktpImage, id)
@@ -173,7 +173,7 @@ func (r *kycRepo) ResubmitKYC(ctx context.Context, userID string, fullName strin
 	_, err = tx.Exec(ctx, `
 		UPDATE kyc_submissions
 		SET full_name = $1, nik = $2, address = $3, birthdate = $4, phone = $5,
-		    ktp_image = $6, status = 'pending', reject_reason = NULL,
+		    ktp_image = $6, status = 'pending', reject_reason = NULL, rejected_fields = NULL,
 		    reviewed_by = NULL, reviewed_at = NULL, updated_at = CURRENT_TIMESTAMP
 		WHERE id = $7
 	`, fullName, nik, address, birthdate, phone, ktpImage, kycID)
@@ -247,14 +247,14 @@ func (r *kycRepo) GetDetailByID(ctx context.Context, id string) (*KYCDetailResul
 	var d KYCDetailResult
 	err := r.db.Pool.QueryRow(ctx, `
 		SELECT ks.id, ks.user_id, ks.full_name, ks.nik, ks.address, ks.birthdate::TEXT, ks.phone, ks.ktp_image,
-		       COALESCE(u.email, '') as email, ks.status, ks.reject_reason, ks.reviewed_by, ks.reviewed_at,
+		       COALESCE(u.email, '') as email, ks.status, ks.reject_reason, ks.rejected_fields, ks.reviewed_by, ks.reviewed_at,
 		       ks.created_at, ks.updated_at
 		FROM kyc_submissions ks
 		LEFT JOIN users u ON ks.user_id::text = u.id::text
 		WHERE ks.id = $1
 	`, id).Scan(
 		&d.ID, &d.UserID, &d.FullName, &d.NIK, &d.Address, &d.Birthdate,
-		&d.Phone, &d.KTPImage, &d.Email, &d.Status, &d.RejectReason,
+		&d.Phone, &d.KTPImage, &d.Email, &d.Status, &d.RejectReason, &d.RejectedFields,
 		&d.ReviewedBy, &d.ReviewedAt, &d.CreatedAt, &d.UpdatedAt,
 	)
 	if err != nil {
@@ -267,18 +267,18 @@ func (r *kycRepo) GetDetailByID(ctx context.Context, id string) (*KYCDetailResul
 }
 
 // UpdateStatus mengubah status KYC (approve/reject)
-func (r *kycRepo) UpdateStatus(ctx context.Context, id string, status string, reviewerID string, rejectReason string) error {
+func (r *kycRepo) UpdateStatus(ctx context.Context, id string, status string, reviewerID string, rejectReason string, rejectedFields []string) error {
 	var err error
 	if status == "rejected" {
 		_, err = r.db.Pool.Exec(ctx, `
 			UPDATE kyc_submissions 
-			SET status = $1, reviewed_by = $2, reject_reason = $3, reviewed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
-			WHERE id = $4
-		`, status, reviewerID, rejectReason, id)
+			SET status = $1, reviewed_by = $2, reject_reason = $3, rejected_fields = $4, reviewed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+			WHERE id = $5
+		`, status, reviewerID, rejectReason, rejectedFields, id)
 	} else {
 		_, err = r.db.Pool.Exec(ctx, `
 			UPDATE kyc_submissions 
-			SET status = $1, reviewed_by = $2, reject_reason = NULL, reviewed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
+			SET status = $1, reviewed_by = $2, reject_reason = NULL, rejected_fields = NULL, reviewed_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
 			WHERE id = $3
 		`, status, reviewerID, id)
 	}

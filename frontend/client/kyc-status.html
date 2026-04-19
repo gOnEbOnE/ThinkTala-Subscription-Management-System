@@ -338,6 +338,29 @@
             document.getElementById('dataPhone').textContent = kyc.phone || '-';
             document.getElementById('dataAddress').textContent = kyc.address || '-';
             document.getElementById('dataSubmittedAt').textContent = formatDateTime(kyc.created_at);
+
+            // Highlight rejected fields
+            var rejectedFields = data.rejected_fields || kyc.rejected_fields || [];
+            if (status === 'rejected' && rejectedFields.length > 0) {
+                var fieldMapping = {
+                    'full_name': 'dataFullName', 'nik': 'dataNIK', 'address': 'dataAddress',
+                    'birthdate': 'dataBirthdate', 'phone': 'dataPhone'
+                };
+                rejectedFields.forEach(function(f) {
+                    var elId = fieldMapping[f];
+                    if (elId) {
+                        var el = document.getElementById(elId);
+                        if (el) {
+                            el.style.color = '#ef4444';
+                            el.style.fontWeight = '700';
+                            if (el.closest('.info-row')) {
+                                var label = el.closest('.info-row').querySelector('.info-label');
+                                if (label) label.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>' + label.textContent;
+                            }
+                        }
+                    }
+                });
+            }
             document.getElementById('dataReviewedAt').textContent = kyc.reviewed_at ? formatDateTime(kyc.reviewed_at) : 'Belum direview';
 
             // Set KTP image

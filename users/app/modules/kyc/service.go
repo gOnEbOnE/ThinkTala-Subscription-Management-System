@@ -256,17 +256,18 @@ func (s *Service) ProcessKYCStatusJob(ctx context.Context, payload any) (any, er
 	}
 
 	return KYCStatusResult{
-		ID:           sub.ID,
-		FullName:     sub.FullName,
-		NIK:          sub.NIK,
-		Address:      sub.Address,
-		Birthdate:    sub.Birthdate,
-		Phone:        sub.Phone,
-		KTPImage:     sub.KTPImage,
-		Status:       sub.Status,
-		RejectReason: sub.RejectReason,
-		ReviewedAt:   sub.ReviewedAt,
-		CreatedAt:    sub.CreatedAt,
+		ID:             sub.ID,
+		FullName:       sub.FullName,
+		NIK:            sub.NIK,
+		Address:        sub.Address,
+		Birthdate:      sub.Birthdate,
+		Phone:          sub.Phone,
+		KTPImage:       sub.KTPImage,
+		Status:         sub.Status,
+		RejectReason:   sub.RejectReason,
+		RejectedFields: sub.RejectedFields,
+		ReviewedAt:     sub.ReviewedAt,
+		CreatedAt:      sub.CreatedAt,
 	}, nil
 }
 
@@ -440,6 +441,23 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 	action, _ := data["action"].(string)
 	rejectReason, _ := data["reject_reason"].(string)
 
+	// Extract rejected_fields (optional array of field names)
+	var rejectedFields []string
+	if rf, ok := data["rejected_fields"].([]any); ok {
+		validFields := map[string]bool{
+			"full_name": true, "nik": true, "address": true,
+			"birthdate": true, "phone": true, "ktp_image": true,
+		}
+		for _, f := range rf {
+			if fieldName, ok := f.(string); ok {
+				fieldName = strings.TrimSpace(fieldName)
+				if validFields[fieldName] {
+					rejectedFields = append(rejectedFields, fieldName)
+				}
+			}
+		}
+	}
+
 	if kycID == "" {
 		return nil, fmt.Errorf("kyc_id wajib diisi")
 	}
@@ -469,7 +487,7 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 		return nil, fmt.Errorf("action tidak valid (gunakan 'approve' atau 'reject')")
 	}
 
-	if err := s.repo.UpdateStatus(ctx, kycID, newStatus, reviewerID, rejectReason); err != nil {
+	if err := s.repo.UpdateStatus(ctx, kycID, newStatus, reviewerID, rejectReason, rejectedFields); err != nil {
 		return nil, fmt.Errorf("gagal mengupdate status KYC: %v", err)
 	}
 

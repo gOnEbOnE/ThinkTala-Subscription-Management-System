@@ -61,6 +61,21 @@
             border-radius: 8px; border: 1px solid var(--border-color);
             margin-top: 0.5rem;
         }
+        .form-field-rejected {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 2px rgba(239,68,68,0.15) !important;
+        }
+        .form-field-rejected:focus {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.25) !important;
+        }
+        .rejected-field-tag {
+            display: inline-block; background: rgba(239,68,68,0.15); color: #ef4444;
+            font-size: 0.72rem; padding: 0.15rem 0.5rem; border-radius: 4px;
+            font-weight: 600; margin: 0.15rem;
+        }
+        .label-rejected { color: #ef4444 !important; }
+        .label-rejected::before { content: '\26A0\0020'; }
     </style>
 </head>
 <body>
@@ -276,6 +291,44 @@
                 }
                 $('oldKtpPreview').src = imgSrc;
                 $('oldKtpContainer').style.display = 'block';
+            }
+
+            // Highlight rejected fields on the form
+            var rejectedFields = data.data.rejected_fields || kyc.rejected_fields || [];
+            if (rejectedFields.length > 0) {
+                var fieldInputMap = {
+                    'full_name': 'fullName', 'nik': 'nik', 'address': 'address',
+                    'birthdate': 'birthdate', 'phone': 'phone'
+                };
+                var fieldLabels = {
+                    'full_name': 'Nama Lengkap', 'nik': 'NIK', 'address': 'Alamat',
+                    'birthdate': 'Tanggal Lahir', 'phone': 'No. Telepon', 'ktp_image': 'Foto KTP'
+                };
+                rejectedFields.forEach(function(f) {
+                    // Highlight form inputs
+                    var inputId = fieldInputMap[f];
+                    if (inputId) {
+                        var inputEl = $(inputId);
+                        if (inputEl) inputEl.classList.add('form-field-rejected');
+                        // Also highlight the label
+                        var labelEl = inputEl ? inputEl.closest('.mb-3, .mb-4')?.querySelector('.form-label') : null;
+                        if (labelEl) labelEl.classList.add('label-rejected');
+                    }
+                    // Highlight upload zone for ktp_image
+                    if (f === 'ktp_image') {
+                        $('uploadZone').style.borderColor = '#ef4444';
+                        var uploadLabel = $('uploadZone')?.closest('.mb-4')?.querySelector('.form-label');
+                        if (uploadLabel) uploadLabel.classList.add('label-rejected');
+                    }
+                });
+                // Show rejected fields summary in rejection banner
+                var tagsHtml = rejectedFields.map(function(f) {
+                    return '<span class="rejected-field-tag"><i class="fa-solid fa-xmark me-1"></i>' + (fieldLabels[f] || f) + '</span>';
+                }).join(' ');
+                var summaryEl = document.createElement('div');
+                summaryEl.className = 'mt-2';
+                summaryEl.innerHTML = '<small class="text-muted d-block mb-1">Field yang perlu diperbaiki:</small>' + tagsHtml;
+                $('rejectionBanner').querySelector('div > div').appendChild(summaryEl);
             }
 
         } catch (err) {
