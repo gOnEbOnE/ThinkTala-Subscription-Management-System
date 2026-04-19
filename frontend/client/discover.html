@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discover | ThinkTala Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .discover-page {
+            position: relative;
+            isolation: isolate;
+            --discover-content-pad: 30px;
+        }
+
+        .discover-page::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 40%;
+            height: 360px;
+            pointer-events: none;
+            background: radial-gradient(circle at top right, rgba(0, 242, 255, 0.18), rgba(0, 242, 255, 0));
+            z-index: -1;
+        }
+
+        .discover-page::after {
+            content: "";
+            position: absolute;
+            top: 120px;
+            left: calc(-1 * var(--discover-content-pad));
+            width: calc(65% + var(--discover-content-pad));
+            height: 280px;
+            pointer-events: none;
+            background: radial-gradient(circle at center left, rgba(0, 242, 255, 0.07), rgba(0, 242, 255, 0));
+            z-index: -1;
+        }
+
+        .main-content.discover-page {
+            padding-bottom: 120px;
+        }
+
+        .discover-hero-kicker {
+            width: 44px;
+            height: 4px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+            background: linear-gradient(90deg, #00f2ff 0%, rgba(0, 242, 255, 0.2) 100%);
+            box-shadow: 0 0 16px rgba(0, 242, 255, 0.45);
+        }
+
+        .discover-title {
+            font-size: clamp(1.8rem, 2.8vw, 2.9rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 6px;
+            color: var(--text-heading);
+        }
+
+        .discover-subtitle {
+            color: var(--text-muted);
+            font-size: 1.02rem;
+            margin-bottom: 0;
+        }
+
+        .discover-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+        }
+
+        .discover-tabs {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .discover-tab {
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 12px 10px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .discover-tab:hover {
+            color: var(--text-main);
+        }
+
+        .discover-tab.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+            text-shadow: 0 0 14px rgba(0, 242, 255, 0.55);
+        }
+
+        .discover-search {
+            min-width: 260px;
+            max-width: 320px;
+            flex: 1;
+            margin-left: auto;
+            border: 1px solid var(--border-color);
+            background: rgba(9, 14, 25, 0.85);
+            border-radius: 12px;
+            padding: 9px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .discover-search i {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .discover-search input {
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            width: 100%;
+            font-size: 0.92rem;
+            outline: none;
+        }
+
+        .discover-section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--accent-cyan);
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        .discover-section-title::after {
+            content: "";
+            height: 1px;
+            background: linear-gradient(90deg, rgba(0, 242, 255, 0.45), transparent);
+            flex: 1;
+        }
+
+        .discover-section-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.8);
+        }
+
+        .featured-grid {
+            margin-bottom: 26px;
+        }
+
+        .featured-card {
+            border: 1px solid rgba(0, 242, 255, 0.28);
+            border-radius: 18px;
+            background: linear-gradient(165deg, rgba(17, 28, 45, 0.95), rgba(10, 14, 22, 0.92));
+            box-shadow: 0 0 0 1px rgba(0, 242, 255, 0.06) inset, 0 16px 36px rgba(0, 0, 0, 0.36);
+            padding: 24px;
+            min-height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .featured-card::before {
+            content: "";
+            position: absolute;
+            right: -80px;
+            top: -80px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 242, 255, 0.12), rgba(0, 242, 255, 0));
+            pointer-events: none;
+        }
+
+        .featured-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .featured-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 14px;
+            border: 1px solid rgba(0, 242, 255, 0.35);
+            background: rgba(0, 242, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-cyan);
+            font-size: 1.35rem;
+            overflow: hidden;
+        }
+
+        .featured-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .featured-type {
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .featured-type.type-promo {
+            color: #88ff47;
+            border: 1px solid rgba(136, 255, 71, 0.45);
+            background: rgba(67, 144, 25, 0.25);
+        }
+
+        .featured-type.type-analysis {
+            color: #2be8ff;
+            border: 1px solid rgba(43, 232, 255, 0.45);
+            background: rgba(18, 126, 139, 0.3);
+        }
+
+        .featured-type.type-feature {
+            color: #ffe870;
+            border: 1px solid rgba(255, 232, 112, 0.45);
+            background: rgba(152, 122, 28, 0.25);
+        }
+
+        .featured-title {
+            font-size: clamp(1.45rem, 1.55vw, 1.95rem);
+            font-weight: 800;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
+            margin-bottom: 12px;
+            color: #f8fbff;
+        }
+
+        .featured-desc {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: rgba(220, 234, 255, 0.75);
+            margin-bottom: 18px;
+            min-height: 120px;
+        }
+
+        .featured-meta {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .featured-cta {
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00f2ff, #07d8df);
+            color: #04151f;
+            text-decoration: none;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            padding: 11px 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .featured-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(0, 242, 255, 0.32);
+            color: #04151f;
+        }
+
+        .recent-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin-bottom: 12px;
+            letter-spacing: -0.015em;
+        }
+
+        .recent-panel {
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: rgba(12, 18, 30, 0.92);
+            overflow: hidden;
+            box-shadow: 0 20px 42px rgba(0, 0, 0, 0.26);
+        }
+
+        .recent-item {
+            display: grid;
+            grid-template-columns: 44px minmax(0, 1fr) auto;
+            gap: 14px;
+            align-items: center;
+            padding: 16px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .recent-item:last-child {
+            border-bottom: none;
+        }
+
+        .recent-item:hover {
+            background: rgba(0, 242, 255, 0.05);
+        }
+
+        .recent-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--accent-cyan);
+            overflow: hidden;
+        }
+
+        .recent-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .recent-main {
+            min-width: 0;
+        }
+
+        .recent-heading {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .recent-item-title {
+            margin: 0;
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: #f4f9ff;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .recent-item-type {
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 0.62rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .recent-item-type.type-promo {
+            color: #88ff47;
+            border: 1px solid rgba(136, 255, 71, 0.35);
+            background: rgba(67, 144, 25, 0.2);
+        }
+
+        .recent-item-type.type-analysis {
+            color: #2be8ff;
+            border: 1px solid rgba(43, 232, 255, 0.35);
+            background: rgba(18, 126, 139, 0.24);
+        }
+
+        .recent-item-type.type-feature {
+            color: #ffe870;
+            border: 1px solid rgba(255, 232, 112, 0.35);
+            background: rgba(152, 122, 28, 0.2);
+        }
+
+        .recent-item-desc {
+            margin: 0;
+            color: rgba(225, 236, 255, 0.58);
+            font-size: 0.93rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .recent-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            white-space: nowrap;
+        }
+
+        .recent-meta {
+            color: rgba(181, 201, 227, 0.65);
+            font-size: 0.84rem;
+        }
+
+        .recent-link {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .recent-link:hover {
+            color: #67f8ff;
+        }
+
+        .section-empty {
+            border: 1px dashed rgba(0, 242, 255, 0.2);
+            border-radius: 14px;
+            color: var(--text-muted);
+            padding: 22px;
+            text-align: center;
+            background: rgba(0, 242, 255, 0.03);
+        }
+
+        @media (max-width: 992px) {
+            .discover-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .discover-search {
+                max-width: none;
+                width: 100%;
+            }
+
+            .featured-desc {
+                min-height: 0;
+            }
+
+            .recent-item {
+                grid-template-columns: 40px minmax(0, 1fr);
+            }
+
+            .recent-actions {
+                grid-column: 1 / -1;
+                justify-content: space-between;
+                padding-left: 2px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .discover-page {
+                --discover-content-pad: 16px;
+            }
+
+            .main-content.discover-page {
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+            }
+
+            .discover-tabs {
+                gap: 0;
+                width: 100%;
+            }
+
+            .discover-tab {
+                flex: 1 1 48%;
+                text-align: center;
+            }
+
+            .featured-card {
+                padding: 20px;
+            }
+
+            .featured-title {
+                font-size: 1.6rem;
+            }
+
+            .recent-item-title {
+                white-space: normal;
+            }
+
+            .recent-item-desc {
+                white-space: normal;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="client-sidebar-placeholder"></div>
+    <div id="client-navbar-placeholder"></div>
+
+    <div class="main-content discover-page">
+        <div class="discover-hero mb-4">
+            <div class="discover-hero-kicker"></div>
+            <h1 class="discover-title">What's New</h1>
+            <p class="discover-subtitle">Important updates and market insights for you.</p>
+        </div>
+
+        <div class="discover-toolbar">
+            <div class="discover-tabs" id="discoverTabs">
+                <button type="button" class="discover-tab active" data-filter="all">All</button>
+                <button type="button" class="discover-tab" data-filter="analysis">Market Analysis</button>
+                <button type="button" class="discover-tab" data-filter="promo">Promos</button>
+                <button type="button" class="discover-tab" data-filter="feature">New Features</button>
+            </div>
+            <label class="discover-search mb-0">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="discoverSearchInput" type="search" placeholder="Search news..." autocomplete="off">
+            </label>
+        </div>
+
+        <div class="discover-section-title">
+            <span class="discover-section-dot"></span>
+            Featured
+        </div>
+        <div class="row g-4 featured-grid" id="featuredContainer">
+            <div class="col-12">
+                <div class="section-empty"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading featured updates...</div>
+            </div>
+        </div>
+
+        <h2 class="recent-title">Recent News</h2>
+        <div class="recent-panel" id="recentContainer">
+            <div class="section-empty border-0 bg-transparent py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading recent news...</div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>Client Discover v1.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/client-layout.js?v=20260419"></script>
+    <script>
+        const DISCOVER_FALLBACK = [
+            {
+                id: 'promo-referral',
+                title: 'Year-End Referral Bonus!',
+                description: 'Earn extra commission by referring new clients to ThinkTala before December 31st. Referral bonuses are credited within 5 business days of activation.',
+                type: 'promo',
+                cta_url: 'https://www.thinktala.com/terms/referral',
+                created_at: '2026-04-17T09:10:00Z',
+                expiry_date: '2026-12-31T23:59:59Z'
+            },
+            {
+                id: 'analysis-q4-market',
+                title: 'Q4 Market Trend Analysis',
+                description: 'Comprehensive analysis of global market shifts in Q4 2026 covering equities, forex, and commodities with forward-looking portfolio signals.',
+                type: 'analysis',
+                cta_url: 'https://www.thinktala.com/research/q4-market',
+                created_at: '2026-04-18T04:35:00Z'
+            },
+            {
+                id: 'update-reporting',
+                title: 'v2.1 Platform Upgrade: New Reporting Feature',
+                description: 'Powerful reporting modules are now available with custom date ranges and export-ready charts.',
+                type: 'feature',
+                created_at: '2026-04-18T07:40:00Z'
+            },
+            {
+                id: 'education-trade-ui',
+                title: 'Understanding the New Trade Interface',
+                description: 'A complete walkthrough of the redesigned trade interface and new quick-order controls.',
+                type: 'analysis',
+                cta_url: 'https://www.thinktala.com/help/new-trade-interface',
+                created_at: '2026-04-16T08:30:00Z'
+            },
+            {
+                id: 'event-webinar',
+                title: 'Client Webinar Series: Navigating Volatility',
+                description: 'Join our senior analysts this weekend for practical risk management tactics in volatile markets.',
+                type: 'feature',
+                cta_url: 'https://www.thinktala.com/events/volatility-webinar',
+                created_at: '2026-04-12T03:00:00Z'
+            },
+            {
+                id: 'feature-new-markets',
+                title: 'New Regional Markets Now Available',
+                description: 'ThinkTala now supports trading across 8 additional regional exchanges for broader diversification.',
+                type: 'feature',
+                created_at: '2026-04-06T13:10:00Z'
+            },
+            {
+                id: 'analysis-midyear',
+                title: 'Mid-Year Economic Outlook: Emerging Markets',
+                description: 'Our research team published an updated perspective on inflation pathways and currency risk.',
+                type: 'analysis',
+                cta_url: 'https://www.thinktala.com/research/mid-year-outlook',
+                created_at: '2026-03-31T10:20:00Z'
+            }
+        ];
+
+        const DISCOVER_STATE = {
+            allItems: [],
+            activeFilter: 'all',
+            keyword: ''
+        };
+
+        function escapeHtml(value) {
+            const div = document.createElement('div');
+            div.textContent = value == null ? '' : String(value);
+            return div.innerHTML;
+        }
+
+        function safeUrl(value) {
+            if (!value) return '';
+            try {
+                const parsed = new URL(value, window.location.origin);
+                if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+                    return parsed.href;
+                }
+                return '';
+            } catch (err) {
+                return '';
+            }
+        }
+
+        function safeImageUrl(value) {
+            const url = safeUrl(value);
+            return url || '';
+        }
+
+        function toDate(value) {
+            const dt = new Date(value || 0);
+            return Number.isNaN(dt.getTime()) ? null : dt;
+        }
+
+        function relativeTime(dt) {
+            if (!dt) return 'Unknown time';
+            const deltaMs = Date.now() - dt.getTime();
+            const minutes = Math.max(1, Math.floor(deltaMs / 60000));
+            if (minutes < 60) return minutes + ' min ago';
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return hours + ' hour' + (hours > 1 ? 's' : '') + ' ago';
+            const days = Math.floor(hours / 24);
+            return days + ' day' + (days > 1 ? 's' : '') + ' ago';
+        }
+
+        function shortDate(dt) {
+            if (!dt) return '';
+            return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function estimateReadTime(text) {
+            const words = String(text || '').trim().split(/\s+/).filter(Boolean).length;
+            if (words === 0) return '1 min read';
+            return Math.max(1, Math.round(words / 35)) + ' min read';
+        }
+
+        function normalizeType(rawType) {
+            const t = String(rawType || '').toLowerCase();
+            if (t.includes('promo')) return 'promo';
+            if (t.includes('analysis') || t.includes('education')) return 'analysis';
+            if (t.includes('feature') || t.includes('update') || t.includes('system') || t.includes('event') || t.includes('warning') || t.includes('info')) {
+                return 'feature';
+            }
+            return 'feature';
+        }
+
+        function typeMeta(type) {
+            if (type === 'promo') {
+                return {
+                    className: 'type-promo',
+                    label: 'Promo',
+                    icon: 'fa-solid fa-gift',
+                    iconColor: '#88ff47',
+                    actionText: 'Read Terms'
+                };
+            }
+            if (type === 'analysis') {
+                return {
+                    className: 'type-analysis',
+                    label: 'Analysis',
+                    icon: 'fa-solid fa-chart-column',
+                    iconColor: '#2be8ff',
+                    actionText: 'Open Full Report'
+                };
+            }
+            return {
+                className: 'type-feature',
+                label: 'Feature',
+                icon: 'fa-solid fa-bullhorn',
+                iconColor: '#ffe870',
+                actionText: 'Read More'
+            };
+        }
+
+        function parseNotification(item, index) {
+            const title = String(item.title || '').trim();
+            const description = String(item.description || item.message || '').trim();
+            if (!title && !description) return null;
+
+            const type = normalizeType(item.type);
+            const created = toDate(item.created_at);
+            const expire = toDate(item.expiry_date);
+
+            return {
+                id: item.id || ('notification-' + index),
+                title: title || 'Untitled update',
+                description: description || 'No description available.',
+                type: type,
+                createdAt: created,
+                expiryAt: expire,
+                ctaUrl: safeUrl(item.cta_url),
+                imageUrl: safeImageUrl(item.image_url)
+            };
+        }
+
+        function getNotificationQuery() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const roleRaw = (user.role_code || user.level_code || user.level || 'CLIENT');
+                const role = String(roleRaw).trim().toLowerCase() || 'client';
+                const userId = String(user.id || '').trim();
+
+                const params = new URLSearchParams();
+                params.set('role', role);
+                if (userId) params.set('user_id', userId);
+                return params.toString();
+            } catch (err) {
+                return 'role=client';
+            }
+        }
+
+        async function fetchNotifications() {
+            const query = getNotificationQuery();
+            const endpoint = '/api/notifications/public?' + query;
+
+            const res = await fetch(endpoint, {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed with status ' + res.status);
+            }
+
+            const contentType = String(res.headers.get('content-type') || '').toLowerCase();
+            if (!contentType.includes('application/json')) {
+                throw new Error('Non-JSON response');
+            }
+
+            const json = await res.json();
+            return Array.isArray(json.data) ? json.data : [];
+        }
+
+        function applyCountToSidebar(total) {
+            if (typeof window.setClientDiscoverCount === 'function') {
+                window.setClientDiscoverCount(total);
+                return;
+            }
+            localStorage.setItem('client_discover_count', String(Math.max(0, total || 0)));
+        }
+
+        function getFilteredItems() {
+            const keyword = DISCOVER_STATE.keyword.toLowerCase().trim();
+            return DISCOVER_STATE.allItems.filter(function (item) {
+                const byFilter = DISCOVER_STATE.activeFilter === 'all' || item.type === DISCOVER_STATE.activeFilter;
+                if (!byFilter) return false;
+                if (!keyword) return true;
+
+                const text = (item.title + ' ' + item.description).toLowerCase();
+                return text.includes(keyword);
+            });
+        }
+
+        function renderFeatured(items) {
+            const container = document.getElementById('featuredContainer');
+            if (!container) return;
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="col-12"><div class="section-empty">No featured update for this filter.</div></div>';
+                return;
+            }
+
+            container.innerHTML = items.map(function (item) {
+                const meta = typeMeta(item.type);
+                const dateInfo = item.createdAt ? ('Published ' + relativeTime(item.createdAt)) : 'Published recently';
+                const expiry = item.expiryAt ? (' - Expires ' + shortDate(item.expiryAt)) : '';
+                const media = item.imageUrl
+                    ? '<div class="featured-icon"><img src="' + item.imageUrl + '" alt="' + escapeHtml(item.title) + '"></div>'
+                    : '<div class="featured-icon" style="color:' + meta.iconColor + ';"><i class="' + meta.icon + '"></i></div>';
+                const actionHtml = item.ctaUrl
+                    ? '<a class="featured-cta" href="' + item.ctaUrl + '" target="_blank" rel="noopener">' + escapeHtml(meta.actionText) + '<i class="fa-solid fa-arrow-right"></i></a>'
+                    : '';
+
+                return [
+                    '<div class="col-xl-6 col-lg-6 col-12">',
+                    '<article class="featured-card">',
+                    '<div class="featured-head">',
+                    media,
+                    '<span class="featured-type ' + meta.className + '">' + escapeHtml(meta.label) + '</span>',
+                    '</div>',
+                    '<h3 class="featured-title">' + escapeHtml(item.title) + '</h3>',
+                    '<p class="featured-desc">' + escapeHtml(item.description) + '</p>',
+                    '<div class="featured-meta">' + escapeHtml(dateInfo + expiry) + '</div>',
+                    actionHtml,
+                    '</article>',
+                    '</div>'
+                ].join('');
+            }).join('');
+        }
+
+        function renderRecent(items) {
+            const container = document.getElementById('recentContainer');
+            if (!container) return;
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="section-empty border-0 bg-transparent">No additional news found.</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(function (item) {
+                const meta = typeMeta(item.type);
+                const when = item.createdAt ? relativeTime(item.createdAt) : 'Recently';
+                const read = estimateReadTime(item.description);
+                const media = item.imageUrl
+                    ? '<div class="recent-icon"><img src="' + item.imageUrl + '" alt="' + escapeHtml(item.title) + '"></div>'
+                    : '<div class="recent-icon" style="color:' + meta.iconColor + ';"><i class="' + meta.icon + '"></i></div>';
+                const actionHtml = item.ctaUrl
+                    ? '<a class="recent-link" href="' + item.ctaUrl + '" target="_blank" rel="noopener">' + escapeHtml(meta.actionText) + ' <i class="fa-solid fa-arrow-right"></i></a>'
+                    : '';
+
+                return [
+                    '<article class="recent-item">',
+                    media,
+                    '<div class="recent-main">',
+                    '<div class="recent-heading">',
+                    '<h3 class="recent-item-title">' + escapeHtml(item.title) + '</h3>',
+                    '<span class="recent-item-type ' + meta.className + '">' + escapeHtml(meta.label) + '</span>',
+                    '</div>',
+                    '<p class="recent-item-desc">' + escapeHtml(item.description) + '</p>',
+                    '</div>',
+                    '<div class="recent-actions">',
+                    '<span class="recent-meta">' + escapeHtml(when + ' - ' + read) + '</span>',
+                    actionHtml,
+                    '</div>',
+                    '</article>'
+                ].join('');
+            }).join('');
+        }
+
+        function renderDiscover() {
+            const filtered = getFilteredItems();
+            const featured = filtered.slice(0, 2);
+            const recent = filtered.slice(2);
+
+            renderFeatured(featured);
+            renderRecent(recent);
+        }
+
+        function setTabFilter(filter) {
+            DISCOVER_STATE.activeFilter = filter;
+            document.querySelectorAll('.discover-tab').forEach(function (btn) {
+                const isActive = btn.getAttribute('data-filter') === filter;
+                btn.classList.toggle('active', isActive);
+            });
+            renderDiscover();
+        }
+
+        function bindDiscoverControls() {
+            document.querySelectorAll('.discover-tab').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const filter = btn.getAttribute('data-filter') || 'all';
+                    setTabFilter(filter);
+                });
+            });
+
+            const searchInput = document.getElementById('discoverSearchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    DISCOVER_STATE.keyword = searchInput.value || '';
+                    renderDiscover();
+                });
+            }
+        }
+
+        async function initDiscoverPage() {
+            bindDiscoverControls();
+
+            let source = [];
+            try {
+                source = await fetchNotifications();
+            } catch (err) {
+                source = DISCOVER_FALLBACK;
+            }
+
+            const normalized = source.map(parseNotification).filter(Boolean).sort(function (a, b) {
+                const aTime = a.createdAt ? a.createdAt.getTime() : 0;
+                const bTime = b.createdAt ? b.createdAt.getTime() : 0;
+                return bTime - aTime;
+            });
+
+            DISCOVER_STATE.allItems = normalized;
+            applyCountToSidebar(normalized.length);
+            renderDiscover();
+        }
+
+        document.addEventListener('DOMContentLoaded', initDiscoverPage);
+    </script>
+</body>
+</html>

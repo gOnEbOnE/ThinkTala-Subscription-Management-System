@@ -112,11 +112,36 @@ h1, h2, h3, h4, h5, h6 { color: var(--text-heading) !important; }
 .nav-link.active i.icon-left { color: var(--accent-cyan) !important; }
 .nav-link i.icon-left { min-width: 24px; text-align: center; margin-right: 12px; font-size: 1.1rem; }
 
+.sidebar-section-label {
+    margin: 14px 20px 4px;
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(139, 155, 180, 0.75);
+    font-weight: 700;
+}
+
+.discover-count-badge {
+    min-width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    padding: 0 7px;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 242, 255, 0.14);
+    border: 1px solid rgba(0, 242, 255, 0.35);
+    color: var(--accent-cyan);
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
 body.sidebar-collapsed .brand-text-content, body.sidebar-collapsed .link-text { display: none !important; }
 body.sidebar-collapsed .nav-link { justify-content: center; padding-left: 0; padding-right: 0; margin-left: 10px; margin-right: 10px; }
 body.sidebar-collapsed .nav-link i.icon-left { margin-right: 0; font-size: 1.3rem; }
 body.sidebar-collapsed .sidebar-brand { padding: 0 0 20px 0; }
 body.sidebar-collapsed .brand-icon { margin-right: 0; font-size: 1.8rem; }
+body.sidebar-collapsed .sidebar-section-label { display: none !important; }
 
 .top-navbar { position: fixed; top: 0; right: 0; left: var(--sidebar-width); height: var(--header-height); background: var(--bg-header); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); z-index: 900; display: flex; align-items: center; padding: 0 30px; transition: left 0.3s; }
 .fixed-footer { position: fixed; bottom: 0; right: 0; left: var(--sidebar-width); height: var(--footer-height); background: var(--bg-panel); border-top: 1px solid var(--border-color); z-index: 900; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; font-size: 0.8rem; color: var(--text-muted); transition: left 0.3s; }
@@ -228,6 +253,7 @@ body.sidebar-collapsed .main-content { margin-left: var(--sidebar-width-collapse
 .magic-icon {
     font-size: 1rem;
     background: linear-gradient(45deg, #00f2ff, #bd00ff);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: pulse-magic 2s infinite;

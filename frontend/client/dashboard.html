@@ -79,6 +79,7 @@
                     <div id="clientNotifications">
                         <div class="text-center text-muted py-3 small"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</div>
                     </div>
+                    <div id="clientNotifHint" class="small text-muted mt-2"></div>
                 </div>
             </div>
         </div>
@@ -122,8 +123,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/za-theme.js"></script>
-    <script src="/assets/js/client-layout.js"></script>
+    <script src="/assets/js/client-layout.js?v=20260419"></script>
     <script>
+        const DASHBOARD_NOTIFICATION_LIMIT = 5;
+
         document.addEventListener('DOMContentLoaded', () => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (user.name) document.getElementById('greetName').textContent = user.name;
@@ -144,48 +147,101 @@
             return dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
         }
 
-        function notifTypeClass(type) {
+        function notifTypeMeta(type) {
             const t = (type || '').toLowerCase();
-            if (t === 'promo') return 'bg-success bg-opacity-25 text-success';
-            if (t === 'warning') return 'bg-warning bg-opacity-25 text-warning';
-            if (t === 'analysis') return 'bg-primary bg-opacity-25 text-primary';
-            if (t === 'event') return 'bg-danger bg-opacity-25 text-danger';
-            return 'bg-info bg-opacity-25 text-info';
+            if (t === 'promo') {
+                return {
+                    badgeClass: 'bg-success bg-opacity-25 text-success',
+                    iconClass: 'fa-solid fa-gift text-success',
+                    actionLabel: 'Read Terms'
+                };
+            }
+            if (t === 'analysis') {
+                return {
+                    badgeClass: 'bg-primary bg-opacity-25 text-primary',
+                    iconClass: 'fa-solid fa-chart-column text-primary',
+                    actionLabel: 'Open Report'
+                };
+            }
+            if (t === 'event') {
+                return {
+                    badgeClass: 'bg-danger bg-opacity-25 text-danger',
+                    iconClass: 'fa-solid fa-calendar-days text-danger',
+                    actionLabel: 'View Event'
+                };
+            }
+            if (t === 'warning') {
+                return {
+                    badgeClass: 'bg-warning bg-opacity-25 text-warning',
+                    iconClass: 'fa-solid fa-triangle-exclamation text-warning',
+                    actionLabel: 'Read Notice'
+                };
+            }
+            return {
+                badgeClass: 'bg-info bg-opacity-25 text-info',
+                iconClass: 'fa-solid fa-bullhorn text-info',
+                actionLabel: 'Read More'
+            };
         }
 
         function renderClientNotifications(items) {
             const container = document.getElementById('clientNotifications');
             const countEl = document.getElementById('notifCount');
+            const hintEl = document.getElementById('clientNotifHint');
             const list = Array.isArray(items) ? items : [];
             countEl.textContent = String(list.length);
 
+            if (typeof window.setClientDiscoverCount === 'function') {
+                window.setClientDiscoverCount(list.length);
+            } else {
+                localStorage.setItem('client_discover_count', String(list.length));
+            }
+
             if (list.length === 0) {
                 container.innerHTML = '<div class="text-center text-muted py-3 small">Belum ada pengumuman saat ini.</div>';
+                if (hintEl) hintEl.textContent = '';
                 return;
             }
 
-            container.innerHTML = list.slice(0, 6).map(function (n) {
+            container.innerHTML = list.slice(0, DASHBOARD_NOTIFICATION_LIMIT).map(function (n) {
                 const title = escapeHtml(n.title || 'Informasi');
                 const desc = escapeHtml((n.description || n.message || '').trim());
                 const type = (n.type || 'info').toLowerCase();
-                const badgeClass = notifTypeClass(type);
+                const meta = notifTypeMeta(type);
                 const dateText = escapeHtml(formatNotifDate(n.created_at));
                 const cta = n.cta_url
-                    ? '<a href="' + escapeHtml(n.cta_url) + '" target="_blank" rel="noopener" class="small text-cyan text-decoration-none">Lihat detail <i class="fa-solid fa-arrow-up-right-from-square ms-1"></i></a>'
+                    ? '<a href="' + escapeHtml(n.cta_url) + '" target="_blank" rel="noopener" class="small text-cyan text-decoration-none">' + meta.actionLabel + ' <i class="fa-solid fa-arrow-up-right-from-square ms-1"></i></a>'
                     : '';
 
                 return [
                     '<div class="pb-3 mb-3 border-bottom border-secondary border-opacity-25">',
+                    '<div class="d-flex gap-3">',
+                    '<div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:42px;height:42px;background:rgba(255,255,255,0.04);border:1px solid var(--border-color);">',
+                    '<i class="' + meta.iconClass + '"></i>',
+                    '</div>',
+                    '<div class="w-100">',
                     '<div class="d-flex justify-content-between align-items-start gap-2 mb-1">',
-                    '<span class="badge ' + badgeClass + '">' + escapeHtml(type) + '</span>',
+                    '<span class="badge ' + meta.badgeClass + '">' + escapeHtml(type) + '</span>',
                     '<small class="text-muted">' + dateText + '</small>',
                     '</div>',
                     '<div class="fw-semibold text-main">' + title + '</div>',
                     '<div class="small text-muted mb-1">' + (desc || '-') + '</div>',
                     cta,
+                    '</div>',
+                    '</div>',
                     '</div>'
                 ].join('');
             }).join('');
+
+            if (hintEl) {
+                if (list.length > DASHBOARD_NOTIFICATION_LIMIT) {
+                    hintEl.textContent =
+                        'Menampilkan ' + DASHBOARD_NOTIFICATION_LIMIT + ' dari ' + list.length + ' update. ' +
+                        'Lihat sisanya di menu Discover pada sidebar.';
+                } else {
+                    hintEl.textContent = 'Semua update terbaru sudah ditampilkan di dashboard.';
+                }
+            }
         }
 
         async function loadClientNotifications() {

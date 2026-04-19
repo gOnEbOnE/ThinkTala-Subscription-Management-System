@@ -21,6 +21,7 @@
     { "source": "/compliance/kyc-detail", "destination": "/frontend/compliance/kyc-detail.html" },
     { "source": "/compliance/reports", "destination": "/frontend/compliance/reports.html" },
     { "source": "/client/dashboard", "destination": "/frontend/client/dashboard.html" },
+    { "source": "/client/discover", "destination": "/frontend/client/discover.html" },
     { "source": "/client/kyc", "destination": "/frontend/client/kyc.html" },
     { "source": "/client/kyc-status", "destination": "/frontend/client/kyc-status.html" },
     { "source": "/market-insight", "destination": "/frontend/market-insight.html" },

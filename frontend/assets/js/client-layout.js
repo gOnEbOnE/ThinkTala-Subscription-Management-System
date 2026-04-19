@@ -30,6 +30,7 @@
     // ── Active state detection ────────────────────────────────────
     var path = window.location.pathname;
     function isActive(route) { return path === route ? ' active' : ''; }
+    function isDiscoverActive() { return path === '/client/discover' ? ' active' : ''; }
     // KYC form page (/client/kyc) should also highlight the KYC nav item
     function isKycActive() { return (path === '/client/kyc-status' || path === '/client/kyc') ? ' active' : ''; }
     function isMembershipActive() { return path === '/client/packages-catalog' ? ' active' : ''; }
@@ -48,10 +49,13 @@
                 '</div>' +
             '</div>' +
             '<ul class="nav flex-column flex-grow-1">' +
+                '<li class="sidebar-section-label"><span class="link-text"></span></li>' +
                 '<li class="nav-item"><a class="nav-link' + isActive('/client/dashboard') + '" href="/client/dashboard"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isDiscoverActive() + '" href="/client/discover"><i class="fa-solid fa-newspaper icon-left"></i><span class="link-text">Discover</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-globe icon-left"></i><span class="link-text">Market Insight</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-satellite-dish icon-left"></i><span class="link-text">Deep Scanner</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-wand-magic-sparkles icon-left"></i><span class="link-text">Ask Nizza</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
+                '<li class="sidebar-section-label"><span class="link-text"></span></li>' +
                 '<li class="nav-item"><a class="nav-link' + isKycActive() + '" href="/client/kyc-status"><i class="fa-solid fa-id-card icon-left"></i><span class="link-text">KYC Verification</span></a></li>' +
             '</ul>' +
             '<ul class="nav flex-column mb-5">' +
@@ -121,6 +125,9 @@
 
     // ── Sidebar toggle ────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function () {
+        // Discover badge counter intentionally disabled.
+        delete window.setClientDiscoverCount;
+
         var btn = document.getElementById('sidebarToggle');
         if (btn) {
             btn.addEventListener('click', function () {
