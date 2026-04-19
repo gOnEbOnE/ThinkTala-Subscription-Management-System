@@ -442,12 +442,20 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 	rejectReason, _ := data["reject_reason"].(string)
 
 	// Extract rejected_fields (optional array of field names)
+	// Handle both []string (from controller) and []any (from JSON deserialization)
 	var rejectedFields []string
-	if rf, ok := data["rejected_fields"].([]any); ok {
-		validFields := map[string]bool{
-			"full_name": true, "nik": true, "address": true,
-			"birthdate": true, "phone": true, "ktp_image": true,
+	validFields := map[string]bool{
+		"full_name": true, "nik": true, "address": true,
+		"birthdate": true, "phone": true, "ktp_image": true,
+	}
+	if rf, ok := data["rejected_fields"].([]string); ok {
+		for _, fieldName := range rf {
+			fieldName = strings.TrimSpace(fieldName)
+			if validFields[fieldName] {
+				rejectedFields = append(rejectedFields, fieldName)
+			}
 		}
+	} else if rf, ok := data["rejected_fields"].([]any); ok {
 		for _, f := range rf {
 			if fieldName, ok := f.(string); ok {
 				fieldName = strings.TrimSpace(fieldName)

@@ -164,11 +164,12 @@ func (c *Controller) Status(w http.ResponseWriter, r *http.Request) {
 
 	kycStatus := result.(KYCStatusResult)
 	
-	// Response wajib memuat field status dan rejection_reason
+	// Response wajib memuat field status, rejection_reason, dan rejected_fields
 	resp.ApiJSON(w, r, http.StatusOK, true, "Data KYC ditemukan", map[string]any{
-		"status":          kycStatus.Status,
+		"status":           kycStatus.Status,
 		"rejection_reason": kycStatus.RejectReason,
-		"kyc":             kycStatus,
+		"rejected_fields":  kycStatus.RejectedFields,
+		"kyc":              kycStatus,
 	})
 }
 
