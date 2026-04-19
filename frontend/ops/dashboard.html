@@ -128,7 +128,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/za-theme.js"></script>
-    <script src="/assets/js/ops-layout.js"></script>
+    <script src="/assets/js/ops-layout.js?v=cs-support-2"></script>
     <script>
         async function loadDashboardStats() {
             // Packages (Active & Total)
@@ -166,8 +166,9 @@
             }
         }
 
-        // Load stats on page load
-        loadDashboardStats();
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardStats();
+        });
     </script>
 </body>
 

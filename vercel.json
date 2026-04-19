@@ -25,7 +25,7 @@
     { "source": "/client/kyc-status", "destination": "/frontend/client/kyc-status.html" },
     { "source": "/market-insight", "destination": "/frontend/market-insight.html" },
     { "source": "/assets/:path*", "destination": "/frontend/assets/:path*" },
-    { "source": "/account/login/auth", "destination": "https://propensuy-thinktala-production.up.railway.app/account/login/auth" },
-    { "source": "/api/:path*", "destination": "https://propensuy-thinktala-production.up.railway.app/api/:path*" }
+    { "source": "/account/login/auth", "destination": "http://localhost:2000/account/login/auth" },
+    { "source": "/api/:path*", "destination": "http://localhost:2000/api/:path*" }
   ]
 }

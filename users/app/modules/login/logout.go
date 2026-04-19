@@ -23,9 +23,7 @@ func (c *Controller) Logout(w http.ResponseWriter, r *http.Request) {
 		if ok && tokenStr != "" {
 			// 2. Decrypt untuk dapat Redis key (UUID)
 			decryptedKey, err := utils.Decrypt(tokenStr)
-			if err != nil {
-				log.Printf("[LOGOUT] Decrypt error: %v", err)
-			} else {
+			if err == nil {
 				// 3. Hapus JWT dari Redis
 				ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 				defer cancel()

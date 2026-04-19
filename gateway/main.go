@@ -410,7 +410,13 @@ func main() {
 	// 2. Static assets (no auth)
 	// ========================================
 	assetsDir := filepath.Join(frontendDir, "assets")
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsDir))))
+	assetsHandler := http.FileServer(http.Dir(assetsDir))
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		assetsHandler.ServeHTTP(w, r)
+	})))
 
 	// ========================================
 	// 3. Protected Dashboard Pages (with Role Auth)
@@ -421,6 +427,9 @@ func main() {
 
 	// /client/* → Only CLIENT, SUPERADMIN
 	http.HandleFunc("/client/", withRoleAuth(serveFrontendPage(frontendDir, "client", "dashboard")))
+	http.HandleFunc("/support/create", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/client/support-create", http.StatusFound)
+	}))
 
 	// /compliance/* → Only COMPLIANCE, SUPERADMIN
 	http.HandleFunc("/compliance/", withRoleAuth(serveFrontendPage(frontendDir, "compliance", "dashboard")))
@@ -524,7 +533,7 @@ func main() {
 	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
 	subTarget := getRouteTarget("/api/admin/packages")
 	if subTarget == "" {
-		subTarget = "http://subscription-service.railway.internal:5004"
+		subTarget = "http://localhost:5004"
 	}
 	http.HandleFunc("/api/admin/packages", withRoleAuth(
 		createProxyHandler(subTarget, true),
@@ -546,7 +555,7 @@ func main() {
 	// --- KYC Admin API (role-protected) - COMPLIANCE & OPERASIONAL can access ---
 	kycTarget := getRouteTarget("/api/admin/kyc")
 	if kycTarget == "" {
-		kycTarget = "http://users-service.railway.internal:2006"
+		kycTarget = "http://localhost:2006"
 	}
 	http.HandleFunc("/api/admin/kyc", withRoleAuth(
 		createProxyHandler(kycTarget, true),
@@ -559,7 +568,7 @@ func main() {
 	// --- ORDERS Admin API (role-protected) - OPERASIONAL can access ---
 	ordersTarget := getRouteTarget("/api/admin/orders")
 	if ordersTarget == "" {
-		ordersTarget = "http://operational-service.railway.internal:8080"
+		ordersTarget = "http://localhost:5005"
 	}
 	http.HandleFunc("/api/admin/orders", withRolesAuth([]string{"OPERASIONAL", "SUPERADMIN", "CEO"},
 		createProxyHandler(ordersTarget, true),
@@ -568,6 +577,19 @@ func main() {
 		createProxyHandler(ordersTarget, true),
 	))
 	log.Printf("[GW] Protected API: /api/admin/orders -> %s (CEO/SUPERADMIN/OPERASIONAL)", ordersTarget)
+
+	// --- SUPPORT TICKETS Admin API (role-protected) - ADMIN_SUPPORT only ---
+	supportTicketsTarget := getRouteTarget("/api/admin/support/tickets")
+	if supportTicketsTarget == "" {
+		supportTicketsTarget = "http://localhost:2004"
+	}
+	http.HandleFunc("/api/admin/support/tickets", withRoleAuth(
+		createProxyHandler(supportTicketsTarget, true),
+	))
+	http.HandleFunc("/api/admin/support/tickets/", withRoleAuth(
+		createProxyHandler(supportTicketsTarget, true),
+	))
+	log.Printf("[GW] Protected API: /api/admin/support/tickets -> %s (ADMIN_SUPPORT)", supportTicketsTarget)
 
 	// --- KYC Client API (role-protected) - CLIENT can access their own KYC ---
 	kycClientTarget := getRouteTarget("/api/kyc/")
@@ -635,6 +657,8 @@ func redirectByRole(roleCode string) string {
 	switch strings.ToUpper(roleCode) {
 	case "OPERASIONAL", "CEO":
 		return "/ops/dashboard"
+	case "ADMIN_SUPPORT":
+		return "/ops/tickets"
 	case "COMPLIANCE":
 		return "/compliance/dashboard"
 	case "CLIENT":

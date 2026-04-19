@@ -23,6 +23,7 @@ func main() {
 	// ============================================================
 
 	utils.LoadEnv(".env")
+	utils.LoadEnv("users/.env")
 
 	if err := utils.InitJWTLoadKeys("certs/private.pem", "certs/public.pem"); err != nil {
 		log.Fatalf("[FATAL] Gagal memuat kunci JWT: %v", err)
@@ -59,10 +60,14 @@ func main() {
 
 	maxConns, _ := strconv.Atoi(utils.GetEnv("read_db_max_conn", "5"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
+	servicePort := utils.GetEnv("port", "")
+	if servicePort == "" {
+		servicePort = utils.GetEnv("PORT", "2006")
+	}
 
 	cfg := core.Config{
 		AppName:        utils.GetEnv("app_name", "ZaFramework"),
-		Port:           utils.GetEnv("port", "9002"),
+		Port:           servicePort,
 		Env:            utils.GetEnv("app_env", "development"),
 		AssetsURL:      utils.GetEnv("assets_url"),
 		SsoAuth:        utils.GetEnv("sso_auth"),
@@ -101,7 +106,11 @@ func main() {
 
 	app := core.New(cfg)
 
-	database.MigrateAndSeed(app.DB)
+	if app.DB != nil && app.DB.Pool != nil {
+		database.MigrateAndSeed(app.DB)
+	} else {
+		log.Println("[DB] Skipping migration: database connection is not initialized")
+	}
 
 	// ============================================================
 	// 2. WIRING FEATURES (Dependency Injection)

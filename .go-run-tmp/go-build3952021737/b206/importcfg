@@ -1,0 +1,9 @@
+# import config
+packagefile context=C:\Users\yovan\AppData\Local\go-build\de\de9b707c08f537cd1e995322edd78ee5cbd891309bb261161017e98c4c1d08a7-d
+packagefile errors=C:\Users\yovan\AppData\Local\go-build\60\60b2b16cf97e7047df9762a969461630da96999df5504f3be1758c726a04b111-d
+packagefile fmt=C:\Users\yovan\AppData\Local\go-build\20\207f6635331b9a1c4d35dd7629029b2e850226585f05c753c5eca3310391c2be-d
+packagefile github.com/jackc/pgx/v5/pgxpool=C:\Users\yovan\AppData\Local\go-build\11\117d92f487f29d5004ac62b638e39a02726c15f3326cd7931433644de46233ba-d
+packagefile golang.org/x/crypto/bcrypt=C:\Users\yovan\AppData\Local\go-build\04\04b867fdc45e26a9cad82cf86b5b27a1bc51e639f680e5913175354f4863696c-d
+packagefile log=C:\Users\yovan\AppData\Local\go-build\09\09fbea7c3ef42e8a74c5e5bef3f9ff386b78b3354e0915be3b64d3e53537417b-d
+packagefile strings=C:\Users\yovan\AppData\Local\go-build\bb\bb220c3fe80d5e749c9382ac634507db68495a2af21b9a9fd847547eb08f02ef-d
+packagefile time=C:\Users\yovan\AppData\Local\go-build\6b\6b6b728fcd59a2ea84a13cc62c224b99a029c57c84a63b33792fc34160437768-d

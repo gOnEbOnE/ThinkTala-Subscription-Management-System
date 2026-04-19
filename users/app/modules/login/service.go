@@ -117,6 +117,7 @@ func (s *Service) ProcessAssumeRoleJob(ctx context.Context, payload any) (any, e
 		"OPERASIONAL": true,
 		"COMPLIANCE":  true,
 		"CLIENT":      true,
+		"ADMIN_SUPPORT": true,
 	}
 	if !validRoles[targetRoleCode] {
 		return nil, fmt.Errorf("Role '%s' tidak valid untuk simulasi", targetRoleCode)
@@ -160,6 +161,8 @@ func (s *Service) ProcessAssumeRoleJob(ctx context.Context, payload any) (any, e
 	// Tentukan redirect URL berdasarkan assumed role
 	var redirectURL string
 	switch roleCode {
+	case "ADMIN_SUPPORT":
+		redirectURL = "/ops/tickets"
 	case "OPERASIONAL", "CEO":
 		redirectURL = "/ops/dashboard"
 	case "COMPLIANCE":

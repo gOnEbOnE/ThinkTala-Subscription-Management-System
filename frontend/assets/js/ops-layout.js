@@ -20,12 +20,29 @@
         return;
     }
 
-    // ── Role guard: /ops/* is only for OPERASIONAL, CEO, SUPERADMIN ──────
+    // ── Role guard: /ops/* is only for support/admin roles ──────
     var _opsRole = (guardUser.role_code || guardUser.level_code || guardUser.level || '').toString().toUpperCase();
-    if (_opsRole !== 'OPERASIONAL' && _opsRole !== 'CEO' && _opsRole !== 'SUPERADMIN') {
+    if (_opsRole !== 'ADMIN_SUPPORT' && _opsRole !== 'OPERASIONAL' && _opsRole !== 'CEO' && _opsRole !== 'SUPERADMIN') {
         var _opsRedirect = { 'COMPLIANCE': '/compliance/dashboard', 'CLIENT': '/client/dashboard' };
         window.location.href = _opsRedirect[_opsRole] || '/account/login';
         return;
+    }
+
+    var _isSupportRole = _opsRole === 'ADMIN_SUPPORT';
+
+    if (_isSupportRole && window.location.pathname !== '/ops/tickets' && window.location.pathname !== '/ops/support-ticket-detail') {
+        window.location.href = '/ops/tickets';
+        return;
+    }
+
+    if (!_isSupportRole && (window.location.pathname === '/ops/tickets' || window.location.pathname === '/ops/support-ticket-detail')) {
+        window.location.href = '/ops/dashboard';
+        return;
+    }
+
+    var _roleBadge = document.getElementById('roleBadge');
+    if (_roleBadge) {
+        _roleBadge.textContent = _opsRole || 'OPERASIONAL';
     }
 
     // ── Prevent transition flash on load ────────────────────────────
@@ -47,8 +64,10 @@
     // parentKey  : submenu parent that gets .open + .parent-active
     const ROUTES = {
         '/ops/dashboard'              : { activeKey: 'dashboard' },
+        '/ops/tickets'                : { activeKey: 'tickets' },
         '/ops/notifications'          : { activeKey: 'notifications',          parentKey: 'notif' },
         '/ops/notification-templates' : { activeKey: 'notification-templates', parentKey: 'notif' },
+        '/ops/support-ticket-detail'  : { activeKey: 'tickets' },
         '/ops/subscriptions'          : { activeKey: 'subscriptions' },
         '/ops/subscriptions-create'   : { activeKey: 'subscriptions' },
         '/ops/subscriptions-edit'     : { activeKey: 'subscriptions' },
@@ -127,6 +146,15 @@
             </a>
         </li>
 
+        ${_isSupportRole ? `
+        <li class="nav-item">
+            <a class="nav-link${isActive('tickets')}" href="/ops/tickets">
+                <i class="fa-solid fa-ticket icon-left"></i>
+                <span class="link-text">Ticket</span>
+            </a>
+        </li>
+        ` : ''}
+
         <li class="nav-item">
             <a class="nav-link${isActive('subscriptions')}" href="/ops/subscriptions">
                 <i class="fa-solid fa-crown icon-left"></i>
@@ -161,7 +189,7 @@
         <button class="btn-header" id="sidebarToggle">
             <i class="fa-solid fa-bars fa-lg"></i>
         </button>
-        <span class="badge bg-warning text-dark" id="roleBadge">OPERASIONAL</span>
+        <span class="badge bg-warning text-dark" id="roleBadge">ADMIN_SUPPORT</span>
         <!-- Assumed Role Indicator -->
         <span class="badge bg-info text-dark" id="assumedRoleBadge" style="display:none;">
             <i class="fa-solid fa-user-secret me-1"></i>Sedang sebagai: <strong id="assumedRoleName"></strong>
@@ -175,6 +203,7 @@
             </button>
             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-2">
                 <li><h6 class="dropdown-header">Pilih Simulasi Peran</h6></li>
+                <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('ADMIN_SUPPORT')"><i class="fa-solid fa-ticket me-2"></i>Customer Support</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('OPERASIONAL')"><i class="fa-solid fa-cogs me-2"></i>Operasional</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('COMPLIANCE')"><i class="fa-solid fa-shield-halved me-2"></i>Compliance</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('CEO')"><i class="fa-solid fa-briefcase me-2"></i>CEO</a></li>
@@ -217,6 +246,33 @@
         const navbarEl  = document.getElementById('ops-navbar-placeholder');
         if (sidebarEl) sidebarEl.outerHTML = sidebarHTML;
         if (navbarEl)  navbarEl.outerHTML  = navbarHTML;
+
+        if (!_isSupportRole) {
+            document.querySelectorAll('a[href="/ops/tickets"]').forEach((link) => {
+                const item = link.closest('.nav-item');
+                if (item) item.remove();
+            });
+        } else {
+            const sidebar = document.querySelector('nav.sidebar');
+            if (sidebar) {
+                // Support panel only keeps Ticket + Logout in sidebar.
+                sidebar.querySelectorAll('ul.nav.flex-column.flex-grow-1 a.nav-link').forEach((link) => {
+                    if (link.getAttribute('href') !== '/ops/tickets') {
+                        const item = link.closest('.nav-item');
+                        if (item) item.remove();
+                    }
+                });
+
+                sidebar.querySelectorAll('ul.nav.flex-column.mb-5 a.nav-link').forEach((link) => {
+                    if (link.classList.contains('text-danger')) {
+                        return;
+                    }
+                    const item = link.closest('.nav-item');
+                    if (item) item.remove();
+                });
+            }
+        }
+
         initLayout();
         initUserInfo();
     }
@@ -317,6 +373,14 @@
         // Show role badge
         const roleBadge = document.getElementById('roleBadge');
         if (roleBadge && user.role_code) roleBadge.textContent = user.role_code;
+
+        const currentRole = String(user.role_code || '').toUpperCase();
+        if (currentRole !== 'ADMIN_SUPPORT') {
+            document.querySelectorAll('a[href="/ops/tickets"]').forEach((link) => {
+                const item = link.closest('.nav-item');
+                if (item) item.remove();
+            });
+        }
 
         // SUPERADMIN: show assume role dropdown
         const levelCode = (user.level_code || '').toUpperCase();
