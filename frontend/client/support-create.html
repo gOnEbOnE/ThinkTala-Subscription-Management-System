@@ -13,8 +13,42 @@
     <link rel="stylesheet" href="/assets/css/styles.css">
     <style>
         .support-form-card {
-            max-width: 860px;
-            margin: 0 auto;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding-inline: clamp(0.25rem, 1.4vw, 1rem);
+        }
+
+        .support-header h4 {
+            color: var(--text-heading);
+            letter-spacing: 0.01em;
+        }
+
+        .support-header small {
+            color: var(--text-muted);
+        }
+
+        .support-form-shell {
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            width: 100%;
+        }
+
+        .support-note {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding: 0.7rem 0.8rem;
+            border-radius: 0.55rem;
+            background: rgba(102, 130, 188, 0.16);
+            border: 1px solid rgba(123, 153, 214, 0.24);
+            color: #cfdfff;
+            font-size: 0.82rem;
+        }
+
+        .support-note i {
+            color: #7fd6ff;
         }
 
         .form-help {
@@ -27,6 +61,7 @@
             background: var(--bg-card) !important;
             border-color: var(--border-color) !important;
             color: var(--text-main) !important;
+            border-radius: 0.55rem;
         }
 
         .form-control:focus,
@@ -40,16 +75,80 @@
             color: #e6ecff;
         }
 
+        .upload-shell {
+            border: 1px dashed rgba(131, 158, 208, 0.4);
+            border-radius: 0.65rem;
+            padding: 0.65rem;
+            background: rgba(84, 109, 167, 0.12);
+            transition: 0.2s ease;
+        }
+
+        .upload-shell.is-filled {
+            border-color: rgba(108, 218, 255, 0.6);
+            background: rgba(72, 145, 201, 0.2);
+        }
+
+        .upload-shell.has-error {
+            border-color: rgba(255, 124, 124, 0.7);
+            background: rgba(141, 59, 72, 0.18);
+        }
+
+        .attachment-preview {
+            display: none;
+            margin-top: 0.75rem;
+            border: 1px solid rgba(129, 159, 214, 0.3);
+            border-radius: 0.65rem;
+            overflow: hidden;
+            background: rgba(17, 24, 45, 0.9);
+        }
+
+        .attachment-preview.is-visible {
+            display: block;
+        }
+
+        .attachment-preview img {
+            display: block;
+            width: 100%;
+            max-height: 320px;
+            object-fit: contain;
+        }
+
         .btn-submit {
             min-width: 170px;
             font-weight: 600;
             background: var(--accent-cyan);
             color: #000;
+            border: none;
         }
 
         .btn-submit:disabled {
             opacity: 0.65;
             cursor: not-allowed;
+        }
+
+        @media (max-width: 992px) {
+            .support-form-card {
+                padding-inline: 0.2rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .support-header {
+                margin-bottom: 1rem !important;
+            }
+
+            .support-note {
+                align-items: flex-start;
+                font-size: 0.78rem;
+            }
+
+            .btn-submit {
+                width: 100%;
+            }
+
+            .attachment-preview img {
+                max-height: 220px;
+            }
         }
     </style>
 </head>
@@ -60,14 +159,17 @@
 
     <div class="main-content">
         <div class="support-form-card">
-            <div class="d-flex justify-content-between align-items-start mb-4">
-                <div>
-                    <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Buat Laporan Kendala Baru</h4>
-                    <small class="text-muted">Sampaikan kendala Anda agar tim support segera menindaklanjuti</small>
-                </div>
+            <div class="support-header mb-4">
+                <h4 class="fw-bold mb-0">Buat Laporan Kendala Baru</h4>
+                <small>Sampaikan kendala Anda agar tim support segera menindaklanjuti.</small>
             </div>
 
-            <div class="ai-card shadow-lg">
+            <div class="ai-card shadow-lg support-form-shell">
+                <div class="support-note">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Isi laporan secara ringkas, jelas, dan sesuai kategori agar proses penanganan lebih cepat.</span>
+                </div>
+
                 <form id="supportTicketForm" novalidate>
                     <div class="mb-3">
                         <label for="titleInput" class="form-label fw-semibold">Judul Kendala</label>
@@ -86,6 +188,9 @@
                             <option value="MASALAH_TEKNIS">Masalah Teknis</option>
                             <option value="PEMBAYARAN">Pembayaran</option>
                             <option value="AKUN">Akun</option>
+                            <option value="LANGGANAN">Langganan</option>
+                            <option value="NOTIFIKASI">Notifikasi</option>
+                            <option value="LAINNYA">Lainnya</option>
                         </select>
                     </div>
 
@@ -93,16 +198,24 @@
                         <label for="descriptionInput" class="form-label fw-semibold">Deskripsi</label>
                         <textarea class="form-control" id="descriptionInput" rows="6"
                             placeholder="Jelaskan kronologi kendala Anda secara detail..." required></textarea>
-                        <small class="form-help mt-1 d-block">Isi deskripsi selengkap mungkin agar support bisa membantu lebih cepat.</small>
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="form-help">Isi deskripsi selengkap mungkin agar support bisa membantu lebih cepat.</small>
+                            <small class="form-help" id="descriptionCounter">0 karakter</small>
+                        </div>
                     </div>
 
                     <div class="mb-4">
                         <label for="attachmentInput" class="form-label fw-semibold">Lampiran Gambar (Opsional)</label>
-                        <input type="file" class="form-control" id="attachmentInput"
-                            accept="image/png,image/jpeg,image/webp,image/gif">
+                        <div class="upload-shell" id="uploadShell">
+                            <input type="file" class="form-control" id="attachmentInput"
+                                accept="image/png,image/jpeg,image/webp,image/gif">
+                        </div>
                         <div class="d-flex justify-content-between mt-1">
                             <small class="form-help">Maksimal 1 gambar, ukuran maksimal 5 MB</small>
                             <small class="form-help" id="attachmentInfo">Belum ada file dipilih</small>
+                        </div>
+                        <div class="attachment-preview" id="attachmentPreview">
+                            <img id="attachmentPreviewImage" alt="Preview lampiran gambar">
                         </div>
                     </div>
 
@@ -143,12 +256,47 @@
         const descriptionInput = document.getElementById('descriptionInput');
         const attachmentInput = document.getElementById('attachmentInput');
         const attachmentInfo = document.getElementById('attachmentInfo');
+        const attachmentPreview = document.getElementById('attachmentPreview');
+        const attachmentPreviewImage = document.getElementById('attachmentPreviewImage');
         const submitBtn = document.getElementById('submitBtn');
         const submitBtnText = document.getElementById('submitBtnText');
         const submitBtnLoading = document.getElementById('submitBtnLoading');
         const titleCounter = document.getElementById('titleCounter');
+        const descriptionCounter = document.getElementById('descriptionCounter');
+        const uploadShell = document.getElementById('uploadShell');
 
         const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
+        let previewObjectURL = '';
+        let previewSignature = '';
+
+        function clearAttachmentPreview() {
+            if (previewObjectURL) {
+                URL.revokeObjectURL(previewObjectURL);
+                previewObjectURL = '';
+            }
+
+            previewSignature = '';
+            attachmentPreviewImage.removeAttribute('src');
+            attachmentPreview.classList.remove('is-visible');
+        }
+
+        function setAttachmentPreview(file) {
+            if (!file) {
+                clearAttachmentPreview();
+                return;
+            }
+
+            const signature = `${file.name}:${file.size}:${file.lastModified}`;
+            if (previewSignature === signature && previewObjectURL !== '') {
+                return;
+            }
+
+            clearAttachmentPreview();
+            previewObjectURL = URL.createObjectURL(file);
+            previewSignature = signature;
+            attachmentPreviewImage.src = previewObjectURL;
+            attachmentPreview.classList.add('is-visible');
+        }
 
         function showToast(message, variant) {
             const toastEl = document.getElementById('supportToast');
@@ -197,18 +345,27 @@
 
         function updateFormState() {
             titleCounter.textContent = `${titleInput.value.length}/120`;
+            descriptionCounter.textContent = `${descriptionInput.value.trim().length} karakter`;
 
             const files = attachmentInput.files;
             const attachmentError = getAttachmentValidationError();
             if (attachmentError) {
+                uploadShell.classList.remove('is-filled');
+                uploadShell.classList.add('has-error');
+                clearAttachmentPreview();
                 attachmentInfo.style.color = '#ff6b6b';
                 attachmentInfo.textContent = attachmentError;
             } else if (files && files.length > 0) {
                 const selected = files[0];
                 const sizeMB = (selected.size / (1024 * 1024)).toFixed(2);
+                uploadShell.classList.remove('has-error');
+                uploadShell.classList.add('is-filled');
+                setAttachmentPreview(selected);
                 attachmentInfo.style.color = 'var(--text-muted)';
                 attachmentInfo.textContent = `${selected.name} (${sizeMB} MB)`;
             } else {
+                uploadShell.classList.remove('has-error', 'is-filled');
+                clearAttachmentPreview();
                 attachmentInfo.style.color = 'var(--text-muted)';
                 attachmentInfo.textContent = 'Belum ada file dipilih';
             }
@@ -267,6 +424,7 @@
         descriptionInput.addEventListener('input', updateFormState);
         attachmentInput.addEventListener('change', updateFormState);
         form.addEventListener('submit', submitTicket);
+        window.addEventListener('beforeunload', clearAttachmentPreview);
 
         document.addEventListener('DOMContentLoaded', updateFormState);
     </script>
