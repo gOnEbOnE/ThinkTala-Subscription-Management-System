@@ -116,6 +116,7 @@ func (s *Service) ProcessAssumeRoleJob(ctx context.Context, payload any) (any, e
 		"CEO":         true,
 		"OPERASIONAL": true,
 		"COMPLIANCE":  true,
+		"MANAGEMENT":  true,
 		"CLIENT":      true,
 	}
 	if !validRoles[targetRoleCode] {
@@ -164,6 +165,8 @@ func (s *Service) ProcessAssumeRoleJob(ctx context.Context, payload any) (any, e
 		redirectURL = "/ops/dashboard"
 	case "COMPLIANCE":
 		redirectURL = "/compliance/dashboard"
+	case "MANAGEMENT", "ADMIN":
+		redirectURL = "/management/dashboard-customers"
 	case "CLIENT":
 		redirectURL = "/client/dashboard"
 	default:

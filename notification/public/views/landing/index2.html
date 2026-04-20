@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacroQuant | AI Full Suite</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --bg-dark: #0b0e17;
+            --bg-sidebar: #0f121d;
+            --bg-panel: rgba(21, 26, 45, 0.7);
+            --border-color: rgba(255, 255, 255, 0.05);
+            --accent-cyan: #00f2ff;
+            --accent-purple: #bd00ff;
+            --text-main: #e2e8f0;
+            --text-muted: #8b9bb4;
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.2);
+            --chart-grid: rgba(255,255,255,0.05);
+            --chart-text: #8b9bb4;
+            --success: #00d26a;
+            --danger: #f93e3e;
+            --warning: #f5a623;
+        }
+
+        [data-theme="light"] {
+            --bg-dark: #f0f2f5;
+            --bg-sidebar: #ffffff;
+            --bg-panel: rgba(255, 255, 255, 0.85);
+            --border-color: rgba(0, 0, 0, 0.05);
+            --accent-cyan: #008891;
+            --accent-purple: #700099;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --chart-grid: rgba(0,0,0,0.05);
+            --chart-text: #64748b;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Sidebar & Layout */
+        .sidebar {
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 1000;
+            padding-top: 20px;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+
+        /* Nav Links */
+        .nav-link {
+            color: var(--text-muted);
+            padding: 12px 20px;
+            margin: 4px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent-cyan);
+            border-left: 3px solid var(--accent-cyan);
+        }
+
+        /* AI Cards */
+        .ai-card {
+            background: var(--bg-panel);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-card);
+        }
+
+        /* Utilities */
+        .text-cyan { color: var(--accent-cyan) !important; }
+        .text-purple { color: var(--accent-purple) !important; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .ai-badge {
+            background: rgba(0, 242, 255, 0.1);
+            color: var(--accent-cyan);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid var(--accent-cyan);
+        }
+
+        /* Page Management */
+        .page-section { display: none; animation: fadeIn 0.4s; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom Elements */
+        .heatmap-cell {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #fff;
+        }
+        .impact-high { border-left: 3px solid var(--danger); }
+        .impact-med { border-left: 3px solid var(--warning); }
+        
+        .cb-meter {
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .cb-indicator {
+            position: absolute;
+            top: 0; bottom: 0; width: 4px; background: #fff;
+            box-shadow: 0 0 5px white;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="text-center mb-5">
+            <h4 class="fw-bold tracking-wider" style="color: var(--text-main)"><i class="fa-solid fa-brain text-cyan me-2"></i>Macro<span class="text-cyan">Quant</span></h4>
+        </div>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link active" onclick="switchPage('dashboard')"><i class="fa-solid fa-chart-radar me-2"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchPage('macro')"><i class="fa-solid fa-globe me-2"></i> Macro Data <span class="badge bg-danger ms-2" style="font-size:0.6rem">LIVE</span></a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchPage('correlation')"><i class="fa-solid fa-layer-group me-2"></i> Correlations</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchPage('ai')"><i class="fa-solid fa-robot me-2"></i> AI Predictions</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchPage('backtest')"><i class="fa-solid fa-history me-2"></i> Backtest Lab</a></li>
+        </ul>
+        
+        <div class="position-absolute bottom-0 w-100 p-3 text-center">
+             <button class="btn btn-sm btn-outline-secondary w-100" id="themeToggle"><i class="fa-solid fa-moon me-2"></i> Toggle Theme</button>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1" id="page-title">Market Overview</h2>
+                <p class="mb-0 text-muted small">AI Last Sync: <span class="font-mono text-cyan">Just Now</span></p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="ai-card py-2 px-3 mb-0 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-microchip text-purple"></i>
+                    <span class="small" style="color: var(--text-main)">NeuroMac v4.2</span>
+                </div>
+                <div class="rounded-circle p-1 bg-gradient-primary">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=0b0e17&color=fff" class="rounded-circle" width="35">
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboard" class="page-section active">
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="ai-card h-100">
+                        <span class="ai-badge">GLOBAL REGIME</span>
+                        <h3 class="fw-bold text-danger mt-2">RISK OFF</h3>
+                        <div class="progress mt-3" style="height:4px"><div class="progress-bar bg-danger" style="width: 88%"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ai-card h-100">
+                        <span class="ai-badge border-success text-success bg-success bg-opacity-10">TOP SIGNAL</span>
+                        <h3 class="fw-bold mt-2">AUD/NZD <small class="text-success text-sm">+0.45%</small></h3>
+                        <p class="small text-muted">Widening Rate Spread</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="ai-card h-100">
+                        <span class="ai-badge border-warning text-warning bg-warning bg-opacity-10">ALERT</span>
+                        <h5 class="fw-bold mt-2 text-warning">Oil Divergence</h5>
+                        <p class="small text-muted">Oil up, CAD flat. Watch for catch-up.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="ai-card">
+                <h5 class="fw-bold mb-4">Fair Value Gap Overview</h5>
+                <div style="height: 300px;"><canvas id="chartDashboard"></canvas></div>
+            </div>
+        </div>
+
+        <div id="macro" class="page-section">
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="ai-card">
+                        <h5 class="fw-bold mb-4"><i class="fa-solid fa-calendar-day text-cyan me-2"></i>AI Filtered Calendar</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" style="color: var(--text-main)">
+                                <thead class="small text-uppercase text-muted">
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Curr</th>
+                                        <th>Event</th>
+                                        <th>Actual / Fcst</th>
+                                        <th>Surprise</th>
+                                        <th>AI Impact</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="font-mono small">
+                                    <tr class="impact-high">
+                                        <td>14:30</td>
+                                        <td><span class="fw-bold">USD</span></td>
+                                        <td>Core CPI (YoY)</td>
+                                        <td><span class="text-danger fw-bold">3.9%</span> / 3.7%</td>
+                                        <td><span class="badge bg-danger">+0.2%</span></td>
+                                        <td class="text-success"><i class="fa-solid fa-arrow-up"></i> Bullish</td>
+                                    </tr>
+                                    <tr class="impact-med">
+                                        <td>09:00</td>
+                                        <td><span class="fw-bold">EUR</span></td>
+                                        <td>German Ifo Climate</td>
+                                        <td>86.4 / 86.0</td>
+                                        <td><span class="badge bg-secondary">0.0%</span></td>
+                                        <td class="text-muted">Neutral</td>
+                                    </tr>
+                                    <tr class="impact-high">
+                                        <td>02:00</td>
+                                        <td><span class="fw-bold">AUD</span></td>
+                                        <td>RBA Meeting Minutes</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td class="text-danger"><i class="fa-solid fa-arrow-down"></i> Dovish Tone</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    <div class="ai-card">
+                        <h5 class="fw-bold mb-4"><i class="fa-solid fa-building-columns text-purple me-2"></i>Central Bank AI Bias</h5>
+                        
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-bold small">Federal Reserve (USD)</span>
+                                <span class="badge bg-danger">HAWKISH</span>
+                            </div>
+                            <div class="cb-meter bg-secondary bg-opacity-25">
+                                <div class="cb-indicator" style="left: 80%; background: var(--danger);"></div>
+                            </div>
+                            <small class="text-muted d-block mt-1">Focus: Inflation Stickiness</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-bold small">ECB (EUR)</span>
+                                <span class="badge bg-secondary">NEUTRAL</span>
+                            </div>
+                            <div class="cb-meter bg-secondary bg-opacity-25">
+                                <div class="cb-indicator" style="left: 50%; background: var(--text-muted);"></div>
+                            </div>
+                            <small class="text-muted d-block mt-1">Focus: Growth Concerns</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-bold small">BOJ (JPY)</span>
+                                <span class="badge bg-success">DOVISH</span>
+                            </div>
+                            <div class="cb-meter bg-secondary bg-opacity-25">
+                                <div class="cb-indicator" style="left: 10%; background: var(--success);"></div>
+                            </div>
+                            <small class="text-muted d-block mt-1">Focus: Yield Curve Control</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="correlation" class="page-section">
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="ai-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Inter-Market Matrix (30 Days)</h5>
+                            <span class="ai-badge">Heatmap</span>
+                        </div>
+                        <p class="small text-muted mb-3">How assets move relative to each other. <span class="text-success">Green = Moving Together</span>, <span class="text-danger">Red = Inverse</span>.</p>
+                        
+                        <div class="row g-1 font-mono small">
+                            <div class="col-2"></div>
+                            <div class="col-2 text-center text-muted">USD</div>
+                            <div class="col-2 text-center text-muted">Gold</div>
+                            <div class="col-2 text-center text-muted">Oil</div>
+                            <div class="col-2 text-center text-muted">S&P500</div>
+                            <div class="col-2 text-center text-muted">US10Y</div>
+
+                            <div class="col-2 text-end pe-2 fw-bold">AUD</div>
+                            <div class="col-2"><div class="heatmap-cell" style="background: #f93e3e;">-0.85</div></div> <div class="col-2"><div class="heatmap-cell" style="background: #00d26a;">+0.78</div></div> <div class="col-2"><div class="heatmap-cell" style="background: #00b050;">+0.65</div></div>
+                            <div class="col-2"><div class="heatmap-cell" style="background: #00d26a;">+0.88</div></div> <div class="col-2"><div class="heatmap-cell" style="background: #f5a623;">-0.12</div></div>
+
+                            <div class="col-2 text-end pe-2 fw-bold">CAD</div>
+                            <div class="col-2"><div class="heatmap-cell" style="background: #f93e3e;">-0.70</div></div>
+                            <div class="col-2"><div class="heatmap-cell" style="background: #a3e635;">+0.40</div></div>
+                            <div class="col-2"><div class="heatmap-cell" style="background: #007f00;">+0.92</div></div> <div class="col-2"><div class="heatmap-cell" style="background: #00d26a;">+0.75</div></div>
+                            <div class="col-2"><div class="heatmap-cell" style="background: #f5a623;">+0.10</div></div>
+                            
+                             <div class="col-2 text-end pe-2 fw-bold">JPY</div>
+                             <div class="col-2"><div class="heatmap-cell" style="background: #990000;">-0.95</div></div>
+                             <div class="col-2"><div class="heatmap-cell" style="background: #00d26a;">+0.80</div></div>
+                             <div class="col-2"><div class="heatmap-cell" style="background: #555;">0.05</div></div>
+                             <div class="col-2"><div class="heatmap-cell" style="background: #f93e3e;">-0.40</div></div>
+                             <div class="col-2"><div class="heatmap-cell" style="background: #f93e3e;">-0.88</div></div> </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="ai-card h-100">
+                        <h5 class="fw-bold mb-4"><i class="fa-solid fa-radar text-cyan me-2"></i>Divergence Scanner</h5>
+                        <div class="alert bg-dark border border-secondary p-3">
+                            <div class="d-flex justify-content-between">
+                                <strong class="text-warning"><i class="fa-solid fa-triangle-exclamation"></i> Strong Signal</strong>
+                                <span class="small text-muted">15m ago</span>
+                            </div>
+                            <p class="mb-1 mt-2"><strong>Asset:</strong> CAD/JPY</p>
+                            <p class="mb-1"><strong>Trigger:</strong> Oil Price (+2.5%)</p>
+                            <p class="small text-muted mb-0">Analysis: Oil broke out, but CAD hasn't moved yet. Expect CAD/JPY to rally 30-50 pips to catch up.</p>
+                        </div>
+                        
+                        <div class="alert bg-dark border border-secondary p-3">
+                            <div class="d-flex justify-content-between">
+                                <strong class="text-muted">Weak Signal</strong>
+                                <span class="small text-muted">1h ago</span>
+                            </div>
+                            <p class="mb-1 mt-2"><strong>Asset:</strong> EUR/USD</p>
+                            <p class="mb-1"><strong>Trigger:</strong> DE-US Yield Spread</p>
+                            <p class="small text-muted mb-0">Spread tightening slightly, but price action is choppy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ai" class="page-section">
+            <div class="row mb-3">
+                <div class="col-12">
+                     <div class="ai-card py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Fair Value Models</h5>
+                            <button class="btn btn-sm btn-outline-info">Retrain Model</button>
+                        </div>
+                     </div>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="ai-card">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h4 class="fw-bold">GBP/USD</h4>
+                            <span class="badge bg-success">BULLISH</span>
+                        </div>
+                        <div class="d-flex justify-content-between font-mono small mb-3">
+                            <span class="text-muted">Current: 1.2750</span>
+                            <span class="text-cyan">Target: 1.2820</span>
+                        </div>
+                        
+                        <h6 class="small text-uppercase text-muted fw-bold">AI Probability</h6>
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: 78%"></div>
+                        </div>
+                        <span class="small text-success fw-bold">78% Confidence</span>
+
+                        <hr class="border-secondary my-3">
+                        
+                        <h6 class="small text-uppercase text-muted fw-bold">Key Drivers (Feature Imp.)</h6>
+                        <ul class="list-unstyled small mb-0">
+                            <li class="d-flex justify-content-between mb-1">
+                                <span>Risk Sentiment</span>
+                                <span class="text-success">+40%</span>
+                            </li>
+                            <li class="d-flex justify-content-between mb-1">
+                                <span>Yield Spread (UK-US)</span>
+                                <span class="text-success">+25%</span>
+                            </li>
+                             <li class="d-flex justify-content-between">
+                                <span>Techs (RSI)</span>
+                                <span class="text-danger">-10%</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="ai-card">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h4 class="fw-bold">USD/JPY</h4>
+                            <span class="badge bg-secondary">NEUTRAL</span>
+                        </div>
+                        <div class="d-flex justify-content-between font-mono small mb-3">
+                            <span class="text-muted">Current: 148.20</span>
+                            <span class="text-cyan">Fair Val: 148.10</span>
+                        </div>
+                        
+                         <h6 class="small text-uppercase text-muted fw-bold">AI Probability</h6>
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar bg-secondary" style="width: 45%"></div>
+                        </div>
+                        <span class="small text-muted fw-bold">45% Confidence (No Trade)</span>
+
+                        <hr class="border-secondary my-3">
+                        <p class="small text-muted fst-italic">"Conflicting signals. Yields suggest UP, but Technicals suggest DOWN. AI recommends waiting."</p>
+                    </div>
+                </div>
+                
+                 <div class="col-md-4">
+                    <div class="ai-card">
+                        <div class="d-flex justify-content-between mb-2">
+                            <h4 class="fw-bold">EUR/AUD</h4>
+                            <span class="badge bg-danger">BEARISH</span>
+                        </div>
+                        <div class="d-flex justify-content-between font-mono small mb-3">
+                            <span class="text-muted">Current: 1.6500</span>
+                            <span class="text-cyan">Target: 1.6410</span>
+                        </div>
+                        
+                         <h6 class="small text-uppercase text-muted fw-bold">AI Probability</h6>
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar bg-danger" style="width: 82%"></div>
+                        </div>
+                        <span class="small text-danger fw-bold">82% Confidence</span>
+
+                        <hr class="border-secondary my-3">
+                        <h6 class="small text-uppercase text-muted fw-bold">Key Drivers</h6>
+                         <ul class="list-unstyled small mb-0">
+                            <li class="d-flex justify-content-between mb-1">
+                                <span>Commodities (Iron Ore)</span>
+                                <span class="text-danger">-55% (AUD Strength)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="backtest" class="page-section">
+            <div class="row g-4">
+                <div class="col-lg-3">
+                    <div class="ai-card h-100">
+                        <h5 class="fw-bold mb-4">Strategy Config</h5>
+                        <form>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Strategy Model</label>
+                                <select class="form-select form-select-sm bg-dark text-light border-secondary">
+                                    <option>Fair Value Reversion (Mean)</option>
+                                    <option>Macro Trend Follower</option>
+                                    <option>News Event Scalper</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Pair</label>
+                                <select class="form-select form-select-sm bg-dark text-light border-secondary">
+                                    <option>EUR/USD</option>
+                                    <option>GBP/JPY</option>
+                                    <option>XAU/USD</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Time Period</label>
+                                <select class="form-select form-select-sm bg-dark text-light border-secondary">
+                                    <option>Last 12 Months</option>
+                                    <option>YTD (Year to Date)</option>
+                                    <option>Last 5 Years</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label small text-muted">Initial Balance</label>
+                                <input type="number" class="form-control form-control-sm bg-dark text-light border-secondary" value="10000">
+                            </div>
+                            <button type="button" class="btn btn-primary w-100 btn-sm fw-bold">RUN SIMULATION <i class="fa-solid fa-play ms-2"></i></button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="ai-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0">Equity Curve Simulation</h5>
+                            <span class="font-mono text-success fw-bold">Total PnL: +$4,250 (+42.5%)</span>
+                        </div>
+                        <div style="height: 300px;"><canvas id="chartBacktest"></canvas></div>
+                        
+                        <div class="row mt-4 text-center">
+                            <div class="col-3 border-end border-secondary">
+                                <span class="d-block small text-muted">Win Rate</span>
+                                <span class="h4 fw-bold text-success">68%</span>
+                            </div>
+                            <div class="col-3 border-end border-secondary">
+                                <span class="d-block small text-muted">Profit Factor</span>
+                                <span class="h4 fw-bold text-cyan">2.14</span>
+                            </div>
+                            <div class="col-3 border-end border-secondary">
+                                <span class="d-block small text-muted">Max Drawdown</span>
+                                <span class="h4 fw-bold text-danger">-8.5%</span>
+                            </div>
+                            <div class="col-3">
+                                <span class="d-block small text-muted">Trades</span>
+                                <span class="h4 fw-bold">342</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // --- 1. NAVIGATION LOGIC (The "SPA" Feel) ---
+        function switchPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+            // Remove active class from nav links
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            
+            // Show target page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update Title
+            const titles = {
+                'dashboard': 'Market Overview',
+                'macro': 'Macro Data Intelligence',
+                'correlation': 'Asset Correlations',
+                'ai': 'AI Predictions Engine',
+                'backtest': 'Strategy Backtesting'
+            };
+            document.getElementById('page-title').innerText = titles[pageId];
+
+            // Re-render charts if necessary (sometimes hidden charts glitch)
+            if(pageId === 'dashboard') renderDashboardChart();
+            if(pageId === 'backtest') renderBacktestChart();
+        }
+
+        // --- 2. CHART INITIALIZATIONS ---
+        
+        // Setup Charts Variables
+        let dashboardChartInstance = null;
+        let backtestChartInstance = null;
+        const ctxDash = document.getElementById('chartDashboard').getContext('2d');
+        const ctxBack = document.getElementById('chartBacktest').getContext('2d');
+
+        // Helper for Gradient
+        function getGradient(ctx, color) {
+            let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            return gradient;
+        }
+
+        function renderDashboardChart() {
+            if(dashboardChartInstance) dashboardChartInstance.destroy();
+            
+            dashboardChartInstance = new Chart(ctxDash, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Now'],
+                    datasets: [{
+                        label: 'Fair Value',
+                        data: [1.08, 1.082, 1.085, 1.083, 1.088, 1.090],
+                        borderColor: '#00f2ff',
+                        backgroundColor: getGradient(ctxDash, 'rgba(0, 242, 255, 0.2)'),
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Price',
+                        data: [1.078, 1.080, 1.081, 1.082, 1.084, 1.085],
+                        borderColor: '#8b9bb4',
+                        borderDash: [5,5],
+                        tension: 0.1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+            });
+        }
+
+        function renderBacktestChart() {
+            if(backtestChartInstance) backtestChartInstance.destroy();
+
+            backtestChartInstance = new Chart(ctxBack, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Equity Curve',
+                        data: [10000, 10500, 10200, 11000, 12500, 14250],
+                        borderColor: '#00d26a',
+                        backgroundColor: getGradient(ctxBack, 'rgba(0, 210, 106, 0.2)'),
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' } }
+                    }
+                }
+            });
+        }
+
+        // --- 3. THEME TOGGLE LOGIC ---
+        const themeBtn = document.getElementById('themeToggle');
+        themeBtn.addEventListener('click', () => {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            
+            // Rerender charts to catch new CSS variables
+            setTimeout(() => {
+                if(document.getElementById('dashboard').classList.contains('active')) renderDashboardChart();
+                if(document.getElementById('backtest').classList.contains('active')) renderBacktestChart();
+            }, 50);
+        });
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDashboardChart(); // Start with dashboard
+        });
+
+    </script>
+</body>
+</html>

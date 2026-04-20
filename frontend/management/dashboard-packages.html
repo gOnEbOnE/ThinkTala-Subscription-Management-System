@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Package Sales | ThinkTala</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .page-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 2px;
+        }
+
+        .metric-card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-panel);
+            padding: 1rem 1.2rem;
+            height: 100%;
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-value {
+            color: var(--text-heading);
+            font-weight: 700;
+            font-size: 2rem;
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+
+        .metric-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .metric-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.04);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .filter-card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-panel);
+            padding: 1rem;
+        }
+
+        .filter-strip {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-left,
+        .filter-right {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .date-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            min-height: 40px;
+            padding: 0 0.45rem;
+        }
+
+        .date-input {
+            width: 132px;
+            border: 0;
+            background: transparent;
+            color: var(--text-main);
+            outline: none;
+            font-size: 0.86rem;
+        }
+
+        .date-input::-webkit-calendar-picker-indicator {
+            filter: invert(0.85);
+            cursor: pointer;
+        }
+
+        .chart-card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-panel);
+            padding: 1rem 1.2rem;
+        }
+
+        .chart-title {
+            color: var(--text-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.15rem;
+        }
+
+        .chart-subtitle {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .chart-wrap {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.7rem;
+            min-height: 280px;
+            position: relative;
+        }
+
+        .empty-hint {
+            display: none;
+            margin-top: 0.65rem;
+            font-size: 0.86rem;
+            color: var(--text-muted);
+        }
+
+        .forbidden-wrap {
+            display: none;
+            margin: 1.2rem 0;
+            border: 1px solid rgba(249, 62, 62, 0.35);
+            border-radius: 12px;
+            background: rgba(249, 62, 62, 0.08);
+            padding: 1.5rem;
+            color: #ffd2d2;
+            text-align: center;
+        }
+
+        .forbidden-code {
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+
+        .error-state {
+            display: none;
+            margin-top: 0.75rem;
+            border: 1px solid rgba(249, 62, 62, 0.35);
+            border-radius: 10px;
+            background: rgba(249, 62, 62, 0.08);
+            padding: 0.9rem 1rem;
+            color: #ffc5c5;
+            font-size: 0.9rem;
+        }
+
+        .empty-period-note {
+            display: none;
+            margin-top: 0.75rem;
+            color: #ffd7a8;
+            border: 1px solid rgba(255, 200, 125, 0.35);
+            background: rgba(255, 200, 125, 0.08);
+            border-radius: 8px;
+            padding: 0.55rem 0.8rem;
+            font-size: 0.86rem;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 0.95rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.82rem 1rem;
+            vertical-align: middle;
+        }
+
+        .custom-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .custom-table td {
+            color: var(--text-main);
+            font-size: 0.92rem;
+        }
+
+        .custom-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .package-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+        }
+
+        .package-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.04);
+            font-size: 0.82rem;
+        }
+
+        .money-cell {
+            color: var(--text-heading);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .growth-positive {
+            color: #35d07f;
+            font-weight: 600;
+        }
+
+        .growth-negative {
+            color: #ff8080;
+            font-weight: 600;
+        }
+
+        .action-btn {
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            background: transparent;
+        }
+
+        .action-btn:hover {
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.06);
+        }
+
+        .pagination-wrap {
+            margin-top: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination-text {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+        }
+
+        .page-btn {
+            min-width: 38px;
+            height: 34px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+            border-radius: 7px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            padding: 0 0.65rem;
+        }
+
+        .page-btn.active {
+            background: var(--text-heading);
+            color: #000;
+            border-color: var(--text-heading);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .toast-zone {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            width: 340px;
+            max-width: calc(100vw - 2rem);
+        }
+
+        .toast-lite {
+            display: none;
+            border: 1px solid rgba(249, 62, 62, 0.35);
+            background: rgba(249, 62, 62, 0.95);
+            color: #fff;
+            border-radius: 8px;
+            padding: 0.7rem 0.85rem;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .skeleton-text {
+            color: transparent !important;
+            position: relative;
+            overflow: hidden;
+            border-radius: 6px;
+            min-height: 1rem;
+        }
+
+        .skeleton-text::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.18) 50%, rgba(255, 255, 255, 0.06) 100%);
+            background-size: 220% 100%;
+            animation: shimmer 1.2s linear infinite;
+        }
+
+        .chart-skeleton {
+            display: none;
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.11) 50%, rgba(255, 255, 255, 0.04) 100%);
+            background-size: 220% 100%;
+            animation: shimmer 1.2s linear infinite;
+            z-index: 2;
+        }
+
+        .skeleton-table-line {
+            display: block;
+            height: 14px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.11) 50%, rgba(255, 255, 255, 0.04) 100%);
+            background-size: 220% 100%;
+            animation: shimmer 1.2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 100% 0;
+            }
+
+            100% {
+                background-position: -120% 0;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .metric-value {
+                font-size: 1.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="toast-zone">
+        <div id="errorToast" class="toast-lite"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <div class="page-title">Dashboard Package Sales</div>
+                <div class="page-subtitle">Analyze subscription package performance</div>
+            </div>
+            <div class="d-flex align-items-center gap-2 text-muted small">
+                <i class="fa-regular fa-bell"></i>
+                <i class="fa-regular fa-user"></i>
+            </div>
+        </div>
+
+        <div id="forbiddenState" class="forbidden-wrap">
+            <div class="forbidden-code">403</div>
+            <div class="h5 mb-2">Access Denied</div>
+            <div>Halaman ini hanya dapat diakses oleh role Management / Admin.</div>
+        </div>
+
+        <div id="dashboardRoot">
+            <div class="row g-3 mb-3">
+                <div class="col-xl-3 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-label">
+                            <span>Most Sold Package</span>
+                            <span class="metric-icon"><i class="fa-solid fa-trophy"></i></span>
+                        </div>
+                        <div class="metric-value" id="mostSoldValue">-</div>
+                        <div class="metric-sub" id="mostSoldSub">0 sales</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-label">
+                            <span>Highest Revenue</span>
+                            <span class="metric-icon"><i class="fa-solid fa-dollar-sign"></i></span>
+                        </div>
+                        <div class="metric-value" id="highestRevenueValue">Rp0</div>
+                        <div class="metric-sub" id="highestRevenueSub">-</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-label">
+                            <span>Fastest Growth</span>
+                            <span class="metric-icon"><i class="fa-solid fa-arrow-trend-up"></i></span>
+                        </div>
+                        <div class="metric-value" id="fastestGrowthValue">0%</div>
+                        <div class="metric-sub" id="fastestGrowthSub">-</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-label">
+                            <span>Total Revenue</span>
+                            <span class="metric-icon"><i class="fa-solid fa-chart-line"></i></span>
+                        </div>
+                        <div class="metric-value" id="totalRevenueValue">Rp0</div>
+                        <div class="metric-sub" id="totalRevenueSub">This Month</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-card mb-3">
+                <div class="filter-strip">
+                    <div class="filter-left">
+                        <div class="date-wrap">
+                            <i class="fa-regular fa-calendar"></i>
+                            <input id="startDate" class="date-input" type="date">
+                            <span class="text-muted">-</span>
+                            <input id="endDate" class="date-input" type="date">
+                        </div>
+                        <select id="periodType" class="form-select form-select-sm" style="width: 140px;">
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="filter-right">
+                        <button id="refreshBtn" class="btn btn-sm btn-outline-light">
+                            <i class="fa-solid fa-rotate-right me-1"></i>Refresh
+                        </button>
+                        <button id="exportBtn" class="btn btn-sm btn-light fw-semibold">
+                            <i class="fa-solid fa-download me-1"></i>Export
+                        </button>
+                    </div>
+                </div>
+                <div id="errorState" class="error-state d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat data dashboard. Silakan coba lagi.</span>
+                    <button id="retryBtn" class="btn btn-sm btn-outline-light">Retry</button>
+                </div>
+                <div id="noDataPeriodState" class="empty-period-note">Data tidak tersedia pada periode ini.</div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-lg-6">
+                    <div class="chart-card h-100">
+                        <div class="chart-title">Package Sales Distribution</div>
+                        <div class="chart-subtitle">Total sales count by package type</div>
+                        <div class="chart-wrap">
+                            <div id="salesDistributionSkeleton" class="chart-skeleton"></div>
+                            <canvas id="salesDistributionChart" height="210"></canvas>
+                        </div>
+                        <div id="salesDistributionEmpty" class="empty-hint">Data penjualan tidak tersedia.</div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="chart-card h-100">
+                        <div class="chart-title">Revenue Contribution</div>
+                        <div class="chart-subtitle">Percentage share by package</div>
+                        <div class="chart-wrap">
+                            <div id="revenueContributionSkeleton" class="chart-skeleton"></div>
+                            <canvas id="revenueContributionChart" height="210"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card mb-3">
+                <div class="chart-title">Sales Trend Over Time</div>
+                <div class="chart-subtitle">Monthly sales growth comparison</div>
+                <div class="chart-wrap">
+                    <div id="salesTrendSkeleton" class="chart-skeleton"></div>
+                    <canvas id="salesTrendChart" height="160"></canvas>
+                </div>
+                <div id="salesTrendEmpty" class="empty-hint">Belum ada data tren penjualan.</div>
+            </div>
+
+            <div class="chart-card mb-4">
+                <div class="chart-title">Package Performance Details</div>
+                <div class="chart-subtitle">Detailed breakdown of each package</div>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Package Name</th>
+                                <th>Transactions</th>
+                                <th>Revenue</th>
+                                <th>Contribution</th>
+                                <th>Growth</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="packageTableBody">
+                            <tr><td colspan="6" class="text-center text-muted py-4">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-wrap">
+                    <div class="pagination-text" id="packagePaginationInfo">Showing 0-0 of 0 packages</div>
+                    <div class="d-flex gap-1" id="packagePaginationBtns"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
+    <script>
+        let salesDistributionChart = null;
+        let revenueContributionChart = null;
+        let salesTrendChart = null;
+
+        const state = {
+            page: 1,
+            limit: 10,
+            total: 0,
+            totalPages: 0,
+            period: 'monthly',
+            startDate: '',
+            endDate: '',
+            payload: null,
+            loading: false,
+        };
+
+        const ALLOWED_ROLES = new Set(['MANAGEMENT', 'ADMIN']);
+        const summarySkeletonIds = [
+            'mostSoldValue',
+            'mostSoldSub',
+            'highestRevenueValue',
+            'highestRevenueSub',
+            'fastestGrowthValue',
+            'fastestGrowthSub',
+            'totalRevenueValue',
+            'totalRevenueSub',
+        ];
+
+        function showToast(msg) {
+            const toast = document.getElementById('errorToast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3200);
+        }
+
+        function getCurrentUser() {
+            try {
+                return JSON.parse(localStorage.getItem('user') || 'null');
+            } catch (_e) {
+                return null;
+            }
+        }
+
+        function enforcePageAccess() {
+            const user = getCurrentUser();
+            if (!user || !user.id) {
+                window.location.href = '/account/login';
+                return false;
+            }
+            const role = String(user.role_code || user.level_code || user.level || '').toUpperCase();
+            if (!ALLOWED_ROLES.has(role)) {
+                document.getElementById('dashboardRoot').style.display = 'none';
+                document.getElementById('forbiddenState').style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+
+        function toInputDate(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getMonthBounds(year, monthIndex) {
+            const start = new Date(year, monthIndex, 1);
+            const end = new Date(year, monthIndex + 1, 0);
+            return { start: toInputDate(start), end: toInputDate(end) };
+        }
+
+        function getYearBounds(year) {
+            const start = new Date(year, 0, 1);
+            const end = new Date(year, 11, 31);
+            return { start: toInputDate(start), end: toInputDate(end) };
+        }
+
+        function syncRangeByPeriod(anchorInputDate) {
+            const safeAnchor = anchorInputDate || state.startDate || toInputDate(new Date());
+            const anchor = new Date(`${safeAnchor}T00:00:00`);
+            if (Number.isNaN(anchor.getTime())) return;
+
+            if (state.period === 'yearly') {
+                const bounds = getYearBounds(anchor.getFullYear());
+                state.startDate = bounds.start;
+                state.endDate = bounds.end;
+            } else {
+                const bounds = getMonthBounds(anchor.getFullYear(), anchor.getMonth());
+                state.startDate = bounds.start;
+                state.endDate = bounds.end;
+            }
+
+            document.getElementById('startDate').value = state.startDate;
+            document.getElementById('endDate').value = state.endDate;
+        }
+
+        function initDefaultDateRange() {
+            state.period = 'monthly';
+            document.getElementById('periodType').value = state.period;
+            syncRangeByPeriod(toInputDate(new Date()));
+        }
+
+        function initDateRangeFromQueryOrDefault() {
+            const params = new URLSearchParams(window.location.search);
+            const period = params.get('period');
+            const startQ = params.get('start_date');
+            const endQ = params.get('end_date');
+
+            if (period === 'monthly' || period === 'yearly') {
+                state.period = period;
+            }
+            document.getElementById('periodType').value = state.period;
+
+            if (startQ && endQ) {
+                state.startDate = startQ;
+                state.endDate = endQ;
+                document.getElementById('startDate').value = startQ;
+                document.getElementById('endDate').value = endQ;
+                if (isDateRangeValid()) {
+                    return;
+                }
+            }
+
+            initDefaultDateRange();
+        }
+
+        function isDateRangeValid() {
+            if (!state.startDate || !state.endDate) return false;
+            const start = new Date(`${state.startDate}T00:00:00`);
+            const end = new Date(`${state.endDate}T00:00:00`);
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+            return start.getTime() <= end.getTime();
+        }
+
+        function validateDateRangeAndNotify() {
+            if (isDateRangeValid()) return true;
+            showToast('Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+            return false;
+        }
+
+        function formatMoney(value) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                maximumFractionDigits: 0,
+            }).format(Number(value || 0));
+        }
+
+        function showErrorState(show) {
+            document.getElementById('errorState').style.display = show ? 'flex' : 'none';
+        }
+
+        function showNoDataPeriod(show) {
+            document.getElementById('noDataPeriodState').style.display = show ? 'block' : 'none';
+        }
+
+        function getQueryParams() {
+            const params = new URLSearchParams();
+            const dateAnchor = new Date(`${state.startDate}T00:00:00`);
+            const year = dateAnchor.getFullYear();
+            const month = dateAnchor.getMonth() + 1;
+
+            if (state.period === 'monthly') {
+                params.set('month', String(month));
+                params.set('year', String(year));
+            } else {
+                params.set('year', String(year));
+            }
+            params.set('period', state.period);
+            params.set('start_date', state.startDate);
+            params.set('end_date', state.endDate);
+            params.set('page', String(state.page));
+            params.set('limit', String(state.limit));
+            return params;
+        }
+
+        function safeJson(res) {
+            return res.json().catch(() => null);
+        }
+
+        function setSummarySkeleton(show) {
+            summarySkeletonIds.forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.toggle('skeleton-text', show);
+            });
+        }
+
+        function setChartSkeleton(show) {
+            const pairs = [
+                ['salesDistributionSkeleton', 'salesDistributionChart'],
+                ['revenueContributionSkeleton', 'revenueContributionChart'],
+                ['salesTrendSkeleton', 'salesTrendChart'],
+            ];
+            pairs.forEach(([skeletonId, canvasId]) => {
+                const skeleton = document.getElementById(skeletonId);
+                const canvas = document.getElementById(canvasId);
+                skeleton.style.display = show ? 'block' : 'none';
+                canvas.style.display = show ? 'none' : 'block';
+            });
+        }
+
+        function setLoadingTableSkeleton() {
+            const row = `
+                <tr>
+                    <td><span class="skeleton-table-line" style="width:220px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:90px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:120px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:95px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:95px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:32px"></span></td>
+                </tr>
+            `;
+            document.getElementById('packageTableBody').innerHTML = row + row + row + row;
+            document.getElementById('packagePaginationInfo').textContent = 'Memuat data...';
+            document.getElementById('packagePaginationBtns').innerHTML = '';
+        }
+
+        function setLoadingState(show) {
+            state.loading = show;
+            setSummarySkeleton(show);
+            setChartSkeleton(show);
+            if (show) {
+                setLoadingTableSkeleton();
+                document.getElementById('salesDistributionEmpty').style.display = 'none';
+                document.getElementById('salesTrendEmpty').style.display = 'none';
+                showNoDataPeriod(false);
+            }
+            ['refreshBtn', 'retryBtn', 'periodType', 'startDate', 'endDate', 'exportBtn'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = show;
+            });
+        }
+
+        function hasAnyData(data) {
+            const summary = (data && data.summary) || {};
+            if (Number(summary.total_revenue_all_package || 0) > 0) return true;
+            const items = (((data || {}).packages || {}).items) || [];
+            return items.length > 0;
+        }
+
+        async function fetchDashboard() {
+            if (!validateDateRangeAndNotify()) return;
+
+            showErrorState(false);
+            setLoadingState(true);
+
+            try {
+                const res = await fetch(`/api/dashboard/packages?${getQueryParams().toString()}`, { credentials: 'include' });
+
+                if (res.status === 401) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                if (res.status === 403) {
+                    document.getElementById('dashboardRoot').style.display = 'none';
+                    document.getElementById('forbiddenState').style.display = 'block';
+                    return;
+                }
+                if (res.status === 400) {
+                    const body = await safeJson(res);
+                    showToast((body && body.message) || 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+                    return;
+                }
+                if (!res.ok) {
+                    throw new Error('failed');
+                }
+
+                const body = await safeJson(res);
+                if (!body || !body.success || !body.data) {
+                    throw new Error('invalid_payload');
+                }
+
+                state.payload = body.data;
+                renderAll(body.data);
+            } catch (_e) {
+                showErrorState(true);
+                showToast('Gagal memuat data dashboard. Silakan coba lagi.');
+                renderFallbackZeros();
+            } finally {
+                setLoadingState(false);
+            }
+        }
+
+        function renderFallbackZeros() {
+            document.getElementById('mostSoldValue').textContent = '-';
+            document.getElementById('mostSoldSub').textContent = '0 sales';
+            document.getElementById('highestRevenueValue').textContent = formatMoney(0);
+            document.getElementById('highestRevenueSub').textContent = '-';
+            document.getElementById('fastestGrowthValue').textContent = '0%';
+            document.getElementById('fastestGrowthSub').textContent = '-';
+            document.getElementById('totalRevenueValue').textContent = formatMoney(0);
+            document.getElementById('totalRevenueSub').textContent = 'This Month';
+
+            renderDistributionChart([]);
+            renderContributionChart([], 0);
+            renderTrendChart([]);
+            renderPackageTable([], { page: 1, limit: 10, total: 0, total_pages: 0 });
+            showNoDataPeriod(true);
+        }
+
+        function renderAll(data) {
+            renderSummary(data.summary || {});
+            renderDistributionChart((data.charts && data.charts.package_sales_distribution) || []);
+            renderContributionChart((data.charts && data.charts.revenue_contribution) || [], Number((data.summary && data.summary.total_revenue_all_package) || 0));
+            renderTrendChart((data.charts && data.charts.sales_trend) || []);
+
+            const packages = data.packages || {};
+            renderPackageTable(packages.items || [], packages.pagination || { page: 1, limit: 10, total: 0, total_pages: 0 });
+            showNoDataPeriod(!hasAnyData(data));
+        }
+
+        function renderSummary(summary) {
+            const mostSold = summary.most_sold_package || {};
+            const highestRevenue = summary.highest_revenue_package || {};
+            const fastestGrowth = summary.fastest_growth_package || {};
+
+            document.getElementById('mostSoldValue').textContent = mostSold.package_name || '-';
+            document.getElementById('mostSoldSub').textContent = `${Number(mostSold.total_sales || 0).toLocaleString('id-ID')} sales`;
+
+            document.getElementById('highestRevenueValue').textContent = formatMoney(highestRevenue.total_revenue || 0);
+            document.getElementById('highestRevenueSub').textContent = highestRevenue.package_name || '-';
+
+            document.getElementById('fastestGrowthValue').textContent = `${Number(fastestGrowth.growth_rate || 0).toFixed(2)}%`;
+            document.getElementById('fastestGrowthSub').textContent = fastestGrowth.package_name || '-';
+
+            document.getElementById('totalRevenueValue').textContent = formatMoney(summary.total_revenue_all_package || 0);
+            document.getElementById('totalRevenueSub').textContent = summary.period_label || 'This Month';
+        }
+
+        function renderDistributionChart(series) {
+            const empty = !Array.isArray(series) || series.length === 0 || series.every((x) => Number(x.total_sales || 0) === 0);
+            document.getElementById('salesDistributionEmpty').style.display = empty ? 'block' : 'none';
+
+            const labels = (series || []).map((x) => x.package_name);
+            const values = (series || []).map((x) => Number(x.total_sales || 0));
+
+            if (salesDistributionChart) salesDistributionChart.destroy();
+            salesDistributionChart = new Chart(document.getElementById('salesDistributionChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Sales Count',
+                        data: values,
+                        borderWidth: 0,
+                        borderRadius: 8,
+                        backgroundColor: ['#5ad9ff', '#00f2ff', '#86b3ff', '#93d6ff']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: getCss('--text-main', '#e2e8f0') }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: getCss('--text-muted', '#8b9bb4') },
+                            grid: { color: 'rgba(255,255,255,0.04)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: getCss('--text-muted', '#8b9bb4') },
+                            grid: { color: 'rgba(255,255,255,0.04)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderContributionChart(series, totalRevenue) {
+            const labels = (series || []).map((x) => x.package_name);
+            const values = (series || []).map((x) => Number(x.percentage_contribution || 0));
+            const empty = !Array.isArray(series) || series.length === 0 || values.every((v) => v === 0);
+
+            if (revenueContributionChart) revenueContributionChart.destroy();
+            revenueContributionChart = new Chart(document.getElementById('revenueContributionChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: empty ? ['No Data'] : labels,
+                    datasets: [{
+                        data: empty ? [100] : values,
+                        backgroundColor: empty
+                            ? ['rgba(255,255,255,0.12)']
+                            : ['#00f2ff', '#5ad9ff', '#86b3ff', '#93d6ff'],
+                        borderWidth: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '68%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { color: getCss('--text-main', '#e2e8f0') }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.label}: ${ctx.parsed.toFixed(2)}%`
+                            }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'centerText',
+                    afterDraw(chart) {
+                        const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                        ctx.save();
+                        ctx.fillStyle = getCss('--text-muted', '#8b9bb4');
+                        ctx.font = '600 12px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('Total', (left + right) / 2, (top + bottom) / 2 - 8);
+                        ctx.fillStyle = getCss('--text-heading', '#ffffff');
+                        ctx.font = '700 26px sans-serif';
+                        const val = empty ? 'Rp0' : formatCompactMoney(totalRevenue || 0);
+                        ctx.fillText(val, (left + right) / 2, (top + bottom) / 2 + 22);
+                        ctx.restore();
+                    }
+                }]
+            });
+        }
+
+        function renderTrendChart(series) {
+            const empty = !Array.isArray(series) || series.length === 0 || series.every((x) =>
+                Number(x.premium || 0) === 0 && Number(x.enterprise || 0) === 0 && Number(x.starter || 0) === 0
+            );
+            document.getElementById('salesTrendEmpty').style.display = empty ? 'block' : 'none';
+
+            const labels = (series || []).map((x) => x.period);
+            const premium = (series || []).map((x) => Number(x.premium || 0));
+            const enterprise = (series || []).map((x) => Number(x.enterprise || 0));
+            const starter = (series || []).map((x) => Number(x.starter || 0));
+
+            if (salesTrendChart) salesTrendChart.destroy();
+            salesTrendChart = new Chart(document.getElementById('salesTrendChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'Premium',
+                            data: premium,
+                            borderColor: '#00f2ff',
+                            backgroundColor: 'rgba(0,242,255,0.1)',
+                            borderWidth: 2,
+                            tension: 0.35,
+                            pointRadius: 3,
+                        },
+                        {
+                            label: 'Enterprise',
+                            data: enterprise,
+                            borderColor: '#5ad9ff',
+                            backgroundColor: 'rgba(90,217,255,0.1)',
+                            borderWidth: 2,
+                            tension: 0.35,
+                            pointRadius: 3,
+                        },
+                        {
+                            label: 'Starter',
+                            data: starter,
+                            borderColor: '#86b3ff',
+                            backgroundColor: 'rgba(134,179,255,0.1)',
+                            borderWidth: 2,
+                            tension: 0.35,
+                            pointRadius: 3,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: getCss('--text-main', '#e2e8f0') } }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: getCss('--text-muted', '#8b9bb4') },
+                            grid: { color: 'rgba(255,255,255,0.04)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: getCss('--text-muted', '#8b9bb4') },
+                            grid: { color: 'rgba(255,255,255,0.04)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderPackageTable(items, pagination) {
+            const tbody = document.getElementById('packageTableBody');
+            if (!Array.isArray(items) || items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Data tidak tersedia pada periode ini.</td></tr>';
+            } else {
+                tbody.innerHTML = items.map((item) => {
+                    const growth = Number(item.growth_rate || 0);
+                    const growthClass = growth >= 0 ? 'growth-positive' : 'growth-negative';
+                    return `
+                        <tr>
+                            <td>
+                                <div class="package-cell">
+                                    <span class="package-icon"><i class="fa-solid fa-cube"></i></span>
+                                    <span>${escapeHtml(item.package_name || '-')}</span>
+                                </div>
+                            </td>
+                            <td>${Number(item.total_transactions || 0).toLocaleString('id-ID')}</td>
+                            <td class="money-cell">${formatMoney(item.total_revenue || 0)}</td>
+                            <td>${Number(item.percentage_contribution || 0).toFixed(2)}%</td>
+                            <td class="${growthClass}">${growth >= 0 ? '+' : ''}${growth.toFixed(2)}% <i class="fa-solid fa-arrow-trend-up ms-1"></i></td>
+                            <td>
+                                <button class="action-btn" title="View detail" onclick="openPackageDetail('${escapeAttr(item.package_id || '')}')">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            state.page = Number(pagination.page || 1);
+            state.limit = Number(pagination.limit || 10);
+            state.total = Number(pagination.total || 0);
+            state.totalPages = Number(pagination.total_pages || 0);
+
+            const start = state.total === 0 ? 0 : ((state.page - 1) * state.limit) + 1;
+            const end = state.total === 0 ? 0 : Math.min(state.page * state.limit, state.total);
+            document.getElementById('packagePaginationInfo').textContent = `Showing ${start}-${end} of ${state.total} packages`;
+            renderPaginationButtons();
+        }
+
+        function renderPaginationButtons() {
+            const wrap = document.getElementById('packagePaginationBtns');
+            if (state.totalPages <= 1) {
+                wrap.innerHTML = '';
+                return;
+            }
+
+            const buttons = [];
+            buttons.push(`<button class="page-btn" ${state.page <= 1 ? 'disabled' : ''} onclick="goPage(${state.page - 1})"><i class="fa-solid fa-chevron-left"></i></button>`);
+
+            const maxButtons = 5;
+            let start = Math.max(1, state.page - 2);
+            let end = Math.min(state.totalPages, start + maxButtons - 1);
+            if ((end - start + 1) < maxButtons) {
+                start = Math.max(1, end - maxButtons + 1);
+            }
+
+            for (let i = start; i <= end; i++) {
+                buttons.push(`<button class="page-btn ${i === state.page ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`);
+            }
+
+            buttons.push(`<button class="page-btn" ${state.page >= state.totalPages ? 'disabled' : ''} onclick="goPage(${state.page + 1})"><i class="fa-solid fa-chevron-right"></i></button>`);
+            wrap.innerHTML = buttons.join('');
+        }
+
+        function goPage(nextPage) {
+            if (nextPage < 1 || nextPage > state.totalPages || nextPage === state.page) return;
+            state.page = nextPage;
+            fetchDashboard();
+        }
+
+        async function openPackageDetail(packageId) {
+            if (!packageId) {
+                showToast('Detail package tidak tersedia.');
+                return;
+            }
+
+            try {
+                const params = getQueryParams();
+                const res = await fetch(`/api/dashboard/package/${encodeURIComponent(packageId)}?${params.toString()}`, { credentials: 'include' });
+                if (res.status === 404) {
+                    showToast('Detail package tidak tersedia.');
+                    return;
+                }
+                if (!res.ok) {
+                    showToast('Detail package tidak tersedia.');
+                    return;
+                }
+                const next = new URLSearchParams();
+                next.set('period', state.period);
+                next.set('start_date', state.startDate);
+                next.set('end_date', state.endDate);
+                window.location.href = `/dashboard/packages/${encodeURIComponent(packageId)}?${next.toString()}`;
+            } catch (_e) {
+                showToast('Detail package tidak tersedia.');
+            }
+        }
+
+        function csvEscape(value) {
+            const raw = String(value == null ? '' : value);
+            if (/[",\n]/.test(raw)) {
+                return `"${raw.replace(/"/g, '""')}"`;
+            }
+            return raw;
+        }
+
+        function buildCsvReport(data) {
+            const lines = [];
+            const summary = data.summary || {};
+            const mostSold = summary.most_sold_package || {};
+            const highestRevenue = summary.highest_revenue_package || {};
+            const fastestGrowth = summary.fastest_growth_package || {};
+            const items = ((data.packages || {}).items) || [];
+            const contributions = ((data.charts || {}).revenue_contribution) || [];
+
+            lines.push('Summary');
+            lines.push('Metric,Value');
+            lines.push(`Most Sold Package,${csvEscape(mostSold.package_name || '-')}`);
+            lines.push(`Most Sold Transactions,${csvEscape(mostSold.total_sales || 0)}`);
+            lines.push(`Highest Revenue Package,${csvEscape(highestRevenue.package_name || '-')}`);
+            lines.push(`Highest Revenue,${csvEscape(highestRevenue.total_revenue || 0)}`);
+            lines.push(`Fastest Growth Package,${csvEscape(fastestGrowth.package_name || '-')}`);
+            lines.push(`Fastest Growth (%),${csvEscape(Number(fastestGrowth.growth_rate || 0).toFixed(2))}`);
+            lines.push(`Total Revenue All Package,${csvEscape(summary.total_revenue_all_package || 0)}`);
+            lines.push('');
+
+            lines.push('Package Performance Details');
+            lines.push('Package Name,Transactions,Revenue,Contribution (%),Growth (%)');
+            if (items.length === 0) {
+                lines.push('Data tidak tersedia pada periode ini.,,,,');
+            } else {
+                items.forEach((item) => {
+                    lines.push([
+                        csvEscape(item.package_name),
+                        csvEscape(item.total_transactions),
+                        csvEscape(item.total_revenue),
+                        csvEscape(Number(item.percentage_contribution || 0).toFixed(2)),
+                        csvEscape(Number(item.growth_rate || 0).toFixed(2)),
+                    ].join(','));
+                });
+            }
+            lines.push('');
+
+            lines.push('Revenue Contribution');
+            lines.push('Package Name,Revenue,Contribution (%)');
+            if (contributions.length === 0) {
+                lines.push('Data tidak tersedia pada periode ini.,,');
+            } else {
+                contributions.forEach((item) => {
+                    lines.push([
+                        csvEscape(item.package_name),
+                        csvEscape(item.revenue),
+                        csvEscape(Number(item.percentage_contribution || 0).toFixed(2)),
+                    ].join(','));
+                });
+            }
+
+            return lines.join('\r\n');
+        }
+
+        function exportReport() {
+            try {
+                if (!state.payload) {
+                    showToast('Data tidak tersedia pada periode ini.');
+                    return;
+                }
+                const csvContent = buildCsvReport(state.payload);
+                const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+                const href = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = href;
+                link.download = `package-dashboard-${Date.now()}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(href);
+            } catch (_e) {
+                showToast('Gagal mengunduh data.');
+            }
+        }
+
+        function getCss(varName, fallback) {
+            const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+            return value || fallback;
+        }
+
+        function formatCompactMoney(value) {
+            const number = Number(value || 0);
+            if (number >= 1000000000) return `Rp${(number / 1000000000).toFixed(1)}B`;
+            if (number >= 1000000) return `Rp${(number / 1000000).toFixed(1)}M`;
+            if (number >= 1000) return `Rp${(number / 1000).toFixed(0)}K`;
+            return `Rp${number.toFixed(0)}`;
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str || '');
+            return div.innerHTML;
+        }
+
+        function escapeAttr(str) {
+            return String(str || '').replace(/'/g, '&#39;');
+        }
+
+        function bindEvents() {
+            document.getElementById('periodType').addEventListener('change', function () {
+                state.period = this.value;
+                syncRangeByPeriod(state.startDate || toInputDate(new Date()));
+                state.page = 1;
+                fetchDashboard();
+            });
+
+            document.getElementById('startDate').addEventListener('change', function () {
+                state.startDate = this.value;
+                syncRangeByPeriod(this.value);
+                if (!validateDateRangeAndNotify()) return;
+                state.page = 1;
+                fetchDashboard();
+            });
+
+            document.getElementById('endDate').addEventListener('change', function () {
+                state.endDate = this.value;
+                syncRangeByPeriod(this.value);
+                if (!validateDateRangeAndNotify()) return;
+                state.page = 1;
+                fetchDashboard();
+            });
+
+            document.getElementById('refreshBtn').addEventListener('click', fetchDashboard);
+            document.getElementById('retryBtn').addEventListener('click', fetchDashboard);
+            document.getElementById('exportBtn').addEventListener('click', exportReport);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!enforcePageAccess()) return;
+            initDateRangeFromQueryOrDefault();
+            bindEvents();
+            fetchDashboard();
+        });
+    </script>
+</body>
+
+</html>

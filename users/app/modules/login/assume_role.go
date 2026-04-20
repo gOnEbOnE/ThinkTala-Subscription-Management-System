@@ -117,6 +117,7 @@ func (c *Controller) GetRoles(w http.ResponseWriter, r *http.Request) {
 		{"code": "CEO", "name": "CEO"},
 		{"code": "OPERASIONAL", "name": "Operasional"},
 		{"code": "COMPLIANCE", "name": "Compliance"},
+		{"code": "MANAGEMENT", "name": "Management"},
 		{"code": "CLIENT", "name": "Client"},
 	}
 

@@ -5,47 +5,47 @@
   "routes": [
     {
       "path": "/api/auth/register",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true
     },
     {
       "path": "/api/auth/verify-otp",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true
     },
     {
       "path": "/api/auth/resend-otp",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true
     },
     {
       "path": "/api/auth",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true
     },
     {
       "path": "/api/auth/logout",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true
     },
     {
       "path": "/api/auth/assume-role",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true
     },
     {
       "path": "/api/auth/roles",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true
     },
     {
       "path": "/account/login/auth",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true
     },
     {
       "path": "/api/kyc/",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -56,7 +56,7 @@
     },
     {
       "path": "/api/admin/kyc",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -68,7 +68,7 @@
     },
     {
       "path": "/api/admin/kyc/",
-      "target": "http://users-service.railway.internal:2006",
+      "target": "http://localhost:2006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -80,7 +80,7 @@
     },
     {
       "path": "/api/notifications",
-      "target": "http://notification-service.railway.internal:5003",
+      "target": "http://localhost:5003",
       "cors": true,
       "auth": true,
       "roles": [
@@ -91,7 +91,7 @@
     },
     {
       "path": "/api/notifications/",
-      "target": "http://notification-service.railway.internal:5003",
+      "target": "http://localhost:5003",
       "cors": true,
       "auth": true,
       "roles": [
@@ -102,7 +102,7 @@
     },
     {
       "path": "/api/help/",
-      "target": "http://notification-service.railway.internal:5003",
+      "target": "http://localhost:5003",
       "cors": true,
       "auth": true,
       "roles": [
@@ -115,7 +115,7 @@
     },
     {
       "path": "/api/admin/packages",
-      "target": "http://subscription-service.railway.internal:5004",
+      "target": "http://localhost:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -126,7 +126,7 @@
     },
     {
       "path": "/api/admin/packages/",
-      "target": "http://subscription-service.railway.internal:5004",
+      "target": "http://localhost:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -137,7 +137,7 @@
     },
     {
       "path": "/api/subscriptions",
-      "target": "http://subscription-service.railway.internal:5004",
+      "target": "http://localhost:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -148,7 +148,7 @@
     },
     {
       "path": "/api/subscriptions/",
-      "target": "http://subscription-service.railway.internal:5004",
+      "target": "http://localhost:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -159,7 +159,7 @@
     },
     {
       "path": "/api/subscription/catalog",
-      "target": "http://subscription-service.railway.internal:5004",
+      "target": "http://localhost:5004",
       "cors": true
     },
     {
@@ -186,7 +186,7 @@
     },
     {
       "path": "/api/operational/",
-      "target": "http://operational-service.railway.internal:8080",
+      "target": "http://localhost:5005",
       "cors": true,
       "auth": true,
       "roles": [
@@ -214,6 +214,48 @@
         "CLIENT"
       ],
       "description": "PBI-46: Get order detail — hanya role CLIENT"
+    },
+    {
+      "path": "/api/dashboard/customers",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "MANAGEMENT",
+        "SUPERADMIN",
+        "ADMIN"
+      ]
+    },
+    {
+      "path": "/api/dashboard/customer/",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "MANAGEMENT",
+        "SUPERADMIN",
+        "ADMIN"
+      ]
+    },
+    {
+      "path": "/api/dashboard/packages",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "MANAGEMENT",
+        "ADMIN"
+      ]
+    },
+    {
+      "path": "/api/dashboard/package/",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "MANAGEMENT",
+        "ADMIN"
+      ]
     }
   ]
 }

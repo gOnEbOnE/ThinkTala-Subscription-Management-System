@@ -1,0 +1,13 @@
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Go build artifacts
+management
+main
+bin/
+dist/
+*.exe
+*.test
+*.prof

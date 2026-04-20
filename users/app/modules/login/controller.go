@@ -49,6 +49,8 @@ func redirectByRole(roleCode string) string {
 		return "/ops/dashboard"
 	case "COMPLIANCE":
 		return "/compliance/dashboard"
+	case "MANAGEMENT", "ADMIN":
+		return "/management/dashboard-customers"
 	case "CEO":
 		return "/ops/dashboard"
 	case "CLIENT":
