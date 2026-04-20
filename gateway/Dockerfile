@@ -16,7 +16,8 @@ RUN apk --no-cache add tzdata ca-certificates
 COPY --from=builder /app/thinknalyze-gateway .
 
 # Copy semua config wajib
-COPY routes.json .
+ARG ROUTES_FILE=routes.json
+COPY ${ROUTES_FILE} routes.json
 
 # Metadata
 ENV port=2000

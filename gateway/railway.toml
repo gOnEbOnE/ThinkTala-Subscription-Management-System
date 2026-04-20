@@ -1,0 +1,11 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+buildArgs = { ROUTES_FILE = "routes.railway.json" }
+
+[deploy]
+startCommand = "./thinknalyze-gateway"
+healthcheckPath = "/"
+healthcheckTimeout = 300
+restartPolicyType = "on-failure"
+restartPolicyMaxRetries = 5
