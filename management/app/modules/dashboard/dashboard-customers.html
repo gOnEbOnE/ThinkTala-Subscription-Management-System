@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Retention & Churn Dashboard | ThinkTala</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .page-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 2px;
+        }
+
+        .stat-card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.2rem;
+            background: var(--bg-panel);
+            height: 100%;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+
+        .stat-meta {
+            font-size: 0.83rem;
+            color: var(--text-muted);
+        }
+
+        .metric-icon {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .filter-strip {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-left {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-right {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .date-wrap {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            min-height: 40px;
+            padding: 0 0.45rem;
+            gap: 0.45rem;
+        }
+
+        .date-input {
+            background: transparent;
+            border: 0;
+            color: var(--text-main);
+            outline: none;
+            width: 130px;
+            font-size: 0.86rem;
+        }
+
+        .date-input::-webkit-calendar-picker-indicator {
+            filter: invert(0.85);
+            cursor: pointer;
+        }
+
+        .chart-card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-panel);
+            padding: 1rem 1.2rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 0.15rem;
+        }
+
+        .chart-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .chart-wrap {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem;
+        }
+
+        .empty-hint {
+            font-size: 0.86rem;
+            color: var(--text-muted);
+            margin-top: 0.75rem;
+            display: none;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 0.12rem;
+        }
+
+        .table-subtitle {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        .table-search {
+            max-width: 280px;
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.85rem 1rem;
+            vertical-align: middle;
+        }
+
+        .custom-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .custom-table td {
+            color: var(--text-main);
+            font-size: 0.92rem;
+        }
+
+        .custom-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .avatar-chip {
+            width: 34px;
+            height: 34px;
+            border-radius: 7px;
+            background: rgba(255, 255, 255, 0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-right: 0.7rem;
+            color: var(--text-heading);
+        }
+
+        .customer-meta {
+            display: flex;
+            align-items: center;
+            min-width: 240px;
+        }
+
+        .customer-name {
+            color: var(--text-heading);
+            font-weight: 600;
+            line-height: 1.1;
+        }
+
+        .customer-email {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+
+        .duration-pill {
+            display: inline-flex;
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            padding: 0.22rem 0.55rem;
+            color: var(--text-heading);
+            font-weight: 600;
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .money-cell {
+            color: var(--text-heading);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .action-btn {
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            background: transparent;
+        }
+
+        .action-btn:hover {
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.06);
+        }
+
+        .pagination-wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination-text {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+        }
+
+        .page-btn {
+            min-width: 38px;
+            height: 34px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-main);
+            border-radius: 7px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            padding: 0 0.65rem;
+        }
+
+        .page-btn.active {
+            background: var(--text-heading);
+            color: #000;
+            border-color: var(--text-heading);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .error-state {
+            display: none;
+            margin-top: 1rem;
+            border: 1px solid rgba(249, 62, 62, 0.35);
+            border-radius: 10px;
+            background: rgba(249, 62, 62, 0.08);
+            padding: 0.9rem 1rem;
+            color: #ffc5c5;
+            font-size: 0.9rem;
+        }
+
+        .forbidden-wrap {
+            display: none;
+            margin: 1.2rem 0;
+            border: 1px solid rgba(249, 62, 62, 0.35);
+            border-radius: 12px;
+            background: rgba(249, 62, 62, 0.08);
+            padding: 1.5rem;
+            color: #ffd2d2;
+            text-align: center;
+        }
+
+        .forbidden-code {
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+
+        .toast-zone {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            width: 340px;
+            max-width: calc(100vw - 2rem);
+        }
+
+        .toast-lite {
+            display: none;
+            border: 1px solid rgba(249, 62, 62, 0.35);
+            background: rgba(249, 62, 62, 0.95);
+            color: #fff;
+            border-radius: 8px;
+            padding: 0.7rem 0.85rem;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .empty-period-note {
+            display: none;
+            margin-top: 0.75rem;
+            color: #ffd7a8;
+            border: 1px solid rgba(255, 200, 125, 0.35);
+            background: rgba(255, 200, 125, 0.08);
+            border-radius: 8px;
+            padding: 0.55rem 0.8rem;
+            font-size: 0.86rem;
+        }
+
+        .skeleton-text {
+            color: transparent !important;
+            position: relative;
+            overflow: hidden;
+            border-radius: 6px;
+            min-height: 1rem;
+        }
+
+        .skeleton-text::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.18) 50%, rgba(255, 255, 255, 0.06) 100%);
+            background-size: 220% 100%;
+            animation: shimmer 1.2s linear infinite;
+        }
+
+        .chart-skeleton {
+            display: none;
+            height: 200px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.11) 50%, rgba(255, 255, 255, 0.04) 100%);
+            background-size: 220% 100%;
+            animation: shimmer 1.2s linear infinite;
+        }
+
+        .skeleton-table-line {
+            display: block;
+            height: 14px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.11) 50%, rgba(255, 255, 255, 0.04) 100%);
+            background-size: 220% 100%;
+            animation: shimmer 1.2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 100% 0;
+            }
+
+            100% {
+                background-position: -120% 0;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .chart-title {
+                font-size: 1.1rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="toast-zone">
+        <div id="errorToast" class="toast-lite"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <div class="page-title">Customer Retention & Churn Dashboard</div>
+                <div class="page-subtitle">Monitor customer loyalty and churn behavior</div>
+            </div>
+            <div class="d-flex align-items-center gap-2 text-muted small">
+                <i class="fa-regular fa-bell"></i>
+                <i class="fa-regular fa-user"></i>
+            </div>
+        </div>
+
+        <div id="forbiddenState" class="forbidden-wrap">
+            <div class="forbidden-code">403</div>
+            <div class="h5 mb-2">Access Denied</div>
+            <div>Halaman ini hanya dapat diakses oleh role Management / Admin.</div>
+        </div>
+
+        <div id="dashboardRoot">
+            <div class="row g-3 mb-3">
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-label">
+                            <span>Active Customers</span>
+                            <span class="metric-icon"><i class="fa-solid fa-user-group"></i></span>
+                        </div>
+                        <div class="stat-value" id="activeCustomersValue">0</div>
+                        <div class="stat-meta" id="activeCustomersMeta">0% from last month</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-label">
+                            <span>Loyal Customers</span>
+                            <span class="metric-icon"><i class="fa-regular fa-heart"></i></span>
+                        </div>
+                        <div class="stat-value" id="loyalCustomersValue">0</div>
+                        <div class="stat-meta">Subscribed 12+ months</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-label">
+                            <span>Churned Customers</span>
+                            <span class="metric-icon"><i class="fa-solid fa-user-xmark"></i></span>
+                        </div>
+                        <div class="stat-value" id="churnCustomersValue">0</div>
+                        <div class="stat-meta">This period</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-label">
+                            <span>Churn Rate</span>
+                            <span class="metric-icon"><i class="fa-solid fa-percent"></i></span>
+                        </div>
+                        <div class="stat-value" id="churnRateValue">0%</div>
+                        <div class="stat-meta" id="churnRateMeta">0% from last month</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-card mb-3">
+                <div class="filter-strip">
+                    <div class="filter-left">
+                        <div class="date-wrap">
+                            <i class="fa-regular fa-calendar"></i>
+                            <input id="startDate" class="date-input" type="date">
+                            <span class="text-muted">-</span>
+                            <input id="endDate" class="date-input" type="date">
+                        </div>
+                        <select id="periodType" class="form-select form-select-sm" style="width: 140px;">
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="filter-right">
+                        <button id="refreshBtn" class="btn btn-sm btn-outline-light">
+                            <i class="fa-solid fa-rotate-right me-1"></i>Refresh
+                        </button>
+                        <button id="exportBtn" class="btn btn-sm btn-light fw-semibold">
+                            <i class="fa-solid fa-download me-1"></i>Export Report
+                        </button>
+                    </div>
+                </div>
+                <div id="errorState" class="error-state d-none justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat dashboard customer.</span>
+                    <button id="retryBtn" class="btn btn-sm btn-outline-light">Retry</button>
+                </div>
+                <div id="noDataPeriodState" class="empty-period-note">Tidak ada data pada periode ini.</div>
+            </div>
+
+            <div class="chart-card mb-3">
+                <div class="chart-title">User Growth vs Churn Analysis</div>
+                <div class="chart-subtitle">Monthly comparison of new customers and churned customers</div>
+                <div class="chart-wrap">
+                    <div id="growthChartSkeleton" class="chart-skeleton"></div>
+                    <canvas id="growthChurnChart" height="120"></canvas>
+                </div>
+                <div id="growthEmptyHint" class="empty-hint">Belum ada data pertumbuhan pelanggan.</div>
+            </div>
+
+            <div class="chart-card mb-3">
+                <div class="chart-title">Churn Rate Trend</div>
+                <div class="chart-subtitle">Percentage of customers churned over time</div>
+                <div class="chart-wrap">
+                    <div id="churnTrendSkeleton" class="chart-skeleton"></div>
+                    <canvas id="churnTrendChart" height="110"></canvas>
+                </div>
+                <div id="churnEmptyHint" class="empty-hint">Tidak ada data churn.</div>
+            </div>
+
+            <div class="chart-card mb-3">
+                <div class="d-flex justify-content-between align-items-end gap-2 flex-wrap">
+                    <div>
+                        <div class="table-title">Top Loyal Customers</div>
+                        <div class="table-subtitle">Customers with longest active subscriptions</div>
+                    </div>
+                    <div class="table-search">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-transparent border-secondary"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input id="searchInput" type="text" class="form-control" placeholder="Search customers...">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Duration</th>
+                                <th>Transactions</th>
+                                <th>Total Spent</th>
+                                <th>Last Active</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="loyalTableBody">
+                            <tr><td colspan="6" class="text-center text-muted py-4">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-wrap">
+                    <div class="pagination-text" id="loyalPaginationInfo">Showing 0 customers</div>
+                    <div class="d-flex gap-1" id="loyalPaginationBtns"></div>
+                </div>
+            </div>
+
+            <div class="chart-card mb-4">
+                <div class="d-flex justify-content-between align-items-end gap-2 flex-wrap">
+                    <div>
+                        <div class="table-title">Recently Churned Customers</div>
+                        <div class="table-subtitle">Customers who cancelled their subscriptions</div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Customer Name</th>
+                                <th>Last Subscription</th>
+                                <th>Churn Date</th>
+                                <th>Lifetime Value</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="churnedTableBody">
+                            <tr><td colspan="5" class="text-center text-muted py-4">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/management-layout.js?v=20260421"></script>
+    <script>
+        let growthChart = null;
+        let churnChart = null;
+
+        const state = {
+            page: 1,
+            limit: 10,
+            total: 0,
+            totalPages: 0,
+            search: '',
+            period: 'monthly',
+            startDate: '',
+            endDate: '',
+            payload: null,
+            loading: false,
+            searchDebounce: null,
+            requestSeq: 0,
+        };
+
+        const ALLOWED_ROLES = new Set(['MANAGEMENT', 'SUPERADMIN', 'ADMIN']);
+        const summarySkeletonIds = [
+            'activeCustomersValue',
+            'loyalCustomersValue',
+            'churnCustomersValue',
+            'churnRateValue',
+            'activeCustomersMeta',
+            'churnRateMeta',
+        ];
+
+        function initDefaultDateRange() {
+            state.period = 'monthly';
+            syncRangeByPeriod(toInputDate(new Date()));
+            document.getElementById('periodType').value = state.period;
+        }
+
+        function toInputDate(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getMonthBounds(year, monthIndex) {
+            const start = new Date(year, monthIndex, 1);
+            const end = new Date(year, monthIndex + 1, 0);
+            return { start: toInputDate(start), end: toInputDate(end) };
+        }
+
+        function getYearBounds(year) {
+            const start = new Date(year, 0, 1);
+            const end = new Date(year, 11, 31);
+            return { start: toInputDate(start), end: toInputDate(end) };
+        }
+
+        function syncRangeByPeriod(anchorInputDate) {
+            const safeAnchor = anchorInputDate || state.startDate || toInputDate(new Date());
+            const anchor = new Date(`${safeAnchor}T00:00:00`);
+            if (Number.isNaN(anchor.getTime())) return;
+
+            if (state.period === 'yearly') {
+                const bounds = getYearBounds(anchor.getFullYear());
+                state.startDate = bounds.start;
+                state.endDate = bounds.end;
+            } else {
+                const bounds = getMonthBounds(anchor.getFullYear(), anchor.getMonth());
+                state.startDate = bounds.start;
+                state.endDate = bounds.end;
+            }
+
+            document.getElementById('startDate').value = state.startDate;
+            document.getElementById('endDate').value = state.endDate;
+        }
+
+        function isDateRangeValid() {
+            if (!state.startDate || !state.endDate) return false;
+            const start = new Date(`${state.startDate}T00:00:00`);
+            const end = new Date(`${state.endDate}T00:00:00`);
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+            return start.getTime() <= end.getTime();
+        }
+
+        function validateDateRangeAndNotify() {
+            if (isDateRangeValid()) return true;
+            showToast('Rentang tanggal tidak valid.');
+            return false;
+        }
+
+        function formatMoney(n) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                maximumFractionDigits: 0,
+            }).format(Number(n || 0));
+        }
+
+        function formatDateLabel(raw) {
+            if (!raw) return '-';
+            const d = new Date(raw);
+            if (Number.isNaN(d.getTime())) return '-';
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function formatLastActive(raw) {
+            if (!raw) return '-';
+            const dt = new Date(raw);
+            if (Number.isNaN(dt.getTime())) return '-';
+            const diffMs = Date.now() - dt.getTime();
+            const diffHours = Math.floor(diffMs / 36e5);
+            if (diffHours < 24) return `${Math.max(diffHours, 0)} hours ago`;
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        }
+
+        function initials(name) {
+            if (!name) return 'NA';
+            return name
+                .trim()
+                .split(/\s+/)
+                .slice(0, 2)
+                .map((x) => x.charAt(0).toUpperCase())
+                .join('');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('errorToast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3200);
+        }
+
+        function showNoDataPeriod(show) {
+            document.getElementById('noDataPeriodState').style.display = show ? 'block' : 'none';
+        }
+
+        function getCurrentUser() {
+            try {
+                return JSON.parse(localStorage.getItem('user') || 'null');
+            } catch (_e) {
+                return null;
+            }
+        }
+
+        function enforcePageAccess() {
+            const user = getCurrentUser();
+            if (!user || !user.id) {
+                // Rely on backend cookie auth if localStorage is unavailable/stale.
+                return true;
+            }
+            const role = String(user.role_code || user.level_code || user.level || '').toUpperCase();
+            if (!ALLOWED_ROLES.has(role)) {
+                document.getElementById('dashboardRoot').style.display = 'none';
+                document.getElementById('forbiddenState').style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+
+        function getQueryParams() {
+            const params = new URLSearchParams();
+            const dateAnchor = new Date(`${state.startDate}T00:00:00`);
+            const year = dateAnchor.getFullYear();
+            const month = dateAnchor.getMonth() + 1;
+
+            if (state.period === 'monthly') {
+                params.set('month', String(month));
+                params.set('year', String(year));
+            } else {
+                params.set('year', String(year));
+            }
+
+            params.set('start_date', state.startDate);
+            params.set('end_date', state.endDate);
+            params.set('page', String(state.page));
+            params.set('limit', String(state.limit));
+            if (state.search.trim()) params.set('search', state.search.trim());
+            return params;
+        }
+
+        function setSummarySkeleton(show) {
+            summarySkeletonIds.forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.toggle('skeleton-text', show);
+            });
+        }
+
+        function setChartSkeleton(show) {
+            const growthSkeleton = document.getElementById('growthChartSkeleton');
+            const churnSkeleton = document.getElementById('churnTrendSkeleton');
+            const growthCanvas = document.getElementById('growthChurnChart');
+            const churnCanvas = document.getElementById('churnTrendChart');
+
+            growthSkeleton.style.display = show ? 'block' : 'none';
+            churnSkeleton.style.display = show ? 'block' : 'none';
+            growthCanvas.style.display = show ? 'none' : 'block';
+            churnCanvas.style.display = show ? 'none' : 'block';
+        }
+
+        function setLoadingTableSkeleton() {
+            const loyalRow = `
+                <tr>
+                    <td><span class="skeleton-table-line" style="width:220px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:80px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:80px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:120px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:100px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:32px"></span></td>
+                </tr>
+            `;
+            const churnRow = `
+                <tr>
+                    <td><span class="skeleton-table-line" style="width:220px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:120px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:90px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:120px"></span></td>
+                    <td><span class="skeleton-table-line" style="width:32px"></span></td>
+                </tr>
+            `;
+
+            document.getElementById('loyalTableBody').innerHTML = loyalRow + loyalRow + loyalRow;
+            document.getElementById('churnedTableBody').innerHTML = churnRow + churnRow + churnRow;
+            document.getElementById('loyalPaginationInfo').textContent = 'Memuat data...';
+            document.getElementById('loyalPaginationBtns').innerHTML = '';
+        }
+
+        function setLoadingState(show) {
+            state.loading = show;
+            setSummarySkeleton(show);
+            setChartSkeleton(show);
+            if (show) {
+                setLoadingTableSkeleton();
+                document.getElementById('growthEmptyHint').style.display = 'none';
+                document.getElementById('churnEmptyHint').style.display = 'none';
+                showNoDataPeriod(false);
+            }
+
+            ['refreshBtn', 'exportBtn', 'retryBtn', 'periodType', 'startDate', 'endDate'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = show;
+            });
+        }
+
+        function showErrorState(show) {
+            const el = document.getElementById('errorState');
+            if (!el) return;
+            el.classList.toggle('d-none', !show);
+            el.classList.toggle('d-flex', show);
+        }
+
+        function hasAnyData(data) {
+            const summary = data.summary || {};
+            if (Number(summary.total_active_customers || 0) > 0) return true;
+            if (Number(summary.total_loyal_customers || 0) > 0) return true;
+            if (Number(summary.total_churned_customers || 0) > 0) return true;
+
+            const loyalItems = ((data.top_loyal_customers || {}).items) || [];
+            const churnItems = data.recently_churned_customers || [];
+            return loyalItems.length > 0 || churnItems.length > 0;
+        }
+
+        async function safeJson(res) {
+            try {
+                return await res.json();
+            } catch (_e) {
+                return null;
+            }
+        }
+
+        async function fetchDashboard() {
+            if (!validateDateRangeAndNotify()) return;
+
+            const reqId = ++state.requestSeq;
+
+            showErrorState(false);
+            setLoadingState(true);
+
+            try {
+                const res = await fetch(`/api/dashboard/customers?${getQueryParams().toString()}`, {
+                    credentials: 'include'
+                });
+
+                if (reqId !== state.requestSeq) {
+                    return;
+                }
+
+                if (res.status === 401) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                if (res.status === 403) {
+                    document.getElementById('dashboardRoot').style.display = 'none';
+                    document.getElementById('forbiddenState').style.display = 'block';
+                    return;
+                }
+                if (res.status === 400) {
+                    const body = await safeJson(res);
+                    showToast((body && body.message) || 'Rentang tanggal tidak valid.');
+                    return;
+                }
+
+                if (!res.ok) {
+                    throw new Error('failed');
+                }
+
+                const body = await safeJson(res);
+                if (!body || !body.success || !body.data) {
+                    throw new Error('invalid_payload');
+                }
+
+                state.payload = body.data;
+                renderAll(body.data);
+            } catch (_e) {
+                if (reqId !== state.requestSeq) {
+                    return;
+                }
+
+                if (state.payload) {
+                    showErrorState(false);
+                    showToast('Koneksi sedang tidak stabil. Menampilkan data terakhir yang berhasil dimuat.');
+                    return;
+                }
+
+                showErrorState(true);
+                showToast('Gagal memuat dashboard customer.');
+                renderFallbackZeros();
+            } finally {
+                if (reqId !== state.requestSeq) {
+                    return;
+                }
+                setLoadingState(false);
+            }
+        }
+
+        function renderFallbackZeros() {
+            document.getElementById('activeCustomersValue').textContent = '0';
+            document.getElementById('loyalCustomersValue').textContent = '0';
+            document.getElementById('churnCustomersValue').textContent = '0';
+            document.getElementById('churnRateValue').textContent = '0%';
+            document.getElementById('activeCustomersMeta').textContent = '0% from last month';
+            document.getElementById('churnRateMeta').textContent = '0% from last month';
+
+            renderLoyalTable([], { page: 1, limit: 10, total: 0, total_pages: 0 });
+            renderRecentlyChurned([]);
+            renderCharts([], [], []);
+            showNoDataPeriod(true);
+        }
+
+        function renderAll(data) {
+            renderSummary(data.summary || {});
+            renderCharts(
+                (data.charts && data.charts.monthly_new_customers) || [],
+                (data.charts && data.charts.monthly_churn_customers) || [],
+                (data.charts && data.charts.churn_rate_trend) || []
+            );
+
+            const loyal = data.top_loyal_customers || {};
+            renderLoyalTable(loyal.items || [], loyal.pagination || { page: 1, limit: 10, total: 0, total_pages: 0 });
+            renderRecentlyChurned(data.recently_churned_customers || []);
+            showNoDataPeriod(!hasAnyData(data));
+        }
+
+        function renderSummary(summary) {
+            document.getElementById('activeCustomersValue').textContent = Number(summary.total_active_customers || 0).toLocaleString('id-ID');
+            document.getElementById('loyalCustomersValue').textContent = Number(summary.total_loyal_customers || 0).toLocaleString('id-ID');
+            document.getElementById('churnCustomersValue').textContent = Number(summary.total_churned_customers || 0).toLocaleString('id-ID');
+            document.getElementById('churnRateValue').textContent = `${Number(summary.churn_rate || 0).toFixed(2)}%`;
+
+            const activePct = Number(summary.active_customers_change_pct || 0);
+            const churnPct = Number(summary.churn_rate_change_pct || 0);
+
+            document.getElementById('activeCustomersMeta').textContent = `${activePct >= 0 ? '+' : ''}${activePct.toFixed(2)}% from last month`;
+            document.getElementById('churnRateMeta').textContent = `${churnPct >= 0 ? '+' : ''}${churnPct.toFixed(2)}% from last month`;
+        }
+
+        function renderCharts(newSeries, churnSeries, churnRateSeries) {
+            const labels = newSeries.map((x) => x.month);
+            const newData = newSeries.map((x) => Number(x.total || 0));
+            const churnData = churnSeries.map((x) => Number(x.total || 0));
+            const churnRateData = churnRateSeries.map((x) => Number(x.rate || 0));
+            const trendLabels = churnRateSeries.map((x) => x.month);
+
+            const noGrowthData = newData.length === 0 || (newData.every((v) => v === 0) && churnData.every((v) => v === 0));
+            const noChurnData = churnRateData.length === 0 || churnRateData.every((v) => v === 0);
+            document.getElementById('growthEmptyHint').style.display = noGrowthData ? 'block' : 'none';
+            document.getElementById('growthEmptyHint').textContent = 'Tidak ada data pada periode ini.';
+            document.getElementById('churnEmptyHint').style.display = noChurnData ? 'block' : 'none';
+            document.getElementById('churnEmptyHint').textContent = 'Tidak ada data pada periode ini.';
+
+            if (growthChart) growthChart.destroy();
+            if (churnChart) churnChart.destroy();
+
+            const mainColor = getComputedStyle(document.documentElement).getPropertyValue('--text-main').trim() || '#e2e8f0';
+            const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#8b9bb4';
+            const cyan = getComputedStyle(document.documentElement).getPropertyValue('--accent-cyan').trim() || '#00f2ff';
+            const red = getComputedStyle(document.documentElement).getPropertyValue('--accent-red').trim() || '#f93e3e';
+
+            growthChart = new Chart(document.getElementById('growthChurnChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: 'New Customers',
+                            data: newData,
+                            borderColor: cyan,
+                            backgroundColor: 'rgba(0, 242, 255, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            tension: 0.35,
+                        },
+                        {
+                            label: 'Churned Customers',
+                            data: churnData,
+                            borderColor: '#9aa3af',
+                            backgroundColor: 'rgba(154, 163, 175, 0.08)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            tension: 0.35,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: mutedColor }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { ticks: { color: mutedColor }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+                    },
+                    plugins: {
+                        legend: { labels: { color: mainColor } }
+                    }
+                }
+            });
+
+            churnChart = new Chart(document.getElementById('churnTrendChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [
+                        {
+                            label: 'Churn Rate (%)',
+                            data: churnRateData,
+                            borderColor: red,
+                            backgroundColor: 'rgba(249, 62, 62, 0.10)',
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            tension: 0.35,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: mutedColor }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: {
+                            ticks: {
+                                color: mutedColor,
+                                callback: (v) => `${v}%`,
+                            },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: mainColor } }
+                    }
+                }
+            });
+        }
+
+        function renderLoyalTable(items, pagination) {
+            const tbody = document.getElementById('loyalTableBody');
+            if (!Array.isArray(items) || items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Tidak ada data pada periode ini.</td></tr>';
+            } else {
+                tbody.innerHTML = items.map((it) => {
+                    return `
+                        <tr>
+                            <td>
+                                <div class="customer-meta">
+                                    <span class="avatar-chip">${initials(it.customer_name)}</span>
+                                    <div>
+                                        <div class="customer-name">${escapeHtml(it.customer_name || '-')}</div>
+                                        <div class="customer-email">${escapeHtml(it.email || '-')}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="duration-pill">${Number(it.duration || 0)} months</span></td>
+                            <td>${Number(it.transactions || 0).toLocaleString('id-ID')}</td>
+                            <td class="money-cell">${formatMoney(it.total_spent || 0)}</td>
+                            <td>${escapeHtml(formatLastActive(it.last_active))}</td>
+                            <td>
+                                <button class="action-btn" title="View detail" onclick="openCustomerDetail('${escapeAttr(it.customer_id || '')}')">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            state.page = Number(pagination.page || 1);
+            state.limit = Number(pagination.limit || 10);
+            state.total = Number(pagination.total || 0);
+            state.totalPages = Number(pagination.total_pages || 0);
+
+            const start = state.total === 0 ? 0 : ((state.page - 1) * state.limit) + 1;
+            const end = state.total === 0 ? 0 : Math.min(state.page * state.limit, state.total);
+            document.getElementById('loyalPaginationInfo').textContent = `Showing ${start}-${end} of ${state.total} loyal customers`;
+
+            renderPaginationButtons();
+        }
+
+        function renderPaginationButtons() {
+            const wrap = document.getElementById('loyalPaginationBtns');
+            if (state.totalPages <= 1) {
+                wrap.innerHTML = '';
+                return;
+            }
+
+            const buttons = [];
+            buttons.push(`<button class="page-btn" ${state.page <= 1 ? 'disabled' : ''} onclick="goPage(${state.page - 1})"><i class="fa-solid fa-chevron-left"></i></button>`);
+
+            const maxButtons = 5;
+            let start = Math.max(1, state.page - 2);
+            let end = Math.min(state.totalPages, start + maxButtons - 1);
+            if ((end - start + 1) < maxButtons) {
+                start = Math.max(1, end - maxButtons + 1);
+            }
+
+            for (let i = start; i <= end; i++) {
+                buttons.push(`<button class="page-btn ${i === state.page ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`);
+            }
+
+            buttons.push(`<button class="page-btn" ${state.page >= state.totalPages ? 'disabled' : ''} onclick="goPage(${state.page + 1})"><i class="fa-solid fa-chevron-right"></i></button>`);
+            wrap.innerHTML = buttons.join('');
+        }
+
+        function renderRecentlyChurned(items) {
+            const tbody = document.getElementById('churnedTableBody');
+            if (!Array.isArray(items) || items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">Tidak ada data pada periode ini.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = items.map((it) => {
+                return `
+                    <tr>
+                        <td>
+                            <div class="customer-meta">
+                                <span class="avatar-chip">${initials(it.customer_name)}</span>
+                                <div>
+                                    <div class="customer-name">${escapeHtml(it.customer_name || '-')}</div>
+                                    <div class="customer-email">${escapeHtml(it.email || '-')}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${escapeHtml(it.last_subscription || '-')}</td>
+                        <td>${escapeHtml(formatDateLabel(it.churn_date))}</td>
+                        <td class="money-cell">${formatMoney(it.lifetime_value || 0)}</td>
+                        <td>
+                            <button class="action-btn" title="View detail" onclick="openCustomerDetail('${escapeAttr(it.customer_id || '')}')">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function openCustomerDetail(customerId) {
+            if (!customerId) {
+                showToast('Detail customer tidak tersedia.');
+                return;
+            }
+            try {
+                const res = await fetch(`/api/dashboard/customer/${encodeURIComponent(customerId)}`, { credentials: 'include' });
+                if (res.status === 404) {
+                    showToast('Detail customer tidak tersedia.');
+                    return;
+                }
+                if (!res.ok) {
+                    showToast('Detail customer tidak tersedia.');
+                    return;
+                }
+                window.location.href = `/dashboard/customer/${encodeURIComponent(customerId)}`;
+            } catch (_e) {
+                showToast('Detail customer tidak tersedia.');
+            }
+        }
+
+        function goPage(nextPage) {
+            if (nextPage < 1 || nextPage > state.totalPages || nextPage === state.page) return;
+            state.page = nextPage;
+            fetchDashboard();
+        }
+
+        function csvEscape(value) {
+            const raw = String(value == null ? '' : value);
+            if (/[",\n]/.test(raw)) {
+                return `"${raw.replace(/"/g, '""')}"`;
+            }
+            return raw;
+        }
+
+        function buildCsvReport(data) {
+            const summary = data.summary || {};
+            const loyalItems = ((data.top_loyal_customers || {}).items) || [];
+            const churnItems = data.recently_churned_customers || [];
+
+            const lines = [];
+            lines.push('Summary');
+            lines.push('Metric,Value');
+            lines.push(`Total Active Customers,${csvEscape(summary.total_active_customers || 0)}`);
+            lines.push(`Total Loyal Customers,${csvEscape(summary.total_loyal_customers || 0)}`);
+            lines.push(`Total Churned Customers,${csvEscape(summary.total_churned_customers || 0)}`);
+            lines.push(`Churn Rate (%),${csvEscape(Number(summary.churn_rate || 0).toFixed(2))}`);
+            lines.push('');
+
+            lines.push('Top Loyal Customers');
+            lines.push('Customer Name,Email,Duration (Months),Transactions,Total Spent,Last Active');
+            if (loyalItems.length === 0) {
+                lines.push('Tidak ada data pada periode ini.,,,,,');
+            } else {
+                loyalItems.forEach((item) => {
+                    lines.push([
+                        csvEscape(item.customer_name),
+                        csvEscape(item.email),
+                        csvEscape(item.duration),
+                        csvEscape(item.transactions),
+                        csvEscape(item.total_spent),
+                        csvEscape(formatDateLabel(item.last_active)),
+                    ].join(','));
+                });
+            }
+            lines.push('');
+
+            lines.push('Recently Churned Customers');
+            lines.push('Customer Name,Email,Last Subscription,Churn Date,Lifetime Value');
+            if (churnItems.length === 0) {
+                lines.push('Tidak ada data pada periode ini.,,,,');
+            } else {
+                churnItems.forEach((item) => {
+                    lines.push([
+                        csvEscape(item.customer_name),
+                        csvEscape(item.email),
+                        csvEscape(item.last_subscription),
+                        csvEscape(formatDateLabel(item.churn_date)),
+                        csvEscape(item.lifetime_value),
+                    ].join(','));
+                });
+            }
+
+            return lines.join('\r\n');
+        }
+
+        function exportReport() {
+            try {
+                if (!state.payload) {
+                    showToast('Tidak ada data pada periode ini.');
+                    return;
+                }
+
+                const csvContent = buildCsvReport(state.payload);
+                const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
+                const href = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = href;
+                link.download = `customer-dashboard-${Date.now()}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(href);
+            } catch (_e) {
+                showToast('Gagal mengunduh laporan.');
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str || '');
+            return div.innerHTML;
+        }
+
+        function escapeAttr(str) {
+            return String(str || '').replace(/'/g, '&#39;');
+        }
+
+        function bindEvents() {
+            document.getElementById('periodType').addEventListener('change', function () {
+                state.period = this.value;
+                syncRangeByPeriod(state.startDate || toInputDate(new Date()));
+                state.page = 1;
+                fetchDashboard();
+            });
+
+            document.getElementById('startDate').addEventListener('change', function () {
+                state.startDate = this.value;
+                syncRangeByPeriod(this.value);
+                if (!validateDateRangeAndNotify()) return;
+                state.page = 1;
+                fetchDashboard();
+            });
+
+            document.getElementById('endDate').addEventListener('change', function () {
+                state.endDate = this.value;
+                syncRangeByPeriod(this.value);
+                if (!validateDateRangeAndNotify()) return;
+                state.page = 1;
+                fetchDashboard();
+            });
+
+            document.getElementById('refreshBtn').addEventListener('click', fetchDashboard);
+            document.getElementById('retryBtn').addEventListener('click', fetchDashboard);
+            document.getElementById('exportBtn').addEventListener('click', exportReport);
+
+            document.getElementById('searchInput').addEventListener('input', function () {
+                clearTimeout(state.searchDebounce);
+                state.searchDebounce = setTimeout(() => {
+                    state.search = this.value || '';
+                    state.page = 1;
+                    fetchDashboard();
+                }, 300);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!enforcePageAccess()) return;
+            initDefaultDateRange();
+            bindEvents();
+            fetchDashboard();
+        });
+    </script>
+</body>
+
+</html>

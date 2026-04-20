@@ -162,23 +162,20 @@ func MigrateAndSeed(db interface{}) {
 		log.Printf("[WARN] Gagal seed pricing tiers: %v", err)
 	}
 
-	// Seed dummy orders
-	ordersSeederSQL := `
-	DELETE FROM subscription.orders WHERE invoice_number LIKE 'INV-2026-000%';
-
-	INSERT INTO subscription.orders (id, invoice_number, user_id, package_id, duration_months, payment_method, total_price, status, created_at) VALUES
-	    (gen_random_uuid(), 'INV-2026-00001', '019cd5b3-d8f9-7d8d-810b-13fc26d137fa', 'a1b2c3d4-e5f6-7890-1234-567890abcdef',  1, 'Transfer Bank',  150000.00,  'PAID',            '2026-01-05 10:00:00'),
-	    (gen_random_uuid(), 'INV-2026-00002', '019cd65b-7a61-7047-a97b-a615cc4eb1fa', 'b2c3d4e5-f678-9012-3456-7890abcdef12',  6, 'Transfer Bank',  2400000.00, 'PAID',            '2026-01-12 14:30:00'),
-	    (gen_random_uuid(), 'INV-2026-00003', '019cd582-9cba-7749-8924-c96b95643828', 'c3d4e5f6-7890-1234-5678-90abcdef1234', 12, 'Transfer Bank', 10080000.00,'PENDING_PAYMENT',  '2026-02-01 09:15:00'),
-	    (gen_random_uuid(), 'INV-2026-00004', '019cd5b3-d8f9-7d8d-810b-13fc26d137fa', 'b2c3d4e5-f678-9012-3456-7890abcdef12',  3, 'Transfer Bank',  1350000.00, 'CANCELLED',       '2026-02-10 11:00:00'),
-	    (gen_random_uuid(), 'INV-2026-00005', '019cd613-fe86-70be-b51e-b3bef12557a4', 'a1b2c3d4-e5f6-7890-1234-567890abcdef',  1, 'Transfer Bank',  150000.00,  'PAID',            '2026-02-18 16:45:00')
-	ON CONFLICT DO NOTHING;
+	cleanupDummyOrdersSQL := `
+	DELETE FROM subscription.orders
+	WHERE invoice_number IN (
+		'INV-2026-00001',
+		'INV-2026-00002',
+		'INV-2026-00003',
+		'INV-2026-00004',
+		'INV-2026-00005'
+	);
 	`
 
-	log.Println("Menjalankan Seeder Orders (Dummy)...")
-	_, err = pool.Exec(ctx, ordersSeederSQL)
-	if err != nil {
-		log.Printf("[WARN] Gagal seed dummy orders: %v", err)
+	log.Println("Membersihkan data dummy order subscription...")
+	if _, err = pool.Exec(ctx, cleanupDummyOrdersSQL); err != nil {
+		log.Printf("[WARN] Gagal membersihkan dummy orders: %v", err)
 	}
 
 	log.Println("Migrasi dan Seeding selesai! (Subscription)")

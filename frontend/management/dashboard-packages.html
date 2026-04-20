@@ -482,7 +482,7 @@
                         </button>
                     </div>
                 </div>
-                <div id="errorState" class="error-state d-flex justify-content-between align-items-center">
+                <div id="errorState" class="error-state d-none justify-content-between align-items-center">
                     <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat data dashboard. Silakan coba lagi.</span>
                     <button id="retryBtn" class="btn btn-sm btn-outline-light">Retry</button>
                 </div>
@@ -556,7 +556,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="/assets/js/za-theme.js"></script>
-    <script src="/assets/js/ops-layout.js"></script>
+    <script src="/assets/js/management-layout.js?v=20260421"></script>
     <script>
         let salesDistributionChart = null;
         let revenueContributionChart = null;
@@ -572,9 +572,24 @@
             endDate: '',
             payload: null,
             loading: false,
+            requestSeq: 0,
+            packageColorMap: {},
         };
 
-        const ALLOWED_ROLES = new Set(['MANAGEMENT', 'ADMIN']);
+        const DISTINCT_PACKAGE_COLORS = [
+            '#1E88E5',
+            '#E53935',
+            '#43A047',
+            '#FB8C00',
+            '#8E24AA',
+            '#00897B',
+            '#6D4C41',
+            '#3949AB',
+            '#C0CA33',
+            '#F4511E',
+        ];
+
+        const ALLOWED_ROLES = new Set(['MANAGEMENT', 'ADMIN', 'SUPERADMIN']);
         const summarySkeletonIds = [
             'mostSoldValue',
             'mostSoldSub',
@@ -607,8 +622,8 @@
         function enforcePageAccess() {
             const user = getCurrentUser();
             if (!user || !user.id) {
-                window.location.href = '/account/login';
-                return false;
+                // Rely on backend cookie auth if localStorage is unavailable/stale.
+                return true;
             }
             const role = String(user.role_code || user.level_code || user.level || '').toUpperCase();
             if (!ALLOWED_ROLES.has(role)) {
@@ -710,7 +725,10 @@
         }
 
         function showErrorState(show) {
-            document.getElementById('errorState').style.display = show ? 'flex' : 'none';
+            const el = document.getElementById('errorState');
+            if (!el) return;
+            el.classList.toggle('d-none', !show);
+            el.classList.toggle('d-flex', show);
         }
 
         function showNoDataPeriod(show) {
@@ -805,11 +823,17 @@
         async function fetchDashboard() {
             if (!validateDateRangeAndNotify()) return;
 
+            const reqId = ++state.requestSeq;
+
             showErrorState(false);
             setLoadingState(true);
 
             try {
                 const res = await fetch(`/api/dashboard/packages?${getQueryParams().toString()}`, { credentials: 'include' });
+
+                if (reqId !== state.requestSeq) {
+                    return;
+                }
 
                 if (res.status === 401) {
                     window.location.href = '/account/login';
@@ -837,12 +861,33 @@
                 state.payload = body.data;
                 renderAll(body.data);
             } catch (_e) {
+                if (reqId !== state.requestSeq) {
+                    return;
+                }
+
+                if (state.payload) {
+                    showErrorState(false);
+                    showToast('Koneksi sedang tidak stabil. Menampilkan data terakhir yang berhasil dimuat.');
+                    return;
+                }
+
                 showErrorState(true);
                 showToast('Gagal memuat data dashboard. Silakan coba lagi.');
                 renderFallbackZeros();
             } finally {
+                if (reqId !== state.requestSeq) {
+                    return;
+                }
                 setLoadingState(false);
             }
+        }
+
+        function getPackageColor(label, index) {
+            const key = String(label || `series-${index}`);
+            if (!state.packageColorMap[key]) {
+                state.packageColorMap[key] = DISTINCT_PACKAGE_COLORS[index % DISTINCT_PACKAGE_COLORS.length];
+            }
+            return state.packageColorMap[key];
         }
 
         function renderFallbackZeros() {
@@ -897,6 +942,7 @@
 
             const labels = (series || []).map((x) => x.package_name);
             const values = (series || []).map((x) => Number(x.total_sales || 0));
+            const colors = labels.map((label, idx) => getPackageColor(label, idx));
 
             if (salesDistributionChart) salesDistributionChart.destroy();
             salesDistributionChart = new Chart(document.getElementById('salesDistributionChart').getContext('2d'), {
@@ -908,7 +954,7 @@
                         data: values,
                         borderWidth: 0,
                         borderRadius: 8,
-                        backgroundColor: ['#5ad9ff', '#00f2ff', '#86b3ff', '#93d6ff']
+                        backgroundColor: colors
                     }]
                 },
                 options: {
@@ -938,6 +984,7 @@
             const labels = (series || []).map((x) => x.package_name);
             const values = (series || []).map((x) => Number(x.percentage_contribution || 0));
             const empty = !Array.isArray(series) || series.length === 0 || values.every((v) => v === 0);
+            const colors = labels.map((label, idx) => getPackageColor(label, idx));
 
             if (revenueContributionChart) revenueContributionChart.destroy();
             revenueContributionChart = new Chart(document.getElementById('revenueContributionChart').getContext('2d'), {
@@ -948,7 +995,7 @@
                         data: empty ? [100] : values,
                         backgroundColor: empty
                             ? ['rgba(255,255,255,0.12)']
-                            : ['#00f2ff', '#5ad9ff', '#86b3ff', '#93d6ff'],
+                            : colors,
                         borderWidth: 0,
                     }]
                 },

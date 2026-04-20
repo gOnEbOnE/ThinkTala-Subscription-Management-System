@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"runtime"
@@ -70,10 +71,96 @@ type Service struct {
 	pid  int
 }
 
+// isPortAvailable returns true when the TCP port can be bound.
+func isPortAvailable(port string) bool {
+	ln, err := net.Listen("tcp", ":"+port)
+	if err != nil {
+		return false
+	}
+	_ = ln.Close()
+	return true
+}
+
+func findListeningPIDs(port string) ([]string, error) {
+	if runtime.GOOS == "windows" {
+		return nil, fmt.Errorf("auto-kill port not supported on windows")
+	}
+
+	cmd := exec.Command("lsof", "-tiTCP:"+port, "-sTCP:LISTEN")
+	out, err := cmd.Output()
+	if err != nil {
+		if _, ok := err.(*exec.ExitError); ok {
+			return []string{}, nil
+		}
+		return nil, err
+	}
+
+	selfPID := fmt.Sprintf("%d", os.Getpid())
+	var pids []string
+	for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
+		pid := strings.TrimSpace(line)
+		if pid == "" || pid == selfPID {
+			continue
+		}
+		pids = append(pids, pid)
+	}
+
+	return pids, nil
+}
+
+func waitUntilPortFree(port string, timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if isPortAvailable(port) {
+			return true
+		}
+		time.Sleep(150 * time.Millisecond)
+	}
+	return isPortAvailable(port)
+}
+
+func autoFreePort(serviceName, port string) bool {
+	if isPortAvailable(port) {
+		return true
+	}
+
+	pids, err := findListeningPIDs(port)
+	if err != nil {
+		log.Printf("[!] Gagal cek konflik port %s untuk %s: %v", port, serviceName, err)
+		return false
+	}
+	if len(pids) == 0 {
+		log.Printf("[!] Port %s bentrok untuk %s, tapi PID listener tidak terdeteksi", port, serviceName)
+		return false
+	}
+
+	fmt.Printf("[!] Port %s bentrok untuk %s. Auto-kill PID: %s\n", port, serviceName, strings.Join(pids, ", "))
+	for _, pid := range pids {
+		_ = exec.Command("kill", "-TERM", pid).Run()
+	}
+
+	if waitUntilPortFree(port, 2*time.Second) {
+		return true
+	}
+
+	fmt.Printf("[!] Port %s masih dipakai, paksa kill PID: %s\n", port, strings.Join(pids, ", "))
+	for _, pid := range pids {
+		_ = exec.Command("kill", "-KILL", pid).Run()
+	}
+
+	if waitUntilPortFree(port, 2*time.Second) {
+		return true
+	}
+
+	log.Printf("[-] Port %s tetap tidak bisa dibebaskan untuk service %s", port, serviceName)
+	return false
+}
+
 func main() {
 	fmt.Println("=========================================")
 	fmt.Println("  🚀 THINKNALYZE ORCHESTRATOR")
-	fmt.Println("=========================================\n")
+	fmt.Println("=========================================")
+	fmt.Println()
 
 	// Check prerequisites
 	checkPrerequisites()
@@ -98,13 +185,26 @@ func main() {
 		{"notification", "notification", "5003"},
 		{"operational", "operational", "5005"},
 		{"subscription", "subscription", "5004"},
+		{"management", "management", "5006"},
 	}
 
-	fmt.Println("\nMemulai semua service...\n")
+	fmt.Println()
+	fmt.Println("Memulai semua service...")
+	fmt.Println()
+
+	startedCount := 0
+	skippedCount := 0
 
 	// Start services
 	for _, cfg := range serviceConfigs {
+		if !autoFreePort(cfg.name, cfg.port) {
+			fmt.Printf("[!] Skip service %s: port %s tidak bisa dibebaskan\n", cfg.name, cfg.port)
+			skippedCount++
+			continue
+		}
+
 		wg.Add(1)
+		startedCount++
 		go func(config struct {
 			name string
 			dir  string
@@ -140,8 +240,20 @@ func main() {
 		time.Sleep(500 * time.Millisecond)
 	}
 
+	if startedCount == 0 {
+		fmt.Println("\n[!] Tidak ada service baru yang dijalankan oleh orchestrator.")
+		if skippedCount > 0 {
+			fmt.Printf("[i] %d service di-skip karena port sudah dipakai.\n", skippedCount)
+		}
+		fmt.Println("[i] Jalankan service per modul atau hentikan proses lama terlebih dahulu.")
+		return
+	}
+
 	fmt.Println("\n=========================================")
-	fmt.Println("  ✅ ALL SERVICES STARTED")
+	fmt.Printf("  ✅ ORCHESTRATOR STARTED %d SERVICES\n", startedCount)
+	if skippedCount > 0 {
+		fmt.Printf("  ℹ️  SKIPPED %d SERVICES (PORT IN USE)\n", skippedCount)
+	}
 	fmt.Println("=========================================")
 	fmt.Println("\n  🌐 Gateway (Port 2000):")
 	fmt.Println("     http://localhost:2000")
@@ -150,7 +262,8 @@ func main() {
 	fmt.Println("\n  📊 Test Credentials:")
 	fmt.Println("     Email: superadmin@thinktala.com")
 	fmt.Println("     Pass:  Super123")
-	fmt.Println("\n=========================================\n")
+	fmt.Println("\n=========================================")
+	fmt.Println()
 
 	// Wait for all services
 	wg.Wait()
@@ -180,7 +293,8 @@ func checkPrerequisites() {
 		"Redis": "redis-cli --version",
 	}
 
-	fmt.Println("[*] Checking prerequisites...\n")
+	fmt.Println("[*] Checking prerequisites...")
+	fmt.Println()
 
 	allOk := true
 	for tool, cmd := range tools {

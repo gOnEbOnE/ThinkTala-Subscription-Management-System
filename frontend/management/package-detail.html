@@ -321,12 +321,12 @@
                 <p id="detailSubtitle">Detailed package performance and trend</p>
             </div>
             <div class="d-flex gap-2">
-                <button id="backBtn" class="btn btn-sm btn-outline-light">
+                <!-- <button id="backBtn" class="btn btn-sm btn-outline-light">
                     <i class="fa-solid fa-arrow-left me-1"></i>Back
                 </button>
                 <button id="exportBtn" class="btn btn-sm btn-light fw-semibold">
                     <i class="fa-solid fa-download me-1"></i>Export
-                </button>
+                </button> -->
             </div>
         </div>
 
@@ -362,9 +362,9 @@
                         </button>
                     </div>
                 </div>
-                <div id="errorState" class="error-state d-flex justify-content-between align-items-center">
-                    <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat detail package. Silakan coba lagi.</span>
-                    <button id="retryBtn" class="btn btn-sm btn-outline-light">Retry</button>
+                <div id="errorState" class="">
+                    <!-- <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat detail package. Silakan coba lagi.</span> -->
+                    <!-- <button id="retryBtn" class="btn btn-sm btn-outline-light">Retry</button> -->
                 </div>
             </div>
 
@@ -433,7 +433,9 @@
                             </tr>
                         </thead>
                         <tbody id="trendTableBody">
-                            <tr><td colspan="2" class="text-center text-muted py-4">Memuat data...</td></tr>
+                            <tr>
+                                <td colspan="2" class="text-center text-muted py-4">Memuat data...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -444,10 +446,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="/assets/js/za-theme.js"></script>
-    <script src="/assets/js/ops-layout.js"></script>
+    <script src="/assets/js/management-layout.js?v=20260421"></script>
     <script>
-        const ALLOWED_ROLES = new Set(['MANAGEMENT', 'ADMIN']);
+        const ALLOWED_ROLES = new Set(['MANAGEMENT', 'ADMIN', 'SUPERADMIN']);
         let trendChart = null;
+        let fetchController = null;
+        let fetchGeneration = 0;
 
         const state = {
             packageId: '',
@@ -481,8 +485,8 @@
         function enforcePageAccess() {
             const user = getCurrentUser();
             if (!user || !user.id) {
-                window.location.href = '/account/login';
-                return false;
+                // Rely on backend cookie auth if localStorage is unavailable/stale.
+                return true;
             }
             const role = String(user.role_code || user.level_code || user.level || '').toUpperCase();
             if (!ALLOWED_ROLES.has(role)) {
@@ -674,12 +678,32 @@
             }
             if (!validateDateRangeAndNotify()) return;
 
+            // Cancel any in-flight request
+            if (fetchController) {
+                fetchController.abort();
+                fetchController = null;
+            }
+
+            const gen = ++fetchGeneration;
+            const controller = new AbortController();
+            fetchController = controller;
+
             hideSpecialStates();
             showErrorState(false);
             setLoadingState(true);
 
+            // Phase 1: Fetch and parse response
+            let body = null;
+            let fetchError = null;
+
             try {
-                const res = await fetch(`/api/dashboard/package/${encodeURIComponent(state.packageId)}?${getQueryParams().toString()}`, { credentials: 'include' });
+                const res = await fetch(`/api/dashboard/package/${encodeURIComponent(state.packageId)}?${getQueryParams().toString()}`, {
+                    credentials: 'include',
+                    signal: controller.signal,
+                });
+
+                // Ignore stale responses
+                if (gen !== fetchGeneration) return;
 
                 if (res.status === 401) {
                     window.location.href = '/account/login';
@@ -695,27 +719,43 @@
                     return;
                 }
                 if (res.status === 400) {
-                    const body = await safeJson(res);
-                    showToast((body && body.message) || 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+                    const errBody = await safeJson(res);
+                    showToast((errBody && errBody.message) || 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+                    setLoadingState(false);
+                    fetchController = null;
                     return;
                 }
                 if (!res.ok) {
-                    throw new Error('failed');
+                    fetchError = 'status_' + res.status;
+                } else {
+                    body = await safeJson(res);
                 }
-
-                const body = await safeJson(res);
-                if (!body || !body.success || !body.data) {
-                    throw new Error('invalid_payload');
-                }
-
-                state.payload = body.data;
-                renderAll(body.data);
             } catch (_e) {
+                if (_e && _e.name === 'AbortError') return;
+                if (gen !== fetchGeneration) return;
+                fetchError = _e;
+            }
+
+            if (gen !== fetchGeneration) return;
+
+            // Phase 2: Render data or show error
+            if (body && body.success && body.data) {
+                state.payload = body.data;
+                try {
+                    renderAll(body.data);
+                } catch (renderErr) {
+                    console.warn('[PackageDetail] render warning:', renderErr);
+                }
+                // Data loaded successfully — never show error banner
+                showErrorState(false);
+            } else {
                 showErrorState(true);
-                showToast('Gagal memuat detail package. Silakan coba lagi.');
                 renderFallback();
-            } finally {
+            }
+
+            if (gen === fetchGeneration) {
                 setLoadingState(false);
+                fetchController = null;
             }
         }
 
@@ -908,8 +948,12 @@
             }
 
             initRangeFromQueryOrDefault();
-            bindEvents();
-            fetchDetail();
+
+            // Fetch first, THEN bind events to avoid any change events
+            // fired during initialization from triggering a duplicate fetch.
+            fetchDetail().then(function () {
+                bindEvents();
+            });
         });
     </script>
 </body>

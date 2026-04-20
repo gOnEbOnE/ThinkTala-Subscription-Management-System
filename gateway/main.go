@@ -96,32 +96,81 @@ func (p *ProxyPool) GetProxy(target string) *httputil.ReverseProxy {
 var proxyPool = NewProxyPool()
 
 func loadConfig() (*Config, error) {
-	configPaths := []string{"routes.local.json", "routes.json", "config/routes.json"}
-	var configData []byte
-	var configPath string
+	readConfig := func(path string) (*Config, error) {
+		configData, err := ioutil.ReadFile(path)
+		if err != nil {
+			return nil, fmt.Errorf("error reading %s: %v", path, err)
+		}
 
-	for _, path := range configPaths {
-		if _, err := os.Stat(path); err == nil {
-			configPath = path
-			configData, _ = ioutil.ReadFile(path)
-			if configData != nil {
-				break
+		var cfg Config
+		if err := json.Unmarshal(configData, &cfg); err != nil {
+			return nil, fmt.Errorf("error parsing %s: %v", path, err)
+		}
+
+		return &cfg, nil
+	}
+
+	mergeConfig := func(dst *Config, src *Config) {
+		if src == nil {
+			return
+		}
+
+		if len(src.AllowedOrigins) > 0 {
+			dst.AllowedOrigins = src.AllowedOrigins
+		}
+
+		routeIndex := make(map[string]int, len(dst.Routes))
+		for i, r := range dst.Routes {
+			routeIndex[r.Path] = i
+		}
+
+		for _, route := range src.Routes {
+			if strings.TrimSpace(route.Path) == "" {
+				continue
 			}
+
+			if idx, exists := routeIndex[route.Path]; exists {
+				dst.Routes[idx] = route
+				continue
+			}
+
+			dst.Routes = append(dst.Routes, route)
+			routeIndex[route.Path] = len(dst.Routes) - 1
 		}
 	}
 
-	if configData == nil {
-		return &Config{AllowedOrigins: []string{"*"}}, nil
+	merged := &Config{AllowedOrigins: []string{"*"}}
+	loadedFrom := make([]string, 0, 2)
+
+	baseCandidates := []string{"routes.json", "config/routes.json"}
+	for _, path := range baseCandidates {
+		if _, err := os.Stat(path); err == nil {
+			cfg, err := readConfig(path)
+			if err != nil {
+				return nil, err
+			}
+			mergeConfig(merged, cfg)
+			loadedFrom = append(loadedFrom, path)
+			break
+		}
 	}
 
-	var cfg Config
-	if err := json.Unmarshal(configData, &cfg); err != nil {
-		return nil, fmt.Errorf("error parsing %s: %v", configPath, err)
+	if _, err := os.Stat("routes.local.json"); err == nil {
+		cfg, err := readConfig("routes.local.json")
+		if err != nil {
+			return nil, err
+		}
+		mergeConfig(merged, cfg)
+		loadedFrom = append(loadedFrom, "routes.local.json")
 	}
 
-	log.Printf("Configuration loaded from: %s", configPath)
-	log.Printf("Loaded %d routes and %d allowed origins", len(cfg.Routes), len(cfg.AllowedOrigins))
-	return &cfg, nil
+	if len(loadedFrom) == 0 {
+		return merged, nil
+	}
+
+	log.Printf("Configuration loaded from: %s", strings.Join(loadedFrom, ", "))
+	log.Printf("Loaded %d routes and %d allowed origins", len(merged.Routes), len(merged.AllowedOrigins))
+	return merged, nil
 }
 
 // ========================================
@@ -339,6 +388,10 @@ func createProxyHandler(target string, enableCORS bool) http.HandlerFunc {
 // ========================================
 func serveFrontendPage(frontendDir, section, defaultPage string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+
 		prefix := "/" + section + "/"
 		pageName := strings.TrimPrefix(r.URL.Path, prefix)
 		if pageName == "" {
@@ -436,6 +489,10 @@ func main() {
 
 	// /dashboard/customer/{id} → customer detail page for management
 	http.HandleFunc("/dashboard/customer/", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+
 		detailFile := filepath.Join(frontendDir, "management", "customer-detail.html")
 		if _, err := os.Stat(detailFile); err == nil {
 			http.ServeFile(w, r, detailFile)
@@ -446,6 +503,10 @@ func main() {
 
 	// /dashboard/packages/{id} → package detail page for management
 	http.HandleFunc("/dashboard/packages/", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+
 		detailFile := filepath.Join(frontendDir, "management", "package-detail.html")
 		if _, err := os.Stat(detailFile); err == nil {
 			http.ServeFile(w, r, detailFile)
@@ -458,6 +519,10 @@ func main() {
 	// 4. Account pages (no role auth, just serve HTML)
 	// ========================================
 	http.HandleFunc("/account/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+
 		// POST /account/login/auth → proxy to users service
 		if r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/account/login/auth") {
 			for _, route := range config.Routes {
@@ -609,16 +674,16 @@ func main() {
 	http.HandleFunc("/api/dashboard/customer/", withRolesAuth([]string{"MANAGEMENT", "SUPERADMIN", "ADMIN"},
 		createProxyHandler(dashboardTarget, true),
 	))
-	http.HandleFunc("/api/dashboard/packages", withRolesAuth([]string{"MANAGEMENT", "ADMIN"},
+	http.HandleFunc("/api/dashboard/packages", withRolesAuth([]string{"MANAGEMENT", "ADMIN", "SUPERADMIN"},
 		createProxyHandler(dashboardTarget, true),
 	))
-	http.HandleFunc("/api/dashboard/package/", withRolesAuth([]string{"MANAGEMENT", "ADMIN"},
+	http.HandleFunc("/api/dashboard/package/", withRolesAuth([]string{"MANAGEMENT", "ADMIN", "SUPERADMIN"},
 		createProxyHandler(dashboardTarget, true),
 	))
 	log.Printf("[GW] Protected API: /api/dashboard/customers -> %s (MANAGEMENT/SUPERADMIN)", dashboardTarget)
 	log.Printf("[GW] Protected API: /api/dashboard/customer/* -> %s (MANAGEMENT/SUPERADMIN)", dashboardTarget)
-	log.Printf("[GW] Protected API: /api/dashboard/packages -> %s (MANAGEMENT/ADMIN)", dashboardTarget)
-	log.Printf("[GW] Protected API: /api/dashboard/package/* -> %s (MANAGEMENT/ADMIN)", dashboardTarget)
+	log.Printf("[GW] Protected API: /api/dashboard/packages -> %s (MANAGEMENT/ADMIN/SUPERADMIN)", dashboardTarget)
+	log.Printf("[GW] Protected API: /api/dashboard/package/* -> %s (MANAGEMENT/ADMIN/SUPERADMIN)", dashboardTarget)
 
 	// --- KYC Client API (role-protected) - CLIENT can access their own KYC ---
 	kycClientTarget := getRouteTarget("/api/kyc/")

@@ -511,7 +511,7 @@
                         </button>
                     </div>
                 </div>
-                <div id="errorState" class="error-state d-flex justify-content-between align-items-center">
+                <div id="errorState" class="error-state d-none justify-content-between align-items-center">
                     <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat dashboard customer.</span>
                     <button id="retryBtn" class="btn btn-sm btn-outline-light">Retry</button>
                 </div>
@@ -607,7 +607,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="/assets/js/za-theme.js"></script>
-    <script src="/assets/js/ops-layout.js"></script>
+    <script src="/assets/js/management-layout.js?v=20260421"></script>
     <script>
         let growthChart = null;
         let churnChart = null;
@@ -624,6 +624,7 @@
             payload: null,
             loading: false,
             searchDebounce: null,
+            requestSeq: 0,
         };
 
         const ALLOWED_ROLES = new Set(['MANAGEMENT', 'SUPERADMIN', 'ADMIN']);
@@ -755,8 +756,8 @@
         function enforcePageAccess() {
             const user = getCurrentUser();
             if (!user || !user.id) {
-                window.location.href = '/account/login';
-                return false;
+                // Rely on backend cookie auth if localStorage is unavailable/stale.
+                return true;
             }
             const role = String(user.role_code || user.level_code || user.level || '').toUpperCase();
             if (!ALLOWED_ROLES.has(role)) {
@@ -853,7 +854,10 @@
         }
 
         function showErrorState(show) {
-            document.getElementById('errorState').style.display = show ? 'flex' : 'none';
+            const el = document.getElementById('errorState');
+            if (!el) return;
+            el.classList.toggle('d-none', !show);
+            el.classList.toggle('d-flex', show);
         }
 
         function hasAnyData(data) {
@@ -878,6 +882,8 @@
         async function fetchDashboard() {
             if (!validateDateRangeAndNotify()) return;
 
+            const reqId = ++state.requestSeq;
+
             showErrorState(false);
             setLoadingState(true);
 
@@ -885,6 +891,10 @@
                 const res = await fetch(`/api/dashboard/customers?${getQueryParams().toString()}`, {
                     credentials: 'include'
                 });
+
+                if (reqId !== state.requestSeq) {
+                    return;
+                }
 
                 if (res.status === 401) {
                     window.location.href = '/account/login';
@@ -913,10 +923,23 @@
                 state.payload = body.data;
                 renderAll(body.data);
             } catch (_e) {
+                if (reqId !== state.requestSeq) {
+                    return;
+                }
+
+                if (state.payload) {
+                    showErrorState(false);
+                    showToast('Koneksi sedang tidak stabil. Menampilkan data terakhir yang berhasil dimuat.');
+                    return;
+                }
+
                 showErrorState(true);
                 showToast('Gagal memuat dashboard customer.');
                 renderFallbackZeros();
             } finally {
+                if (reqId !== state.requestSeq) {
+                    return;
+                }
                 setLoadingState(false);
             }
         }
