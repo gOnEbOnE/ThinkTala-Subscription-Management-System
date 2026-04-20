@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Verifikasi Pesanan | ThinkTala Ops</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .order-detail-page {
+            max-width: 1320px;
+            padding-top: calc(var(--header-height) + 16px);
+            padding-bottom: calc(var(--footer-height) + 24px);
+        }
+
+        .order-detail-page .ai-card {
+            height: auto;
+            overflow: visible;
+        }
+
+        .page-subtitle {
+            max-width: 720px;
+            line-height: 1.45;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, rgba(33, 44, 79, 0.46), rgba(20, 26, 46, 0.92));
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 992px) {
+            .detail-grid {
+                grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+                align-items: start;
+            }
+        }
+
+        .info-items {
+            display: grid;
+            gap: 0.7rem;
+        }
+
+        .info-item {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem 0.85rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .invoice-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-heading);
+        }
+
+        .status-badge-pill {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+        }
+
+        .info-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .info-value {
+            color: var(--text-heading);
+            font-weight: 600;
+        }
+
+        .proof-preview {
+            max-height: min(58vh, 520px);
+            max-width: 100%;
+            width: auto;
+            object-fit: contain;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .proof-frame {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            min-height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+        }
+
+        .verify-mode-btn {
+            min-width: 130px;
+        }
+
+        .verify-mode-btn.active {
+            font-weight: 700;
+        }
+
+        .verify-panel {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .verify-state {
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 0;
+        }
+
+        .verify-readonly {
+            background: rgba(34, 197, 94, 0.08);
+            border-color: rgba(34, 197, 94, 0.28);
+            color: #bbf7d0;
+        }
+
+        .verify-blocked {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: rgba(255, 193, 7, 0.3);
+            color: #fde68a;
+        }
+
+        .verify-zone {
+            margin-top: 1rem;
+        }
+
+        .verify-note {
+            border-color: rgba(239, 68, 68, 0.32);
+            background: rgba(239, 68, 68, 0.08);
+            color: #fecaca;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="main-content order-detail-page">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+            <div>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Detail Verifikasi Pesanan</h4>
+                <small class="text-muted page-subtitle">Review bukti transfer dan proses approve/reject secara fokus tanpa popup agar verifikasi lebih nyaman dan cepat.</small>
+            </div>
+            <a href="/ops/orders" class="btn btn-sm btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i>Kembali ke Daftar Pesanan
+            </a>
+        </div>
+
+        <div id="loadingState" class="ai-card text-center py-5">
+            <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat detail pesanan...
+        </div>
+
+        <div id="errorState" class="ai-card text-center py-5 d-none">
+            <i class="fa-solid fa-triangle-exclamation fa-2x mb-3 d-block text-warning"></i>
+            <h6 class="fw-bold mb-2" style="color: var(--text-heading)">Gagal memuat detail pesanan</h6>
+            <p class="text-muted small mb-3" id="errorText">Terjadi kendala saat mengambil data detail.</p>
+            <a href="/ops/orders" class="btn btn-sm btn-outline-secondary">Kembali</a>
+        </div>
+
+        <div id="detailState" class="d-none">
+            <div class="ai-card summary-card mb-3">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div>
+                        <div class="info-label">Nomor Invoice</div>
+                        <div class="invoice-code" id="dInvoice">-</div>
+                        <small class="text-muted" id="dDateHeader">-</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="info-label">Status</div>
+                        <div id="dStatus">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-grid">
+                <div>
+                    <div class="ai-card info-card">
+                        <h6 class="fw-bold mb-3" style="color: var(--text-heading)">Informasi Pesanan</h6>
+                        <div class="info-items">
+                            <div class="info-item">
+                                <div class="info-label">Client</div>
+                                <div class="info-value" id="dClient">-</div>
+                                <small class="text-muted" id="dClientEmail">-</small>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Paket</div>
+                                <div class="info-value" id="dPackage">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Durasi</div>
+                                <div class="info-value" id="dDuration">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Metode Pembayaran</div>
+                                <div class="info-value" id="dMethod">-</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Total Pembayaran</div>
+                                <div class="info-value" id="dTotal">-</div>
+                            </div>
+                        </div>
+
+                        <div id="verificationNoteWrap" class="alert verify-note mt-4 mb-0 d-none">
+                            <strong>Alasan Reject:</strong><br>
+                            <span id="verificationNoteText">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="ai-card proof-card">
+                        <h6 class="fw-bold mb-3" style="color: var(--text-heading)">Bukti Transfer</h6>
+                        <div id="proofUnavailable" class="alert alert-warning d-none mb-3">Bukti transfer belum diunggah oleh client.</div>
+                        <div id="proofContent" class="d-none">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                <small class="text-muted" id="dProofUploadedAt">-</small>
+                                <a id="dProofLink" href="#" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fa-solid fa-image me-1"></i>Buka Gambar
+                                </a>
+                            </div>
+                            <div class="proof-frame">
+                                <img id="dProofImage" class="proof-preview" alt="Bukti transfer client">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="verify-zone">
+                        <h6 class="fw-bold mb-3" style="color: var(--text-heading)">Aksi Verifikasi</h6>
+                        <div id="verifyReadonly" class="alert verify-state verify-readonly d-none">
+                            Pesanan ini sudah diverifikasi. Tidak ada aksi lanjutan yang diperlukan.
+                        </div>
+
+                        <div id="verifyBlocked" class="alert verify-state verify-blocked d-none">
+                            Verifikasi belum bisa diproses karena bukti transfer belum tersedia.
+                        </div>
+
+                        <div id="verifyForm" class="verify-panel d-none">
+                            <p class="text-muted small mb-3">Pilih tindakan verifikasi. Jika memilih reject, alasan wajib diisi.</p>
+
+                            <div class="d-flex gap-2 mb-3 flex-wrap">
+                                <button type="button" id="modeApprove" class="btn btn-sm btn-outline-success verify-mode-btn" onclick="setVerifyMode('APPROVE')">
+                                    <i class="fa-solid fa-check me-1"></i>Approve
+                                </button>
+                                <button type="button" id="modeReject" class="btn btn-sm btn-outline-danger verify-mode-btn" onclick="setVerifyMode('REJECT')">
+                                    <i class="fa-solid fa-xmark me-1"></i>Reject
+                                </button>
+                            </div>
+
+                            <div id="rejectReasonWrap" class="mb-3 d-none">
+                                <label for="rejectReasonInput" class="form-label small fw-semibold" style="color: var(--text-heading)">Alasan Reject <span class="text-danger">*</span></label>
+                                <textarea id="rejectReasonInput" class="form-control form-control-sm" rows="4" maxlength="500" placeholder="Jelaskan kenapa pembayaran ditolak..."></textarea>
+                                <small class="text-muted">Alasan ini akan tersimpan di catatan verifikasi pesanan.</small>
+                            </div>
+
+                            <button type="button" id="btnSubmitVerify" class="btn btn-sm btn-primary" onclick="submitVerification()">
+                                <span id="verifyBtnText"><i class="fa-solid fa-paper-plane me-1"></i>Proses Verifikasi</span>
+                                <span id="verifyBtnLoading" class="d-none"><i class="fa-solid fa-spinner fa-spin me-1"></i>Memproses...</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999;">
+        <div id="toastEl" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3200">
+            <div class="d-flex">
+                <div class="toast-body fw-semibold" id="toastMsg">-</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>Operations Panel v1.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
+    <script>
+        let currentOrder = null;
+        let verifyMode = 'APPROVE';
+
+        function formatRp(val) {
+            return 'Rp ' + Number(val || 0).toLocaleString('id-ID');
+        }
+
+        function normalizeStatus(status) {
+            const s = String(status || '').toUpperCase();
+            if (s === 'PENDING') return 'PENDING_PAYMENT';
+            return s || 'PENDING_PAYMENT';
+        }
+
+        function statusBadge(status) {
+            const current = normalizeStatus(status);
+            const map = {
+                'PAID': { bg: 'rgba(16,185,129,0.2)', color: '#34d399', border: '1px solid rgba(16,185,129,0.35)', label: 'PAID' },
+                'PENDING_PAYMENT': { bg: 'rgba(255,193,7,0.18)', color: '#ffd54a', border: '1px solid rgba(255,193,7,0.35)', label: 'PENDING' },
+                'CANCELLED': { bg: 'rgba(220,53,69,0.2)', color: '#ff6b7a', border: '1px solid rgba(220,53,69,0.35)', label: 'CANCELLED' },
+                'EXPIRED': { bg: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border-color)', label: 'EXPIRED' },
+            };
+            const s = map[current] || map['EXPIRED'];
+            return `<span class="status-badge-pill" style="background:${s.bg};color:${s.color};border:${s.border};">${s.label}</span>`;
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toastEl');
+            const m = document.getElementById('toastMsg');
+            t.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+            t.classList.add(type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-danger');
+            m.textContent = msg;
+            bootstrap.Toast.getOrCreateInstance(t).show();
+        }
+
+        function setState(state) {
+            document.getElementById('loadingState').classList.add('d-none');
+            document.getElementById('errorState').classList.add('d-none');
+            document.getElementById('detailState').classList.add('d-none');
+            document.getElementById(state).classList.remove('d-none');
+        }
+
+        function setVerifyMode(mode) {
+            verifyMode = mode;
+            const approveBtn = document.getElementById('modeApprove');
+            const rejectBtn = document.getElementById('modeReject');
+            const rejectWrap = document.getElementById('rejectReasonWrap');
+
+            if (mode === 'APPROVE') {
+                approveBtn.classList.add('active', 'btn-success');
+                approveBtn.classList.remove('btn-outline-success');
+                rejectBtn.classList.remove('active', 'btn-danger');
+                rejectBtn.classList.add('btn-outline-danger');
+                rejectWrap.classList.add('d-none');
+            } else {
+                rejectBtn.classList.add('active', 'btn-danger');
+                rejectBtn.classList.remove('btn-outline-danger');
+                approveBtn.classList.remove('active', 'btn-success');
+                approveBtn.classList.add('btn-outline-success');
+                rejectWrap.classList.remove('d-none');
+            }
+        }
+
+        function renderDetail(order) {
+            const status = normalizeStatus(order.status);
+            const hasProof = !!order.has_payment_proof;
+
+            document.getElementById('dInvoice').textContent = order.invoice_number || '-';
+            document.getElementById('dDateHeader').textContent = order.created_at
+                ? new Date(order.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : '-';
+            document.getElementById('dStatus').innerHTML = statusBadge(status);
+
+            document.getElementById('dClient').textContent = order.client_name || 'Unknown';
+            document.getElementById('dClientEmail').textContent = order.client_email || '-';
+            document.getElementById('dPackage').textContent = order.package_name || '-';
+            document.getElementById('dDuration').textContent = (order.duration_months || 0) + ' bulan';
+            document.getElementById('dMethod').textContent = order.payment_method || '-';
+            document.getElementById('dTotal').textContent = formatRp(order.total_price);
+
+            const note = String(order.verification_note || '').trim();
+            const noteWrap = document.getElementById('verificationNoteWrap');
+            const noteText = document.getElementById('verificationNoteText');
+            if (note) {
+                noteWrap.classList.remove('d-none');
+                noteText.textContent = note;
+            } else {
+                noteWrap.classList.add('d-none');
+                noteText.textContent = '-';
+            }
+
+            const proofUnavailable = document.getElementById('proofUnavailable');
+            const proofContent = document.getElementById('proofContent');
+            const proofUrl = order.payment_proof_url || '';
+            if (hasProof && proofUrl) {
+                proofUnavailable.classList.add('d-none');
+                proofContent.classList.remove('d-none');
+                document.getElementById('dProofLink').href = proofUrl;
+                document.getElementById('dProofUploadedAt').textContent = order.payment_proof_uploaded_at
+                    ? ('Diunggah: ' + new Date(order.payment_proof_uploaded_at).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }))
+                    : 'Bukti transfer tersedia';
+                document.getElementById('dProofImage').src = proofUrl + (proofUrl.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+            } else {
+                proofUnavailable.classList.remove('d-none');
+                proofContent.classList.add('d-none');
+            }
+
+            const verifyReadonly = document.getElementById('verifyReadonly');
+            const verifyBlocked = document.getElementById('verifyBlocked');
+            const verifyForm = document.getElementById('verifyForm');
+
+            verifyReadonly.classList.add('d-none');
+            verifyBlocked.classList.add('d-none');
+            verifyForm.classList.add('d-none');
+
+            if (status === 'PENDING_PAYMENT' && hasProof) {
+                verifyForm.classList.remove('d-none');
+                setVerifyMode('APPROVE');
+                document.getElementById('rejectReasonInput').value = '';
+                return;
+            }
+
+            if (status === 'PENDING_PAYMENT' && !hasProof) {
+                verifyBlocked.classList.remove('d-none');
+                return;
+            }
+
+            verifyReadonly.classList.remove('d-none');
+        }
+
+        function getOrderIdFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return String(params.get('id') || params.get('order_id') || '').trim();
+        }
+
+        async function loadOrderDetail() {
+            const orderID = getOrderIdFromURL();
+            if (!orderID) {
+                setState('errorState');
+                document.getElementById('errorText').textContent = 'Order ID tidak ditemukan di URL.';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/admin/orders/${encodeURIComponent(orderID)}`, { credentials: 'include' });
+                if (res.redirected || res.status === 401) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                if (res.status === 403) {
+                    setState('errorState');
+                    document.getElementById('errorText').textContent = 'Akses ditolak untuk melihat detail pesanan ini.';
+                    return;
+                }
+
+                const json = await res.json();
+                if (!res.ok || !json.success) {
+                    setState('errorState');
+                    document.getElementById('errorText').textContent = (json && json.error_message) ? json.error_message : 'Data detail pesanan tidak bisa dimuat.';
+                    return;
+                }
+
+                currentOrder = json.data || {};
+                renderDetail(currentOrder);
+                setState('detailState');
+            } catch (e) {
+                setState('errorState');
+                document.getElementById('errorText').textContent = 'Gagal terhubung ke server.';
+            }
+        }
+
+        async function submitVerification() {
+            if (!currentOrder || !currentOrder.order_id) return;
+
+            const rejectReasonInput = document.getElementById('rejectReasonInput');
+            const rejectReason = String(rejectReasonInput.value || '').trim();
+
+            if (verifyMode === 'REJECT' && !rejectReason) {
+                showToast('Alasan reject wajib diisi.', 'warning');
+                rejectReasonInput.focus();
+                return;
+            }
+
+            const btn = document.getElementById('btnSubmitVerify');
+            const btnText = document.getElementById('verifyBtnText');
+            const btnLoading = document.getElementById('verifyBtnLoading');
+            btn.disabled = true;
+            btnText.classList.add('d-none');
+            btnLoading.classList.remove('d-none');
+
+            try {
+                const res = await fetch(`/api/admin/orders/${encodeURIComponent(currentOrder.order_id)}/verify`, {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: verifyMode,
+                        reject_reason: verifyMode === 'REJECT' ? rejectReason : ''
+                    })
+                });
+
+                if (res.redirected || res.status === 401) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                if (res.status === 403) {
+                    showToast('Akses ditolak untuk memverifikasi pesanan.', 'danger');
+                    return;
+                }
+
+                const json = await res.json();
+                if (!res.ok || !json.success) {
+                    showToast((json && json.error_message) ? json.error_message : 'Gagal memproses verifikasi.', 'danger');
+                    return;
+                }
+
+                showToast('Verifikasi pesanan berhasil diproses.', 'success');
+                await loadOrderDetail();
+            } catch (e) {
+                showToast('Gagal terhubung ke server.', 'danger');
+            } finally {
+                btn.disabled = false;
+                btnText.classList.remove('d-none');
+                btnLoading.classList.add('d-none');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadOrderDetail();
+        });
+    </script>
+</body>
+</html>

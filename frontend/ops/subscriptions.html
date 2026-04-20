@@ -68,15 +68,16 @@
             padding: 8px 20px;
             border: none;
             border-radius: 50px;
-            box-shadow: 0 0 16px rgba(0,242,255,0.35);
+            box-shadow: 0 0 16px rgba(0, 242, 255, 0.35);
             cursor: pointer;
             transition: filter .2s, box-shadow .2s;
             text-decoration: none;
             display: inline-block;
         }
+
         .btn-add-pkg:hover {
             filter: brightness(1.15);
-            box-shadow: 0 0 24px rgba(0,242,255,0.55);
+            box-shadow: 0 0 24px rgba(0, 242, 255, 0.55);
             text-decoration: none;
             color: #000;
         }
@@ -108,8 +109,10 @@
                         Paket</label>
                     <div class="input-group input-group-sm">
                         <span class="input-group-text"
-                            style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);"><i class="fa-solid fa-search"></i></span>
-                        <input type="text" class="form-control" id="filterSearch" placeholder="Cari berdasarkan nama paket..." oninput="applyFilter()">
+                            style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);"><i
+                                class="fa-solid fa-search"></i></span>
+                        <input type="text" class="form-control" id="filterSearch"
+                            placeholder="Cari berdasarkan nama paket..." oninput="applyFilter()">
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -143,8 +146,8 @@
                     </div>
                 </div>
                 <div class="col-md-3 d-flex gap-2">
-                    <button class="btn btn-sm px-3 fw-bold w-100 btn-add-pkg"
-                        onclick="applyFilter()">Terapkan Filter</button>
+                    <button class="btn btn-sm px-3 fw-bold w-100 btn-add-pkg" onclick="applyFilter()">Terapkan
+                        Filter</button>
                     <button class="btn btn-sm btn-outline-secondary px-3" onclick="resetFilter()">Reset</button>
                 </div>
             </div>
@@ -195,7 +198,8 @@
 
     <!-- Toast Container -->
     <div class="position-fixed top-0 end-0 p-3" style="z-index:9999;">
-        <div id="toastSuccess" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+        <div id="toastSuccess" class="toast align-items-center border-0" role="alert" aria-live="assertive"
+            aria-atomic="true" data-bs-delay="3000">
             <div class="d-flex">
                 <div class="toast-body d-flex align-items-center gap-2" id="toastBody">
                     <i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Berhasil</span>
@@ -233,7 +237,8 @@
                     <input type="hidden" id="togglePkgStatus">
                     <div class="d-flex gap-2 justify-content-center mt-3">
                         <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
-                        <button class="btn btn-sm px-4" id="toggleConfirmBtn" onclick="confirmToggleStatus()">Ya, Ubah</button>
+                        <button class="btn btn-sm px-4" id="toggleConfirmBtn" onclick="confirmToggleStatus()">Ya,
+                            Ubah</button>
                     </div>
                 </div>
             </div>
@@ -272,7 +277,7 @@
         const perPage = 6;
 
         async function logout() {
-            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch(e) {}
+            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) { }
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             sessionStorage.clear();
@@ -280,7 +285,78 @@
         }
 
         function formatRp(val) {
-            return 'Rp ' + Number(val).toLocaleString('id-ID');
+            const n = Number(val);
+            if (isNaN(n)) return 'Rp 0';
+            return 'Rp ' + n.toLocaleString('id-ID');
+        }
+
+        function toSafeNumber(val) {
+            if (typeof val === 'number') return isNaN(val) ? 0 : val;
+            if (val === null || val === undefined) return 0;
+
+            let raw = String(val).trim();
+            if (!raw) return 0;
+
+            // Keep digits, dot, comma and minus only.
+            raw = raw.replace(/[^0-9.,-]/g, '');
+
+            // Handle common Indonesian format: 1.234.567,89
+            if (raw.includes(',') && raw.includes('.')) {
+                raw = raw.replace(/\./g, '').replace(',', '.');
+            } else if (raw.includes(',') && !raw.includes('.')) {
+                // Handle decimal comma format: 1234,56
+                raw = raw.replace(',', '.');
+            } else if (/^\d{1,3}(\.\d{3})+$/.test(raw)) {
+                // Handle thousands dot format without decimal part: 1.234.567
+                raw = raw.replace(/\./g, '');
+            }
+
+            const n = Number(raw);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function readTierMonths(tier) {
+            return toSafeNumber(
+                tier?.duration_months ??
+                tier?.durationMonths ??
+                tier?.DurationMonths ??
+                tier?.duration ??
+                tier?.months
+            );
+        }
+
+        function readTierPrice(tier) {
+            return toSafeNumber(
+                tier?.price ??
+                tier?.Price ??
+                tier?.total_price ??
+                tier?.amount
+            );
+        }
+
+        function readPricingTiers(pkg) {
+            const tiers =
+                pkg?.pricing_tiers ??
+                pkg?.pricingTiers ??
+                pkg?.PricingTiers ??
+                [];
+            return Array.isArray(tiers) ? tiers : [];
+        }
+
+        function getDurationPrice(pkg, durationMonths) {
+            const monthly = toSafeNumber(pkg?.price ?? pkg?.Price);
+
+            // Backward compatibility for legacy payload with explicit yearly price.
+            if (durationMonths === 12) {
+                const yearlyLegacy = toSafeNumber(pkg?.price_yearly ?? pkg?.priceYearly ?? pkg?.PriceYearly);
+                if (yearlyLegacy > 0) return yearlyLegacy;
+            }
+
+            const tiers = readPricingTiers(pkg);
+            const special = tiers.find(t => readTierMonths(t) === durationMonths && readTierPrice(t) > 0);
+            if (special) return readTierPrice(special);
+
+            return monthly * durationMonths;
         }
 
         function showAlert(msg, type = 'danger') {
@@ -326,7 +402,7 @@
                 <tr>
                     <td class="py-3 pkg-name">${pkg.name || '—'}</td>
                     <td class="py-3 pkg-price-monthly">${formatRp(pkg.price)}</td>
-                    <td class="py-3 pkg-price-yearly">${formatRp(pkg.price_yearly)}</td>
+                    <td class="py-3 pkg-price-yearly">${formatRp(getDurationPrice(pkg, 12))}</td>
                     <td class="py-3">${statusBadge(pkg.status)}</td>
                     <td class="py-3 text-end">
                         <div class="d-flex gap-1 justify-content-end flex-nowrap">
@@ -468,7 +544,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadPackages();
             const pendingToast = sessionStorage.getItem('toast');
             if (pendingToast) {

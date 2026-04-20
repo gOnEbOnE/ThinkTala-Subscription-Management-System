@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/orders"
 	"github.com/master-abror/zaframework/app/modules/packages"
 	"github.com/master-abror/zaframework/core"
 )
 
 // Init mendaftarkan semua route subscription service
-func Init(app *core.App, packagesController *packages.Controller) {
+func Init(app *core.App, packagesController *packages.Controller, ordersController *orders.Controller) {
 
 	// Static assets
 	fs := http.FileServer(http.Dir("./public/assets"))
@@ -48,4 +49,27 @@ func Init(app *core.App, packagesController *packages.Controller) {
 
 	// Legacy alias sesuai routes.json gateway
 	app.Router.HandleFunc("GET /api/subscriptions", packagesController.GetPackagesAdminHandler)
+
+	// ===================================================
+	// EPIC04 PBI-45: Create Order (Client)
+	// ===================================================
+	app.Router.HandleFunc("POST /api/orders", ordersController.CreateOrderHandler)
+	app.Router.HandleFunc("GET /api/orders", ordersController.ListOrdersClientHandler)
+	app.Router.HandleFunc("GET /api/orders/{id}", ordersController.GetOrderDetailClientHandler)
+	app.Router.HandleFunc("POST /api/orders/{id}/payment-proof", ordersController.UploadPaymentProofClientHandler)
+	app.Router.HandleFunc("GET /api/orders/{id}/payment-proof", ordersController.GetPaymentProofClientHandler)
+
+	// ===================================================
+	// EPIC04 PBI-49: Verify Order (Operasional)
+	// ===================================================
+	app.Router.HandleFunc("GET /api/admin/orders", ordersController.ListOrdersAdminHandler)
+	app.Router.HandleFunc("GET /api/admin/orders/{id}", ordersController.GetOrderDetailAdminHandler)
+	app.Router.HandleFunc("GET /api/admin/orders/{id}/payment-proof", ordersController.GetPaymentProofAdminHandler)
+	app.Router.HandleFunc("PATCH /api/admin/orders/{id}/verify", ordersController.VerifyOrderHandler)
+
+	// ===================================================
+	// EPIC04 PBI-50: Activate Subscription after Verify
+	// ===================================================
+	app.Router.HandleFunc("PATCH /api/admin/orders/{id}/activate", ordersController.ActivateOrderHandler)
+	app.Router.HandleFunc("GET /api/subscriptions/me", ordersController.GetMySubscriptionHandler)
 }

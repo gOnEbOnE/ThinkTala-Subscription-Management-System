@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Pesanan | ThinkTala</title>
+    <meta name="description" content="Detail invoice pesanan langganan Anda">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .detail-page {
+            width: calc(100% - var(--sidebar-width));
+            max-width: none;
+            margin: 0;
+            min-width: 0;
+            box-sizing: border-box;
+            container-type: inline-size;
+        }
+
+        body.sidebar-collapsed .detail-page {
+            width: calc(100% - var(--sidebar-width-collapsed));
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            align-items: start;
+            min-width: 0;
+        }
+
+        .detail-grid > .ai-card {
+            min-width: 0;
+        }
+
+        @container (min-width: 1240px) {
+            .detail-grid {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .detail-page {
+                width: 100% !important;
+            }
+        }
+
+        .invoice-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--text-heading);
+        }
+
+        .status-pill {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 0.4rem 0.75rem;
+            border-radius: 999px;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.18);
+            color: #ffd54a;
+            border: 1px solid rgba(255, 193, 7, 0.35);
+        }
+
+        .status-paid {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+
+        .status-cancelled {
+            background: rgba(220, 53, 69, 0.2);
+            color: #ff6b7a;
+            border: 1px solid rgba(220, 53, 69, 0.35);
+        }
+
+        .label-small {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .value-main {
+            color: var(--text-heading);
+            font-weight: 600;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-heading);
+        }
+
+        .section-title i {
+            color: var(--accent-cyan);
+        }
+
+        .proof-upload-box {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .proof-step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 0.9rem;
+            min-width: 0;
+            flex-wrap: wrap;
+            row-gap: 0.5rem;
+        }
+
+        .proof-step {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            min-width: 0;
+            flex: 0 1 auto;
+        }
+
+        .proof-step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: transparent;
+        }
+
+        .proof-step.active .proof-step-num {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            color: #000;
+        }
+
+        .proof-step-label {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .proof-step-line {
+            flex: 1;
+            min-width: 14px;
+            height: 2px;
+            margin: 0 0.55rem;
+            background: var(--border-color);
+        }
+
+        @container (max-width: 700px) {
+            .proof-step-line {
+                display: none;
+            }
+
+            .proof-step-indicator {
+                gap: 0.35rem 0.65rem;
+            }
+        }
+
+        .proof-upload-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1.15rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.25s, background 0.25s;
+            position: relative;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .proof-upload-zone:hover,
+        .proof-upload-zone.dragover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.06);
+        }
+
+        .proof-upload-zone.has-file {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .proof-upload-zone .upload-icon {
+            font-size: 2rem;
+            color: var(--text-muted);
+            margin-bottom: 0.45rem;
+        }
+
+        .proof-upload-zone.has-file .upload-icon {
+            color: #10b981;
+        }
+
+        .proof-remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(220, 53, 69, 0.9);
+            color: #fff;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .proof-upload-zone.has-file .proof-remove-btn {
+            display: inline-flex;
+        }
+
+        .proof-file-meta {
+            margin-top: 0.7rem;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.55rem 0.75rem;
+        }
+
+        .proof-tip {
+            margin-top: 0.8rem;
+            font-size: 0.79rem;
+            color: var(--text-muted);
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid rgba(0, 242, 255, 0.16);
+            border-radius: 10px;
+            padding: 0.6rem 0.75rem;
+        }
+
+        .proof-ok-banner {
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 10px;
+            padding: 0.65rem 0.8rem;
+            font-size: 0.8rem;
+            color: #6ee7b7;
+            font-weight: 600;
+        }
+
+        .proof-preview-img {
+            max-height: 380px;
+            object-fit: contain;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-upload-proof {
+            background: linear-gradient(135deg, var(--accent-cyan), #0099cc);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            padding: 0.55rem 0.95rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-upload-proof:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="client-sidebar-placeholder"></div>
+    <div id="client-navbar-placeholder"></div>
+
+    <div class="main-content detail-page">
+        <div class="mb-4">
+            <a href="/client/billing-history" class="btn btn-sm btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i>Kembali
+            </a>
+        </div>
+
+        <div id="loadingState" class="ai-card text-center py-5">
+            <i class="fa-solid fa-spinner fa-spin fa-2x text-cyan d-block mb-3"></i>
+            <p class="text-muted mb-0">Memuat detail pesanan...</p>
+        </div>
+
+        <div id="notFoundState" class="ai-card text-center py-5 d-none">
+            <i class="fa-solid fa-file-circle-xmark fa-2x text-warning d-block mb-3"></i>
+            <h6 class="fw-bold" style="color:var(--text-heading)">Data pesanan tidak ditemukan</h6>
+            <p class="text-muted small mb-3">Pesanan yang Anda cari tidak tersedia atau sudah tidak dapat diakses.</p>
+            <a href="/client/billing-history" class="btn btn-sm btn-outline-secondary">Kembali ke Riwayat</a>
+        </div>
+
+        <div id="errorState" class="ai-card text-center py-5 d-none">
+            <i class="fa-solid fa-triangle-exclamation fa-2x text-danger d-block mb-3"></i>
+            <h6 class="fw-bold" style="color:var(--text-heading)">Terjadi kesalahan</h6>
+            <p class="text-muted small mb-3" id="errorText">Gagal memuat detail pesanan.</p>
+            <a href="/client/billing-history" class="btn btn-sm btn-outline-secondary">Kembali ke Riwayat</a>
+        </div>
+
+        <div id="detailState" class="d-none">
+            <div class="ai-card mb-4">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                    <div>
+                        <div class="label-small">Nomor Invoice</div>
+                        <div class="invoice-code" id="invoiceNumber">-</div>
+                        <div class="text-muted small mt-1" id="createdAt">-</div>
+                    </div>
+                    <div>
+                        <div class="label-small mb-2">Status Pembayaran</div>
+                        <span id="statusBadge" class="status-pill">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-grid">
+                <div class="ai-card">
+                    <h6 class="fw-bold mb-3" style="color:var(--text-heading)">Rincian Transaksi</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="label-small">Paket</div>
+                            <div class="value-main" id="packageName">-</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="label-small">Metode Pembayaran</div>
+                            <div class="value-main" id="paymentMethod">-</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="label-small">Harga</div>
+                            <div class="value-main" id="totalPrice">-</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="label-small">Tanggal</div>
+                            <div class="value-main" id="invoiceDate">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-card" id="proofSection">
+                    <div class="section-title"><i class="fa-solid fa-file-shield"></i>Bukti Transfer</div>
+                    <p class="text-muted small mb-3" id="proofHelperText">Unggah bukti transfer agar pembayaran dapat diverifikasi oleh tim operasional.</p>
+
+                    <div id="proofUploadForm" class="proof-upload-box d-none">
+                        <div class="proof-step-indicator">
+                            <div class="proof-step active">
+                                <div class="proof-step-num">1</div>
+                                <div class="proof-step-label">Pilih File</div>
+                            </div>
+                            <div class="proof-step-line"></div>
+                            <div class="proof-step active">
+                                <div class="proof-step-num">2</div>
+                                <div class="proof-step-label">Upload</div>
+                            </div>
+                            <div class="proof-step-line"></div>
+                            <div class="proof-step">
+                                <div class="proof-step-num">3</div>
+                                <div class="proof-step-label">Verifikasi Ops</div>
+                            </div>
+                        </div>
+
+                        <div class="proof-upload-zone" id="proofUploadZone">
+                            <button type="button" id="proofRemoveBtn" class="proof-remove-btn" title="Hapus file">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                            <div id="proofUploadContent">
+                                <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                                <p class="mb-1 fw-semibold" style="color: var(--text-heading)">Drag & drop bukti transfer di sini</p>
+                                <p class="text-muted small mb-2">atau</p>
+                                <button type="button" class="btn btn-outline-light btn-sm" id="proofBrowseBtn">
+                                    <i class="fa-solid fa-folder-open me-1"></i>Pilih File
+                                </button>
+                                <p class="text-muted small mt-2 mb-0">Format: JPG, PNG, WEBP. Maksimal 5MB.</p>
+                            </div>
+                            <input type="file" id="paymentProofInput" class="d-none" accept="image/png,image/jpeg,image/webp">
+                        </div>
+
+                        <div id="proofFileMeta" class="proof-file-meta d-none"></div>
+
+                        <div id="proofDraftPreviewWrap" class="d-none mt-2">
+                            <img id="proofDraftPreview" class="proof-preview-img" alt="Preview draft bukti transfer">
+                        </div>
+
+                        <div class="proof-tip">
+                            <i class="fa-solid fa-circle-info text-cyan me-1"></i>
+                            Setelah upload berhasil, status transaksi otomatis masuk antrean verifikasi operasional.
+                        </div>
+
+                        <button type="button" id="btnUploadProof" class="btn-upload-proof mt-3" onclick="uploadPaymentProof()">
+                            <span id="uploadProofText"><i class="fa-solid fa-upload me-1"></i>Upload Bukti Transfer</span>
+                            <span id="uploadProofLoading" class="d-none"><i class="fa-solid fa-spinner fa-spin me-1"></i>Mengunggah...</span>
+                        </button>
+                    </div>
+
+                    <div id="proofStatusInfo" class="d-none">
+                        <div class="proof-ok-banner mb-3">
+                            <i class="fa-solid fa-circle-check me-1"></i> Bukti transfer tersimpan. Menunggu verifikasi operasional.
+                        </div>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <div>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size:0.75rem;">BUKTI TRANSFER TERSEDIA</span>
+                                <div class="text-muted small mt-1" id="proofUploadedAtText">-</div>
+                            </div>
+                            <a id="proofOpenLink" href="#" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <i class="fa-solid fa-image me-1"></i>Buka Gambar
+                            </a>
+                        </div>
+                        <img id="proofPreviewImage" class="proof-preview-img d-none" alt="Bukti transfer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div id="toastEl" class="toast align-items-center text-white border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body fw-semibold" id="toastMsg">-</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/client-layout.js"></script>
+    <script>
+        var currentOrder = null;
+        var selectedProofFile = null;
+
+        function formatRp(n) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n || 0);
+        }
+
+        function showToast(msg, type) {
+            var t = document.getElementById('toastEl');
+            var m = document.getElementById('toastMsg');
+            t.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+            t.classList.add(type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-danger');
+            m.textContent = msg;
+            bootstrap.Toast.getOrCreateInstance(t, { delay: 3500 }).show();
+        }
+
+        function renderStatus(status, hasProof) {
+            var s = (status || '').toUpperCase();
+            if (s === 'PAID') {
+                return { text: 'Paid', className: 'status-pill status-paid' };
+            }
+            if (s === 'CANCELLED') {
+                return { text: 'Cancelled', className: 'status-pill status-cancelled' };
+            }
+            return { text: hasProof ? 'Menunggu Verifikasi' : 'Menunggu Bukti', className: 'status-pill status-pending' };
+        }
+
+        function showState(state) {
+            document.getElementById('loadingState').classList.add('d-none');
+            document.getElementById('notFoundState').classList.add('d-none');
+            document.getElementById('errorState').classList.add('d-none');
+            document.getElementById('detailState').classList.add('d-none');
+            document.getElementById(state).classList.remove('d-none');
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            var d = new Date(dateStr);
+            if (Number.isNaN(d.getTime())) return '-';
+            return d.toLocaleString('id-ID', {
+                day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (!bytes || bytes <= 0) return '0 KB';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        function clearProofSelection() {
+            selectedProofFile = null;
+            var input = document.getElementById('paymentProofInput');
+            var zone = document.getElementById('proofUploadZone');
+            var meta = document.getElementById('proofFileMeta');
+            var draftWrap = document.getElementById('proofDraftPreviewWrap');
+            var draftImg = document.getElementById('proofDraftPreview');
+
+            if (input) input.value = '';
+            if (zone) zone.classList.remove('has-file', 'dragover');
+            if (meta) {
+                meta.classList.add('d-none');
+                meta.textContent = '';
+            }
+            if (draftWrap) draftWrap.classList.add('d-none');
+            if (draftImg) draftImg.removeAttribute('src');
+        }
+
+        function handleProofFileSelection(file) {
+            if (!file) {
+                clearProofSelection();
+                return;
+            }
+
+            var allowed = ['image/jpeg', 'image/png', 'image/webp'];
+            if (allowed.indexOf(file.type) === -1) {
+                showToast('Format file harus JPG, PNG, atau WEBP.', 'warning');
+                clearProofSelection();
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Ukuran file maksimal 5MB.', 'warning');
+                clearProofSelection();
+                return;
+            }
+
+            selectedProofFile = file;
+
+            var zone = document.getElementById('proofUploadZone');
+            var meta = document.getElementById('proofFileMeta');
+            var draftWrap = document.getElementById('proofDraftPreviewWrap');
+            var draftImg = document.getElementById('proofDraftPreview');
+
+            if (zone) zone.classList.add('has-file');
+            if (meta) {
+                meta.classList.remove('d-none');
+                meta.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+            }
+
+            if (file.type.indexOf('image/') === 0 && draftWrap && draftImg) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    draftImg.src = e.target.result;
+                    draftWrap.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setupProofUploadUX() {
+            var zone = document.getElementById('proofUploadZone');
+            var input = document.getElementById('paymentProofInput');
+            var browseBtn = document.getElementById('proofBrowseBtn');
+            var removeBtn = document.getElementById('proofRemoveBtn');
+
+            if (!zone || !input || zone.dataset.bound === '1') return;
+            zone.dataset.bound = '1';
+
+            if (browseBtn) {
+                browseBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    input.click();
+                });
+            }
+
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearProofSelection();
+                });
+            }
+
+            zone.addEventListener('click', function (e) {
+                if (e.target.closest('#proofBrowseBtn') || e.target.closest('#proofRemoveBtn')) return;
+                input.click();
+            });
+
+            input.addEventListener('change', function () {
+                var file = input.files && input.files[0] ? input.files[0] : null;
+                handleProofFileSelection(file);
+            });
+
+            zone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+
+            zone.addEventListener('dragleave', function () {
+                zone.classList.remove('dragover');
+            });
+
+            zone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]
+                    ? e.dataTransfer.files[0]
+                    : null;
+                handleProofFileSelection(file);
+            });
+        }
+
+        function renderProofSection(order) {
+            var status = String(order.status || '').toUpperCase();
+            var hasProof = !!order.has_payment_proof;
+            var proofUrl = order.payment_proof_url || '';
+
+            setupProofUploadUX();
+
+            var helper = document.getElementById('proofHelperText');
+            var uploadForm = document.getElementById('proofUploadForm');
+            var statusInfo = document.getElementById('proofStatusInfo');
+            var uploadedAtText = document.getElementById('proofUploadedAtText');
+            var proofOpenLink = document.getElementById('proofOpenLink');
+            var proofPreviewImage = document.getElementById('proofPreviewImage');
+
+            uploadForm.classList.add('d-none');
+            statusInfo.classList.add('d-none');
+            proofPreviewImage.classList.add('d-none');
+            proofPreviewImage.removeAttribute('src');
+
+            if (status === 'PENDING_PAYMENT' && !hasProof) {
+                helper.textContent = 'Pesanan masih menunggu pembayaran. Upload bukti transfer untuk masuk proses verifikasi.';
+                uploadForm.classList.remove('d-none');
+                return;
+            }
+
+            if (hasProof && proofUrl) {
+                clearProofSelection();
+                helper.textContent = status === 'PENDING_PAYMENT'
+                    ? 'Bukti transfer sudah diunggah. Menunggu verifikasi tim operasional.'
+                    : 'Bukti transfer untuk transaksi ini telah tersimpan.';
+
+                statusInfo.classList.remove('d-none');
+                uploadedAtText.textContent = 'Diunggah: ' + formatDateTime(order.payment_proof_uploaded_at);
+                proofOpenLink.href = proofUrl;
+
+                // Add timestamp query to avoid stale cached image after re-upload.
+                var ts = Date.now();
+                proofPreviewImage.src = proofUrl + (proofUrl.indexOf('?') >= 0 ? '&' : '?') + 't=' + ts;
+                proofPreviewImage.classList.remove('d-none');
+                return;
+            }
+
+            helper.textContent = 'Belum ada bukti transfer untuk pesanan ini.';
+        }
+
+        async function uploadPaymentProof() {
+            if (!currentOrder || !currentOrder.order_id) {
+                showToast('Data pesanan tidak tersedia.', 'danger');
+                return;
+            }
+
+            var fileInput = document.getElementById('paymentProofInput');
+            var file = selectedProofFile || (fileInput.files && fileInput.files[0]);
+            if (!file) {
+                showToast('Pilih file bukti transfer terlebih dahulu.', 'warning');
+                return;
+            }
+
+            var allowed = ['image/jpeg', 'image/png', 'image/webp'];
+            if (allowed.indexOf(file.type) === -1) {
+                showToast('Format file harus JPG, PNG, atau WEBP.', 'warning');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('Ukuran file maksimal 5MB.', 'warning');
+                return;
+            }
+
+            var btn = document.getElementById('btnUploadProof');
+            var txt = document.getElementById('uploadProofText');
+            var loading = document.getElementById('uploadProofLoading');
+            btn.disabled = true;
+            txt.classList.add('d-none');
+            loading.classList.remove('d-none');
+
+            try {
+                var fd = new FormData();
+                fd.append('payment_proof', file);
+
+                var res = await fetch('/api/orders/' + encodeURIComponent(currentOrder.order_id) + '/payment-proof', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: fd
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+
+                var json = await res.json();
+                if (!res.ok || !json.success) {
+                    showToast((json && json.error_message) ? json.error_message : 'Gagal mengunggah bukti transfer.', 'danger');
+                    return;
+                }
+
+                showToast('Bukti transfer berhasil diunggah.', 'success');
+                clearProofSelection();
+                await loadOrderDetail();
+            } catch (e) {
+                showToast('Gagal terhubung ke server.', 'danger');
+            } finally {
+                btn.disabled = false;
+                txt.classList.remove('d-none');
+                loading.classList.add('d-none');
+            }
+        }
+
+        async function loadOrderDetail() {
+            var id = new URLSearchParams(window.location.search).get('id');
+            if (!id) {
+                showState('notFoundState');
+                return;
+            }
+
+            try {
+                var res = await fetch('/api/orders/' + encodeURIComponent(id), { credentials: 'include' });
+                if (res.status === 401 || res.status === 403) {
+                    if (res.status === 403) {
+                        showState('errorState');
+                        document.getElementById('errorText').textContent = 'Anda tidak memiliki akses ke pesanan ini.';
+                        return;
+                    }
+                    window.location.href = '/account/login';
+                    return;
+                }
+
+                if (res.status === 404) {
+                    showState('notFoundState');
+                    return;
+                }
+
+                var json = await res.json();
+                if (!res.ok || !json.success) {
+                    showState('errorState');
+                    document.getElementById('errorText').textContent = (json && json.error_message) ? json.error_message : 'Gagal memuat detail pesanan.';
+                    return;
+                }
+
+                var d = json.data || json;
+                currentOrder = d;
+                var status = renderStatus(d.status, !!d.has_payment_proof);
+
+                document.getElementById('invoiceNumber').textContent = d.invoice_number || '-';
+                document.getElementById('packageName').textContent = d.package_name || '-';
+                document.getElementById('paymentMethod').textContent = d.payment_method || '-';
+                document.getElementById('totalPrice').textContent = formatRp(d.total_price);
+
+                var created = d.created_at ? new Date(d.created_at) : null;
+                document.getElementById('invoiceDate').textContent = created
+                    ? created.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+                    : '-';
+                document.getElementById('createdAt').textContent = created
+                    ? created.toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : '-';
+
+                var badge = document.getElementById('statusBadge');
+                badge.className = status.className;
+                badge.textContent = status.text;
+
+                renderProofSection(d);
+
+                showState('detailState');
+            } catch (e) {
+                showState('errorState');
+                document.getElementById('errorText').textContent = 'Gagal memuat detail pesanan.';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setupProofUploadUX();
+            loadOrderDetail();
+        });
+    </script>
+</body>
+
+</html>

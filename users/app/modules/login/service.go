@@ -75,8 +75,23 @@ func (s *Service) ProcessLoginJob(ctx context.Context, payload any) (any, error)
 		"os":         os,
 	}
 
-	// Pastikan role_code tidak kosong dan dalam format uppercase
-	roleCode := strings.ToUpper(strings.TrimSpace(userData["role_code"].(string)))
+	// Normalisasi level/role untuk otorisasi konsisten lintas service.
+	levelCode := strings.ToUpper(strings.TrimSpace(fmt.Sprint(userData["level_code"])))
+	userData["level_code"] = levelCode
+
+	roleCode := strings.ToUpper(strings.TrimSpace(fmt.Sprint(userData["role_code"])))
+
+	// Super Admin kadang tersimpan dengan role fungsional (mis. CEO).
+	// Untuk autentikasi gateway, role_code harus membawa identitas SUPERADMIN.
+	if levelCode == "SUPERADMIN" {
+		if roleCode != "SUPERADMIN" {
+			userData["original_role"] = userData["role"]
+			userData["original_role_code"] = roleCode
+		}
+		userData["role"] = "Super Admin"
+		roleCode = "SUPERADMIN"
+	}
+
 	userData["role_code"] = roleCode
 
 	token, err := utils.CreateJWT(userData, 24*time.Hour)

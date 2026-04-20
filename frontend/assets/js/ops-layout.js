@@ -15,14 +15,13 @@
     // ── Route guard: redirect to login if no session ─────────────────
     var guardUser = null;
     try { guardUser = JSON.parse(localStorage.getItem('user')); } catch (e) {}
-    if (!guardUser || !guardUser.id) {
-        window.location.href = '/account/login';
-        return;
-    }
+    var hasLocalUser = !!(guardUser && guardUser.id);
 
     // ── Role guard: shared internal layout for OPERASIONAL/CEO/SUPERADMIN/MANAGEMENT ──────
-    var _opsRole = (guardUser.role_code || guardUser.level_code || guardUser.level || '').toString().toUpperCase();
-    if (_opsRole !== 'OPERASIONAL' && _opsRole !== 'CEO' && _opsRole !== 'SUPERADMIN' && _opsRole !== 'MANAGEMENT' && _opsRole !== 'ADMIN') {
+    var _opsRole = hasLocalUser
+        ? (guardUser.role_code || guardUser.level_code || guardUser.level || '').toString().toUpperCase()
+        : '';
+    if (hasLocalUser && _opsRole !== 'OPERASIONAL' && _opsRole !== 'CEO' && _opsRole !== 'SUPERADMIN' && _opsRole !== 'MANAGEMENT' && _opsRole !== 'ADMIN') {
         var _opsRedirect = { 'COMPLIANCE': '/compliance/dashboard', 'CLIENT': '/client/dashboard', 'MANAGEMENT': '/management/dashboard-customers' };
         window.location.href = _opsRedirect[_opsRole] || '/account/login';
         return;
@@ -49,6 +48,8 @@
         '/ops/dashboard'              : { activeKey: 'dashboard' },
         '/ops/notifications'          : { activeKey: 'notifications',          parentKey: 'notif' },
         '/ops/notification-templates' : { activeKey: 'notification-templates', parentKey: 'notif' },
+        '/ops/orders'                 : { activeKey: 'orders' },
+        '/ops/orders-detail'          : { activeKey: 'orders' },
         '/ops/subscriptions'          : { activeKey: 'subscriptions' },
         '/ops/subscriptions-create'   : { activeKey: 'subscriptions' },
         '/ops/subscriptions-edit'     : { activeKey: 'subscriptions' },
@@ -66,8 +67,8 @@
             (currentPath.startsWith('/dashboard/packages/') ? { activeKey: 'management-packages' } : {}));
     const activeKey  = route.activeKey  || '';
     const parentKey  = route.parentKey  || '';
-    const canOpenManagement = _opsRole === 'MANAGEMENT' || _opsRole === 'SUPERADMIN' || _opsRole === 'ADMIN';
-    const canOpenPackageSales = _opsRole === 'MANAGEMENT' || _opsRole === 'ADMIN';
+    const canOpenManagement = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'SUPERADMIN' || _opsRole === 'ADMIN';
+    const canOpenPackageSales = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'ADMIN' || _opsRole === 'SUPERADMIN';
     const canCreateUser = _opsRole === 'SUPERADMIN' || (guardUser && guardUser.level_code && guardUser.level_code.toUpperCase() === 'SUPERADMIN');
 
     // Helper: mark a link active
@@ -333,9 +334,11 @@
     function initUserInfo() {
         const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-        // Route guard: redirect to login if no user
+        // Do not force redirect when localStorage is unavailable/stale.
+        // Backend route middleware already protects private pages.
         if (!user || !user.id) {
-            window.location.href = '/account/login';
+            const roleBadge = document.getElementById('roleBadge');
+            if (roleBadge) roleBadge.textContent = 'SESSION';
             return;
         }
 

@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Paket | ThinkTala</title>
+    <meta name="description" content="Konfirmasi dan selesaikan pembelian paket ThinkTala">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        /* ===== LAYOUT ===== */
+        .checkout-page {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .checkout-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-decoration: none;
+            margin-bottom: 1.25rem;
+            transition: color .2s;
+        }
+
+        .checkout-back:hover {
+            color: var(--accent-cyan);
+        }
+
+        .checkout-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin: 0 0 4px;
+        }
+
+        .checkout-subtitle {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ===== SECTION CARDS ===== */
+        .section-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1.1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-heading);
+        }
+
+        .section-header i {
+            color: var(--accent-cyan);
+        }
+
+        .section-body {
+            padding: 1.5rem;
+        }
+
+        /* ===== PACKET INFO ===== */
+        .pkg-info-box {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .pkg-info-box h6 {
+            color: var(--text-heading);
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .pkg-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== PRICE BREAKDOWN ===== */
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.45rem 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(255, 255, 255, .05);
+        }
+
+        .price-row:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-heading);
+            padding-top: 0.7rem;
+        }
+
+        .price-row .label {
+            color: var(--text-muted);
+        }
+
+        /* ===== FORM ===== */
+        .form-label-sm {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .form-control-dark {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            padding: 0.65rem 0.9rem;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: border-color .2s;
+        }
+
+        .form-control-dark:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        .form-control-dark.readonly {
+            opacity: .6;
+            cursor: default;
+        }
+
+        .input-icon-wrap {
+            position: relative;
+        }
+
+        .input-icon-wrap i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: .85rem;
+        }
+
+        .input-icon-wrap .form-control-dark {
+            padding-left: 2.2rem;
+        }
+
+        /* ===== BANK TRANSFER ===== */
+        .bank-card {
+            border: 2px solid var(--accent-cyan);
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            background: rgba(0, 242, 255, 0.05);
+        }
+
+        .payment-method-select {
+            margin-bottom: 0.9rem;
+        }
+
+        .bank-card h6 {
+            color: var(--text-heading);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .bank-card .subtitle {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            margin-bottom: 1rem;
+        }
+
+        .bank-detail-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+        }
+
+        .bank-detail-box .dline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            padding: 3px 0;
+        }
+
+        .bank-detail-box .dline .dk {
+            color: var(--text-muted);
+        }
+
+        .bank-detail-box .dline .dv {
+            font-weight: 700;
+            color: var(--text-heading);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .copy-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 2px 10px;
+            font-size: 0.75rem;
+            color: var(--accent-cyan);
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(0, 242, 255, 0.1);
+        }
+
+        /* ===== SIDEBAR SUMMARY ===== */
+        .summary-sidebar {
+            position: sticky;
+            top: 80px;
+        }
+
+        .summary-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .summary-card-header {
+            background: rgba(0, 242, 255, 0.06);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.25rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-heading);
+        }
+
+        .summary-card-body {
+            padding: 1.25rem;
+        }
+
+        .sum-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .sum-value {
+            font-size: 0.92rem;
+            color: var(--text-main);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .sum-divider {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 0.75rem 0;
+        }
+
+        .sum-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            padding: 4px 0;
+        }
+
+        .sum-row .sk {
+            color: var(--text-muted);
+        }
+
+        .sum-row.total {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--text-heading);
+            margin-top: 4px;
+        }
+
+        .sum-row.total .sv {
+            color: var(--accent-cyan);
+        }
+
+        /* ===== SECURITY BADGE ===== */
+        .security-badge {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.8rem;
+        }
+
+        .security-badge i {
+            color: #10b981;
+            font-size: .9rem;
+        }
+
+        /* ===== CONFIRM BUTTON ===== */
+        .btn-confirm {
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, #0099cc 100%);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            padding: 0.9rem 1rem;
+            font-size: 0.95rem;
+            width: 100%;
+            transition: opacity .2s, transform .15s;
+        }
+
+        .btn-confirm:not(:disabled):hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .btn-confirm:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .btn-confirm-wrap {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .tos-text {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 0.6rem;
+        }
+
+        .tos-text a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+        }
+
+        /* ===== DURATION PICKER ===== */
+        .duration-input-wrap {
+            max-width: 280px;
+            margin-bottom: 10px;
+        }
+
+        .duration-input-wrap .input-group-text {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .special-tier-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .dur-card {
+            flex: 1;
+            min-width: 110px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            cursor: pointer;
+            position: relative;
+            transition: border-color .2s, background .2s;
+            text-align: center;
+        }
+
+        .dur-card:hover {
+            border-color: rgba(0, 242, 255, 0.4);
+        }
+
+        .dur-card.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.06);
+        }
+
+        .dur-card .dur-months {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .dur-card .dur-price {
+            font-size: 0.82rem;
+            color: var(--accent-cyan);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .dur-card .dur-label {
+            display: inline-block;
+            font-size: 0.68rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .duration-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* loading spinner */
+        .page-loading {
+            text-align: center;
+            padding: 4rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="client-sidebar-placeholder"></div>
+    <div id="client-navbar-placeholder"></div>
+
+    <div class="main-content checkout-page">
+
+        <!-- Back -->
+        <a href="/client/packages-catalog" class="checkout-back" id="backLink">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Katalog
+        </a>
+        <h1 class="checkout-title">Checkout</h1>
+        <p class="checkout-subtitle">Konfirmasi dan selesaikan pembelian paket Anda</p>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="page-loading">
+            <i class="fa-solid fa-spinner fa-spin fa-2x text-cyan mb-3 d-block"></i>
+            <p class="text-muted">Memuat detail paket...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="d-none text-center py-5">
+            <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3 d-block"></i>
+            <h6 class="fw-semibold mb-1" style="color:var(--text-heading)">Paket Tidak Ditemukan</h6>
+            <p class="text-muted small mb-3">Paket yang dipilih tidak tersedia.</p>
+            <a href="/client/packages-catalog" class="btn btn-outline-light btn-sm">Kembali ke Katalog</a>
+        </div>
+
+        <!-- Main Checkout Layout -->
+        <div id="checkoutMain" class="d-none">
+            <div class="row g-4">
+
+                <!-- LEFT COLUMN -->
+                <div class="col-lg-7">
+
+                    <!-- 1. Rincian Pesanan -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <i class="fa-solid fa-file-invoice"></i> Rincian Pesanan
+                        </div>
+                        <div class="section-body">
+                            <p class="form-label-sm mb-2">Paket Terpilih</p>
+                            <div class="pkg-info-box mb-3">
+                                <h6 id="pkgName">—</h6>
+                                <p class="pkg-meta mb-0" id="pkgMeta">—</p>
+                            </div>
+
+                            <!-- Duration Picker -->
+                            <p class="form-label-sm mb-2">Pilih Durasi Berlangganan</p>
+                            <div class="input-group input-group-sm duration-input-wrap">
+                                <input type="text" class="form-control form-control-dark" id="customDurationInput" value="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="onCustomDurationChange(this.value)">
+                                <span class="input-group-text">bulan</span>
+                            </div>
+                            <div class="duration-hint" id="durationHint">Harga normal dihitung dari harga bulanan × durasi, kecuali ada harga spesial.</div>
+
+                            <div id="specialTierSection" class="d-none">
+                                <p class="form-label-sm mb-1 mt-3">Pilihan Durasi Spesial</p>
+                                <div class="special-tier-grid" id="specialTierGrid"></div>
+                            </div>
+
+                            <!-- Price Breakdown -->
+                            <div class="price-row mt-3">
+                                <span class="label">Subtotal</span>
+                                <span id="priceSubtotal">—</span>
+                            </div>
+                            <div class="price-row">
+                                <span class="label fw-bold" style="color:var(--text-heading)">Total Pembayaran</span>
+                                <span id="priceTotal" style="color:var(--accent-cyan)">—</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Informasi Tagihan -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <i class="fa-solid fa-calendar-check"></i> Informasi Tagihan
+                        </div>
+                        <div class="section-body">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="form-label-sm">Nomor Invoice</div>
+                                    <input type="text" class="form-control-dark readonly" id="invoiceInput" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-label-sm">Tanggal Pesanan</div>
+                                    <input type="text" class="form-control-dark readonly" id="dateInput" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-label-sm">Status</div>
+                                    <input type="text" class="form-control-dark readonly" value="Menunggu Pembayaran"
+                                        readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-label-sm">Nama Lengkap</div>
+                                    <div class="input-icon-wrap">
+                                        <i class="fa-solid fa-user"></i>
+                                        <input type="text" class="form-control-dark" id="inputNama"
+                                            placeholder="Masukkan nama Anda">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-label-sm">Email</div>
+                                    <div class="input-icon-wrap">
+                                        <i class="fa-solid fa-envelope"></i>
+                                        <input type="email" class="form-control-dark" id="inputEmail"
+                                            placeholder="email@contoh.com">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Metode Pembayaran -->
+                    <div class="section-card">
+                        <div class="section-header">
+                            <i class="fa-solid fa-credit-card"></i> Metode Pembayaran
+                        </div>
+                        <div class="section-body">
+                            <p class="form-label-sm mb-2">Metode Pembayaran Aktif</p>
+                            <div class="text-muted small mb-2">Saat ini pembayaran hanya mendukung <strong style="color:var(--text-heading)">Transfer Bank</strong>.</div>
+                            <div class="bank-card">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <i class="fa-solid fa-building-columns fa-lg text-cyan"></i>
+                                    <h6 class="mb-0">Bank Transfer</h6>
+                                </div>
+                                <p class="subtitle">Transfer manual ke rekening bank. Konfirmasi pembayaran dalam 1×24
+                                    jam.</p>
+                                <div class="bank-detail-box">
+                                    <p class="form-label-sm mb-2">Detail Rekening:</p>
+                                    <div class="dline">
+                                        <span class="dk">Bank</span>
+                                        <span class="dv">BCA</span>
+                                    </div>
+                                    <div class="dline">
+                                        <span class="dk">No. Rekening</span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="dv" id="bankNumber">1234567890</span>
+                                            <button class="copy-btn" onclick="copyRek()"><i
+                                                    class="fa-regular fa-copy me-1"></i>Salin</button>
+                                        </div>
+                                    </div>
+                                    <div class="dline">
+                                        <span class="dk">Atas Nama</span>
+                                        <span class="dv">PT ThinkNalyze Indonesia</span>
+                                    </div>
+                                </div>
+                                <p class="text-muted small mt-2 mb-0">
+                                    <i class="fa-solid fa-circle-info me-1"></i>
+                                    Setelah transfer, Anda akan diminta upload bukti pembayaran.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN — Sidebar -->
+                <div class="col-lg-5">
+                    <div class="summary-sidebar">
+                        <div class="summary-card">
+                            <div class="summary-card-header">
+                                <i class="fa-solid fa-receipt me-2 text-cyan"></i>Ringkasan Pesanan
+                            </div>
+                            <div class="summary-card-body">
+                                <div class="sum-label">Paket</div>
+                                <div class="sum-value" id="sumPkgName">—</div>
+
+                                <div class="sum-label">Periode</div>
+                                <div class="sum-value" id="sumPeriod">—</div>
+
+                                <hr class="sum-divider">
+
+                                <div class="sum-row">
+                                    <span class="sk">Subtotal</span>
+                                    <span id="sumSubtotal">—</span>
+                                </div>
+
+                                <hr class="sum-divider">
+
+                                <div class="sum-row total">
+                                    <span>Total</span>
+                                    <span class="sv" id="sumTotal">—</span>
+                                </div>
+
+                                <div class="security-badge mt-3">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <span>Pembayaran Aman · Transaksi dienkripsi SSL 256-bit</span>
+                                </div>
+                            </div>
+
+                            <div class="btn-confirm-wrap">
+                                <button id="btnConfirm" class="btn-confirm" onclick="submitOrder()">
+                                    <span id="btnText"><i class="fa-solid fa-lock me-2"></i>Buat Pesanan</span>
+                                    <span id="btnLoading" style="display:none"><i
+                                            class="fa-solid fa-spinner fa-spin me-2"></i>Memproses...</span>
+                                </button>
+                                <p class="tos-text mt-2">
+                                    Dengan melanjutkan, Anda menyetujui <a href="#">Syarat &amp; Ketentuan</a> kami
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div id="toastEl" class="toast align-items-center text-white border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body fw-semibold" id="toastMsg">—</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KYC Required Modal -->
+    <div class="modal fade" id="kycRequiredModal" tabindex="-1" aria-labelledby="kycRequiredModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="kycRequiredModalLabel" style="color: var(--text-heading);">
+                        <i class="fa-solid fa-shield-halved me-2 text-warning"></i>Verifikasi KYC Diperlukan
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="color: var(--text-main);">
+                    <p class="mb-0" id="kycRequiredMessage">Anda harus menyelesaikan verifikasi KYC sebelum membuat pesanan.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Tutup</button>
+                    <a id="kycRequiredAction" href="/client/kyc" class="btn btn-primary">Lengkapi KYC</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/za-sidebar.js"></script>
+    <script src="/assets/js/client-layout.js"></script>
+    <script>
+        var selectedPackage = null;
+        var selectedTier = null; // { duration_months, price, label, is_special }
+        var selectedPaymentMethod = 'Transfer Bank';
+
+        // ===========================
+        // HELPERS
+        // ===========================
+        function formatRp(n) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+        }
+
+        function todayStr() {
+            return new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        function genInvoice() {
+            return 'INV-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 9999999)).padStart(7, '0');
+        }
+
+        function showToast(msg, type) {
+            var t = document.getElementById('toastEl');
+            var m = document.getElementById('toastMsg');
+            t.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+            t.classList.add(type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-danger');
+            m.textContent = msg;
+            bootstrap.Toast.getOrCreateInstance(t, { delay: 4000 }).show();
+        }
+
+        function setSubmitLoading(isLoading) {
+            var btn = document.getElementById('btnConfirm');
+            var btnTxt = document.getElementById('btnText');
+            var btnLd = document.getElementById('btnLoading');
+            btn.disabled = isLoading;
+            btnTxt.style.display = isLoading ? 'none' : 'inline';
+            btnLd.style.display = isLoading ? 'inline' : 'none';
+        }
+
+        function showKYCRequiredModal(message, actionUrl, actionLabel) {
+            document.getElementById('kycRequiredMessage').textContent = message;
+            var actionBtn = document.getElementById('kycRequiredAction');
+            actionBtn.setAttribute('href', actionUrl || '/client/kyc');
+            actionBtn.textContent = actionLabel || 'Lengkapi KYC';
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('kycRequiredModal')).show();
+        }
+
+        function readKYCStatusResponse(json) {
+            var payload = (json && json.data) || {};
+            var status = (payload.status || (payload.kyc && payload.kyc.status) || '').toLowerCase();
+            var rejectionReason = payload.rejection_reason || (payload.kyc && payload.kyc.rejection_reason) || '';
+            return { status: status, rejectionReason: rejectionReason };
+        }
+
+        async function ensureKYCApprovedBeforeOrder() {
+            try {
+                var res = await fetch('/api/kyc/status', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                var json = {};
+                try {
+                    json = await res.json();
+                } catch (parseErr) {
+                    json = {};
+                }
+
+                if (res.status === 401 || res.status === 403) {
+                    showToast('Sesi berakhir, silakan login ulang.', 'danger');
+                    setTimeout(function () { window.location.replace('/account/login'); }, 1200);
+                    return false;
+                }
+
+                if (res.status === 404) {
+                    showKYCRequiredModal(
+                        'Anda belum melakukan KYC verification dan tidak bisa melakukan pembelian paket.',
+                        '/client/kyc',
+                        'Buat KYC Sekarang'
+                    );
+                    return false;
+                }
+
+                if (!res.ok || !json.status) {
+                    showToast((json && (json.msg || json.error_message)) || 'Gagal memverifikasi status KYC.', 'danger');
+                    return false;
+                }
+
+                var kycInfo = readKYCStatusResponse(json);
+
+                if (kycInfo.status === 'approved') {
+                    return true;
+                }
+
+                if (kycInfo.status === 'pending') {
+                    showKYCRequiredModal(
+                        'KYC Anda masih dalam proses review. Anda tidak bisa melakukan pembelian paket saat ini.',
+                        '/client/kyc-status',
+                        'Lihat Status KYC'
+                    );
+                    return false;
+                }
+
+                if (kycInfo.status === 'rejected') {
+                    var rejectedMsg = 'KYC Anda ditolak. Anda tidak bisa melakukan pembelian paket sebelum memperbaiki data KYC.';
+                    if (kycInfo.rejectionReason) {
+                        rejectedMsg += ' Alasan: ' + kycInfo.rejectionReason;
+                    }
+                    showKYCRequiredModal(rejectedMsg, '/client/kyc', 'Perbaiki KYC');
+                    return false;
+                }
+
+                showKYCRequiredModal(
+                    'Status KYC Anda belum memenuhi syarat. Anda tidak bisa melakukan pembelian paket.',
+                    '/client/kyc-status',
+                    'Lihat Status KYC'
+                );
+                return false;
+
+            } catch (e) {
+                showToast('Gagal memeriksa status KYC. Coba lagi beberapa saat.', 'danger');
+                return false;
+            }
+        }
+
+        function copyRek() {
+            navigator.clipboard.writeText(document.getElementById('bankNumber').textContent.trim()).then(function () {
+                showToast('No. rekening berhasil disalin!', 'success');
+            });
+        }
+
+        function toNumber(v) {
+            if (typeof v === 'number') return isNaN(v) ? 0 : v;
+            if (v === null || v === undefined) return 0;
+            var raw = String(v).replace(/[^0-9.,-]/g, '');
+            if (raw.indexOf(',') >= 0 && raw.indexOf('.') >= 0) {
+                raw = raw.replace(/\./g, '').replace(',', '.');
+            } else if (raw.indexOf(',') >= 0) {
+                raw = raw.replace(',', '.');
+            } else if (/^\d{1,3}(\.\d{3})+$/.test(raw)) {
+                raw = raw.replace(/\./g, '');
+            }
+            var n = Number(raw);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function readPricingTiers(pkg) {
+            var tiers = (pkg && (pkg.pricing_tiers || pkg.pricingTiers || pkg.PricingTiers)) || [];
+            if (!Array.isArray(tiers)) return [];
+            return tiers.map(function (t) {
+                return {
+                    duration_months: toNumber(t.duration_months || t.durationMonths || t.DurationMonths || t.duration),
+                    price: toNumber(t.price || t.Price || t.total_price),
+                    label: (t.label || t.Label || '').trim()
+                };
+            }).filter(function (t) { return t.duration_months > 0 && t.price > 0; });
+        }
+
+        function getCalculatedTier(pkg, durationMonths) {
+            var monthly = Number(pkg && pkg.price) || 0;
+            var tiers = readPricingTiers(pkg);
+            var special = tiers.find(function (t) { return t.duration_months === durationMonths; });
+            if (special) {
+                return {
+                    duration_months: durationMonths,
+                    price: special.price,
+                    label: special.label,
+                    is_special: (special.label || '').length > 0 || special.price !== (monthly * durationMonths)
+                };
+            }
+
+            return {
+                duration_months: durationMonths,
+                price: monthly * durationMonths,
+                label: '',
+                is_special: false
+            };
+        }
+
+        function updateDurationPricing(durationMonths) {
+            var months = Number(durationMonths) || 0;
+            if (months <= 0) months = 1;
+            if (!selectedPackage) return;
+
+            selectedTier = getCalculatedTier(selectedPackage, months);
+
+            document.querySelectorAll('.dur-card').forEach(function (c) { c.classList.remove('selected'); });
+            var active = document.querySelector('.dur-card[data-dur="' + months + '"]');
+            if (active) active.classList.add('selected');
+
+            document.getElementById('priceSubtotal').textContent = formatRp(selectedTier.price);
+            document.getElementById('priceTotal').textContent = formatRp(selectedTier.price);
+            document.getElementById('sumPeriod').textContent = months + ' bulan';
+            document.getElementById('sumSubtotal').textContent = formatRp(selectedTier.price);
+            document.getElementById('sumTotal').textContent = formatRp(selectedTier.price);
+
+            var hint = document.getElementById('durationHint');
+            if (selectedTier.is_special) {
+                hint.textContent = 'Durasi ' + months + ' bulan menggunakan harga spesial paket.';
+            } else {
+                hint.textContent = 'Durasi ' + months + ' bulan menggunakan harga normal (harga bulanan × durasi).';
+            }
+        }
+
+        function onCustomDurationChange(raw) {
+            var val = String(raw || '').replace(/[^0-9]/g, '');
+            var input = document.getElementById('customDurationInput');
+            input.value = val;
+            var months = Number(val) || 0;
+            if (months <= 0) return;
+            updateDurationPricing(months);
+        }
+
+        function renderSpecialTierCards(pkg) {
+            var monthly = Number(pkg && pkg.price) || 0;
+            var tiers = readPricingTiers(pkg);
+            var specials = tiers.filter(function (t) {
+                if (t.duration_months <= 0) return false;
+                if ((t.label || '').trim() !== '') return true;
+                return t.price !== (monthly * t.duration_months);
+            }).sort(function (a, b) { return a.duration_months - b.duration_months; });
+
+            var wrap = document.getElementById('specialTierSection');
+            var grid = document.getElementById('specialTierGrid');
+            grid.innerHTML = '';
+
+            if (specials.length === 0) {
+                wrap.classList.add('d-none');
+                return;
+            }
+
+            wrap.classList.remove('d-none');
+            specials.forEach(function (t) {
+                var card = document.createElement('div');
+                card.className = 'dur-card';
+                card.setAttribute('data-dur', t.duration_months);
+                card.innerHTML =
+                    '<div class="dur-months">' + t.duration_months + ' Bulan</div>' +
+                    '<div class="dur-price">' + formatRp(t.price) + '</div>' +
+                    (t.label ? '<div class="dur-label">' + t.label + '</div>' : '<div class="dur-label">Harga Spesial</div>');
+                card.addEventListener('click', function () {
+                    document.getElementById('customDurationInput').value = String(t.duration_months);
+                    updateDurationPricing(t.duration_months);
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        // ===========================
+        // LOAD PACKAGE
+        // ===========================
+        async function loadPackage(packageId) {
+            try {
+                var res = await fetch('/api/subscription/catalog', { credentials: 'include' });
+                if (res.status === 401 || res.status === 403) { window.location.replace('/account/login'); return; }
+                var json = await res.json();
+                var pkg = (json.data || []).find(function (p) { return p.id === packageId; });
+                if (!pkg) { throw new Error('Paket tidak ditemukan'); }
+
+                selectedPackage = pkg;
+                var inv = genInvoice();
+
+                // Render package info
+                document.getElementById('pkgName').textContent = pkg.name;
+                document.getElementById('pkgMeta').textContent = 'Kuota ' + (pkg.quota || 0).toLocaleString('id-ID') + ' permintaan';
+                document.getElementById('invoiceInput').value = inv;
+                document.getElementById('dateInput').value = todayStr();
+                document.getElementById('sumPkgName').textContent = pkg.name;
+
+                // Render special durations only and default to 1 month manual input
+                renderSpecialTierCards(pkg);
+                document.getElementById('customDurationInput').value = '1';
+                updateDurationPricing(1);
+
+                document.getElementById('loadingState').classList.add('d-none');
+                document.getElementById('checkoutMain').classList.remove('d-none');
+
+            } catch (e) {
+                document.getElementById('loadingState').classList.add('d-none');
+                document.getElementById('errorState').classList.remove('d-none');
+            }
+        }
+
+        // ===========================
+        // SUBMIT ORDER
+        // ===========================
+        async function submitOrder() {
+            if (!selectedPackage) return;
+
+            var nama = document.getElementById('inputNama').value.trim();
+            var email = document.getElementById('inputEmail').value.trim();
+            if (!nama) { showToast('Nama lengkap wajib diisi', 'warning'); return; }
+            if (!email) { showToast('Email wajib diisi', 'warning'); return; }
+
+            var durationRaw = (document.getElementById('customDurationInput').value || '').replace(/[^0-9]/g, '');
+            var durationMonths = Number(durationRaw) || 0;
+            if (durationMonths <= 0) {
+                showToast('Durasi berlangganan harus lebih dari 0 bulan', 'warning');
+                return;
+            }
+            updateDurationPricing(durationMonths);
+
+            var canProceed = await ensureKYCApprovedBeforeOrder();
+            if (!canProceed) {
+                return;
+            }
+
+            setSubmitLoading(true);
+
+            try {
+                var res = await fetch('/api/orders', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        package_id: selectedPackage.id,
+                        duration_months: durationMonths,
+                        payment_method: selectedPaymentMethod
+                    })
+                });
+                var json = await res.json();
+
+                if (res.status === 401) {
+                    showToast('Sesi berakhir, silakan login ulang.', 'danger');
+                    setTimeout(function () { window.location.replace('/account/login'); }, 1500);
+                    return;
+                }
+
+                if (res.status === 403) {
+                    var forbiddenMsg = (json && json.error_message) ? json.error_message : 'Akses ditolak.';
+                    if (/kyc/i.test(forbiddenMsg)) {
+                        showKYCRequiredModal(forbiddenMsg, '/client/kyc-status', 'Lihat Status KYC');
+                    } else {
+                        showToast(forbiddenMsg, 'danger');
+                    }
+                    return;
+                }
+
+                if (res.status === 201 && json.success) {
+                    showToast('Pesanan berhasil dibuat, silakan upload bukti transfer.', 'success');
+                    sessionStorage.setItem('billingToast', 'Pesanan berhasil dibuat, silakan upload bukti transfer.');
+                    setTimeout(function () {
+                        window.location.href = '/client/billing-history';
+                    }, 700);
+                    return;
+                }
+
+                showToast((json && json.error_message) ? json.error_message : 'Terjadi kesalahan.', 'danger');
+
+            } catch (e) {
+                showToast('Gagal terhubung ke server.', 'danger');
+            } finally {
+                setSubmitLoading(false);
+            }
+        }
+
+        // ===========================
+        // INIT
+        // ===========================
+        document.addEventListener('DOMContentLoaded', function () {
+            var params = new URLSearchParams(window.location.search);
+            var pid = params.get('package_id');
+            if (!pid) { document.getElementById('loadingState').classList.add('d-none'); document.getElementById('errorState').classList.remove('d-none'); return; }
+            loadPackage(pid);
+        });
+    </script>
+</body>
+
+</html>

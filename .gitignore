@@ -42,3 +42,4 @@ Thumbs.db
 
 # --- Docker ---
 .docker/operational/operational
+gateway/routes.local.json

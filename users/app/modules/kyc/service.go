@@ -26,7 +26,7 @@ func NewService(repo Repository) *Service {
 }
 
 // dispatchNotification mengirim event KYC ke Notification Service.
-// Urutan: 1) Redis queue → 2) HTTP langsung → 3) SMTP fallback.
+// Urutan: 1) Redis queue → 2) HTTP langsung.
 func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 	// 1. Coba Redis queue terlebih dahulu (async, reliable)
 	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
@@ -34,7 +34,7 @@ func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 		return
 	}
 
-	// 2. Fallback: HTTP langsung ke notification service
+	// 2. HTTP langsung ke notification service
 	baseURL := utils.GetEnv("NOTIFICATION_SERVICE_URL", "http://localhost:5003")
 	payload := map[string]any{
 		"event_type": eventType,
@@ -46,13 +46,7 @@ func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 
 	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
 	if err != nil {
-		log.Printf("[KYC NOTIF] Notification service tidak tersedia (%v), fallback SMTP", err)
-		// Derive status dari eventType agar fallback email sesuai
-		statusFallback := "approved"
-		if strings.Contains(eventType, "reject") {
-			statusFallback = "rejected"
-		}
-		sendKYCFallbackEmail(to, vars["full_name"], statusFallback, vars["reject_reason"])
+		log.Printf("[KYC NOTIF] Notification service tidak tersedia (%v), tidak ada fallback SMTP", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -60,63 +54,7 @@ func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 	if resp.StatusCode != http.StatusOK {
 		var result map[string]any
 		json.NewDecoder(resp.Body).Decode(&result)
-		log.Printf("[KYC NOTIF] Gagal kirim via template (%d), fallback SMTP", resp.StatusCode)
-		statusFallback := "approved"
-		if strings.Contains(eventType, "reject") {
-			statusFallback = "rejected"
-		}
-		sendKYCFallbackEmail(to, vars["full_name"], statusFallback, vars["reject_reason"])
-	}
-}
-
-// sendKYCFallbackEmail mengirim email KYC langsung via SMTP jika Notification Service tidak tersedia.
-func sendKYCFallbackEmail(to, fullName, status, rejectReason string) {
-	smtp := utils.NewSMTPClient()
-	var subject, body string
-
-	if status == "approved" {
-		subject = "✓ Verifikasi KYC Berhasil - ThinkNalyze"
-		body = fmt.Sprintf(
-			"Halo %s,\n\n"+
-				"Selamat! Verifikasi identitas (KYC) Anda telah disetujui.\n\n"+
-				"Anda sekarang memiliki akses penuh ke semua fitur ThinkNalyze, termasuk:\n"+
-				"• Market Insight\n"+
-				"• Deep Scanner\n"+
-				"• Ask Nizza AI Assistant\n"+
-				"• Trading Features\n\n"+
-				"Silakan login ke dashboard Anda untuk mulai menggunakan layanan kami.\n\n"+
-				"Terima kasih telah mempercayai ThinkNalyze.\n\n"+
-				"Salam,\n"+
-				"Tim ThinkNalyze",
-			fullName,
-		)
-	} else if status == "rejected" {
-		subject = "⚠️ Verifikasi KYC Memerlukan Perbaikan - ThinkNalyze"
-		body = fmt.Sprintf(
-			"Halo %s,\n\n"+
-				"Mohon maaf, verifikasi identitas (KYC) Anda memerlukan perbaikan.\n\n"+
-				"ALASAN PENOLAKAN:\n"+
-				"%s\n\n"+
-				"LANGKAH SELANJUTNYA:\n"+
-				"1. Login ke dashboard Anda\n"+
-				"2. Buka menu KYC Verification\n"+
-				"3. Klik tombol \"Perbaiki Data KYC\"\n"+
-				"4. Perbaiki data sesuai alasan penolakan di atas\n"+
-				"5. Submit ulang untuk direview kembali\n\n"+
-				"Jika ada pertanyaan, silakan hubungi tim support kami.\n\n"+
-				"Salam,\n"+
-				"Tim ThinkNalyze",
-			fullName,
-			rejectReason,
-		)
-	} else {
-		return
-	}
-
-	if err := smtp.SendEmail(to, subject, body); err != nil {
-		log.Printf("[KYC NOTIFICATION] Gagal mengirim fallback email ke %s: %v", to, err)
-	} else {
-		log.Printf("[KYC NOTIFICATION] Fallback email terkirim ke %s", to)
+		log.Printf("[KYC NOTIF] Gagal kirim via template (%d: %v), tidak ada fallback SMTP", resp.StatusCode, result["error"])
 	}
 }
 
@@ -515,8 +453,7 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 }
 
 // sendKYCNotification mengirim email notifikasi ke user saat KYC di-approve/reject.
-// dispatchKYCNotification sudah menangani fallback SMTP secara internal —
-// jangan panggil sendKYCFallbackEmail di sini agar tidak terjadi double message.
+// Semua pengiriman dilakukan melalui Notification Service (Brevo-only).
 func (s *Service) sendKYCNotification(email, fullName, status, rejectReason string) {
 	go func() {
 		switch status {

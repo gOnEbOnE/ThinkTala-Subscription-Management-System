@@ -8,16 +8,46 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .subscription-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .subscription-item {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .subscription-item-name {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 2px;
+        }
+
+        .subscription-item-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+    </style>
 </head>
 <body>
     <div id="client-sidebar-placeholder"></div>
     <div id="client-navbar-placeholder"></div>
 
     <div class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap">
             <div>
                 <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Welcome back, <span id="greetName">Client</span> 👋</h4>
                 <small class="text-muted">Here's your market overview for today</small>
+            </div>
+            <div>
+                <a href="/client/billing-history" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-receipt me-1"></i>Billing History
+                </a>
             </div>
         </div>
 
@@ -71,6 +101,38 @@
             </div>
         </div>
 
+        <!-- Subscription Card -->
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="ai-card shadow-lg">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-muted text-uppercase small mb-0"><i class="fa-solid fa-crown me-2"></i>Subscription Card</h6>
+                        <span id="subStatusBadge" class="badge" style="background:rgba(255,255,255,0.1);color:var(--text-muted);">Loading...</span>
+                    </div>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-4">
+                            <small class="text-muted text-uppercase" style="font-size:0.68rem;">Paket Aktif</small>
+                            <h5 class="fw-bold mb-0" id="subPackageName" style="color:var(--text-heading);">Belum Berlangganan</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted text-uppercase" style="font-size:0.68rem;">Aktif Sejak</small>
+                            <div class="fw-semibold" id="subStartDate" style="color:var(--text-main);">-</div>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted text-uppercase" style="font-size:0.68rem;">Jatuh Tempo Terdekat</small>
+                            <div class="fw-semibold" id="subEndDate" style="color:var(--text-main);">-</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3" style="border-top:1px solid var(--border-color);">
+                        <small class="text-muted text-uppercase" style="font-size:0.68rem;">Daftar Paket Berjalan</small>
+                        <div id="subPackagesList" class="subscription-list mt-2">
+                            <div class="text-muted small">Memuat daftar paket...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Notifications Section -->
         <div class="row g-4 mb-4">
             <div class="col-12">
@@ -86,11 +148,11 @@
         <!-- Quick Access -->
         <div class="row g-4 mb-5">
             <div class="col-lg-4 col-md-6">
-                <a href="#" class="text-decoration-none">
+                <a href="/client/billing-history" class="text-decoration-none">
                     <div class="ai-card shadow-lg h-100 text-center p-4" style="transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <i class="fa-solid fa-globe fa-3x text-cyan mb-3"></i>
-                        <h6 class="fw-bold text-main">Market Insight</h6>
-                        <small class="text-muted">Real-time macro analysis</small>
+                        <i class="fa-solid fa-receipt fa-3x text-cyan mb-3"></i>
+                        <h6 class="fw-bold text-main">Billing History</h6>
+                        <small class="text-muted">Cek status pembayaran & bukti transfer</small>
                     </div>
                 </a>
             </div>
@@ -124,11 +186,131 @@
     <script src="/assets/js/za-theme.js"></script>
     <script src="/assets/js/client-layout.js"></script>
     <script>
+        let subPolling = null;
+
         document.addEventListener('DOMContentLoaded', () => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (user.name) document.getElementById('greetName').textContent = user.name;
             fetchKYCStatus();
+            fetchSubscriptionStatus();
+
+            // Update otomatis tanpa perlu interaksi user.
+            subPolling = setInterval(fetchSubscriptionStatus, 15000);
         });
+
+        function formatIdDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            if (Number.isNaN(d.getTime())) return '-';
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+        }
+
+        function escapeHTML(raw) {
+            return String(raw || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function normalizeSubscriptionsPayload(json) {
+            if (Array.isArray(json.active_subscriptions)) {
+                return json.active_subscriptions;
+            }
+            if (Array.isArray(json.data)) {
+                return json.data;
+            }
+            if (json.data && typeof json.data === 'object') {
+                return [json.data];
+            }
+            return [];
+        }
+
+        function renderSubscriptionCard(subscriptions) {
+            const badge = document.getElementById('subStatusBadge');
+            const packageEl = document.getElementById('subPackageName');
+            const startEl = document.getElementById('subStartDate');
+            const endEl = document.getElementById('subEndDate');
+            const currentPlanEl = document.getElementById('currentPlan');
+            const subListEl = document.getElementById('subPackagesList');
+            const list = Array.isArray(subscriptions) ? subscriptions.filter(Boolean) : [];
+
+            if (list.length === 0) {
+                badge.textContent = 'Belum Berlangganan';
+                badge.style.background = 'rgba(255,255,255,0.1)';
+                badge.style.color = 'var(--text-muted)';
+                packageEl.textContent = 'Belum Berlangganan';
+                packageEl.style.color = 'var(--text-heading)';
+                startEl.textContent = '-';
+                endEl.textContent = '-';
+                currentPlanEl.textContent = 'Free';
+                subListEl.innerHTML = '<div class="text-muted small">Belum ada paket aktif saat ini.</div>';
+                return;
+            }
+
+            const sortedByEndDate = list.slice().sort((a, b) => {
+                const d1 = new Date(a.end_date || 0).getTime();
+                const d2 = new Date(b.end_date || 0).getTime();
+                return d1 - d2;
+            });
+            const sortedByStartDate = list.slice().sort((a, b) => {
+                const d1 = new Date(a.start_date || 0).getTime();
+                const d2 = new Date(b.start_date || 0).getTime();
+                return d1 - d2;
+            });
+
+            const packageNames = list.map(item => item.package_name || 'Paket Aktif');
+            const uniqueNames = Array.from(new Set(packageNames));
+
+            badge.textContent = list.length + ' Paket Active';
+            badge.style.background = 'rgba(16,185,129,0.18)';
+            badge.style.color = '#34d399';
+
+            if (uniqueNames.length === 1) {
+                packageEl.textContent = uniqueNames[0];
+                currentPlanEl.textContent = uniqueNames[0];
+            } else {
+                packageEl.textContent = uniqueNames.length + ' paket aktif';
+                currentPlanEl.textContent = uniqueNames.length + ' Paket';
+            }
+
+            packageEl.style.color = '#34d399';
+            startEl.textContent = formatIdDate(sortedByStartDate[0].start_date);
+            endEl.textContent = formatIdDate(sortedByEndDate[0].end_date);
+
+            subListEl.innerHTML = list.map(item => {
+                const packageName = escapeHTML(item.package_name || '-');
+                const periodText = escapeHTML(formatIdDate(item.start_date) + ' - ' + formatIdDate(item.end_date));
+                return '<div class="subscription-item">'
+                    + '<div class="d-flex justify-content-between align-items-center gap-2">'
+                    + '<div class="subscription-item-name">' + packageName + '</div>'
+                    + '<span class="badge" style="background:rgba(16,185,129,0.18);color:#34d399;">ACTIVE</span>'
+                    + '</div>'
+                    + '<div class="subscription-item-meta">Periode: ' + periodText + '</div>'
+                    + '</div>';
+            }).join('');
+        }
+
+        async function fetchSubscriptionStatus() {
+            try {
+                const res = await fetch('/api/subscriptions/me', { credentials: 'include' });
+                if (res.status === 401) {
+                    renderSubscriptionCard([]);
+                    return;
+                }
+
+                const json = await res.json();
+                if (!json.success) {
+                    renderSubscriptionCard([]);
+                    return;
+                }
+
+                renderSubscriptionCard(normalizeSubscriptionsPayload(json));
+            } catch (err) {
+                renderSubscriptionCard([]);
+            }
+        }
 
         async function fetchKYCStatus() {
             const el = document.getElementById('kycStatus');
@@ -161,6 +343,10 @@
                 el.className = 'fw-bold text-muted mb-0';
             }
         }
+
+        window.addEventListener('beforeunload', function () {
+            if (subPolling) clearInterval(subPolling);
+        });
     </script>
 </body>
 </html>

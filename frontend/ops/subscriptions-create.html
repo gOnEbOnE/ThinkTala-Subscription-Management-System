@@ -49,17 +49,48 @@
             padding: 8px 20px;
             border: none;
             border-radius: 50px;
-            box-shadow: 0 0 16px rgba(0,242,255,0.35);
+            box-shadow: 0 0 16px rgba(0, 242, 255, 0.35);
             cursor: pointer;
             transition: filter .2s, box-shadow .2s;
             text-decoration: none;
             display: inline-block;
         }
+
         .btn-add-pkg:hover {
             filter: brightness(1.15);
-            box-shadow: 0 0 24px rgba(0,242,255,0.55);
+            box-shadow: 0 0 24px rgba(0, 242, 255, 0.55);
             text-decoration: none;
             color: #000;
+        }
+
+        /* UX input bulan agar mudah diketik manual */
+        .tier-month-wrap {
+            width: 165px;
+            min-width: 165px;
+        }
+
+        .tier-month-input {
+            text-align: left;
+            padding-left: 12px;
+            font-weight: 600;
+        }
+
+        .tier-month-input::-webkit-inner-spin-button,
+        .tier-month-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .tier-month-input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        @media (max-width: 576px) {
+            .tier-month-wrap {
+                width: 100%;
+                min-width: 100%;
+            }
         }
     </style>
 </head>
@@ -110,34 +141,55 @@
                     <h6 class="fw-bold mb-2" style="color: var(--text-heading)">Harga Paket</h6>
                     <div class="row g-2 mb-2">
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold mb-1">Harga Bulanan <span
+                            <label class="form-label small fw-semibold mb-1">Harga Dasar / Bulan <span
                                     class="text-danger">*</span></label>
                             <div class="input-group input-group-sm">
                                 <span class="input-group-text"
                                     style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);">Rp</span>
-                                <input type="number" class="form-control" id="pkgPrice" placeholder="99.000"
+                                <input type="number" class="form-control" id="pkgPrice" placeholder="150.000"
                                     oninput="updatePreview()">
                             </div>
-                            <small class="text-muted" style="font-size:0.75rem;">Harga per bulan dalam Rupiah</small>
+                            <small class="text-muted" style="font-size:0.75rem;">Harga referensi per bulan dalam
+                                Rupiah</small>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold mb-1">Harga Tahunan <span
-                                    class="text-danger">*</span></label>
-                            <div class="input-group input-group-sm">
+                    </div>
+
+                    <hr style="border-color: var(--border-color); margin: 12px 0;">
+
+                    <!-- Pricing Tiers -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-0" style="color: var(--text-heading)">Pilihan Durasi & Harga <span
+                                    class="text-danger">*</span></h6>
+                            <small class="text-muted" style="font-size:0.75rem;">Atur harga khusus per durasi
+                                berlangganan</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="addTier()" style="font-size:0.78rem;">
+                            <i class="fa-solid fa-plus me-1"></i> Tambah Durasi
+                        </button>
+                    </div>
+                    <div id="tiersList">
+                        <div class="tier-item d-flex align-items-center gap-2 mb-2">
+                            <div class="input-group input-group-sm tier-month-wrap">
+                                <input type="text" class="form-control tier-month-input" placeholder="Bulan" value="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                <span class="input-group-text" style="background:var(--bg-dark);border-color:var(--border-color);color:var(--text-muted);">bln</span>
+                            </div>
+                            <div class="input-group input-group-sm flex-grow-1">
                                 <span class="input-group-text"
-                                    style="background: var(--bg-dark); border-color: var(--border-color); color: var(--text-muted);">Rp</span>
-                                <input type="number" class="form-control" id="pkgPriceYearly" placeholder="990.000"
-                                    oninput="updatePreview()">
+                                    style="background:var(--bg-dark);border-color:var(--border-color);color:var(--text-muted);">Rp</span>
+                                <input type="number" class="form-control" placeholder="150.000" min="0">
                             </div>
-                            <small class="text-muted" style="font-size:0.75rem;">Harga per tahun dalam Rupiah</small>
+                            <input type="text" class="form-control form-control-sm"
+                                placeholder='Label opsional: "Hemat 10%"' style="max-width:160px;">
+                            <button class="btn btn-sm btn-outline-danger"
+                                style="width:32px;height:32px;padding:0;flex-shrink:0;" onclick="removeTier(this)">
+                                <i class="fa-solid fa-times fa-xs"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="p-2 rounded d-flex align-items-start gap-2 mb-0"
-                        style="background: rgba(0,242,255,0.05); border: 1px solid rgba(0,242,255,0.15);">
-                        <i class="fa-solid fa-lightbulb text-cyan" style="font-size:0.75rem;margin-top:2px;"></i>
-                        <small class="text-muted" style="font-size:0.75rem;"><strong class="text-cyan">Tips:</strong>
-                            Tawarkan diskon untuk pembayaran tahunan (biasanya 2 bulan gratis)</small>
-                    </div>
+                    <small class="text-muted" style="font-size:0.74rem;"><i
+                            class="fa-solid fa-info-circle me-1"></i>Minimal 1 durasi harus diisi. Contoh: 1 bln = Rp
+                        150.000, 6 bln = Rp 720.000 (Hemat 20%)</small>
 
                     <hr style="border-color: var(--border-color); margin: 12px 0;">
 
@@ -351,17 +403,51 @@
         async function savePackage() {
             const name = document.getElementById('pkgName').value.trim();
             const price = parseFloat(document.getElementById('pkgPrice').value) || 0;
-            const price_yearly = parseFloat(document.getElementById('pkgPriceYearly').value) || 0;
             const quota = parseInt(document.getElementById('pkgQuota').value) || 0;
-            const status = document.querySelector('[name="pkgStatus"]:checked') ? document.querySelector('[name="pkgStatus"]:checked').value : 'ACTIVE';
-            const duration = 1; // monthly
+            const status = document.querySelector('[name="pkgStatus"]:checked')?.value || 'ACTIVE';
 
             if (!name) { showAlert('Nama paket harus diisi!'); return; }
-            if (price <= 0) { showAlert('Harga bulanan harus lebih dari 0!'); return; }
-            if (price_yearly > 0 && price_yearly < price) { showAlert('Harga tahunan tidak boleh lebih rendah dari harga bulanan!'); return; }
+            if (price <= 0) { showAlert('Harga dasar harus lebih dari 0!'); return; }
             if (quota <= 0) { showAlert('Kuota harus lebih dari 0!'); return; }
 
-            const body = { name, price, price_yearly, duration, quota, status };
+            // Kumpulkan pricing tiers
+            const pricing_tiers = [];
+            const seenDurations = new Set();
+            let tierError = '';
+            document.querySelectorAll('#tiersList .tier-item').forEach((row, idx) => {
+                if (tierError) return;
+
+                const inputs = row.querySelectorAll('input');
+                const durRaw = (inputs[0].value || '').trim();
+                const dur = parseInt(durRaw, 10) || 0;
+                const prc = parseFloat(inputs[1].value) || 0;
+                const lbl = inputs[2].value.trim();
+
+                if (!durRaw && prc <= 0 && !lbl) return;
+
+                if (dur <= 0) {
+                    tierError = `Durasi pada baris ${idx + 1} harus lebih dari 0 bulan.`;
+                    return;
+                }
+                if (seenDurations.has(dur)) {
+                    tierError = `Durasi ${dur} bulan duplikat. Setiap durasi harus unik.`;
+                    return;
+                }
+                if (prc <= 0) {
+                    tierError = `Harga pada durasi ${dur} bulan harus lebih dari 0.`;
+                    return;
+                }
+
+                seenDurations.add(dur);
+                pricing_tiers.push({ duration_months: dur, price: prc, label: lbl });
+            });
+
+            if (tierError) { showAlert(tierError); return; }
+            if (pricing_tiers.length === 0) { showAlert('Minimal harus ada 1 pilihan durasi harga!'); return; }
+
+            pricing_tiers.sort((a, b) => a.duration_months - b.duration_months);
+
+            const body = { name, price, quota, status, pricing_tiers };
 
             try {
                 const res = await fetch('/api/admin/packages', {
@@ -379,6 +465,28 @@
                 }
             } catch (e) { showAlert('Error: ' + e.message, 'danger'); }
         }
+
+        function addTier() {
+            const list = document.getElementById('tiersList');
+            const div = document.createElement('div');
+            div.className = 'tier-item d-flex align-items-center gap-2 mb-2';
+            div.innerHTML = `
+                <div class="input-group input-group-sm tier-month-wrap">
+                    <input type="text" class="form-control tier-month-input" placeholder="Bulan" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                    <span class="input-group-text" style="background:var(--bg-dark);border-color:var(--border-color);color:var(--text-muted);">bln</span>
+                </div>
+                <div class="input-group input-group-sm flex-grow-1">
+                    <span class="input-group-text" style="background:var(--bg-dark);border-color:var(--border-color);color:var(--text-muted);">Rp</span>
+                    <input type="number" class="form-control" placeholder="400.000" min="0">
+                </div>
+                <input type="text" class="form-control form-control-sm" placeholder='Label opsional: "Hemat 10%"' style="max-width:160px;">
+                <button class="btn btn-sm btn-outline-danger" style="width:32px;height:32px;padding:0;flex-shrink:0;" onclick="removeTier(this)">
+                    <i class="fa-solid fa-times fa-xs"></i>
+                </button>`;
+            list.appendChild(div);
+        }
+
+        function removeTier(btn) { btn.closest('.tier-item').remove(); }
     </script>
 </body>
 
