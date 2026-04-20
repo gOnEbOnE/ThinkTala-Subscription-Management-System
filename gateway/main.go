@@ -96,7 +96,7 @@ func (p *ProxyPool) GetProxy(target string) *httputil.ReverseProxy {
 var proxyPool = NewProxyPool()
 
 func loadConfig() (*Config, error) {
-	configPaths := []string{"routes.json", "config/routes.json"}
+	configPaths := []string{"routes.local.json", "routes.json", "config/routes.json"}
 	var configData []byte
 	var configPath string
 
@@ -559,7 +559,7 @@ func main() {
 	// --- ORDERS Admin API (role-protected) - OPERASIONAL can access ---
 	ordersTarget := getRouteTarget("/api/admin/orders")
 	if ordersTarget == "" {
-		ordersTarget = "http://operational-service.railway.internal:8080"
+		ordersTarget = "http://subscription-service.railway.internal:5004"
 	}
 	http.HandleFunc("/api/admin/orders", withRolesAuth([]string{"OPERASIONAL", "SUPERADMIN", "CEO"},
 		createProxyHandler(ordersTarget, true),

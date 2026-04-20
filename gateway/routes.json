@@ -164,7 +164,7 @@
     },
     {
       "path": "/api/admin/orders",
-      "target": "http://operational-service.railway.internal:8080",
+      "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -175,7 +175,7 @@
     },
     {
       "path": "/api/admin/orders/",
-      "target": "http://operational-service.railway.internal:8080",
+      "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -203,7 +203,17 @@
       "roles": [
         "CLIENT"
       ],
-      "description": "PBI-45: Create Order — hanya role CLIENT yang dapat membuat pesanan"
+      "description": "PBI-45/46: Create & list orders — hanya role CLIENT"
+    },
+    {
+      "path": "/api/orders/",
+      "target": "http://subscription-service.railway.internal:5004",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "CLIENT"
+      ],
+      "description": "PBI-46: Get order detail — hanya role CLIENT"
     }
   ]
 }

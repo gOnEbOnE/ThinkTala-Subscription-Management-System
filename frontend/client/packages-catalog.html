@@ -118,12 +118,19 @@
     <div class="main-content">
 
         <!-- Page Header -->
-        <div class="mb-4">
-            <div class="page-header-badge">
-                <i class="fa-solid fa-box-open"></i> Katalog Paket Aktif
+        <div class="mb-4 d-flex justify-content-between align-items-start gap-2 flex-wrap">
+            <div>
+                <div class="page-header-badge">
+                    <i class="fa-solid fa-box-open"></i> Katalog Paket Aktif
+                </div>
+                <h4 class="fw-bold mb-1" style="color: var(--text-heading)">Pilih Paket Langganan</h4>
+                <small class="text-muted">Temukan paket yang paling sesuai dengan kebutuhan analitik Anda</small>
             </div>
-            <h4 class="fw-bold mb-1" style="color: var(--text-heading)">Pilih Paket Langganan</h4>
-            <small class="text-muted">Temukan paket yang paling sesuai dengan kebutuhan analitik Anda</small>
+            <div>
+                <a href="/client/billing-history" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-receipt me-1"></i>Billing History
+                </a>
+            </div>
         </div>
 
         <!-- Loading State -->
@@ -204,9 +211,15 @@
         // ============================
         function buildPackageCard(pkg, index) {
             var style = CARD_STYLES[index % CARD_STYLES.length];
-            var price = formatRupiah(pkg.price);
+            // Ambil harga dari tier terkecil, fallback ke pkg.price
+            var tiers = pkg.pricing_tiers || [];
+            var minTier = tiers.length > 0 ? tiers.reduce(function (a, b) { return a.price < b.price ? a : b; }) : null;
+            var displayPrice = minTier ? formatRupiah(minTier.price) : formatRupiah(pkg.price);
+            var priceLabel = tiers.length > 1 ? 'Mulai dari ' + displayPrice : displayPrice;
             var quota = (pkg.quota || 0).toLocaleString('id-ID') + ' permintaan';
-            var durasi = (pkg.duration || 0) + ' bulan';
+            var durasiOptions = tiers.length > 0
+                ? tiers.map(function (t) { return t.duration_months + ' bln'; }).join(' / ')
+                : '1 bln';
 
             return [
                 '<div class="col-xl-4 col-md-6">',
@@ -221,7 +234,7 @@
                 '      <div class="mb-4">',
                 '        <div class="pkg-detail-row">',
                 '          <span class="label"><i class="fa-solid fa-tag me-2"></i>Harga</span>',
-                '          <span class="value text-cyan">' + price + '</span>',
+                '          <span class="value text-cyan">' + priceLabel + '</span>',
                 '        </div>',
                 '        <div class="pkg-detail-row">',
                 '          <span class="label"><i class="fa-solid fa-database me-2"></i>Kuota</span>',
@@ -229,7 +242,7 @@
                 '        </div>',
                 '        <div class="pkg-detail-row">',
                 '          <span class="label"><i class="fa-solid fa-calendar-days me-2"></i>Durasi</span>',
-                '          <span class="value">' + durasi + '</span>',
+                '          <span class="value">' + durasiOptions + '</span>',
                 '        </div>',
                 '      </div>',
                 '      <button',

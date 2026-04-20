@@ -49,6 +49,8 @@
         '/ops/dashboard'              : { activeKey: 'dashboard' },
         '/ops/notifications'          : { activeKey: 'notifications',          parentKey: 'notif' },
         '/ops/notification-templates' : { activeKey: 'notification-templates', parentKey: 'notif' },
+        '/ops/orders'                 : { activeKey: 'orders' },
+        '/ops/orders-detail'          : { activeKey: 'orders' },
         '/ops/subscriptions'          : { activeKey: 'subscriptions' },
         '/ops/subscriptions-create'   : { activeKey: 'subscriptions' },
         '/ops/subscriptions-edit'     : { activeKey: 'subscriptions' },

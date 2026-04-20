@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Tagihan | ThinkTala</title>
+    <meta name="description" content="Riwayat pesanan dan pembayaran langganan Anda">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .history-page {
+            width: calc(100% - var(--sidebar-width));
+            max-width: none;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .history-table {
+            --bs-table-bg: transparent;
+            --bs-table-striped-bg: transparent;
+            --bs-table-hover-bg: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+            width: 100%;
+            table-layout: fixed;
+            min-width: 0;
+        }
+
+        .history-table td,
+        .history-table th {
+            border-color: var(--border-color) !important;
+            color: inherit;
+            background: transparent !important;
+            vertical-align: middle;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .history-table th:nth-child(1),
+        .history-table td:nth-child(1) {
+            width: 19%;
+        }
+
+        .history-table th:nth-child(2),
+        .history-table td:nth-child(2) {
+            width: 15%;
+        }
+
+        .history-table th:nth-child(3),
+        .history-table td:nth-child(3) {
+            width: 14%;
+        }
+
+        .history-table th:nth-child(4),
+        .history-table td:nth-child(4) {
+            width: 16%;
+        }
+
+        .history-table th:nth-child(5),
+        .history-table td:nth-child(5) {
+            width: 16%;
+        }
+
+        .history-table th:nth-child(6),
+        .history-table td:nth-child(6) {
+            width: 20%;
+        }
+
+        .history-action-btn {
+            white-space: nowrap;
+            max-width: 100%;
+        }
+
+        .invoice-code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-heading);
+            font-weight: 700;
+            font-size: 0.84rem;
+        }
+
+        .badge-status {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 0.35rem 0.6rem;
+            border-radius: 999px;
+        }
+
+        .badge-pending {
+            background: rgba(255, 193, 7, 0.18);
+            color: #ffd54a;
+            border: 1px solid rgba(255, 193, 7, 0.35);
+        }
+
+        .badge-paid {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+
+        .badge-cancelled {
+            background: rgba(220, 53, 69, 0.2);
+            color: #ff6b7a;
+            border: 1px solid rgba(220, 53, 69, 0.35);
+        }
+
+        .history-mobile-list {
+            display: none;
+            gap: 0.75rem;
+        }
+
+        .history-layout-compact #historyTableWrap {
+            display: none;
+        }
+
+        .history-layout-compact .history-mobile-list {
+            display: grid;
+        }
+
+        .history-mobile-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .mobile-item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.65rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .mobile-item-date {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .mobile-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.3rem 0;
+            font-size: 0.83rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .mobile-item-row:first-of-type {
+            border-top: none;
+        }
+
+        .mobile-item-label {
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 700;
+        }
+
+        .mobile-item-value {
+            color: var(--text-main);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .mobile-action-wrap {
+            margin-top: 0.7rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        @media (max-width: 991.98px) {
+            .history-table {
+                table-layout: auto;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .history-page {
+                width: 100% !important;
+                padding-left: 0;
+                padding-right: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="client-sidebar-placeholder"></div>
+    <div id="client-navbar-placeholder"></div>
+
+    <div class="main-content history-page">
+        <div class="history-header mb-4">
+            <div>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Riwayat Tagihan & Pembayaran</h4>
+                <small class="text-muted">Lihat semua pesanan yang pernah Anda buat</small>
+            </div>
+            <a href="/client/packages-catalog" class="btn btn-sm btn-outline-secondary">
+                <i class="fa-solid fa-plus me-1"></i>Beli Paket Lagi
+            </a>
+        </div>
+
+        <div class="ai-card">
+            <div class="mb-3">
+                <h6 class="fw-bold mb-0" style="color: var(--text-heading)">Daftar Pesanan</h6>
+                <small class="text-muted" id="tableSubtitle">Memuat data...</small>
+            </div>
+
+            <div id="historyTableWrap" class="table-responsive">
+                <table class="table history-table mb-0">
+                    <thead>
+                        <tr>
+                            <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Invoice</th>
+                            <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Paket</th>
+                            <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Total</th>
+                            <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Pembayaran</th>
+                            <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Status</th>
+                            <th class="small fw-semibold py-3 text-end" style="text-transform: uppercase; font-size: 0.72rem;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="historyMobileList" class="history-mobile-list">
+                <div class="text-center py-4 text-muted">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div id="toastEl" class="toast align-items-center text-white border-0" role="alert">
+            <div class="d-flex">
+                <div class="toast-body fw-semibold" id="toastMsg">—</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/client-layout.js"></script>
+    <script>
+        function formatRp(n) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n || 0);
+        }
+
+        function formatDateID(dateStr) {
+            var d = new Date(dateStr);
+            if (Number.isNaN(d.getTime())) return '-';
+            return d.toLocaleDateString('id-ID');
+        }
+
+        function getUsableContentWidth() {
+            var main = document.querySelector('.main-content.history-page');
+            if (!main) return window.innerWidth;
+            var cs = window.getComputedStyle(main);
+            var marginLeft = parseFloat(cs.marginLeft) || 0;
+            var paddingLeft = parseFloat(cs.paddingLeft) || 0;
+            var paddingRight = parseFloat(cs.paddingRight) || 0;
+            return window.innerWidth - marginLeft - paddingLeft - paddingRight;
+        }
+
+        function syncHistoryLayoutMode() {
+            var page = document.querySelector('.history-page');
+            if (!page) return;
+
+            // Switch to compact card mode when actual content area is narrow,
+            // including the state when sidebar is expanded.
+            var compact = getUsableContentWidth() < 980;
+            page.classList.toggle('history-layout-compact', compact);
+        }
+
+        function setupHistoryResponsiveWatcher() {
+            syncHistoryLayoutMode();
+            window.addEventListener('resize', syncHistoryLayoutMode);
+
+            var bodyObserver = new MutationObserver(function () {
+                syncHistoryLayoutMode();
+                // Wait for sidebar transition (~300ms) then recalc again.
+                setTimeout(syncHistoryLayoutMode, 340);
+            });
+
+            bodyObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+            var sidebarToggle = document.getElementById('sidebarToggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function () {
+                    syncHistoryLayoutMode();
+                    setTimeout(syncHistoryLayoutMode, 340);
+                });
+            }
+        }
+
+        function statusBadge(status, hasProof) {
+            if (status === 'PAID') return '<span class="badge-status badge-paid">PAID</span>';
+            if (status === 'CANCELLED') return '<span class="badge-status badge-cancelled">CANCELLED</span>';
+            if (hasProof) return '<span class="badge-status badge-pending">MENUNGGU VERIFIKASI</span>';
+            return '<span class="badge-status badge-pending">MENUNGGU BUKTI</span>';
+        }
+
+        function showToast(msg, type) {
+            var t = document.getElementById('toastEl');
+            var m = document.getElementById('toastMsg');
+            t.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+            t.classList.add(type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-danger');
+            m.textContent = msg;
+            bootstrap.Toast.getOrCreateInstance(t, { delay: 3000 }).show();
+        }
+
+        function renderHistory(list) {
+            var tbody = document.getElementById('historyTableBody');
+            var subtitle = document.getElementById('tableSubtitle');
+            var mobileList = document.getElementById('historyMobileList');
+
+            if (!Array.isArray(list) || list.length === 0) {
+                subtitle.textContent = 'Belum ada pesanan';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa-solid fa-receipt fa-2x d-block mb-2"></i>Belum ada data pesanan</td></tr>';
+                mobileList.innerHTML = '<div class="text-center py-4 text-muted"><i class="fa-solid fa-receipt fa-2x d-block mb-2"></i>Belum ada data pesanan</div>';
+                return;
+            }
+
+            subtitle.textContent = list.length + ' pesanan ditemukan';
+            tbody.innerHTML = list.map(function (o) {
+                var status = o.status || 'PENDING_PAYMENT';
+                var normalized = status === 'PENDING_PAYMENT' ? 'PENDING' : status;
+                var hasProof = !!o.has_payment_proof;
+                var actionLabel = (normalized === 'PENDING' && !hasProof) ? 'Upload Bukti' : 'Detail';
+                return '<tr>' +
+                    '<td class="py-3"><span class="invoice-code">' + (o.invoice_number || '-') + '</span><div class="text-muted small mt-1">' + formatDateID(o.created_at) + '</div></td>' +
+                    '<td class="py-3">' + (o.package_name || '-') + '</td>' +
+                    '<td class="py-3">' + formatRp(o.total_price) + '</td>' +
+                    '<td class="py-3">' + (o.payment_method || '-') + '</td>' +
+                    '<td class="py-3">' + statusBadge(normalized, hasProof) + '</td>' +
+                    '<td class="py-3 text-end"><a href="/client/order-detail?id=' + encodeURIComponent(o.order_id) + '" class="btn btn-sm btn-outline-secondary history-action-btn"><i class="fa-solid fa-eye me-1"></i>' + actionLabel + '</a></td>' +
+                    '</tr>';
+            }).join('');
+
+            mobileList.innerHTML = list.map(function (o) {
+                var status = o.status || 'PENDING_PAYMENT';
+                var normalized = status === 'PENDING_PAYMENT' ? 'PENDING' : status;
+                var hasProof = !!o.has_payment_proof;
+                var actionLabel = (normalized === 'PENDING' && !hasProof) ? 'Upload Bukti' : 'Detail';
+                return '<div class="history-mobile-item">' +
+                    '<div class="mobile-item-top">' +
+                        '<div>' +
+                            '<div class="invoice-code">' + (o.invoice_number || '-') + '</div>' +
+                            '<div class="mobile-item-date">' + formatDateID(o.created_at) + '</div>' +
+                        '</div>' +
+                        '<div>' + statusBadge(normalized, hasProof) + '</div>' +
+                    '</div>' +
+                    '<div class="mobile-item-row"><span class="mobile-item-label">Paket</span><span class="mobile-item-value">' + (o.package_name || '-') + '</span></div>' +
+                    '<div class="mobile-item-row"><span class="mobile-item-label">Total</span><span class="mobile-item-value">' + formatRp(o.total_price) + '</span></div>' +
+                    '<div class="mobile-item-row"><span class="mobile-item-label">Pembayaran</span><span class="mobile-item-value">' + (o.payment_method || '-') + '</span></div>' +
+                    '<div class="mobile-action-wrap"><a href="/client/order-detail?id=' + encodeURIComponent(o.order_id) + '" class="btn btn-sm btn-outline-secondary history-action-btn"><i class="fa-solid fa-eye me-1"></i>' + actionLabel + '</a></div>' +
+                    '</div>';
+            }).join('');
+        }
+
+        async function loadHistory() {
+            try {
+                var res = await fetch('/api/orders', { credentials: 'include' });
+                if (res.status === 401 || res.status === 403) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+
+                var json = await res.json();
+                var list = Array.isArray(json) ? json : (json.data || []);
+                renderHistory(list);
+            } catch (e) {
+                document.getElementById('tableSubtitle').textContent = 'Gagal memuat data';
+                document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" class="text-center py-5 text-danger"><i class="fa-solid fa-circle-exclamation fa-2x d-block mb-2"></i>Gagal memuat data riwayat</td></tr>';
+                document.getElementById('historyMobileList').innerHTML = '<div class="text-center py-4 text-danger"><i class="fa-solid fa-circle-exclamation fa-2x d-block mb-2"></i>Gagal memuat data riwayat</div>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setupHistoryResponsiveWatcher();
+            loadHistory();
+            var toastMsg = sessionStorage.getItem('billingToast');
+            if (toastMsg) {
+                sessionStorage.removeItem('billingToast');
+                setTimeout(function () { showToast(toastMsg, 'success'); }, 400);
+            }
+        });
+    </script>
+</body>
+
+</html>

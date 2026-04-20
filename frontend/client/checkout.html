@@ -171,6 +171,10 @@
             background: rgba(0, 242, 255, 0.05);
         }
 
+        .payment-method-select {
+            margin-bottom: 0.9rem;
+        }
+
         .bank-card h6 {
             color: var(--text-heading);
             font-weight: 700;
@@ -347,6 +351,76 @@
             text-decoration: none;
         }
 
+        /* ===== DURATION PICKER ===== */
+        .duration-input-wrap {
+            max-width: 280px;
+            margin-bottom: 10px;
+        }
+
+        .duration-input-wrap .input-group-text {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .special-tier-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .dur-card {
+            flex: 1;
+            min-width: 110px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            cursor: pointer;
+            position: relative;
+            transition: border-color .2s, background .2s;
+            text-align: center;
+        }
+
+        .dur-card:hover {
+            border-color: rgba(0, 242, 255, 0.4);
+        }
+
+        .dur-card.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 242, 255, 0.06);
+        }
+
+        .dur-card .dur-months {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .dur-card .dur-price {
+            font-size: 0.82rem;
+            color: var(--accent-cyan);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .dur-card .dur-label {
+            display: inline-block;
+            font-size: 0.68rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .duration-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
         /* loading spinner */
         .page-loading {
             text-align: center;
@@ -401,8 +475,21 @@
                                 <p class="pkg-meta mb-0" id="pkgMeta">—</p>
                             </div>
 
+                            <!-- Duration Picker -->
+                            <p class="form-label-sm mb-2">Pilih Durasi Berlangganan</p>
+                            <div class="input-group input-group-sm duration-input-wrap">
+                                <input type="text" class="form-control form-control-dark" id="customDurationInput" value="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off" oninput="onCustomDurationChange(this.value)">
+                                <span class="input-group-text">bulan</span>
+                            </div>
+                            <div class="duration-hint" id="durationHint">Harga normal dihitung dari harga bulanan × durasi, kecuali ada harga spesial.</div>
+
+                            <div id="specialTierSection" class="d-none">
+                                <p class="form-label-sm mb-1 mt-3">Pilihan Durasi Spesial</p>
+                                <div class="special-tier-grid" id="specialTierGrid"></div>
+                            </div>
+
                             <!-- Price Breakdown -->
-                            <div class="price-row">
+                            <div class="price-row mt-3">
                                 <span class="label">Subtotal</span>
                                 <span id="priceSubtotal">—</span>
                             </div>
@@ -459,6 +546,8 @@
                             <i class="fa-solid fa-credit-card"></i> Metode Pembayaran
                         </div>
                         <div class="section-body">
+                            <p class="form-label-sm mb-2">Metode Pembayaran Aktif</p>
+                            <div class="text-muted small mb-2">Saat ini pembayaran hanya mendukung <strong style="color:var(--text-heading)">Transfer Bank</strong>.</div>
                             <div class="bank-card">
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <i class="fa-solid fa-building-columns fa-lg text-cyan"></i>
@@ -531,8 +620,7 @@
 
                             <div class="btn-confirm-wrap">
                                 <button id="btnConfirm" class="btn-confirm" onclick="submitOrder()">
-                                    <span id="btnText"><i class="fa-solid fa-lock me-2"></i>Konfirmasi &amp;
-                                        Bayar</span>
+                                    <span id="btnText"><i class="fa-solid fa-lock me-2"></i>Buat Pesanan</span>
                                     <span id="btnLoading" style="display:none"><i
                                             class="fa-solid fa-spinner fa-spin me-2"></i>Memproses...</span>
                                 </button>
@@ -558,6 +646,27 @@
         </div>
     </div>
 
+    <!-- KYC Required Modal -->
+    <div class="modal fade" id="kycRequiredModal" tabindex="-1" aria-labelledby="kycRequiredModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold" id="kycRequiredModalLabel" style="color: var(--text-heading);">
+                        <i class="fa-solid fa-shield-halved me-2 text-warning"></i>Verifikasi KYC Diperlukan
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="color: var(--text-main);">
+                    <p class="mb-0" id="kycRequiredMessage">Anda harus menyelesaikan verifikasi KYC sebelum membuat pesanan.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Tutup</button>
+                    <a id="kycRequiredAction" href="/client/kyc" class="btn btn-primary">Lengkapi KYC</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="fixed-footer">
         <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
         <div>v1.3.0</div>
@@ -569,6 +678,8 @@
     <script src="/assets/js/client-layout.js"></script>
     <script>
         var selectedPackage = null;
+        var selectedTier = null; // { duration_months, price, label, is_special }
+        var selectedPaymentMethod = 'Transfer Bank';
 
         // ===========================
         // HELPERS
@@ -594,9 +705,221 @@
             bootstrap.Toast.getOrCreateInstance(t, { delay: 4000 }).show();
         }
 
+        function setSubmitLoading(isLoading) {
+            var btn = document.getElementById('btnConfirm');
+            var btnTxt = document.getElementById('btnText');
+            var btnLd = document.getElementById('btnLoading');
+            btn.disabled = isLoading;
+            btnTxt.style.display = isLoading ? 'none' : 'inline';
+            btnLd.style.display = isLoading ? 'inline' : 'none';
+        }
+
+        function showKYCRequiredModal(message, actionUrl, actionLabel) {
+            document.getElementById('kycRequiredMessage').textContent = message;
+            var actionBtn = document.getElementById('kycRequiredAction');
+            actionBtn.setAttribute('href', actionUrl || '/client/kyc');
+            actionBtn.textContent = actionLabel || 'Lengkapi KYC';
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('kycRequiredModal')).show();
+        }
+
+        function readKYCStatusResponse(json) {
+            var payload = (json && json.data) || {};
+            var status = (payload.status || (payload.kyc && payload.kyc.status) || '').toLowerCase();
+            var rejectionReason = payload.rejection_reason || (payload.kyc && payload.kyc.rejection_reason) || '';
+            return { status: status, rejectionReason: rejectionReason };
+        }
+
+        async function ensureKYCApprovedBeforeOrder() {
+            try {
+                var res = await fetch('/api/kyc/status', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                var json = {};
+                try {
+                    json = await res.json();
+                } catch (parseErr) {
+                    json = {};
+                }
+
+                if (res.status === 401 || res.status === 403) {
+                    showToast('Sesi berakhir, silakan login ulang.', 'danger');
+                    setTimeout(function () { window.location.replace('/account/login'); }, 1200);
+                    return false;
+                }
+
+                if (res.status === 404) {
+                    showKYCRequiredModal(
+                        'Anda belum melakukan KYC verification dan tidak bisa melakukan pembelian paket.',
+                        '/client/kyc',
+                        'Buat KYC Sekarang'
+                    );
+                    return false;
+                }
+
+                if (!res.ok || !json.status) {
+                    showToast((json && (json.msg || json.error_message)) || 'Gagal memverifikasi status KYC.', 'danger');
+                    return false;
+                }
+
+                var kycInfo = readKYCStatusResponse(json);
+
+                if (kycInfo.status === 'approved') {
+                    return true;
+                }
+
+                if (kycInfo.status === 'pending') {
+                    showKYCRequiredModal(
+                        'KYC Anda masih dalam proses review. Anda tidak bisa melakukan pembelian paket saat ini.',
+                        '/client/kyc-status',
+                        'Lihat Status KYC'
+                    );
+                    return false;
+                }
+
+                if (kycInfo.status === 'rejected') {
+                    var rejectedMsg = 'KYC Anda ditolak. Anda tidak bisa melakukan pembelian paket sebelum memperbaiki data KYC.';
+                    if (kycInfo.rejectionReason) {
+                        rejectedMsg += ' Alasan: ' + kycInfo.rejectionReason;
+                    }
+                    showKYCRequiredModal(rejectedMsg, '/client/kyc', 'Perbaiki KYC');
+                    return false;
+                }
+
+                showKYCRequiredModal(
+                    'Status KYC Anda belum memenuhi syarat. Anda tidak bisa melakukan pembelian paket.',
+                    '/client/kyc-status',
+                    'Lihat Status KYC'
+                );
+                return false;
+
+            } catch (e) {
+                showToast('Gagal memeriksa status KYC. Coba lagi beberapa saat.', 'danger');
+                return false;
+            }
+        }
+
         function copyRek() {
             navigator.clipboard.writeText(document.getElementById('bankNumber').textContent.trim()).then(function () {
                 showToast('No. rekening berhasil disalin!', 'success');
+            });
+        }
+
+        function toNumber(v) {
+            if (typeof v === 'number') return isNaN(v) ? 0 : v;
+            if (v === null || v === undefined) return 0;
+            var raw = String(v).replace(/[^0-9.,-]/g, '');
+            if (raw.indexOf(',') >= 0 && raw.indexOf('.') >= 0) {
+                raw = raw.replace(/\./g, '').replace(',', '.');
+            } else if (raw.indexOf(',') >= 0) {
+                raw = raw.replace(',', '.');
+            } else if (/^\d{1,3}(\.\d{3})+$/.test(raw)) {
+                raw = raw.replace(/\./g, '');
+            }
+            var n = Number(raw);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function readPricingTiers(pkg) {
+            var tiers = (pkg && (pkg.pricing_tiers || pkg.pricingTiers || pkg.PricingTiers)) || [];
+            if (!Array.isArray(tiers)) return [];
+            return tiers.map(function (t) {
+                return {
+                    duration_months: toNumber(t.duration_months || t.durationMonths || t.DurationMonths || t.duration),
+                    price: toNumber(t.price || t.Price || t.total_price),
+                    label: (t.label || t.Label || '').trim()
+                };
+            }).filter(function (t) { return t.duration_months > 0 && t.price > 0; });
+        }
+
+        function getCalculatedTier(pkg, durationMonths) {
+            var monthly = Number(pkg && pkg.price) || 0;
+            var tiers = readPricingTiers(pkg);
+            var special = tiers.find(function (t) { return t.duration_months === durationMonths; });
+            if (special) {
+                return {
+                    duration_months: durationMonths,
+                    price: special.price,
+                    label: special.label,
+                    is_special: (special.label || '').length > 0 || special.price !== (monthly * durationMonths)
+                };
+            }
+
+            return {
+                duration_months: durationMonths,
+                price: monthly * durationMonths,
+                label: '',
+                is_special: false
+            };
+        }
+
+        function updateDurationPricing(durationMonths) {
+            var months = Number(durationMonths) || 0;
+            if (months <= 0) months = 1;
+            if (!selectedPackage) return;
+
+            selectedTier = getCalculatedTier(selectedPackage, months);
+
+            document.querySelectorAll('.dur-card').forEach(function (c) { c.classList.remove('selected'); });
+            var active = document.querySelector('.dur-card[data-dur="' + months + '"]');
+            if (active) active.classList.add('selected');
+
+            document.getElementById('priceSubtotal').textContent = formatRp(selectedTier.price);
+            document.getElementById('priceTotal').textContent = formatRp(selectedTier.price);
+            document.getElementById('sumPeriod').textContent = months + ' bulan';
+            document.getElementById('sumSubtotal').textContent = formatRp(selectedTier.price);
+            document.getElementById('sumTotal').textContent = formatRp(selectedTier.price);
+
+            var hint = document.getElementById('durationHint');
+            if (selectedTier.is_special) {
+                hint.textContent = 'Durasi ' + months + ' bulan menggunakan harga spesial paket.';
+            } else {
+                hint.textContent = 'Durasi ' + months + ' bulan menggunakan harga normal (harga bulanan × durasi).';
+            }
+        }
+
+        function onCustomDurationChange(raw) {
+            var val = String(raw || '').replace(/[^0-9]/g, '');
+            var input = document.getElementById('customDurationInput');
+            input.value = val;
+            var months = Number(val) || 0;
+            if (months <= 0) return;
+            updateDurationPricing(months);
+        }
+
+        function renderSpecialTierCards(pkg) {
+            var monthly = Number(pkg && pkg.price) || 0;
+            var tiers = readPricingTiers(pkg);
+            var specials = tiers.filter(function (t) {
+                if (t.duration_months <= 0) return false;
+                if ((t.label || '').trim() !== '') return true;
+                return t.price !== (monthly * t.duration_months);
+            }).sort(function (a, b) { return a.duration_months - b.duration_months; });
+
+            var wrap = document.getElementById('specialTierSection');
+            var grid = document.getElementById('specialTierGrid');
+            grid.innerHTML = '';
+
+            if (specials.length === 0) {
+                wrap.classList.add('d-none');
+                return;
+            }
+
+            wrap.classList.remove('d-none');
+            specials.forEach(function (t) {
+                var card = document.createElement('div');
+                card.className = 'dur-card';
+                card.setAttribute('data-dur', t.duration_months);
+                card.innerHTML =
+                    '<div class="dur-months">' + t.duration_months + ' Bulan</div>' +
+                    '<div class="dur-price">' + formatRp(t.price) + '</div>' +
+                    (t.label ? '<div class="dur-label">' + t.label + '</div>' : '<div class="dur-label">Harga Spesial</div>');
+                card.addEventListener('click', function () {
+                    document.getElementById('customDurationInput').value = String(t.duration_months);
+                    updateDurationPricing(t.duration_months);
+                });
+                grid.appendChild(card);
             });
         }
 
@@ -614,19 +937,17 @@
                 selectedPackage = pkg;
                 var inv = genInvoice();
 
-                // Render left column
+                // Render package info
                 document.getElementById('pkgName').textContent = pkg.name;
-                document.getElementById('pkgMeta').textContent = (pkg.duration || 1) + ' bulan · Kuota ' + (pkg.quota || 0).toLocaleString('id-ID') + ' permintaan';
-                document.getElementById('priceSubtotal').textContent = formatRp(pkg.price);
-                document.getElementById('priceTotal').textContent = formatRp(pkg.price);
+                document.getElementById('pkgMeta').textContent = 'Kuota ' + (pkg.quota || 0).toLocaleString('id-ID') + ' permintaan';
                 document.getElementById('invoiceInput').value = inv;
                 document.getElementById('dateInput').value = todayStr();
-
-                // Render sidebar
                 document.getElementById('sumPkgName').textContent = pkg.name;
-                document.getElementById('sumPeriod').textContent = (pkg.duration || 1) + ' bulan';
-                document.getElementById('sumSubtotal').textContent = formatRp(pkg.price);
-                document.getElementById('sumTotal').textContent = formatRp(pkg.price);
+
+                // Render special durations only and default to 1 month manual input
+                renderSpecialTierCards(pkg);
+                document.getElementById('customDurationInput').value = '1';
+                updateDurationPricing(1);
 
                 document.getElementById('loadingState').classList.add('d-none');
                 document.getElementById('checkoutMain').classList.remove('d-none');
@@ -648,44 +969,65 @@
             if (!nama) { showToast('Nama lengkap wajib diisi', 'warning'); return; }
             if (!email) { showToast('Email wajib diisi', 'warning'); return; }
 
-            var btn = document.getElementById('btnConfirm');
-            var btnTxt = document.getElementById('btnText');
-            var btnLd = document.getElementById('btnLoading');
-            btn.disabled = true; btnTxt.style.display = 'none'; btnLd.style.display = 'inline';
+            var durationRaw = (document.getElementById('customDurationInput').value || '').replace(/[^0-9]/g, '');
+            var durationMonths = Number(durationRaw) || 0;
+            if (durationMonths <= 0) {
+                showToast('Durasi berlangganan harus lebih dari 0 bulan', 'warning');
+                return;
+            }
+            updateDurationPricing(durationMonths);
+
+            var canProceed = await ensureKYCApprovedBeforeOrder();
+            if (!canProceed) {
+                return;
+            }
+
+            setSubmitLoading(true);
 
             try {
                 var res = await fetch('/api/orders', {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ package_id: selectedPackage.id, payment_method: 'Transfer Bank' })
+                    body: JSON.stringify({
+                        package_id: selectedPackage.id,
+                        duration_months: durationMonths,
+                        payment_method: selectedPaymentMethod
+                    })
                 });
                 var json = await res.json();
 
-                if (res.status === 401 || res.status === 403) {
+                if (res.status === 401) {
                     showToast('Sesi berakhir, silakan login ulang.', 'danger');
                     setTimeout(function () { window.location.replace('/account/login'); }, 1500);
                     return;
                 }
 
+                if (res.status === 403) {
+                    var forbiddenMsg = (json && json.error_message) ? json.error_message : 'Akses ditolak.';
+                    if (/kyc/i.test(forbiddenMsg)) {
+                        showKYCRequiredModal(forbiddenMsg, '/client/kyc-status', 'Lihat Status KYC');
+                    } else {
+                        showToast(forbiddenMsg, 'danger');
+                    }
+                    return;
+                }
+
                 if (res.status === 201 && json.success) {
-                    // Save context for success page
-                    var orderData = Object.assign({}, json.data, {
-                        package_name: selectedPackage.name,
-                        customer_name: nama,
-                        customer_email: email
-                    });
-                    sessionStorage.setItem('orderSuccess', JSON.stringify(orderData));
-                    window.location.href = '/client/billing';
+                    showToast('Pesanan berhasil dibuat, silakan upload bukti transfer.', 'success');
+                    sessionStorage.setItem('billingToast', 'Pesanan berhasil dibuat, silakan upload bukti transfer.');
+                    setTimeout(function () {
+                        window.location.href = '/client/billing-history';
+                    }, 700);
                     return;
                 }
 
                 showToast((json && json.error_message) ? json.error_message : 'Terjadi kesalahan.', 'danger');
-                btn.disabled = false; btnTxt.style.display = 'inline'; btnLd.style.display = 'none';
 
             } catch (e) {
                 showToast('Gagal terhubung ke server.', 'danger');
-                btn.disabled = false; btnTxt.style.display = 'inline'; btnLd.style.display = 'none';
+            } finally {
+                setSubmitLoading(false);
             }
         }
 

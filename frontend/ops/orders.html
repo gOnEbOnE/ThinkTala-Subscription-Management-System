@@ -43,6 +43,43 @@
             padding: 4px 12px;
             border-radius: 6px;
         }
+
+        .verify-info-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .verify-info-value {
+            color: var(--text-heading);
+            font-weight: 600;
+        }
+
+        .status-badge-pill {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            padding: 0.35rem 0.6rem;
+            border-radius: 999px;
+        }
+
+        .invoice-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .proof-preview {
+            max-height: 360px;
+            width: 100%;
+            object-fit: contain;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+        }
     </style>
 </head>
 
@@ -80,6 +117,12 @@
                                 Paket</th>
                             <th class="small fw-semibold py-3"
                                 style="text-transform:uppercase;font-size:0.72rem;color:var(--text-muted);border-color:var(--border-color);">
+                                Total</th>
+                            <th class="small fw-semibold py-3"
+                                style="text-transform:uppercase;font-size:0.72rem;color:var(--text-muted);border-color:var(--border-color);">
+                                Pembayaran</th>
+                            <th class="small fw-semibold py-3"
+                                style="text-transform:uppercase;font-size:0.72rem;color:var(--text-muted);border-color:var(--border-color);">
                                 Status</th>
                             <th class="small fw-semibold py-3 text-end"
                                 style="text-transform:uppercase;font-size:0.72rem;color:var(--text-muted);border-color:var(--border-color);">
@@ -88,7 +131,7 @@
                     </thead>
                     <tbody id="ordersTableBody">
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
+                            <td colspan="7" class="text-center py-5 text-muted">
                                 <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...
                             </td>
                         </tr>
@@ -105,6 +148,130 @@
         </div>
     </div>
 
+    <!-- Detail + Verify Modal (Layer 1) -->
+    <div class="modal fade" id="detailVerifyModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                    <h6 class="fw-bold mb-0" style="color: var(--text-heading);">
+                        <i class="fa-solid fa-receipt me-2"></i>Detail Pembayaran Pesanan
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="detailLoading" class="text-center py-4 text-muted">
+                        <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat detail pembayaran...
+                    </div>
+
+                    <div id="detailContent" class="d-none">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                            <div>
+                                <div class="verify-info-label">Nomor Invoice</div>
+                                <div class="invoice-code" id="dInvoice">-</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="verify-info-label">Status</div>
+                                <div id="dStatus">-</div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="verify-info-label">Klien</div>
+                                <div class="verify-info-value" id="dClient">-</div>
+                                <small class="text-muted" id="dClientEmail">-</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="verify-info-label">Tanggal Transaksi</div>
+                                <div class="verify-info-value" id="dDate">-</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="verify-info-label">Paket</div>
+                                <div class="verify-info-value" id="dPackage">-</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="verify-info-label">Durasi</div>
+                                <div class="verify-info-value" id="dDuration">-</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="verify-info-label">Metode Pembayaran</div>
+                                <div class="verify-info-value" id="dMethod">-</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="verify-info-label">Total Pembayaran</div>
+                                <div class="verify-info-value" id="dTotal">-</div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <div class="verify-info-label">Bukti Transfer</div>
+                            <div id="dProofEmpty" class="text-muted small">Belum ada bukti transfer yang diunggah client.</div>
+                            <div id="dProofContent" class="d-none">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted" id="dProofUploadedAt">-</small>
+                                    <a id="dProofLink" href="#" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fa-solid fa-image me-1"></i>Buka Gambar
+                                    </a>
+                                </div>
+                                <img id="dProofImage" class="proof-preview" alt="Bukti transfer client">
+                            </div>
+                        </div>
+
+                        <div id="verifyHint" class="alert mt-4 mb-0 d-none" style="border-color: rgba(255,193,7,0.3); background: rgba(255,193,7,0.08); color: #ffd966;">
+                            Hanya pesanan dengan status <strong>PENDING_PAYMENT</strong> yang dapat diverifikasi.
+                        </div>
+
+                        <div id="verificationNoteBox" class="alert mt-3 mb-0 d-none" style="border-color: rgba(239,68,68,0.28); background: rgba(239,68,68,0.08); color: #fecaca;">
+                            <strong>Alasan Reject:</strong><br>
+                            <span id="verificationNoteText">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" id="btnReject" class="btn btn-sm btn-danger d-none" onclick="openConfirmLayer('REJECT')">
+                        <i class="fa-solid fa-xmark me-1"></i>Reject
+                    </button>
+                    <button type="button" id="btnApprove" class="btn btn-sm btn-success d-none" onclick="openConfirmLayer('APPROVE')">
+                        <i class="fa-solid fa-check me-1"></i>Approve
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Layered Confirmation Modal (Layer 2) -->
+    <div class="modal fade" id="confirmLayerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i id="confirmIcon" class="fa-solid fa-circle-question fa-3x mb-3" style="color: var(--accent-cyan);"></i>
+                    <h6 class="fw-bold mb-2" style="color: var(--text-heading);" id="confirmTitle">Konfirmasi Verifikasi</h6>
+                    <p class="text-muted small mb-3" id="confirmDesc">Yakin ingin memproses aksi ini?</p>
+                    <div id="rejectReasonWrap" class="text-start mt-2 d-none">
+                        <label for="rejectReasonInput" class="form-label small fw-semibold" style="color: var(--text-heading);">Alasan Reject <span class="text-danger">*</span></label>
+                        <textarea id="rejectReasonInput" class="form-control form-control-sm" rows="3" maxlength="500" placeholder="Tuliskan alasan kenapa pembayaran ditolak..."></textarea>
+                        <small class="text-muted">Alasan ini akan disimpan sebagai catatan verifikasi.</small>
+                    </div>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-sm" id="confirmActionBtn" onclick="submitVerifyAction()">Ya, Proses</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999;">
+        <div id="toastEl" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3200">
+            <div class="d-flex">
+                <div class="toast-body fw-semibold" id="toastMsg">-</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
     <footer class="fixed-footer">
         <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
         <div>Operations Panel v1.0</div>
@@ -117,9 +284,22 @@
         let allOrders = [];
         let currentPage = 1;
         const perPage = 10;
+        let selectedOrder = null;
+        let pendingAction = '';
+        let autoOpenOrderId = '';
+
+        function formatRp(val) {
+            return 'Rp ' + Number(val || 0).toLocaleString('id-ID');
+        }
+
+        function normalizeStatus(status) {
+            const s = String(status || '').toUpperCase();
+            if (s === 'PENDING') return 'PENDING_PAYMENT';
+            return s || 'PENDING_PAYMENT';
+        }
 
         async function logout() {
-            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) {}
+            try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch (e) { }
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             sessionStorage.clear();
@@ -127,15 +307,24 @@
         }
 
         function statusBadge(status) {
+            const current = normalizeStatus(status);
             const map = {
-                'PAID':      { bg: '#00d26a', color: '#000' },
-                'PENDING':   { bg: '#ffc107', color: '#000' },
-                'CANCELLED': { bg: '#dc3545', color: '#fff' },
-                'EXPIRED':   { bg: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border-color)' },
+                'PAID': { bg: 'rgba(16,185,129,0.2)', color: '#34d399', border: '1px solid rgba(16,185,129,0.35)', label: 'PAID' },
+                'PENDING_PAYMENT': { bg: 'rgba(255,193,7,0.18)', color: '#ffd54a', border: '1px solid rgba(255,193,7,0.35)', label: 'PENDING' },
+                'CANCELLED': { bg: 'rgba(220,53,69,0.2)', color: '#ff6b7a', border: '1px solid rgba(220,53,69,0.35)', label: 'CANCELLED' },
+                'EXPIRED': { bg: 'transparent', color: 'var(--text-muted)', border: '1px solid var(--border-color)', label: 'EXPIRED' },
             };
-            const s = map[status] || map['EXPIRED'];
-            const borderStyle = s.border ? `border:${s.border};` : '';
-            return `<span class="badge fw-semibold px-2 py-1" style="background:${s.bg};color:${s.color};${borderStyle}font-size:0.72rem;">${status}</span>`;
+            const s = map[current] || map['EXPIRED'];
+            return `<span class="status-badge-pill" style="background:${s.bg};color:${s.color};border:${s.border};">${s.label}</span>`;
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toastEl');
+            const m = document.getElementById('toastMsg');
+            t.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+            t.classList.add(type === 'success' ? 'bg-success' : type === 'warning' ? 'bg-warning' : 'bg-danger');
+            m.textContent = msg;
+            bootstrap.Toast.getOrCreateInstance(t).show();
         }
 
         function renderTable(orders) {
@@ -145,7 +334,7 @@
             if (!orders.length) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-muted">
+                        <td colspan="7" class="text-center py-5 text-muted">
                             <i class="fa-solid fa-receipt fa-2x mb-2 d-block"></i>
                             Belum ada transaksi pesanan masuk
                         </td>
@@ -168,10 +357,11 @@
                     <td class="py-3 col-invoice">${order.invoice_number || '—'}</td>
                     <td class="py-3">${order.client_name || '—'}</td>
                     <td class="py-3">${order.package_name || '—'}</td>
-                    <td class="py-3">${statusBadge(order.status || 'PENDING')}</td>
+                    <td class="py-3">${formatRp(order.total_price)}</td>
+                    <td class="py-3">${order.payment_method || '-'}</td>
+                    <td class="py-3">${statusBadge(order.status || 'PENDING_PAYMENT')}</td>
                     <td class="py-3 text-end">
-                        <a href="/ops/orders-detail?id=${order.order_id}"
-                           class="btn btn-sm btn-outline-secondary btn-action-detail">
+                        <a class="btn btn-sm btn-outline-secondary btn-action-detail" href="/ops/orders-detail?id=${encodeURIComponent(order.order_id)}">
                             <i class="fa-solid fa-eye fa-xs me-1"></i>Detail/Verifikasi
                         </a>
                     </td>
@@ -195,6 +385,227 @@
             pages.innerHTML = html;
         }
 
+        function fillDetailModal(order) {
+            const status = normalizeStatus(order.status);
+            document.getElementById('dInvoice').textContent = order.invoice_number || '-';
+            document.getElementById('dClient').textContent = order.client_name || 'Unknown';
+            document.getElementById('dClientEmail').textContent = order.client_email || '-';
+            document.getElementById('dDate').textContent = order.created_at
+                ? new Date(order.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : '-';
+            document.getElementById('dPackage').textContent = order.package_name || '-';
+            document.getElementById('dDuration').textContent = (order.duration_months || 0) + ' bulan';
+            document.getElementById('dMethod').textContent = order.payment_method || '-';
+            document.getElementById('dTotal').textContent = formatRp(order.total_price);
+            document.getElementById('dStatus').innerHTML = statusBadge(status);
+
+            const hasProof = !!order.has_payment_proof;
+            const proofUrl = order.payment_proof_url || '';
+            const proofEmpty = document.getElementById('dProofEmpty');
+            const proofContent = document.getElementById('dProofContent');
+            const proofUploadedAt = document.getElementById('dProofUploadedAt');
+            const proofLink = document.getElementById('dProofLink');
+            const proofImage = document.getElementById('dProofImage');
+
+            proofEmpty.classList.remove('d-none');
+            proofContent.classList.add('d-none');
+            proofImage.removeAttribute('src');
+
+            if (hasProof && proofUrl) {
+                proofEmpty.classList.add('d-none');
+                proofContent.classList.remove('d-none');
+                proofLink.href = proofUrl;
+                proofUploadedAt.textContent = order.payment_proof_uploaded_at
+                    ? ('Diunggah: ' + new Date(order.payment_proof_uploaded_at).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }))
+                    : 'Bukti transfer tersedia';
+                proofImage.src = proofUrl + (proofUrl.indexOf('?') >= 0 ? '&' : '?') + 't=' + Date.now();
+            }
+
+            const btnApprove = document.getElementById('btnApprove');
+            const btnReject = document.getElementById('btnReject');
+            const hint = document.getElementById('verifyHint');
+            const noteBox = document.getElementById('verificationNoteBox');
+            const noteText = document.getElementById('verificationNoteText');
+
+            const verificationNote = String(order.verification_note || '').trim();
+            if (verificationNote) {
+                noteBox.classList.remove('d-none');
+                noteText.textContent = verificationNote;
+            } else {
+                noteBox.classList.add('d-none');
+                noteText.textContent = '-';
+            }
+
+            if (status === 'PENDING_PAYMENT' && hasProof) {
+                btnApprove.classList.remove('d-none');
+                btnReject.classList.remove('d-none');
+                hint.classList.add('d-none');
+            } else if (status === 'PENDING_PAYMENT' && !hasProof) {
+                btnApprove.classList.add('d-none');
+                btnReject.classList.add('d-none');
+                hint.classList.remove('d-none');
+                hint.innerHTML = 'Client belum mengunggah <strong>bukti transfer</strong>. Verifikasi belum dapat diproses.';
+            } else {
+                btnApprove.classList.add('d-none');
+                btnReject.classList.add('d-none');
+                hint.classList.add('d-none');
+            }
+        }
+
+        async function openOrderDetail(orderID) {
+            selectedOrder = null;
+            document.getElementById('detailLoading').classList.remove('d-none');
+            document.getElementById('detailContent').classList.add('d-none');
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('detailVerifyModal')).show();
+
+            try {
+                const res = await fetch(`/api/admin/orders/${encodeURIComponent(orderID)}`, { credentials: 'include' });
+                if (res.redirected || res.status === 401) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                if (res.status === 403) {
+                    document.getElementById('detailLoading').innerHTML = '<i class="fa-solid fa-lock me-2"></i>Akses ditolak untuk melihat detail pesanan ini';
+                    return;
+                }
+                const json = await res.json();
+
+                if (!res.ok || !json.success) {
+                    document.getElementById('detailLoading').innerHTML = '<i class="fa-solid fa-circle-exclamation me-2"></i>Gagal memuat detail pembayaran';
+                    return;
+                }
+
+                selectedOrder = json.data || {};
+                fillDetailModal(selectedOrder);
+                document.getElementById('detailLoading').classList.add('d-none');
+                document.getElementById('detailContent').classList.remove('d-none');
+
+                // Jika halaman dibuka dari URL lama (/ops/orders-detail?id=...),
+                // hapus query agar refresh berikutnya kembali normal.
+                if (autoOpenOrderId && selectedOrder.order_id === autoOpenOrderId) {
+                    history.replaceState({}, '', '/ops/orders');
+                    autoOpenOrderId = '';
+                }
+            } catch (e) {
+                document.getElementById('detailLoading').innerHTML = '<i class="fa-solid fa-circle-exclamation me-2"></i>Gagal memuat detail pembayaran';
+            }
+        }
+
+        function readAutoOpenOrderIdFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const candidate =
+                params.get('detail') ||
+                params.get('id') ||
+                params.get('order_id') ||
+                '';
+            return String(candidate).trim();
+        }
+
+        function openConfirmLayer(action) {
+            if (!selectedOrder) return;
+
+            pendingAction = action;
+            const title = document.getElementById('confirmTitle');
+            const desc = document.getElementById('confirmDesc');
+            const icon = document.getElementById('confirmIcon');
+            const btn = document.getElementById('confirmActionBtn');
+            const rejectWrap = document.getElementById('rejectReasonWrap');
+            const rejectInput = document.getElementById('rejectReasonInput');
+
+            rejectInput.value = '';
+
+            if (action === 'APPROVE') {
+                title.textContent = 'Konfirmasi Approve';
+                desc.textContent = `Yakin ingin APPROVE pembayaran invoice ${selectedOrder.invoice_number || ''}?`;
+                icon.className = 'fa-solid fa-circle-check fa-3x mb-3 text-success';
+                btn.className = 'btn btn-sm btn-success';
+                btn.textContent = 'Ya, Approve';
+                rejectWrap.classList.add('d-none');
+            } else {
+                title.textContent = 'Konfirmasi Reject';
+                desc.textContent = `Isi alasan terlebih dahulu, lalu konfirmasi REJECT invoice ${selectedOrder.invoice_number || ''}.`;
+                icon.className = 'fa-solid fa-circle-xmark fa-3x mb-3 text-danger';
+                btn.className = 'btn btn-sm btn-danger';
+                btn.textContent = 'Ya, Reject';
+                rejectWrap.classList.remove('d-none');
+            }
+
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmLayerModal')).show();
+        }
+
+        async function submitVerifyAction() {
+            if (!selectedOrder || !pendingAction) return;
+
+            const btn = document.getElementById('confirmActionBtn');
+            const rejectReasonInput = document.getElementById('rejectReasonInput');
+            const rejectReason = String(rejectReasonInput.value || '').trim();
+
+            if (pendingAction === 'REJECT' && !rejectReason) {
+                showToast('Alasan reject wajib diisi.', 'warning');
+                rejectReasonInput.focus();
+                return;
+            }
+
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/admin/orders/${encodeURIComponent(selectedOrder.order_id)}/verify`, {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: pendingAction,
+                        reject_reason: pendingAction === 'REJECT' ? rejectReason : ''
+                    })
+                });
+                if (res.redirected || res.status === 401) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                if (res.status === 403) {
+                    showToast('Akses ditolak untuk memverifikasi pesanan.', 'danger');
+                    btn.disabled = false;
+                    return;
+                }
+                const json = await res.json();
+
+                if (!res.ok || !json.success) {
+                    showToast((json && json.error_message) ? json.error_message : 'Gagal memverifikasi pembayaran', 'danger');
+                    btn.disabled = false;
+                    return;
+                }
+
+                const newStatus = json.new_status || (json.data && json.data.new_status) || selectedOrder.status;
+                const verificationNote =
+                    json.verification_note ||
+                    (json.data && json.data.verification_note) ||
+                    (pendingAction === 'REJECT' ? rejectReason : '');
+                selectedOrder.status = newStatus;
+                selectedOrder.verification_note = verificationNote;
+
+                allOrders = allOrders.map(function (o) {
+                    if (o.order_id === selectedOrder.order_id) {
+                        return Object.assign({}, o, { status: newStatus });
+                    }
+                    return o;
+                });
+                renderTable(allOrders);
+                fillDetailModal(selectedOrder);
+
+                bootstrap.Modal.getInstance(document.getElementById('confirmLayerModal')).hide();
+                bootstrap.Modal.getInstance(document.getElementById('detailVerifyModal')).hide();
+
+                showToast('Status pembayaran berhasil diperbarui', 'success');
+                pendingAction = '';
+            } catch (e) {
+                showToast('Gagal terhubung ke server.', 'danger');
+                btn.disabled = false;
+                return;
+            }
+
+            btn.disabled = false;
+        }
+
         function changePage(page) {
             currentPage = page;
             renderTable(allOrders);
@@ -207,14 +618,18 @@
                     window.location.href = '/account/login';
                     return;
                 }
-                const data = await res.json();
-                allOrders = Array.isArray(data) ? data : (data.data || []);
+                const json = await res.json();
+                allOrders = Array.isArray(json) ? json : (json.data || []);
                 currentPage = 1;
                 renderTable(allOrders);
+
+                if (autoOpenOrderId) {
+                    openOrderDetail(autoOpenOrderId);
+                }
             } catch (e) {
                 document.getElementById('ordersTableBody').innerHTML = `
                     <tr>
-                        <td colspan="5" class="text-center py-5 text-danger">
+                        <td colspan="7" class="text-center py-5 text-danger">
                             <i class="fa-solid fa-circle-exclamation fa-2x mb-2 d-block"></i>
                             Gagal memuat data. Pastikan operational service berjalan.
                         </td>
@@ -223,7 +638,15 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadOrders);
+        document.addEventListener('DOMContentLoaded', function () {
+            autoOpenOrderId = readAutoOpenOrderIdFromURL();
+            loadOrders();
+            document.getElementById('confirmLayerModal').addEventListener('hidden.bs.modal', function () {
+                pendingAction = '';
+                document.getElementById('confirmActionBtn').disabled = false;
+                document.getElementById('rejectReasonInput').value = '';
+            });
+        });
     </script>
 </body>
 
