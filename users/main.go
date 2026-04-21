@@ -60,9 +60,9 @@ func main() {
 
 	maxConns, _ := strconv.Atoi(utils.GetEnv("read_db_max_conn", "5"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
-	port := utils.GetEnv("PORT", "")
+	port := utils.GetEnv("port", "")
 	if port == "" {
-		port = utils.GetEnv("port", "9002")
+		port = utils.GetEnv("PORT", "9002")
 	}
 
 	cfg := core.Config{

@@ -43,9 +43,9 @@ func main() {
 		SameSite:    sameSiteMode,
 	})
 
-	port := utils.GetEnv("PORT", "")
+	port := utils.GetEnv("port", "")
 	if port == "" {
-		port = utils.GetEnv("port", "2005")
+		port = utils.GetEnv("PORT", "2005")
 	}
 
 	cfg := core.Config{
