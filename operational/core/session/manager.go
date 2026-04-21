@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/gorilla/sessions"
-	"github.com/master-abror/zaframework/core/utils"
+	"operational/core/utils"
 
 	"github.com/rbcervilla/redisstore/v9"
 )

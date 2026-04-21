@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/master-abror/zaframework/core/concurrency"
-	"github.com/master-abror/zaframework/core/database"
-	ehttp "github.com/master-abror/zaframework/core/http" // Alias package http engine
-	"github.com/master-abror/zaframework/core/utils"      // Wajib import utils untuk GetEnv
+	"operational/core/concurrency"
+	"operational/core/database"
+	ehttp "operational/core/http" // Alias package http engine
+	"operational/core/utils"      // Wajib import utils untuk GetEnv
 )
 
 // Config struct holding all configuration

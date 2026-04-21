@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions" // Pastikan import ini ada untuk &sessions.Options{}
-	"github.com/master-abror/zaframework/core/utils"
+	"operational/core/utils"
 )
 
 // Helper Internal untuk memastikan SessionManager tidak NIL
