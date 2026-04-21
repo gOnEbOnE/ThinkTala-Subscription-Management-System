@@ -1,0 +1,5787 @@
+{
+  "nodes": [
+    {
+      "id": "operational_main_go",
+      "label": "main.go",
+      "file_type": "code",
+      "source_file": "operational\\main.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "main_main",
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "operational\\main.go",
+      "source_location": "L18"
+    },
+    {
+      "id": "main_getenv",
+      "label": "getEnv()",
+      "file_type": "code",
+      "source_file": "operational\\main.go",
+      "source_location": "L87"
+    },
+    {
+      "id": "main_getdashboardstats",
+      "label": "getDashboardStats()",
+      "file_type": "code",
+      "source_file": "operational\\main.go",
+      "source_location": "L94"
+    },
+    {
+      "id": "main_listkyc",
+      "label": "listKYC()",
+      "file_type": "code",
+      "source_file": "operational\\main.go",
+      "source_location": "L112"
+    },
+    {
+      "id": "main_listorders",
+      "label": "listOrders()",
+      "file_type": "code",
+      "source_file": "operational\\main.go",
+      "source_location": "L151"
+    },
+    {
+      "id": "main_reviewkyc",
+      "label": "reviewKYC()",
+      "file_type": "code",
+      "source_file": "operational\\main.go",
+      "source_location": "L196"
+    },
+    {
+      "id": "operational_core_app_go",
+      "label": "app.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "core_config",
+      "label": "Config",
+      "file_type": "code",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L19"
+    },
+    {
+      "id": "core_app",
+      "label": "App",
+      "file_type": "code",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L35"
+    },
+    {
+      "id": "app_new",
+      "label": "New()",
+      "file_type": "code",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L46"
+    },
+    {
+      "id": "core_app_registerjob",
+      "label": ".RegisterJob()",
+      "file_type": "code",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L103"
+    },
+    {
+      "id": "core_app_run",
+      "label": ".Run()",
+      "file_type": "code",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L109"
+    },
+    {
+      "id": "operational_core_concurrency_circuit_breaker_go",
+      "label": "circuit_breaker.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "concurrency_enhancedcircuitbreaker",
+      "label": "EnhancedCircuitBreaker",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L9"
+    },
+    {
+      "id": "circuit_breaker_newcircuitbreaker",
+      "label": "NewCircuitBreaker()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L24"
+    },
+    {
+      "id": "concurrency_enhancedcircuitbreaker_allow",
+      "label": ".Allow()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L33"
+    },
+    {
+      "id": "concurrency_enhancedcircuitbreaker_recordsuccess",
+      "label": ".RecordSuccess()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L57"
+    },
+    {
+      "id": "concurrency_enhancedcircuitbreaker_recordfailure",
+      "label": ".RecordFailure()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L64"
+    },
+    {
+      "id": "concurrency_enhancedcircuitbreaker_updateerrorrate",
+      "label": ".UpdateErrorRate()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L75"
+    },
+    {
+      "id": "operational_core_concurrency_dispatcher_go",
+      "label": "dispatcher.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "concurrency_dispatcher",
+      "label": "Dispatcher",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L16"
+    },
+    {
+      "id": "dispatcher_newdispatcher",
+      "label": "NewDispatcher()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L37"
+    },
+    {
+      "id": "concurrency_dispatcher_start",
+      "label": ".Start()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L62"
+    },
+    {
+      "id": "concurrency_dispatcher_stop",
+      "label": ".Stop()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L68"
+    },
+    {
+      "id": "concurrency_dispatcher_registerjobhandler",
+      "label": ".RegisterJobHandler()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L73"
+    },
+    {
+      "id": "concurrency_dispatcher_register",
+      "label": ".Register()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L82"
+    },
+    {
+      "id": "concurrency_dispatcher_dispatch",
+      "label": ".Dispatch()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L88"
+    },
+    {
+      "id": "concurrency_dispatcher_dispatchandwait",
+      "label": ".DispatchAndWait()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L94"
+    },
+    {
+      "id": "concurrency_dispatcher_enqueue",
+      "label": ".enqueue()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L117"
+    },
+    {
+      "id": "concurrency_dispatcher_shutdown",
+      "label": ".Shutdown()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L165"
+    },
+    {
+      "id": "concurrency_dispatcher_monitorloop",
+      "label": ".monitorLoop()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L178"
+    },
+    {
+      "id": "operational_core_concurrency_metricts_go",
+      "label": "metricts.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "concurrency_enhancedmetrics",
+      "label": "EnhancedMetrics",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L12"
+    },
+    {
+      "id": "metricts_newenhancedmetrics",
+      "label": "NewEnhancedMetrics()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L33"
+    },
+    {
+      "id": "concurrency_enhancedmetrics_addresponsetime",
+      "label": ".AddResponseTime()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L44"
+    },
+    {
+      "id": "concurrency_enhancedmetrics_addqueuetime",
+      "label": ".AddQueueTime()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L57"
+    },
+    {
+      "id": "concurrency_enhancedmetrics_updateresponsemetrics",
+      "label": ".updateResponseMetrics()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L70"
+    },
+    {
+      "id": "concurrency_enhancedmetrics_updatequeuemetrics",
+      "label": ".updateQueueMetrics()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L112"
+    },
+    {
+      "id": "concurrency_enhancedmetrics_getstats",
+      "label": ".GetStats()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L125"
+    },
+    {
+      "id": "operational_core_concurrency_rate_limiter_go",
+      "label": "rate_limiter.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "concurrency_slidingwindowratelimiter",
+      "label": "SlidingWindowRateLimiter",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L10"
+    },
+    {
+      "id": "rate_limiter_newslidingwindowratelimiter",
+      "label": "NewSlidingWindowRateLimiter()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L19"
+    },
+    {
+      "id": "concurrency_slidingwindowratelimiter_allow",
+      "label": ".Allow()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L31"
+    },
+    {
+      "id": "concurrency_slidingwindowratelimiter_getstats",
+      "label": ".GetStats()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L61"
+    },
+    {
+      "id": "operational_core_concurrency_types_go",
+      "label": "types.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "concurrency_jobtype",
+      "label": "JobType",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L19"
+    },
+    {
+      "id": "concurrency_handlerfunc",
+      "label": "HandlerFunc",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L22"
+    },
+    {
+      "id": "concurrency_job",
+      "label": "Job",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L28"
+    },
+    {
+      "id": "concurrency_jobresult",
+      "label": "JobResult",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L39"
+    },
+    {
+      "id": "concurrency_config",
+      "label": "Config",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L46"
+    },
+    {
+      "id": "operational_core_concurrency_worker_go",
+      "label": "worker.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "concurrency_workerpool",
+      "label": "WorkerPool",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L13"
+    },
+    {
+      "id": "worker_newworkerpool",
+      "label": "newWorkerPool()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L30"
+    },
+    {
+      "id": "concurrency_workerpool_workerloop",
+      "label": ".workerLoop()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L54"
+    },
+    {
+      "id": "concurrency_workerpool_processjob",
+      "label": ".processJob()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L69"
+    },
+    {
+      "id": "concurrency_workerpool_submit",
+      "label": ".submit()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L158"
+    },
+    {
+      "id": "concurrency_workerpool_shutdown",
+      "label": ".shutdown()",
+      "file_type": "code",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L168"
+    },
+    {
+      "id": "operational_core_database_connection_go",
+      "label": "connection.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "database_config",
+      "label": "Config",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L13"
+    },
+    {
+      "id": "database_dbwrapper",
+      "label": "DBWrapper",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L33"
+    },
+    {
+      "id": "connection_connect",
+      "label": "Connect()",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L38"
+    },
+    {
+      "id": "database_dbwrapper_close",
+      "label": ".Close()",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L80"
+    },
+    {
+      "id": "database_dbwrapper_stats",
+      "label": ".Stats()",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L89"
+    },
+    {
+      "id": "database_dbwrapper_queryrow",
+      "label": ".QueryRow()",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L109"
+    },
+    {
+      "id": "database_dbwrapper_exec",
+      "label": ".Exec()",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L118"
+    },
+    {
+      "id": "database_dummyscanner",
+      "label": "dummyScanner",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L135"
+    },
+    {
+      "id": "database_dummyscanner_scan",
+      "label": ".Scan()",
+      "file_type": "code",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L139"
+    },
+    {
+      "id": "operational_core_http_middleware_go",
+      "label": "middleware.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "http_currentuser",
+      "label": "CurrentUser",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L19"
+    },
+    {
+      "id": "middleware_chain",
+      "label": "Chain()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L45"
+    },
+    {
+      "id": "middleware_corsmiddleware",
+      "label": "CORSMiddleware()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L53"
+    },
+    {
+      "id": "http_contextkey",
+      "label": "contextKey",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L82"
+    },
+    {
+      "id": "middleware_wafmiddleware",
+      "label": "WAFMiddleware()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L86"
+    },
+    {
+      "id": "middleware_ratelimitmiddleware",
+      "label": "RateLimitMiddleware()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L156"
+    },
+    {
+      "id": "middleware_loggermiddleware",
+      "label": "LoggerMiddleware()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L188"
+    },
+    {
+      "id": "http_logresponsewriter",
+      "label": "logResponseWriter",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L217"
+    },
+    {
+      "id": "http_logresponsewriter_writeheader",
+      "label": ".WriteHeader()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L222"
+    },
+    {
+      "id": "middleware_csrfmiddleware",
+      "label": "CSRFMiddleware()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L227"
+    },
+    {
+      "id": "middleware_authmiddleware",
+      "label": "AuthMiddleware()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L246"
+    },
+    {
+      "id": "middleware_authorize",
+      "label": "Authorize()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L390"
+    },
+    {
+      "id": "middleware_destroyauthorize",
+      "label": "DestroyAuthorize()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L463"
+    },
+    {
+      "id": "middleware_islogout",
+      "label": "IsLogout()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L489"
+    },
+    {
+      "id": "operational_core_http_response_go",
+      "label": "response.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "http_responsehelper",
+      "label": "ResponseHelper",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L16"
+    },
+    {
+      "id": "http_jsonresponse",
+      "label": "JSONResponse",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L23"
+    },
+    {
+      "id": "response_getcsrftoken",
+      "label": "GetCSRFToken()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L32"
+    },
+    {
+      "id": "http_responsehelper_json",
+      "label": ".JSON()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L37"
+    },
+    {
+      "id": "http_responsehelper_view",
+      "label": ".View()",
+      "file_type": "code",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L56"
+    },
+    {
+      "id": "operational_core_session_manager_go",
+      "label": "manager.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "session_config",
+      "label": "Config",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L16"
+    },
+    {
+      "id": "session_manager",
+      "label": "Manager",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L31"
+    },
+    {
+      "id": "manager_init",
+      "label": "Init()",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L38"
+    },
+    {
+      "id": "operational_core_session_methods_go",
+      "label": "methods.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "methods_getmanager",
+      "label": "getManager()",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L19"
+    },
+    {
+      "id": "methods_set",
+      "label": "Set()",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L27"
+    },
+    {
+      "id": "methods_get",
+      "label": "Get()",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L120"
+    },
+    {
+      "id": "methods_destroy",
+      "label": "Destroy()",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L189"
+    },
+    {
+      "id": "methods_extracttoken",
+      "label": "extractToken()",
+      "file_type": "code",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L237"
+    },
+    {
+      "id": "operational_core_utils_agent_go",
+      "label": "agent.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "agent_getagent",
+      "label": "GetAgent()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L13"
+    },
+    {
+      "id": "agent_getuseragent",
+      "label": "GetUserAgent()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L18"
+    },
+    {
+      "id": "agent_getclientip",
+      "label": "GetClientIP()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L31"
+    },
+    {
+      "id": "agent_getoriginfromref",
+      "label": "GetOriginFromRef()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L55"
+    },
+    {
+      "id": "operational_core_utils_converts_go",
+      "label": "converts.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\converts.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "converts_toint",
+      "label": "ToInt()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\converts.go",
+      "source_location": "L8"
+    },
+    {
+      "id": "converts_tostring",
+      "label": "ToString()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\converts.go",
+      "source_location": "L26"
+    },
+    {
+      "id": "operational_core_utils_crypto_go",
+      "label": "crypto.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "crypto_pkcs5unpadding",
+      "label": "PKCS5UnPadding()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L22"
+    },
+    {
+      "id": "crypto_pkcs5padding",
+      "label": "PKCS5Padding()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L31"
+    },
+    {
+      "id": "crypto_decrypt",
+      "label": "Decrypt()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L37"
+    },
+    {
+      "id": "crypto_encrypt",
+      "label": "Encrypt()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L66"
+    },
+    {
+      "id": "operational_core_utils_env_go",
+      "label": "env.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "env_loadenv",
+      "label": "LoadEnv()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L16"
+    },
+    {
+      "id": "env_getenv",
+      "label": "GetEnv()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L42"
+    },
+    {
+      "id": "operational_core_utils_generator_go",
+      "label": "generator.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "generator_newuuid",
+      "label": "NewUUID()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L15"
+    },
+    {
+      "id": "generator_randomstring",
+      "label": "RandomString()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L27"
+    },
+    {
+      "id": "generator_slugify",
+      "label": "Slugify()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L37"
+    },
+    {
+      "id": "operational_core_utils_image_go",
+      "label": "image.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "utils_imagepreset",
+      "label": "ImagePreset",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L18"
+    },
+    {
+      "id": "image_processimage",
+      "label": "ProcessImage()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L40"
+    },
+    {
+      "id": "image_saveimage",
+      "label": "saveImage()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L78"
+    },
+    {
+      "id": "image_pngcompression",
+      "label": "pngCompression()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L102"
+    },
+    {
+      "id": "operational_core_utils_jwt_go",
+      "label": "jwt.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "jwt_initjwtloadkeys",
+      "label": "InitJWTLoadKeys()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L19"
+    },
+    {
+      "id": "utils_appclaims",
+      "label": "AppClaims",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L44"
+    },
+    {
+      "id": "jwt_createjwt",
+      "label": "CreateJWT()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L50"
+    },
+    {
+      "id": "jwt_validatejwt",
+      "label": "ValidateJWT()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L70"
+    },
+    {
+      "id": "jwt_refreshjwt",
+      "label": "RefreshJWT()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L94"
+    },
+    {
+      "id": "jwt_encrypttokensignature",
+      "label": "EncryptTokenSignature()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L119"
+    },
+    {
+      "id": "jwt_createhs256token",
+      "label": "CreateHS256Token()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L134"
+    },
+    {
+      "id": "operational_core_utils_mail_go",
+      "label": "mail.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "mail_isvalidemail",
+      "label": "IsValidEmail()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L10"
+    },
+    {
+      "id": "utils_smtpclient",
+      "label": "SMTPClient",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L16"
+    },
+    {
+      "id": "mail_newsmtpclient",
+      "label": "NewSMTPClient()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L25"
+    },
+    {
+      "id": "utils_smtpclient_sendemail",
+      "label": ".SendEmail()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L36"
+    },
+    {
+      "id": "operational_core_utils_redis_go",
+      "label": "redis.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "redis_initredis",
+      "label": "InitRedis()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L19"
+    },
+    {
+      "id": "redis_redisset",
+      "label": "RedisSet()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L63"
+    },
+    {
+      "id": "redis_redisget",
+      "label": "RedisGet()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L71"
+    },
+    {
+      "id": "redis_redisdel",
+      "label": "RedisDel()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L79"
+    },
+    {
+      "id": "redis_redisflush",
+      "label": "RedisFlush()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L87"
+    },
+    {
+      "id": "redis_getredisclient",
+      "label": "GetRedisClient()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L100"
+    },
+    {
+      "id": "redis_isredisenabled",
+      "label": "IsRedisEnabled()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L105"
+    },
+    {
+      "id": "operational_core_utils_string_go",
+      "label": "string.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "string_replacespacetounderscore",
+      "label": "ReplaceSpaceToUnderscore()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L13"
+    },
+    {
+      "id": "string_ucfirst",
+      "label": "Ucfirst()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L17"
+    },
+    {
+      "id": "string_isnumber",
+      "label": "IsNumber()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L24"
+    },
+    {
+      "id": "string_generaterandomstring",
+      "label": "GenerateRandomString()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L37"
+    },
+    {
+      "id": "string_generaterandomnumber",
+      "label": "GenerateRandomNumber()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L42"
+    },
+    {
+      "id": "string_securerandom",
+      "label": "secureRandom()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L46"
+    },
+    {
+      "id": "operational_core_utils_time_go",
+      "label": "time.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\time.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "time_formatdateid",
+      "label": "FormatDateID()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\time.go",
+      "source_location": "L15"
+    },
+    {
+      "id": "time_timeago",
+      "label": "TimeAgo()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\time.go",
+      "source_location": "L31"
+    },
+    {
+      "id": "operational_core_utils_uploader_go",
+      "label": "uploader.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "uploader_uploadfile",
+      "label": "UploadFile()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L48"
+    },
+    {
+      "id": "uploader_isallowedextension",
+      "label": "isAllowedExtension()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L111"
+    },
+    {
+      "id": "uploader_validatemimetype",
+      "label": "validateMimeType()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L121"
+    },
+    {
+      "id": "operational_core_utils_validator_go",
+      "label": "validator.go",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "validator_init",
+      "label": "init()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L12"
+    },
+    {
+      "id": "utils_validatorerror",
+      "label": "ValidatorError",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L17"
+    },
+    {
+      "id": "validator_validatestruct",
+      "label": "ValidateStruct()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L21"
+    },
+    {
+      "id": "validator_msgfortag",
+      "label": "msgForTag()",
+      "file_type": "code",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L36"
+    },
+    {
+      "id": "operational_public_assets_js_za_form_js",
+      "label": "za-form.js",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "za_form_secureform",
+      "label": "SecureForm",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L5"
+    },
+    {
+      "id": "za_form_secureform_constructor",
+      "label": ".constructor()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L6"
+    },
+    {
+      "id": "za_form_secureform_init",
+      "label": ".init()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L55"
+    },
+    {
+      "id": "za_form_secureform_handlesubmit",
+      "label": ".handleSubmit()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L67"
+    },
+    {
+      "id": "za_form_secureform_handlesuccessaction",
+      "label": ".handleSuccessAction()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L111"
+    },
+    {
+      "id": "za_form_secureform_getcsrftoken",
+      "label": ".getCsrfToken()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L135"
+    },
+    {
+      "id": "za_form_secureform_iscooldownactive",
+      "label": ".isCooldownActive()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L140"
+    },
+    {
+      "id": "za_form_secureform_activatecooldown",
+      "label": ".activateCooldown()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L148"
+    },
+    {
+      "id": "za_form_secureform_resetstate",
+      "label": ".resetState()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L171"
+    },
+    {
+      "id": "za_form_secureform_lockbutton",
+      "label": ".lockButton()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L178"
+    },
+    {
+      "id": "za_form_secureform_unlockbutton",
+      "label": ".unlockButton()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L201"
+    },
+    {
+      "id": "za_form_secureform_fetchwithtimeout",
+      "label": ".fetchWithTimeout()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L213"
+    },
+    {
+      "id": "za_form_secureform_fetchwithretry",
+      "label": ".fetchWithRetry()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L226"
+    },
+    {
+      "id": "operational_public_assets_js_za_landing_theme_js",
+      "label": "za-landing-theme.js",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-landing-theme.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "za_landing_theme_inittheme",
+      "label": "initTheme()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-landing-theme.js",
+      "source_location": "L7"
+    },
+    {
+      "id": "za_landing_theme_updatethemeui",
+      "label": "updateThemeUI()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-landing-theme.js",
+      "source_location": "L30"
+    },
+    {
+      "id": "za_landing_theme_injecttoasthtml",
+      "label": "injectToastHTML()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-landing-theme.js",
+      "source_location": "L46"
+    },
+    {
+      "id": "operational_public_assets_js_za_navigate_js",
+      "label": "za-navigate.js",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-navigate.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "za_navigate_resetidletimer",
+      "label": "resetIdleTimer()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-navigate.js",
+      "source_location": "L5"
+    },
+    {
+      "id": "za_navigate_logoutuser",
+      "label": "logoutUser()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-navigate.js",
+      "source_location": "L11"
+    },
+    {
+      "id": "za_navigate_runscripts",
+      "label": "runScripts()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-navigate.js",
+      "source_location": "L105"
+    },
+    {
+      "id": "operational_public_assets_js_za_toast_js",
+      "label": "za-toast.js",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-toast.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "za_toast_injecttoasthtml",
+      "label": "injectToastHTML()",
+      "file_type": "code",
+      "source_file": "operational\\public\\assets\\js\\za-toast.js",
+      "source_location": "L7"
+    },
+    {
+      "id": "page_dashboard",
+      "label": "Operasional Dashboard | ThinkNalyze",
+      "file_type": "document",
+      "source_file": "operational/public/views/dashboard.html"
+    },
+    {
+      "id": "page_page",
+      "label": "page.html",
+      "file_type": "document",
+      "source_file": "operational/public/views/account/dashboard/page.html"
+    },
+    {
+      "id": "page_page",
+      "label": "page.html",
+      "file_type": "document",
+      "source_file": "operational/public/views/account/users/page.html"
+    },
+    {
+      "id": "page_page_searchInput",
+      "label": "searchInput",
+      "file_type": "document",
+      "source_file": "operational/public/views/account/users/page.html"
+    },
+    {
+      "id": "page_page_selectAll",
+      "label": "selectAll",
+      "file_type": "document",
+      "source_file": "operational/public/views/account/users/page.html"
+    },
+    {
+      "id": "page_page",
+      "label": "Jakarta Edukasi",
+      "file_type": "document",
+      "source_file": "operational/public/views/login/page.html"
+    },
+    {
+      "id": "page_page_email",
+      "label": "email",
+      "file_type": "document",
+      "source_file": "operational/public/views/login/page.html"
+    },
+    {
+      "id": "page_page_password",
+      "label": "password",
+      "file_type": "document",
+      "source_file": "operational/public/views/login/page.html"
+    },
+    {
+      "id": "page_page_rememberMe",
+      "label": "rememberMe",
+      "file_type": "document",
+      "source_file": "operational/public/views/login/page.html"
+    },
+    {
+      "id": "page_page",
+      "label": "Masuk & Daftar - JakEdu AI",
+      "file_type": "document",
+      "source_file": "operational/public/views/register/page.html"
+    },
+    {
+      "id": "page_page_field",
+      "label": "field",
+      "file_type": "document",
+      "source_file": "operational/public/views/register/page.html"
+    },
+    {
+      "id": "page_page_field",
+      "label": "field",
+      "file_type": "document",
+      "source_file": "operational/public/views/register/page.html"
+    },
+    {
+      "id": "page_page_field",
+      "label": "field",
+      "file_type": "document",
+      "source_file": "operational/public/views/register/page.html"
+    },
+    {
+      "id": "page_page_field",
+      "label": "field",
+      "file_type": "document",
+      "source_file": "operational/public/views/register/page.html"
+    }
+  ],
+  "edges": [
+    {
+      "source": "operational_main_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "log",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "os",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "gin",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "pgxpool",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "godotenv",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "main_main",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "main_getenv",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "main_getdashboardstats",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "main_listkyc",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "main_listorders",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L151",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_main_go",
+      "target": "main_reviewkyc",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L196",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "main_getenv",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\main.go",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "log",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "os",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "signal",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "syscall",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "concurrency",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "database",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "core_config",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "core_app",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_app_go",
+      "target": "app_new",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app",
+      "target": "core_app_registerjob",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app",
+      "target": "core_app_run",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_circuit_breaker_go",
+      "target": "sync",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_circuit_breaker_go",
+      "target": "atomic",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_circuit_breaker_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_circuit_breaker_go",
+      "target": "concurrency_enhancedcircuitbreaker",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_circuit_breaker_go",
+      "target": "circuit_breaker_newcircuitbreaker",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedcircuitbreaker",
+      "target": "concurrency_enhancedcircuitbreaker_allow",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedcircuitbreaker",
+      "target": "concurrency_enhancedcircuitbreaker_recordsuccess",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedcircuitbreaker",
+      "target": "concurrency_enhancedcircuitbreaker_recordfailure",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedcircuitbreaker",
+      "target": "concurrency_enhancedcircuitbreaker_updateerrorrate",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\circuit_breaker.go",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_dispatcher_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_dispatcher_go",
+      "target": "errors",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_dispatcher_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_dispatcher_go",
+      "target": "log",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_dispatcher_go",
+      "target": "atomic",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_dispatcher_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_dispatcher_go",
+      "target": "concurrency_dispatcher",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_dispatcher_go",
+      "target": "dispatcher_newdispatcher",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher",
+      "target": "concurrency_dispatcher_start",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L62",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher",
+      "target": "concurrency_dispatcher_stop",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L68",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher",
+      "target": "concurrency_dispatcher_registerjobhandler",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L73",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher",
+      "target": "concurrency_dispatcher_register",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher",
+      "target": "concurrency_dispatcher_dispatch",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher",
+      "target": "concurrency_dispatcher_dispatchandwait",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher",
+      "target": "concurrency_dispatcher_enqueue",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher",
+      "target": "concurrency_dispatcher_shutdown",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L165",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher",
+      "target": "concurrency_dispatcher_monitorloop",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L178",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_start",
+      "target": "concurrency_dispatcher_monitorloop",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_stop",
+      "target": "concurrency_dispatcher_shutdown",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_registerjobhandler",
+      "target": "concurrency_dispatcher_register",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_dispatch",
+      "target": "concurrency_dispatcher_enqueue",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L89",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_dispatchandwait",
+      "target": "concurrency_dispatcher_enqueue",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L99",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_monitorloop",
+      "target": "concurrency_dispatcher_stop",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L180",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_metricts_go",
+      "target": "math",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_metricts_go",
+      "target": "sort",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_metricts_go",
+      "target": "sync",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_metricts_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_metricts_go",
+      "target": "concurrency_enhancedmetrics",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_metricts_go",
+      "target": "metricts_newenhancedmetrics",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedmetrics",
+      "target": "concurrency_enhancedmetrics_addresponsetime",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedmetrics",
+      "target": "concurrency_enhancedmetrics_addqueuetime",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedmetrics",
+      "target": "concurrency_enhancedmetrics_updateresponsemetrics",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L70",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedmetrics",
+      "target": "concurrency_enhancedmetrics_updatequeuemetrics",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedmetrics",
+      "target": "concurrency_enhancedmetrics_getstats",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L125",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedmetrics_addresponsetime",
+      "target": "concurrency_enhancedmetrics_updateresponsemetrics",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_enhancedmetrics_addqueuetime",
+      "target": "concurrency_enhancedmetrics_updatequeuemetrics",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\metricts.go",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_rate_limiter_go",
+      "target": "sync",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_rate_limiter_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_rate_limiter_go",
+      "target": "concurrency_slidingwindowratelimiter",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_rate_limiter_go",
+      "target": "rate_limiter_newslidingwindowratelimiter",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_slidingwindowratelimiter",
+      "target": "concurrency_slidingwindowratelimiter_allow",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_slidingwindowratelimiter",
+      "target": "concurrency_slidingwindowratelimiter_getstats",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\rate_limiter.go",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_types_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_types_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_types_go",
+      "target": "concurrency_jobtype",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_types_go",
+      "target": "concurrency_handlerfunc",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_types_go",
+      "target": "concurrency_job",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_types_go",
+      "target": "concurrency_jobresult",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_types_go",
+      "target": "concurrency_config",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\types.go",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_worker_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_worker_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_worker_go",
+      "target": "log",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_worker_go",
+      "target": "sync",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_worker_go",
+      "target": "atomic",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_worker_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_worker_go",
+      "target": "concurrency_workerpool",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_concurrency_worker_go",
+      "target": "worker_newworkerpool",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool",
+      "target": "concurrency_workerpool_workerloop",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L54",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool",
+      "target": "concurrency_workerpool_processjob",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool",
+      "target": "concurrency_workerpool_submit",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L158",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool",
+      "target": "concurrency_workerpool_shutdown",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L168",
+      "weight": 1.0
+    },
+    {
+      "source": "worker_newworkerpool",
+      "target": "concurrency_workerpool_workerloop",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool_workerloop",
+      "target": "concurrency_workerpool_processjob",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L64",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_database_connection_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_database_connection_go",
+      "target": "errors",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_database_connection_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_database_connection_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_database_connection_go",
+      "target": "pgxpool",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_database_connection_go",
+      "target": "database_config",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_database_connection_go",
+      "target": "database_dbwrapper",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_database_connection_go",
+      "target": "connection_connect",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "database_dbwrapper",
+      "target": "database_dbwrapper_close",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "database_dbwrapper",
+      "target": "database_dbwrapper_stats",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L89",
+      "weight": 1.0
+    },
+    {
+      "source": "database_dbwrapper",
+      "target": "database_dbwrapper_queryrow",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "database_dbwrapper",
+      "target": "database_dbwrapper_exec",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L118",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_database_connection_go",
+      "target": "database_dummyscanner",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L135",
+      "weight": 1.0
+    },
+    {
+      "source": "database_dummyscanner",
+      "target": "database_dummyscanner_scan",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L139",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "log",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "sync",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "color",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "csrf",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "session",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "rate",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "http_currentuser",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_chain",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_corsmiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "http_contextkey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_wafmiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_ratelimitmiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L156",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_loggermiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L188",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "http_logresponsewriter",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L217",
+      "weight": 1.0
+    },
+    {
+      "source": "http_logresponsewriter",
+      "target": "http_logresponsewriter_writeheader",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L222",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_csrfmiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L227",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_authmiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L246",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_authorize",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L390",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_destroyauthorize",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L463",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_middleware_go",
+      "target": "middleware_islogout",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L489",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_corsmiddleware",
+      "target": "http_logresponsewriter_writeheader",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authmiddleware",
+      "target": "http_logresponsewriter_writeheader",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L318",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authmiddleware",
+      "target": "middleware_authorize",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L355",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authorize",
+      "target": "middleware_destroyauthorize",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L406",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_islogout",
+      "target": "http_logresponsewriter_writeheader",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L539",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "bytes",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "json",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "template",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "maps",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "csrf",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "v2",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "html",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "http_responsehelper",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "http_jsonresponse",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_http_response_go",
+      "target": "response_getcsrftoken",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "http_responsehelper",
+      "target": "http_responsehelper_json",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "http_responsehelper",
+      "target": "http_responsehelper_view",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L56",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "os",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "sessions",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "v9",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "session_config",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "session_manager",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_manager_go",
+      "target": "manager_init",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "json",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "errors",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "v5",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "uuid",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "sessions",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "utils",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "methods_getmanager",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "methods_set",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "methods_get",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L120",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "methods_destroy",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L189",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_session_methods_go",
+      "target": "methods_extracttoken",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L237",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_set",
+      "target": "methods_getmanager",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_set",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_get",
+      "target": "methods_getmanager",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_get",
+      "target": "methods_extracttoken",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L142",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_destroy",
+      "target": "methods_getmanager",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L190",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_destroy",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L201",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_destroy",
+      "target": "methods_extracttoken",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L220",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_extracttoken",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L238",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_agent_go",
+      "target": "net",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_agent_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_agent_go",
+      "target": "url",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_agent_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_agent_go",
+      "target": "user_agent",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_agent_go",
+      "target": "agent_getagent",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_agent_go",
+      "target": "agent_getuseragent",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_agent_go",
+      "target": "agent_getclientip",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_agent_go",
+      "target": "agent_getoriginfromref",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_converts_go",
+      "target": "strconv",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\converts.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_converts_go",
+      "target": "converts_toint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\converts.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_converts_go",
+      "target": "converts_tostring",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\converts.go",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "bytes",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "aes",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "cipher",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "base64",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "errors",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "crypto_pkcs5unpadding",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "crypto_pkcs5padding",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "crypto_decrypt",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_crypto_go",
+      "target": "crypto_encrypt",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "crypto_decrypt",
+      "target": "crypto_pkcs5unpadding",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L58",
+      "weight": 1.0
+    },
+    {
+      "source": "crypto_encrypt",
+      "target": "crypto_pkcs5padding",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L71",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_env_go",
+      "target": "bufio",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_env_go",
+      "target": "os",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_env_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_env_go",
+      "target": "sync",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_env_go",
+      "target": "env_loadenv",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_env_go",
+      "target": "env_getenv",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_generator_go",
+      "target": "rand",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_generator_go",
+      "target": "hex",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_generator_go",
+      "target": "regexp",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_generator_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_generator_go",
+      "target": "uuid",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_generator_go",
+      "target": "generator_newuuid",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_generator_go",
+      "target": "generator_randomstring",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_generator_go",
+      "target": "generator_slugify",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\generator.go",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "image",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "png",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "filepath",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "imaging",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "utils_imagepreset",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "image_processimage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "image_saveimage",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_image_go",
+      "target": "image_pngcompression",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "image_processimage",
+      "target": "image_saveimage",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "image_saveimage",
+      "target": "image_pngcompression",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\image.go",
+      "source_location": "L93",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "rsa",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "errors",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "os",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "v5",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "jwt_initjwtloadkeys",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "utils_appclaims",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "jwt_createjwt",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "jwt_validatejwt",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L70",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "jwt_refreshjwt",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "jwt_encrypttokensignature",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L119",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_jwt_go",
+      "target": "jwt_createhs256token",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L134",
+      "weight": 1.0
+    },
+    {
+      "source": "jwt_refreshjwt",
+      "target": "jwt_validatejwt",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L99",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_mail_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_mail_go",
+      "target": "mail",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_mail_go",
+      "target": "smtp",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_mail_go",
+      "target": "mail_isvalidemail",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_mail_go",
+      "target": "utils_smtpclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_mail_go",
+      "target": "mail_newsmtpclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "utils_smtpclient",
+      "target": "utils_smtpclient_sendemail",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "log",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "strconv",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "v9",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "redis_initredis",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "redis_redisset",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "redis_redisget",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L71",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "redis_redisdel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "redis_redisflush",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "redis_getredisclient",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L100",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_redis_go",
+      "target": "redis_isredisenabled",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L105",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "rand",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "big",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "strconv",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "unicode",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "string_replacespacetounderscore",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "string_ucfirst",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "string_isnumber",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "string_generaterandomstring",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "string_generaterandomnumber",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_string_go",
+      "target": "string_securerandom",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "string_generaterandomstring",
+      "target": "string_securerandom",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "string_generaterandomnumber",
+      "target": "string_securerandom",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\string.go",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_time_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\time.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_time_go",
+      "target": "math",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\time.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_time_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\time.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_time_go",
+      "target": "time_formatdateid",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\time.go",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_time_go",
+      "target": "time_timeago",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\time.go",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "time_timeago",
+      "target": "time_formatdateid",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\time.go",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "errors",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "io",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "multipart",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "os",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "filepath",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "uploader_uploadfile",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L48",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "uploader_isallowedextension",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_uploader_go",
+      "target": "uploader_validatemimetype",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "uploader_uploadfile",
+      "target": "uploader_isallowedextension",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "uploader_uploadfile",
+      "target": "uploader_validatemimetype",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_validator_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_validator_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_validator_go",
+      "target": "v10",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_validator_go",
+      "target": "validator_init",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_validator_go",
+      "target": "utils_validatorerror",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_validator_go",
+      "target": "validator_validatestruct",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_core_utils_validator_go",
+      "target": "validator_msgfortag",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "validator_validatestruct",
+      "target": "validator_msgfortag",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_public_assets_js_za_form_js",
+      "target": "za_form_secureform",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_constructor",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_init",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_handlesubmit",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_handlesuccessaction",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L111",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_getcsrftoken",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L135",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_iscooldownactive",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L140",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_activatecooldown",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L148",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_resetstate",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_lockbutton",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L178",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_unlockbutton",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L201",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_fetchwithtimeout",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L213",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform",
+      "target": "za_form_secureform_fetchwithretry",
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L226",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_constructor",
+      "target": "za_form_secureform_init",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_init",
+      "target": "za_form_secureform_iscooldownactive",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_init",
+      "target": "za_form_secureform_lockbutton",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_handlesubmit",
+      "target": "za_form_secureform_iscooldownactive",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_handlesubmit",
+      "target": "za_form_secureform_lockbutton",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_handlesubmit",
+      "target": "za_form_secureform_getcsrftoken",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L77",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_handlesubmit",
+      "target": "za_form_secureform_fetchwithretry",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_handlesubmit",
+      "target": "za_form_secureform_activatecooldown",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_handlesubmit",
+      "target": "za_form_secureform_resetstate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_handlesubmit",
+      "target": "za_form_secureform_handlesuccessaction",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L103",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_activatecooldown",
+      "target": "za_form_secureform_lockbutton",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L168",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_fetchwithretry",
+      "target": "za_form_secureform_fetchwithtimeout",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L228",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_public_assets_js_za_landing_theme_js",
+      "target": "za_landing_theme_inittheme",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-landing-theme.js",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_public_assets_js_za_landing_theme_js",
+      "target": "za_landing_theme_updatethemeui",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-landing-theme.js",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_public_assets_js_za_landing_theme_js",
+      "target": "za_landing_theme_injecttoasthtml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-landing-theme.js",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "za_landing_theme_inittheme",
+      "target": "za_landing_theme_updatethemeui",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-landing-theme.js",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_public_assets_js_za_navigate_js",
+      "target": "za_navigate_resetidletimer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-navigate.js",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_public_assets_js_za_navigate_js",
+      "target": "za_navigate_logoutuser",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-navigate.js",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_public_assets_js_za_navigate_js",
+      "target": "za_navigate_runscripts",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-navigate.js",
+      "source_location": "L105",
+      "weight": 1.0
+    },
+    {
+      "source": "operational_public_assets_js_za_toast_js",
+      "target": "za_toast_injecttoasthtml",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "operational\\public\\assets\\js\\za-toast.js",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "database_dbwrapper_close",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "core_app_run",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L84",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getenv",
+      "target": "env_getenv",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L88",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardstats",
+      "target": "database_dummyscanner_scan",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L97",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardstats",
+      "target": "database_dbwrapper_queryrow",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L97",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardstats",
+      "target": "http_responsehelper_json",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "main_listkyc",
+      "target": "http_responsehelper_json",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L128",
+      "weight": 1.0
+    },
+    {
+      "source": "main_listkyc",
+      "target": "database_dbwrapper_close",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L131",
+      "weight": 1.0
+    },
+    {
+      "source": "main_listkyc",
+      "target": "database_dummyscanner_scan",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L138",
+      "weight": 1.0
+    },
+    {
+      "source": "main_listorders",
+      "target": "http_responsehelper_json",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L169",
+      "weight": 1.0
+    },
+    {
+      "source": "main_listorders",
+      "target": "database_dbwrapper_close",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L172",
+      "weight": 1.0
+    },
+    {
+      "source": "main_listorders",
+      "target": "database_dummyscanner_scan",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L179",
+      "weight": 1.0
+    },
+    {
+      "source": "main_reviewkyc",
+      "target": "http_responsehelper_json",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L204",
+      "weight": 1.0
+    },
+    {
+      "source": "main_reviewkyc",
+      "target": "database_dbwrapper_exec",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\main.go",
+      "source_location": "L208",
+      "weight": 1.0
+    },
+    {
+      "source": "app_new",
+      "target": "env_getenv",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
+      "source": "app_new",
+      "target": "connection_connect",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "app_new",
+      "target": "dispatcher_newdispatcher",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L73",
+      "weight": 1.0
+    },
+    {
+      "source": "app_new",
+      "target": "concurrency_dispatcher_start",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app_registerjob",
+      "target": "concurrency_dispatcher_registerjobhandler",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L105",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app_run",
+      "target": "middleware_loggermiddleware",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L114",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app_run",
+      "target": "middleware_corsmiddleware",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app_run",
+      "target": "middleware_wafmiddleware",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L116",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app_run",
+      "target": "middleware_ratelimitmiddleware",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L119",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app_run",
+      "target": "env_getenv",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L133",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app_run",
+      "target": "concurrency_workerpool_shutdown",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L170",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app_run",
+      "target": "concurrency_dispatcher_stop",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L175",
+      "weight": 1.0
+    },
+    {
+      "source": "core_app_run",
+      "target": "database_dbwrapper_close",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\app.go",
+      "source_location": "L179",
+      "weight": 1.0
+    },
+    {
+      "source": "dispatcher_newdispatcher",
+      "target": "circuit_breaker_newcircuitbreaker",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "dispatcher_newdispatcher",
+      "target": "rate_limiter_newslidingwindowratelimiter",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "dispatcher_newdispatcher",
+      "target": "metricts_newenhancedmetrics",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "dispatcher_newdispatcher",
+      "target": "worker_newworkerpool",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_registerjobhandler",
+      "target": "concurrency_jobtype",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_registerjobhandler",
+      "target": "concurrency_handlerfunc",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_dispatchandwait",
+      "target": "concurrency_jobtype",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_enqueue",
+      "target": "concurrency_slidingwindowratelimiter_allow",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L119",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_enqueue",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L120",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_enqueue",
+      "target": "concurrency_workerpool_submit",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L157",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_shutdown",
+      "target": "concurrency_workerpool_shutdown",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_dispatcher_monitorloop",
+      "target": "concurrency_enhancedcircuitbreaker_updateerrorrate",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\dispatcher.go",
+      "source_location": "L182",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool_processjob",
+      "target": "concurrency_enhancedmetrics_addqueuetime",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L76",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool_processjob",
+      "target": "concurrency_enhancedmetrics_addresponsetime",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool_processjob",
+      "target": "concurrency_enhancedcircuitbreaker_recordfailure",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L125",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool_processjob",
+      "target": "concurrency_enhancedcircuitbreaker_recordsuccess",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L129",
+      "weight": 1.0
+    },
+    {
+      "source": "concurrency_workerpool_processjob",
+      "target": "database_dbwrapper_close",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\concurrency\\worker.go",
+      "source_location": "L153",
+      "weight": 1.0
+    },
+    {
+      "source": "database_dbwrapper_queryrow",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L112",
+      "weight": 1.0
+    },
+    {
+      "source": "database_dbwrapper_exec",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\database\\connection.go",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_corsmiddleware",
+      "target": "concurrency_handlerfunc",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L60",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_corsmiddleware",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L61",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_corsmiddleware",
+      "target": "methods_set",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L65",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_wafmiddleware",
+      "target": "concurrency_handlerfunc",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L87",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_ratelimitmiddleware",
+      "target": "concurrency_handlerfunc",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L163",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_ratelimitmiddleware",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L166",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_ratelimitmiddleware",
+      "target": "concurrency_slidingwindowratelimiter_allow",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L178",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_loggermiddleware",
+      "target": "concurrency_handlerfunc",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L189",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_loggermiddleware",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L200",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_csrfmiddleware",
+      "target": "concurrency_handlerfunc",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L239",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authmiddleware",
+      "target": "concurrency_handlerfunc",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L248",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authmiddleware",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L250",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authmiddleware",
+      "target": "methods_set",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L278",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authmiddleware",
+      "target": "env_getenv",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L290",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authmiddleware",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L303",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authmiddleware",
+      "target": "crypto_encrypt",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L323",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authorize",
+      "target": "crypto_decrypt",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L396",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authorize",
+      "target": "redis_redisget",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L402",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authorize",
+      "target": "jwt_validatejwt",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L425",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authorize",
+      "target": "jwt_refreshjwt",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L430",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authorize",
+      "target": "jwt_encrypttokensignature",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L435",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_authorize",
+      "target": "redis_redisset",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L437",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_destroyauthorize",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L465",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_destroyauthorize",
+      "target": "crypto_decrypt",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L473",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_destroyauthorize",
+      "target": "redis_redisdel",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L479",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_islogout",
+      "target": "concurrency_handlerfunc",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L490",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_islogout",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L492",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_islogout",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L500",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_islogout",
+      "target": "crypto_encrypt",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L512",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_islogout",
+      "target": "env_getenv",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L512",
+      "weight": 1.0
+    },
+    {
+      "source": "middleware_islogout",
+      "target": "methods_set",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\middleware.go",
+      "source_location": "L538",
+      "weight": 1.0
+    },
+    {
+      "source": "http_responsehelper_json",
+      "target": "methods_set",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "http_responsehelper_view",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L101",
+      "weight": 1.0
+    },
+    {
+      "source": "http_responsehelper_view",
+      "target": "methods_set",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\http\\response.go",
+      "source_location": "L110",
+      "weight": 1.0
+    },
+    {
+      "source": "manager_init",
+      "target": "redis_isredisenabled",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "manager_init",
+      "target": "redis_getredisclient",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\session\\manager.go",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_getmanager",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_set",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L39",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_set",
+      "target": "redis_redisset",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L96",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_get",
+      "target": "redis_redisget",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L175",
+      "weight": 1.0
+    },
+    {
+      "source": "methods_destroy",
+      "target": "redis_redisdel",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\session\\methods.go",
+      "source_location": "L226",
+      "weight": 1.0
+    },
+    {
+      "source": "agent_getagent",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "agent_getuseragent",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "agent_getuseragent",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "agent_getclientip",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\agent.go",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "crypto_decrypt",
+      "target": "env_getenv",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "crypto_decrypt",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L60",
+      "weight": 1.0
+    },
+    {
+      "source": "crypto_encrypt",
+      "target": "env_getenv",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\crypto.go",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "env_loadenv",
+      "target": "database_dbwrapper_close",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "env_loadenv",
+      "target": "database_dummyscanner_scan",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\env.go",
+      "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "jwt_createjwt",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "jwt_validatejwt",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L72",
+      "weight": 1.0
+    },
+    {
+      "source": "jwt_refreshjwt",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L96",
+      "weight": 1.0
+    },
+    {
+      "source": "jwt_encrypttokensignature",
+      "target": "crypto_encrypt",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\jwt.go",
+      "source_location": "L124",
+      "weight": 1.0
+    },
+    {
+      "source": "mail_newsmtpclient",
+      "target": "env_getenv",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\mail.go",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "redis_initredis",
+      "target": "env_getenv",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "redis_redisset",
+      "target": "methods_set",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "redis_redisget",
+      "target": "methods_get",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\redis.go",
+      "source_location": "L75",
+      "weight": 1.0
+    },
+    {
+      "source": "uploader_uploadfile",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "uploader_uploadfile",
+      "target": "database_dbwrapper_close",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "uploader_uploadfile",
+      "target": "generator_randomstring",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L89",
+      "weight": 1.0
+    },
+    {
+      "source": "uploader_validatemimetype",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\uploader.go",
+      "source_location": "L124",
+      "weight": 1.0
+    },
+    {
+      "source": "validator_init",
+      "target": "app_new",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\core\\utils\\validator.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "za_form_secureform_handlesubmit",
+      "target": "http_responsehelper_json",
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "operational\\public\\assets\\js\\za-form.js",
+      "source_location": "L90",
+      "weight": 1.0
+    },
+    {
+      "source": "page_page",
+      "target": "page_page_searchInput",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "page_page",
+      "target": "page_page_selectAll",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "page_page",
+      "target": "page_page_email",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "page_page",
+      "target": "page_page_password",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "page_page",
+      "target": "page_page_rememberMe",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "page_page",
+      "target": "page_page_field",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "page_page",
+      "target": "page_page_field",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "page_page",
+      "target": "page_page_field",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    },
+    {
+      "source": "page_page",
+      "target": "page_page_field",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

@@ -1,0 +1,19 @@
+operational\public\views\dashboard.html
+operational\public\views\account\dashboard\page.html
+operational\public\views\account\users\active.html
+operational\public\views\account\users\banned.html
+operational\public\views\account\users\inactive.html
+operational\public\views\account\users\page.html
+operational\public\views\account\wrapper\page.html
+operational\public\views\account\wrapper\settings.html
+operational\public\views\docs\index.html
+operational\public\views\landing\index copy 2.html
+operational\public\views\landing\index copy.html
+operational\public\views\landing\index.html
+operational\public\views\landing\index2.html
+operational\public\views\landing\macrodata.html
+operational\public\views\landing\thinkarah.html
+operational\public\views\login\page.html
+operational\public\views\login1\page.html
+operational\public\views\register\page.html
+operational\public\views\reset\page.html

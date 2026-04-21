@@ -1,0 +1,7 @@
+{
+  "gateway\\main.go": 1776510152.0456903,
+  "gateway\\auth\\auth.go": 1776442296.29063,
+  "gateway\\auth\\redis_init.go": 1776256182.560833,
+  "gateway\\core\\routes\\routes.go": 1776256182.57084,
+  "gateway\\system\\env.go": 1776256182.5780058
+}

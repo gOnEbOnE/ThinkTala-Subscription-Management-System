@@ -1,0 +1,729 @@
+{
+  "nodes": [
+    {
+      "id": "account_page_admin_panel",
+      "label": "Admin Panel Shell",
+      "file_type": "document",
+      "source_file": "account/public/views/account/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "dashboard_page_system_summary",
+      "label": "System Summary Dashboard",
+      "file_type": "document",
+      "source_file": "account/public/views/account/dashboard/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "active_page_users_table",
+      "label": "Active Users Table View",
+      "file_type": "document",
+      "source_file": "account/public/views/account/users/active.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "banned_page_users_table",
+      "label": "Banned Users Table View",
+      "file_type": "document",
+      "source_file": "account/public/views/account/users/banned.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "inactive_page_user_management",
+      "label": "Inactive Users Management",
+      "file_type": "document",
+      "source_file": "account/public/views/account/users/inactive.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "users_page_user_management",
+      "label": "All Users Management",
+      "file_type": "document",
+      "source_file": "account/public/views/account/users/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "wrapper_page_account_wrapper",
+      "label": "Account Wrapper Layout",
+      "file_type": "document",
+      "source_file": "account/public/views/account/wrapper/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "settings_page_password_change",
+      "label": "Password Change Settings",
+      "file_type": "document",
+      "source_file": "account/public/views/account/wrapper/settings.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_index_zaframework_docs",
+      "label": "ZAFramework Documentation",
+      "file_type": "document",
+      "source_file": "account/public/views/docs/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_copy_2_macroquant_overview",
+      "label": "MacroQuant Overview Landing (Copy 2)",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/index copy 2.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_copy_pinkai_landing",
+      "label": "PinkAI Marketing Landing",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/index copy.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index_macroquant_overview",
+      "label": "MacroQuant Overview Landing",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "index2_macroquant_suite",
+      "label": "MacroQuant Full Suite Landing",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/index2.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "macrodata_macro_calendar",
+      "label": "Macro Data Calendar View",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/macrodata.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "thinkarah_project_blueprint",
+      "label": "ThinkArah Project Blueprint",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "login_page_modern_login",
+      "label": "Modern Login Page",
+      "file_type": "document",
+      "source_file": "account/public/views/login/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "login1_page_legacy_login",
+      "label": "Legacy Login Page",
+      "file_type": "document",
+      "source_file": "account/public/views/login1/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "register_page_signup",
+      "label": "Register Page",
+      "file_type": "document",
+      "source_file": "account/public/views/register/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "reset_page_password_reset",
+      "label": "Reset Password Page",
+      "file_type": "document",
+      "source_file": "account/public/views/reset/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "active_api_users_endpoint",
+      "label": "Users API Endpoint",
+      "file_type": "document",
+      "source_file": "account/public/views/account/users/active.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "inactive_api_user_detail",
+      "label": "User Detail Endpoint",
+      "file_type": "document",
+      "source_file": "account/public/views/account/users/inactive.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "inactive_api_user_update",
+      "label": "User Update Endpoint",
+      "file_type": "document",
+      "source_file": "account/public/views/account/users/inactive.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "login_route_reset",
+      "label": "Reset Route",
+      "file_type": "document",
+      "source_file": "account/public/views/login/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "login_route_register",
+      "label": "Register Route",
+      "file_type": "document",
+      "source_file": "account/public/views/login/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_route_login",
+      "label": "Login Route",
+      "file_type": "document",
+      "source_file": "account/public/views/register/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_session_manager",
+      "label": "Session Manager (Redis/Cookie/JWT)",
+      "file_type": "document",
+      "source_file": "account/public/views/docs/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_routing_system",
+      "label": "Routing System (http.ServeMux Wrapper)",
+      "file_type": "document",
+      "source_file": "account/public/views/docs/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "pinkai_sdk_multilang",
+      "label": "PinkAI SDK Multi-language Concept",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/index copy.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "macroquant_neuromac_model",
+      "label": "NeuroMac v4.2 Model",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "macroquant_central_bank_bias",
+      "label": "Central Bank Bias Module",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/macrodata.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "macroquant_economic_calendar",
+      "label": "AI Economic Calendar Module",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/macrodata.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "thinkarah_ai_engine",
+      "label": "ThinkArah AI Engine",
+      "file_type": "document",
+      "source_file": "account/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "login1_tawkto_widget",
+      "label": "Tawk.to Chat Widget",
+      "file_type": "document",
+      "source_file": "account/public/views/login1/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "wrapper_page_account_wrapper",
+      "target": "inactive_page_user_management",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/account/wrapper/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "wrapper_page_account_wrapper",
+      "target": "settings_page_password_change",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/account/wrapper/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_page_admin_panel",
+      "target": "inactive_page_user_management",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/account/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_page_admin_panel",
+      "target": "settings_page_password_change",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/account/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "active_page_users_table",
+      "target": "active_api_users_endpoint",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/account/users/active.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "users_page_user_management",
+      "target": "active_api_users_endpoint",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/account/users/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "inactive_page_user_management",
+      "target": "active_api_users_endpoint",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/account/users/inactive.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "inactive_page_user_management",
+      "target": "inactive_api_user_detail",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/account/users/inactive.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "inactive_page_user_management",
+      "target": "inactive_api_user_update",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/account/users/inactive.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "settings_page_password_change",
+      "target": "auth_route_login",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.67,
+      "source_file": "account/public/views/account/wrapper/settings.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "docs_index_zaframework_docs",
+      "target": "docs_session_manager",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/docs/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "docs_index_zaframework_docs",
+      "target": "docs_routing_system",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/docs/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "login_page_modern_login",
+      "target": "login_route_reset",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/login/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "login_page_modern_login",
+      "target": "login_route_register",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/login/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "register_page_signup",
+      "target": "auth_route_login",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/register/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "reset_page_password_reset",
+      "target": "auth_route_login",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/reset/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "login1_page_legacy_login",
+      "target": "login_route_reset",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/login1/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "login1_page_legacy_login",
+      "target": "login_route_register",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/login1/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "login1_page_legacy_login",
+      "target": "login1_tawkto_widget",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/login1/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "index_copy_pinkai_landing",
+      "target": "pinkai_sdk_multilang",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/landing/index copy.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "index_macroquant_overview",
+      "target": "macroquant_neuromac_model",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/landing/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "index_copy_2_macroquant_overview",
+      "target": "macroquant_neuromac_model",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/landing/index copy 2.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "index2_macroquant_suite",
+      "target": "macroquant_economic_calendar",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/landing/index2.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "macrodata_macro_calendar",
+      "target": "macroquant_central_bank_bias",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/landing/macrodata.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "macrodata_macro_calendar",
+      "target": "macroquant_economic_calendar",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/landing/macrodata.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "thinkarah_project_blueprint",
+      "target": "thinkarah_ai_engine",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "account/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "thinkarah_ai_engine",
+      "target": "macroquant_economic_calendar",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.72,
+      "source_file": "account/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "index_macroquant_overview",
+      "target": "index_copy_2_macroquant_overview",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.93,
+      "source_file": "account/public/views/landing/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "index_macroquant_overview",
+      "target": "macrodata_macro_calendar",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.81,
+      "source_file": "account/public/views/landing/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "active_page_users_table",
+      "target": "users_page_user_management",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.88,
+      "source_file": "account/public/views/account/users/active.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "banned_page_users_table",
+      "target": "inactive_page_user_management",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.79,
+      "source_file": "account/public/views/account/users/banned.html",
+      "source_location": null,
+      "weight": 1
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "auth_pages_form_flow",
+      "label": "Authentication Form Flow",
+      "nodes": [
+        "login_page_modern_login",
+        "login1_page_legacy_login",
+        "register_page_signup",
+        "reset_page_password_reset",
+        "auth_route_login"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.92,
+      "source_file": "account/public/views/login/page.html"
+    },
+    {
+      "id": "user_admin_table_views",
+      "label": "User Administration Table Views",
+      "nodes": [
+        "users_page_user_management",
+        "active_page_users_table",
+        "banned_page_users_table",
+        "inactive_page_user_management",
+        "active_api_users_endpoint"
+      ],
+      "relation": "form",
+      "confidence": "EXTRACTED",
+      "confidence_score": 0.9,
+      "source_file": "account/public/views/account/users/page.html"
+    },
+    {
+      "id": "macroquant_analysis_stack",
+      "label": "MacroQuant Analysis Stack",
+      "nodes": [
+        "index_macroquant_overview",
+        "index2_macroquant_suite",
+        "macrodata_macro_calendar",
+        "macroquant_neuromac_model",
+        "macroquant_central_bank_bias",
+        "macroquant_economic_calendar"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.84,
+      "source_file": "account/public/views/landing/macrodata.html"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

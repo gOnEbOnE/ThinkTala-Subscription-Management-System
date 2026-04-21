@@ -1,0 +1,217 @@
+{
+  "communities": {
+    "0": [
+      "main_buildemptydashboardpayload",
+      "main_countactiveatdate",
+      "main_countactivecustomers",
+      "main_countchurnedcustomers",
+      "main_countloyalcustomers",
+      "main_fetchrecentlychurnedcustomers",
+      "main_fetchtoployalcustomers",
+      "main_isdashboardsourceready",
+      "management_churnedcustomeritem",
+      "management_churnratepoint",
+      "management_customerdetailpayload",
+      "management_dashboardcustomerpayload",
+      "management_dashboardpackagepayload",
+      "management_dummycustomer",
+      "management_dummypackagetransaction",
+      "management_loyalcustomeritem",
+      "management_main_go",
+      "management_monthlypoint",
+      "management_packagecatalogitem",
+      "management_packagedetailpayload",
+      "management_packagedetailtrendpoint",
+      "management_packageperformanceitem",
+      "management_packagerevenuecontributionpoint",
+      "management_packagesalesdistributionpoint",
+      "management_packagesalestrendpoint",
+      "management_requestaudit"
+    ],
+    "1": [
+      "main_aggregatepackagemetrics",
+      "main_builddummypackagedashboardpayload",
+      "main_builddummypackagedetailpayload",
+      "main_buildmonthbuckets",
+      "main_calculaterate",
+      "main_comparefloatrate",
+      "main_comparerate",
+      "main_getdummypackagetransactions",
+      "main_getmetrictransactions",
+      "main_getpackagecatalog",
+      "main_packageperiodlabel",
+      "main_previousperiod",
+      "main_round2"
+    ],
+    "2": [
+      "main_builddummycustomerdetail",
+      "main_builddummydashboardpayload",
+      "main_calctotalpages",
+      "main_countdummyactiveatdate",
+      "main_countdummyactiveinrange",
+      "main_countdummychurnedinrange",
+      "main_dummydurationmonths",
+      "main_getdashboardcustomerdetail",
+      "main_getdummycustomers",
+      "main_iscustomeractiveinrange",
+      "main_iscustomerchurnedinrange",
+      "main_iswithinrange"
+    ],
+    "3": [
+      "main_getdashboardcustomers",
+      "main_getdashboardpackagedetail",
+      "main_getdashboardpackages",
+      "main_handleservererror",
+      "main_parseintdefault",
+      "main_parseperiod",
+      "main_requirepackagedashboardrole",
+      "main_setauditerror"
+    ],
+    "4": [
+      "main_auditmiddleware",
+      "main_ensuremanagementschema",
+      "main_getenv",
+      "main_main",
+      "main_requiremanagementrole",
+      "main_saveauditlog"
+    ],
+    "5": [
+      "main_fetchmonthlychurncustomers",
+      "main_fetchmonthlynewcustomers",
+      "main_monthkey"
+    ]
+  },
+  "cohesion": {
+    "0": 0.08,
+    "1": 0.27,
+    "2": 0.23,
+    "3": 0.36,
+    "4": 0.33,
+    "5": 0.67
+  },
+  "gods": [
+    {
+      "id": "main_builddummydashboardpayload",
+      "label": "buildDummyDashboardPayload()",
+      "degree": 16
+    },
+    {
+      "id": "main_builddummypackagedashboardpayload",
+      "label": "buildDummyPackageDashboardPayload()",
+      "degree": 12
+    },
+    {
+      "id": "main_builddummypackagedetailpayload",
+      "label": "buildDummyPackageDetailPayload()",
+      "degree": 10
+    },
+    {
+      "id": "main_setauditerror",
+      "label": "setAuditError()",
+      "degree": 7
+    },
+    {
+      "id": "main_main",
+      "label": "main()",
+      "degree": 6
+    },
+    {
+      "id": "main_round2",
+      "label": "round2()",
+      "degree": 6
+    },
+    {
+      "id": "main_getdashboardcustomers",
+      "label": "getDashboardCustomers()",
+      "degree": 5
+    },
+    {
+      "id": "main_getdashboardpackages",
+      "label": "getDashboardPackages()",
+      "degree": 5
+    },
+    {
+      "id": "main_comparerate",
+      "label": "compareRate()",
+      "degree": 5
+    },
+    {
+      "id": "main_getdashboardpackagedetail",
+      "label": "getDashboardPackageDetail()",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "main()",
+      "target": "requirePackageDashboardRole()",
+      "source_files": [
+        "management\\main.go",
+        "management\\main.go"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 4 \u2192 community 3"
+    },
+    {
+      "source": "getDashboardCustomers()",
+      "target": "buildDummyDashboardPayload()",
+      "source_files": [
+        "management\\main.go",
+        "management\\main.go"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 3 \u2192 community 2"
+    },
+    {
+      "source": "getDashboardPackages()",
+      "target": "buildDummyPackageDashboardPayload()",
+      "source_files": [
+        "management\\main.go",
+        "management\\main.go"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 3 \u2192 community 1"
+    },
+    {
+      "source": "buildDummyPackageDashboardPayload()",
+      "target": "calcTotalPages()",
+      "source_files": [
+        "management\\main.go",
+        "management\\main.go"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "note": "Bridges community 1 \u2192 community 2"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `buildDummyDashboardPayload()` connect `Community 2` to `Community 0`, `Community 1`, `Community 3`?",
+      "why": "High betweenness centrality (0.022) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `buildDummyPackageDashboardPayload()` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`?",
+      "why": "High betweenness centrality (0.010) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `buildDummyPackageDetailPayload()` connect `Community 1` to `Community 0`, `Community 3`?",
+      "why": "High betweenness centrality (0.006) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `monthlyPoint`, `churnRatePoint`, `loyalCustomerItem` to the rest of the system?",
+      "why": "17 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `Community 0` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.08 - nodes in this community are weakly interconnected."
+    }
+  ]
+}
