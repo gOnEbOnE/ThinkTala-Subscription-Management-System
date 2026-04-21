@@ -11,6 +11,8 @@ type Service struct {
 	repo *Repository
 }
 
+const maxPinnedNotifications = 2
+
 // NewService membuat instance Service baru.
 func NewService() *Service {
 	return &Service{repo: NewRepository()}
@@ -72,12 +74,23 @@ func (s *Service) Create(req CreateNotificationRequest, id string) error {
 	req.Type = typeVal
 	req.TargetRole = targetRole
 
+	if req.IsPinned != nil && *req.IsPinned {
+		pinnedCount, err := s.repo.countPinned("")
+		if err != nil {
+			return fmt.Errorf("gagal mengecek slot pinned")
+		}
+		if pinnedCount >= maxPinnedNotifications {
+			return fmt.Errorf("slot pinned penuh (maksimal %d). Nonaktifkan atau hapus salah satu news pinned terlebih dahulu", maxPinnedNotifications)
+		}
+	}
+
 	return s.repo.Create(req, id)
 }
 
 // Update memperbarui notification berdasarkan ID.
 func (s *Service) Update(id string, req UpdateNotificationRequest) error {
-	if _, err := s.repo.GetByID(id); err != nil {
+	existing, err := s.repo.GetByID(id)
+	if err != nil {
 		return err
 	}
 
@@ -96,6 +109,16 @@ func (s *Service) Update(id string, req UpdateNotificationRequest) error {
 	}
 	if req.Type != "" {
 		req.Type = strings.ToLower(strings.TrimSpace(req.Type))
+	}
+
+	if req.IsPinned != nil && *req.IsPinned && !existing.IsPinned {
+		pinnedCount, err := s.repo.countPinned(id)
+		if err != nil {
+			return fmt.Errorf("gagal mengecek slot pinned")
+		}
+		if pinnedCount >= maxPinnedNotifications {
+			return fmt.Errorf("slot pinned penuh (maksimal %d). Nonaktifkan atau hapus salah satu news pinned terlebih dahulu", maxPinnedNotifications)
+		}
 	}
 
 	return s.repo.Update(id, req)

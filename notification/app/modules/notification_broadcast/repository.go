@@ -37,6 +37,7 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 			image_url,
 			expiry_date,
 			is_active,
+			is_pinned,
 			created_at,
 			created_by,
 			updated_at,
@@ -85,6 +86,7 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 			&n.ImageURL,
 			&n.ExpiryDate,
 			&n.IsActive,
+			&n.IsPinned,
 			&n.CreatedAt,
 			&n.CreatedBy,
 			&n.UpdatedAt,
@@ -127,12 +129,12 @@ func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
 
 	rows, err := r.db.Query(context.Background(), `
 		SELECT id, title, COALESCE(description, message, '') AS description, type, target_role,
-		       cta_url, image_url, expiry_date, created_at
+		       cta_url, image_url, expiry_date, created_at, is_pinned
 		FROM notifications
 		WHERE is_active = TRUE
 		  AND (expiry_date IS NULL OR expiry_date > NOW())
 		  AND LOWER(target_role) = ANY($1)
-		ORDER BY created_at DESC LIMIT 20
+		ORDER BY is_pinned DESC, created_at DESC LIMIT 20
 	`, audienceKeys)
 	if err != nil {
 		return nil, err
@@ -145,7 +147,8 @@ func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
 		var ctaURL, imageURL *string
 		var expiryDate *time.Time
 		var createdAt time.Time
-		err = rows.Scan(&id, &title, &desc, &typ, &target, &ctaURL, &imageURL, &expiryDate, &createdAt)
+		var isPinned bool
+		err = rows.Scan(&id, &title, &desc, &typ, &target, &ctaURL, &imageURL, &expiryDate, &createdAt, &isPinned)
 		if err != nil {
 			return nil, err
 		}
@@ -158,6 +161,7 @@ func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
 			"target_role": target,
 			"cta_url":     ctaURL,
 			"image_url":   imageURL,
+			"is_pinned":   isPinned,
 			"expiry_date": expiryDate,
 			"created_at":  createdAt,
 		})
@@ -249,6 +253,7 @@ func (r *Repository) GetByID(id string) (Notification, error) {
 			image_url,
 			expiry_date,
 			is_active,
+			is_pinned,
 			created_at,
 			created_by,
 			updated_at,
@@ -265,6 +270,7 @@ func (r *Repository) GetByID(id string) (Notification, error) {
 		&n.ImageURL,
 		&n.ExpiryDate,
 		&n.IsActive,
+		&n.IsPinned,
 		&n.CreatedAt,
 		&n.CreatedBy,
 		&n.UpdatedAt,
@@ -288,6 +294,10 @@ func (r *Repository) Create(req CreateNotificationRequest, id string) error {
 	isActive := true
 	if req.IsActive != nil {
 		isActive = *req.IsActive
+	}
+	isPinned := false
+	if req.IsPinned != nil {
+		isPinned = *req.IsPinned
 	}
 	if typ == "" {
 		typ = "info"
@@ -321,10 +331,10 @@ func (r *Repository) Create(req CreateNotificationRequest, id string) error {
 
 	_, err := r.db.Exec(context.Background(), `
 		INSERT INTO notifications
-			(id, title, message, description, type, target_role, cta_url, image_url, expiry_date, is_active, created_by)
+			(id, title, message, description, type, target_role, cta_url, image_url, expiry_date, is_active, is_pinned, created_by)
 		VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-	`, id, req.Title, desc, desc, typ, targetRole, ctaURL, imageURL, expiryAt, isActive, createdBy)
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+	`, id, req.Title, desc, desc, typ, targetRole, ctaURL, imageURL, expiryAt, isActive, isPinned, createdBy)
 	return err
 }
 
@@ -365,10 +375,11 @@ func (r *Repository) Update(id string, req UpdateNotificationRequest) error {
 			image_url   = COALESCE(NULLIF($7,''), image_url),
 			expiry_date = COALESCE($8, expiry_date),
 			is_active   = COALESCE($9, is_active),
-			updated_by  = $10,
+			is_pinned   = COALESCE($10, is_pinned),
+			updated_by  = $11,
 			updated_at  = CURRENT_TIMESTAMP
 		WHERE id = $1
-	`, id, req.Title, desc, typ, targetRole, ctaURL, imageURL, expiryAt, req.IsActive, updatedBy)
+	`, id, req.Title, desc, typ, targetRole, ctaURL, imageURL, expiryAt, req.IsActive, req.IsPinned, updatedBy)
 	if err != nil {
 		return err
 	}
@@ -388,6 +399,19 @@ func (r *Repository) Delete(id string) error {
 		return pgx.ErrNoRows
 	}
 	return err
+}
+
+func (r *Repository) countPinned(excludeID string) (int, error) {
+	ctx := context.Background()
+	var count int
+
+	if strings.TrimSpace(excludeID) == "" {
+		err := r.db.QueryRow(ctx, `SELECT COUNT(*) FROM notifications WHERE is_pinned = TRUE`).Scan(&count)
+		return count, err
+	}
+
+	err := r.db.QueryRow(ctx, `SELECT COUNT(*) FROM notifications WHERE is_pinned = TRUE AND id <> $1`, excludeID).Scan(&count)
+	return count, err
 }
 
 func deriveStatus(isActive bool, expiryDate *time.Time) string {

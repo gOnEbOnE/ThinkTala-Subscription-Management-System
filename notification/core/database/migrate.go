@@ -22,6 +22,7 @@ func Migrate() {
 			image_url   TEXT,
 			expiry_date TIMESTAMPTZ,
 			is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+			is_pinned   BOOLEAN NOT NULL DEFAULT FALSE,
 			created_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			created_by  VARCHAR(255),
@@ -32,6 +33,7 @@ func Migrate() {
 		ALTER TABLE notifications ADD COLUMN IF NOT EXISTS cta_url TEXT;
 		ALTER TABLE notifications ADD COLUMN IF NOT EXISTS image_url TEXT;
 		ALTER TABLE notifications ADD COLUMN IF NOT EXISTS expiry_date TIMESTAMPTZ;
+		ALTER TABLE notifications ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN NOT NULL DEFAULT FALSE;
 
 		UPDATE notifications
 		SET description = COALESCE(NULLIF(description, ''), message)
@@ -42,6 +44,7 @@ func Migrate() {
 		WHERE message IS NULL OR message = '';
 
 		CREATE INDEX IF NOT EXISTS idx_notifications_active ON notifications(is_active, target_role);
+		CREATE INDEX IF NOT EXISTS idx_notifications_pinned ON notifications(is_pinned, created_at DESC);
 		CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications(type);
 	`)
 	if err != nil {

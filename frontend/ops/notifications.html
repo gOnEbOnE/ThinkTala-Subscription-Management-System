@@ -160,6 +160,19 @@
         .toast-msg.error {
             background: #dc2626;
         }
+
+        .pin-inline-badge {
+            border: 1px solid rgba(0, 242, 255, 0.4);
+            background: rgba(0, 242, 255, 0.12);
+            color: var(--accent-cyan);
+            border-radius: 999px;
+            font-size: 0.66rem;
+            padding: 2px 8px;
+            margin-left: 8px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -311,6 +324,13 @@
                                 <option value="client_lapsed">Client - Paket Lapsed</option>
                             </select>
                         </div>
+                        <div class="col-md-12">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="notifPinned" role="switch">
+                                <label class="form-check-label" for="notifPinned">Pin ke Discover Featured</label>
+                                <div class="small text-muted" id="pinnedSlotHint">Jika aktif, news ini diprioritaskan tampil di dua kartu Featured.</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-secondary" style="border-opacity: 0.2;">
@@ -354,7 +374,9 @@
     <script src="/assets/js/ops-layout.js"></script>
     <script>
         const API_BASE = '/api/notifications';
+        const PINNED_MAX = 2;
         let searchTimer = null;
+        let pinnedUsed = 0;
         const CLIENT_TARGET_ROLES = new Set([
             'client',
             'client_never_bought',
@@ -394,6 +416,53 @@
             return y + '-' + m + '-' + day + 'T' + hh + ':' + mm;
         }
 
+        function getEditingItem() {
+            const id = document.getElementById('notifId').value;
+            if (!id) return null;
+            return cachedNotifications.find(function (n) { return n.id === id; }) || null;
+        }
+
+        function updatePinnedSlotUI() {
+            const hintEl = document.getElementById('pinnedSlotHint');
+            const pinnedEl = document.getElementById('notifPinned');
+            if (!hintEl || !pinnedEl) return;
+
+            const editingItem = getEditingItem();
+            const editingPinned = !!(editingItem && editingItem.is_pinned);
+            const isFull = pinnedUsed >= PINNED_MAX;
+            const canEnable = !isFull || editingPinned;
+
+            pinnedEl.disabled = !canEnable;
+
+            if (isFull && !editingPinned) {
+                pinnedEl.checked = false;
+                hintEl.textContent = 'Slot pinned: ' + pinnedUsed + '/' + PINNED_MAX + ' (Penuh). Unpin/hapus salah satu news pinned untuk buka slot.';
+                return;
+            }
+
+            const remaining = Math.max(0, PINNED_MAX - pinnedUsed + (editingPinned ? 1 : 0));
+            hintEl.textContent = 'Slot pinned: ' + pinnedUsed + '/' + PINNED_MAX + ' (Sisa slot untuk post ini: ' + remaining + ').';
+        }
+
+        async function refreshPinnedUsage() {
+            try {
+                const res = await fetch(API_BASE, { credentials: 'include' });
+                const json = await res.json();
+                if (!res.ok) {
+                    throw new Error(json.error || 'Gagal cek slot pinned');
+                }
+                const allItems = Array.isArray(json.data) ? json.data : [];
+                pinnedUsed = allItems.reduce(function (sum, item) {
+                    return sum + (item && item.is_pinned ? 1 : 0);
+                }, 0);
+            } catch (e) {
+                pinnedUsed = (Array.isArray(cachedNotifications) ? cachedNotifications : []).reduce(function (sum, item) {
+                    return sum + (item && item.is_pinned ? 1 : 0);
+                }, 0);
+            }
+            updatePinnedSlotUI();
+        }
+
         function resetForm() {
             document.getElementById('notifId').value = '';
             document.getElementById('notifTitle').value = '';
@@ -404,7 +473,9 @@
             document.getElementById('notifExpiryDate').value = '';
             document.getElementById('notifActive').value = 'true';
             document.getElementById('notifTargetRole').value = 'client';
+            document.getElementById('notifPinned').checked = false;
             document.getElementById('modalTitle').textContent = 'New Notification';
+            updatePinnedSlotUI();
         }
 
         function typeBadge(type) {
@@ -447,7 +518,9 @@
             document.getElementById('notifExpiryDate').value = toLocalDateTimeInput(item.expiry_date);
             document.getElementById('notifActive').value = item.is_active ? 'true' : 'false';
             document.getElementById('notifTargetRole').value = normalizeTargetRole(item.target_role);
+            document.getElementById('notifPinned').checked = !!item.is_pinned;
             document.getElementById('modalTitle').textContent = 'Edit Notification';
+            updatePinnedSlotUI();
             new bootstrap.Modal(document.getElementById('notifModal')).show();
         }
 
@@ -461,11 +534,12 @@
             tbody.innerHTML = list.map(function (n, i) {
                 const desc = escapeHtml((n.description || n.message || '').trim());
                 const createdAt = n.created_at ? new Date(n.created_at).toLocaleString('id-ID') : '-';
+                const pinnedBadge = n.is_pinned ? '<span class="pin-inline-badge">Pinned</span>' : '';
                 return [
                     '<tr>',
                     '<td class="small">' + (i + 1) + '</td>',
                     '<td>',
-                    '<div class="fw-semibold" style="color:var(--text-heading)">' + escapeHtml(n.title || '-') + '</div>',
+                    '<div class="fw-semibold" style="color:var(--text-heading)">' + escapeHtml(n.title || '-') + pinnedBadge + '</div>',
                     '<div class="small text-muted notification-desc" title="' + desc + '">' + (desc || '-') + '</div>',
                     '</td>',
                     '<td>' + typeBadge(n.type) + '</td>',
@@ -520,13 +594,25 @@
                 }
                 cachedNotifications = Array.isArray(json.data) ? json.data : [];
                 renderTable(applyLocalSearch(cachedNotifications));
+                await refreshPinnedUsage();
             } catch (e) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Gagal memuat daftar</td></tr>';
+                updatePinnedSlotUI();
             }
         }
 
         async function saveNotification() {
             const id = document.getElementById('notifId').value;
+            const editingItem = getEditingItem();
+            const wasPinned = !!(editingItem && editingItem.is_pinned);
+            const wantsPinned = document.getElementById('notifPinned').checked;
+
+            if (wantsPinned && !wasPinned && pinnedUsed >= PINNED_MAX) {
+                showToast('Slot pinned sudah penuh. Unpin/hapus news pinned yang ada dulu.', 'error');
+                updatePinnedSlotUI();
+                return;
+            }
+
             const payload = {
                 title: (document.getElementById('notifTitle').value || '').trim(),
                 description: (document.getElementById('notifDescription').value || '').trim(),
@@ -535,7 +621,8 @@
                 image_url: (document.getElementById('notifImageUrl').value || '').trim(),
                 expiry_date: (document.getElementById('notifExpiryDate').value || '').trim(),
                 target_role: normalizeTargetRole(document.getElementById('notifTargetRole').value),
-                is_active: document.getElementById('notifActive').value === 'true'
+                is_active: document.getElementById('notifActive').value === 'true',
+                is_pinned: wantsPinned
             };
 
             if (!payload.title || !payload.description || !payload.type) {
@@ -559,7 +646,7 @@
                 }
                 bootstrap.Modal.getInstance(document.getElementById('notifModal')).hide();
                 showToast(id ? 'Notifikasi berhasil diperbarui' : 'Notifikasi berhasil dibuat', 'success');
-                loadNotifications();
+                await loadNotifications();
             } catch (e) {
                 showToast(e.message || 'Gagal menyimpan notifikasi', 'error');
             }
@@ -588,6 +675,17 @@
         document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('filterType').addEventListener('change', loadNotifications);
             document.getElementById('filterStatus').addEventListener('change', loadNotifications);
+            document.getElementById('notifPinned').addEventListener('change', function (event) {
+                if (event.target.checked) {
+                    const editingItem = getEditingItem();
+                    const wasPinned = !!(editingItem && editingItem.is_pinned);
+                    if (!wasPinned && pinnedUsed >= PINNED_MAX) {
+                        event.target.checked = false;
+                        showToast('Slot pinned sudah penuh. Unpin/hapus news pinned yang ada dulu.', 'error');
+                    }
+                }
+                updatePinnedSlotUI();
+            });
             document.getElementById('searchInput').addEventListener('input', function () {
                 if (searchTimer) {
                     clearTimeout(searchTimer);

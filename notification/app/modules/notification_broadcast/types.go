@@ -15,6 +15,7 @@ type Notification struct {
 	Status      string     `json:"status"` // active | inactive | expired
 	TargetRole  string     `json:"target_role,omitempty"`
 	IsActive    bool       `json:"is_active"`
+	IsPinned    bool       `json:"is_pinned"`
 	CreatedAt   time.Time  `json:"created_at"`
 	CreatedBy   *string    `json:"created_by,omitempty"`
 	UpdatedAt   time.Time  `json:"updated_at"`
@@ -32,6 +33,7 @@ type CreateNotificationRequest struct {
 	ExpiryDate  string `json:"expiry_date"`
 	TargetRole  string `json:"target_role,omitempty"`
 	IsActive    *bool  `json:"is_active,omitempty"`
+	IsPinned    *bool  `json:"is_pinned,omitempty"`
 	CreatedBy   string `json:"created_by,omitempty"`
 }
 
@@ -46,5 +48,6 @@ type UpdateNotificationRequest struct {
 	ExpiryDate  string `json:"expiry_date,omitempty"`
 	TargetRole  string `json:"target_role,omitempty"`
 	IsActive    *bool  `json:"is_active,omitempty"`
+	IsPinned    *bool  `json:"is_pinned,omitempty"`
 	UpdatedBy   string `json:"updated_by,omitempty"`
 }
