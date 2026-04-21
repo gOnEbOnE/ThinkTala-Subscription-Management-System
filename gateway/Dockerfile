@@ -19,8 +19,8 @@ COPY --from=builder /app/thinknalyze-gateway .
 COPY certs/ ./certs/
 
 # Copy semua config wajib
-ARG ROUTES_FILE=routes.json
-COPY ${ROUTES_FILE} routes.json
+# Always use routes.railway.json for Docker (production deployments)
+COPY routes.railway.json routes.json
 
 # Metadata
 COPY entrypoint.sh .
