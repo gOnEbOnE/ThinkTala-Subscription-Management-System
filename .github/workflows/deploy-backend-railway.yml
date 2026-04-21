@@ -1,0 +1,120 @@
+name: Deploy Backend (Railway)
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_notification:
+        description: "Deploy notification service"
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+    paths:
+      - "gateway/**"
+      - "users/**"
+      - "account/**"
+      - "management/**"
+      - "operational/**"
+      - "subscription/**"
+      - "tickets/**"
+      - "notification/**"
+      - ".github/workflows/deploy-backend-railway.yml"
+
+jobs:
+  deploy:
+    name: Deploy Railway services
+    runs-on: ubuntu-latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+      RAILWAY_ENVIRONMENT: ${{ vars.RAILWAY_ENVIRONMENT || 'production' }}
+      DEPLOY_NOTIFICATION: ${{ inputs.deploy_notification || 'false' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy users
+        run: |
+          railway up --ci --detach \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT" \
+            --service users \
+            --path-as-root \
+            --message "CI deploy users ${GITHUB_SHA}" \
+            users
+
+      - name: Deploy account
+        run: |
+          railway up --ci --detach \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT" \
+            --service account \
+            --path-as-root \
+            --message "CI deploy account ${GITHUB_SHA}" \
+            account
+
+      - name: Deploy management
+        run: |
+          railway up --ci --detach \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT" \
+            --service management \
+            --path-as-root \
+            --message "CI deploy management ${GITHUB_SHA}" \
+            management
+
+      - name: Deploy operational
+        run: |
+          railway up --ci --detach \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT" \
+            --service operational \
+            --path-as-root \
+            --message "CI deploy operational ${GITHUB_SHA}" \
+            operational
+
+      - name: Deploy subscription
+        run: |
+          railway up --ci --detach \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT" \
+            --service subscription \
+            --path-as-root \
+            --message "CI deploy subscription ${GITHUB_SHA}" \
+            subscription
+
+      - name: Deploy tickets
+        run: |
+          railway up --ci --detach \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT" \
+            --service tickets \
+            --path-as-root \
+            --message "CI deploy tickets ${GITHUB_SHA}" \
+            tickets
+
+      - name: Deploy gateway
+        run: |
+          railway up --ci --detach \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT" \
+            --service gateway \
+            --path-as-root \
+            --message "CI deploy gateway ${GITHUB_SHA}" \
+            gateway
+
+      - name: Deploy notification (optional)
+        if: ${{ env.DEPLOY_NOTIFICATION == 'true' }}
+        run: |
+          railway up --ci --detach \
+            --project "$RAILWAY_PROJECT_ID" \
+            --environment "$RAILWAY_ENVIRONMENT" \
+            --service notification \
+            --path-as-root \
+            --message "CI deploy notification ${GITHUB_SHA}" \
+            notification

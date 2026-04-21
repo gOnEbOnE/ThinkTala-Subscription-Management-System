@@ -2,6 +2,43 @@
 
 Step-by-step deployment guide for reproducible Railway setup.
 
+## 0. Create GitHub Repository First
+This project already contains backend auto-deploy workflow at:
+- `.github/workflows/deploy-backend-railway.yml`
+
+Auto-deploy only runs after this code exists on GitHub and required secrets are configured.
+
+### 0.1 Create repository (recommended using bootstrap script)
+From project root:
+
+```powershell
+./scripts/bootstrap-github-railway.ps1 -Owner "<github-owner>" -Repo "<repo-name>" -Visibility public -Pat "<github-pat>"
+```
+
+If you do not provide `-Pat`, create the repository manually first at:
+- `https://github.com/new`
+
+Then rerun script without PAT to only set remote and push:
+
+```powershell
+./scripts/bootstrap-github-railway.ps1 -Owner "<github-owner>" -Repo "<repo-name>" -Visibility public
+```
+
+### 0.2 Configure GitHub Actions secrets/variables
+In GitHub repo settings:
+- Settings -> Secrets and variables -> Actions
+
+Add secrets:
+- `RAILWAY_TOKEN`
+- `RAILWAY_PROJECT_ID`
+
+Add variable:
+- `RAILWAY_ENVIRONMENT` = `production`
+
+Notes:
+- `RAILWAY_PROJECT_ID` can be retrieved from Railway project settings.
+- Workflow deploys backend services on push to `main` (and can be run manually via `workflow_dispatch`).
+
 ## 1. Create Railway Services
 Create or confirm services in one Railway project:
 - Gateway
