@@ -32,17 +32,15 @@ RUN apk --no-cache add tzdata
 COPY --from=builder /app/account /app/account
 RUN chmod +x /app/account
 
-# Copy env file (opsional)
-# Copy env file
-COPY .env .env
-
-# ---> TAMBAHKAN BARIS INI UNTUK MENGCOPY FILE PEM <---
-COPY private.pem public.pem ./
+# Copy key pair and TLS assets baked in repository
+COPY certs/ ./certs/
 
 COPY public/ ./public/
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN tr -d '\r' < /app/entrypoint.sh > /tmp/ep && mv /tmp/ep /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Expose port aplikasi
 EXPOSE 2001
 
-# Jalankan aplikasi
-CMD ["/app/account"]
+ENTRYPOINT ["/app/entrypoint.sh"]

@@ -1,11 +1,11 @@
-# Build Stage
+# Build Stage — go.mod is 1.25.x; default golang:alpine can be older, which breaks -mod=vendor parsing.
 FROM golang:alpine AS builder
+ENV GOTOOLCHAIN=go1.25.5
 WORKDIR /app
 # Install git jika package kamu ada di private repo atau github
 RUN apk add --no-cache git 
 COPY . .
-RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o thinknalyze-gateway main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -ldflags="-s -w" -o thinknalyze-gateway main.go
 
 # Run Stage
 FROM alpine:latest
@@ -15,12 +15,18 @@ RUN apk --no-cache add tzdata ca-certificates
 # Copy binary
 COPY --from=builder /app/thinknalyze-gateway .
 
+# JWT keys (see main.go InitJWTLoadKeys paths)
+COPY certs/ ./certs/
+
 # Copy semua config wajib
 ARG ROUTES_FILE=routes.json
 COPY ${ROUTES_FILE} routes.json
 
 # Metadata
+COPY entrypoint.sh .
+RUN tr -d '\r' < /app/entrypoint.sh > /tmp/ep && mv /tmp/ep /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+
 ENV port=2000
 EXPOSE 2000
 
-CMD ["./thinknalyze-gateway"]
+ENTRYPOINT ["/app/entrypoint.sh"]
