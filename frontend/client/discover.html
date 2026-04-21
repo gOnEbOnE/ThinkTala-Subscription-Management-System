@@ -932,10 +932,6 @@
                 const actionHtml = item.ctaUrl
                     ? '<a class="featured-cta" href="' + item.ctaUrl + '" target="_blank" rel="noopener">' + escapeHtml(meta.actionText) + '<i class="fa-solid fa-arrow-right"></i></a>'
                     : '';
-                const pinnedHtml = item.isPinned
-                    ? '<span class="featured-chip pinned">Pinned</span>'
-                    : '';
-
                 return [
                     '<div class="col-xl-6 col-lg-6 col-12">',
                     '<article class="featured-card">',
@@ -943,7 +939,6 @@
                     '<div class="featured-body">',
                     '<div class="featured-topline">',
                     '<span class="featured-type ' + meta.className + '">' + escapeHtml(meta.label) + '</span>',
-                    pinnedHtml,
                     '</div>',
                     '<h3 class="featured-title">' + escapeHtml(item.title) + '</h3>',
                     '<p class="featured-desc">' + escapeHtml(item.description) + '</p>',
