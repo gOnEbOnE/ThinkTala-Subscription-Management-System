@@ -34,6 +34,9 @@
     // KYC form page (/client/kyc) should also highlight the KYC nav item
     function isKycActive() { return (path === '/client/kyc-status' || path === '/client/kyc') ? ' active' : ''; }
     function isMembershipActive() { return path === '/client/packages-catalog' ? ' active' : ''; }
+    function isBillingActive() {
+        return (path === '/client/billing-history' || path === '/client/order-detail' || path === '/client/checkout') ? ' active' : '';
+    }
 
     // ── Sidebar HTML ──────────────────────────────────────────────
     var sidebarHTML =
@@ -60,6 +63,7 @@
             '</ul>' +
             '<ul class="nav flex-column mb-5">' +
                 '<li class="nav-item"><a class="nav-link' + isMembershipActive() + '" href="/client/packages-catalog"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isBillingActive() + '" href="/client/billing-history"><i class="fa-solid fa-receipt icon-left"></i><span class="link-text">Billing History</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>' +
             '</ul>' +

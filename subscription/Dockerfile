@@ -12,7 +12,7 @@ RUN apk --no-cache add tzdata ca-certificates
 COPY --from=builder /app/subscription .
 COPY entrypoint.sh .
 COPY certs/ ./certs/
-RUN chmod +x /app/subscription && chmod +x entrypoint.sh
+RUN tr -d '\r' < /app/entrypoint.sh > /tmp/ep && mv /tmp/ep /app/entrypoint.sh && chmod +x /app/subscription && chmod +x /app/entrypoint.sh
 
 EXPOSE 5004
 ENTRYPOINT ["/app/entrypoint.sh"]

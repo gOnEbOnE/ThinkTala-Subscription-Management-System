@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk & Daftar - JakEdu AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        /* Custom Font (Optional) */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Banner Image Styling */
+        .banner-side {
+            background: url('https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=1932&auto=format&fit=crop') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+        
+        /* Overlay untuk teks di atas gambar agar terbaca */
+        .banner-overlay {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+        }
+
+        /* Transisi Form */
+        .auth-card {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Floating Button Style (Persis Dashboard) */
+        .theme-toggle-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1050;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .theme-toggle-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Input Group Focus State */
+        .input-group-text {
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .form-control:focus + .input-group-text, 
+        .form-control:focus ~ .input-group-text {
+            border-color: var(--bs-primary);
+        }
+    </style>
+</head>
+<body class="bg-body-tertiary">
+
+    <div class="container-fluid g-0">
+        <div class="row g-0 vh-100">
+            
+            
+
+            <div class="col-lg-6 d-none d-lg-block banner-side">
+                <div class="banner-overlay d-flex flex-column justify-content-end p-5">
+                    <div class="text-white mb-5 pb-5">
+                        <span class="badge bg-primary bg-opacity-75 backdrop-blur rounded-pill px-3 py-2 mb-3">
+                            <i class="bi bi-stars me-1"></i> AI Powered Education
+                        </span>
+                        <h1 class="display-4 fw-bold mb-3">Revolusi Pendidikan <br> dengan Kecerdasan AI</h1>
+                        <p class="lead text-white-50" style="max-width: 500px;">
+                            Kelola data siswa, analisis performa, dan optimalkan kurikulum dengan bantuan teknologi AI terdepan dari JakEdu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 d-flex align-items-center justify-content-center bg-body p-4">
+                <div class="auth-card w-100" style="max-width: 420px;">
+                    
+                    <div id="registerForm">
+                        <div class="text-center mb-4">
+                            <div class="bg-success-subtle text-success rounded-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="bi bi-person-plus fs-2"></i>
+                            </div>
+                            <h3 class="fw-bold text-emphasis">Buat Akun Baru</h3>
+                            <p class="text-muted small">Bergabunglah dengan platform pendidikan AI masa depan</p>
+                        </div>
+
+                        <form onsubmit="event.preventDefault(); showToast('Pendaftaran Berhasil!', 'Silakan cek email Anda untuk verifikasi.');">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Nama Lengkap</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
+                                        <i class="bi bi-person text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="Nama Anda" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
+                                        <i class="bi bi-envelope text-muted"></i>
+                                    </span>
+                                    <input type="email" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="nama@sekolah.id" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
+                                        <i class="bi bi-lock text-muted"></i>
+                                    </span>
+                                    <input type="password" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="••••••••" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Konfirmasi Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
+                                        <i class="bi bi-check2-circle text-muted"></i>
+                                    </span>
+                                    <input type="password" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="••••••••" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 py-2 rounded-3 fw-bold shadow-sm mb-3">
+                                Daftar Sekarang
+                            </button>
+
+                            <div class="text-center">
+                                <span class="text-muted small">Sudah punya akun?</span>
+                                <a href="{{.base_url}}/login" class="text-primary fw-bold text-decoration-none small ms-1">Masuk disini</a>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-primary theme-toggle-btn rounded-circle" id="themeToggle" title="Ganti Tema">
+        <i class="bi bi-moon-stars-fill"></i>
+    </button>
+
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <div id="liveToast" class="toast align-items-center text-bg-primary border-0 rounded-4 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                    <div>
+                        <strong class="d-block" id="toastTitle">Notifikasi</strong>
+                        <small id="toastMessage">Pesan notifikasi muncul disini.</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // 1. Logic Toggle Login <-> Register
+        function toggleForms() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            
+            if (loginForm.classList.contains('d-none')) {
+                // Show Login
+                loginForm.classList.remove('d-none');
+                loginForm.classList.add('animate__animated', 'animate__fadeIn');
+                registerForm.classList.add('d-none');
+            } else {
+                // Show Register
+                loginForm.classList.add('d-none');
+                registerForm.classList.remove('d-none');
+                registerForm.classList.add('animate__animated', 'animate__fadeIn');
+            }
+        }
+
+        // 2. Logic Theme Toggle (Dark/Light)
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const icon = themeToggleBtn.querySelector('i');
+        const html = document.documentElement;
+
+        // Cek Local Storage
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-bs-theme', savedTheme);
+        updateIcon(savedTheme);
+
+        themeToggleBtn.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateIcon(newTheme);
+        });
+
+        function updateIcon(theme) {
+            if (theme === 'dark') {
+                icon.classList.remove('bi-moon-stars-fill');
+                icon.classList.add('bi-sun-fill');
+                themeToggleBtn.classList.replace('btn-primary', 'btn-warning');
+                themeToggleBtn.classList.add('text-dark');
+            } else {
+                icon.classList.remove('bi-sun-fill');
+                icon.classList.add('bi-moon-stars-fill');
+                themeToggleBtn.classList.replace('btn-warning', 'btn-primary');
+                themeToggleBtn.classList.remove('text-dark');
+            }
+        }
+
+        // 3. Logic Toast Notification
+        const toastEl = document.getElementById('liveToast');
+        const toastBootstrap = new bootstrap.Toast(toastEl);
+        const toastTitle = document.getElementById('toastTitle');
+        const toastMessage = document.getElementById('toastMessage');
+
+        function showToast(title, message) {
+            toastTitle.innerText = title;
+            toastMessage.innerText = message;
+            toastBootstrap.show();
+        }
+    </script>
+</body>
+</html>

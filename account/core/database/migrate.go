@@ -18,6 +18,10 @@ func MigrateAndSeed(db interface{}) {
 
 	// Ambil pool aslinya dari dalam wrapper
 	pool := wrapper.Pool
+	if pool == nil {
+		log.Printf("[WARN] Database pool is nil, skipping migration & seeding")
+		return
+	}
 
 	migrationSQL := `
 	CREATE TABLE IF NOT EXISTS levels (

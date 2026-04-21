@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/admin"
 	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
@@ -59,10 +60,14 @@ func main() {
 
 	maxConns, _ := strconv.Atoi(utils.GetEnv("read_db_max_conn", "5"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
+	port := utils.GetEnv("port", "")
+	if port == "" {
+		port = utils.GetEnv("PORT", "9002")
+	}
 
 	cfg := core.Config{
 		AppName:        utils.GetEnv("app_name", "ZaFramework"),
-		Port:           utils.GetEnv("port", "9002"),
+		Port:           port,
 		Env:            utils.GetEnv("app_env", "development"),
 		AssetsURL:      utils.GetEnv("assets_url"),
 		SsoAuth:        utils.GetEnv("sso_auth"),
@@ -123,6 +128,11 @@ func main() {
 	kycController := kyc.NewController(app.Dispatcher, app.Response)
 	kycAdminController := kyc.NewAdminController(app.Dispatcher, app.Response)
 
+	// --- Feature: Admin User Management ---
+	adminRepo := admin.NewRepository(app.DB)
+	adminService := admin.NewService(adminRepo)
+	adminController := admin.NewController(app.Dispatcher, app.Response)
+
 	// Register Job Handlers (Workers)
 	app.RegisterJob("auth", loginService.ProcessLoginJob)
 	app.RegisterJob("register", registerService.ProcessRegisterJob)
@@ -131,9 +141,16 @@ func main() {
 	app.RegisterJob("assume_role", loginService.ProcessAssumeRoleJob)
 	app.RegisterJob("kyc_submit", kycService.ProcessKYCSubmitJob)
 	app.RegisterJob("kyc_status", kycService.ProcessKYCStatusJob)
+	app.RegisterJob("kyc_resubmit", kycService.ProcessKYCResubmitJob)
 	app.RegisterJob("admin_kyc_list", kycService.ProcessAdminKYCListJob)
 	app.RegisterJob("admin_kyc_detail", kycService.ProcessAdminKYCDetailJob)
 	app.RegisterJob("admin_kyc_review", kycService.ProcessAdminKYCReviewJob)
+	app.RegisterJob("admin_create_user", adminService.ProcessCreateUserJob)
+	app.RegisterJob("admin_get_users", adminService.ProcessGetUsersJob)
+	app.RegisterJob("admin_get_user_detail", adminService.ProcessGetUserDetailJob)
+	app.RegisterJob("admin_edit_user", adminService.ProcessEditUserJob)
+	app.RegisterJob("admin_deactivate_user", adminService.ProcessDeactivateUserJob)
+	app.RegisterJob("admin_reactivate_user", adminService.ProcessReactivateUserJob)
 
 	// ============================================================
 	// 3. ROUTING
@@ -143,6 +160,7 @@ func main() {
 		registerController,
 		kycController,
 		kycAdminController,
+		adminController,
 	)
 
 	// ============================================================

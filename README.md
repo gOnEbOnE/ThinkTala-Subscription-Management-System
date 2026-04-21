@@ -1,115 +1,48 @@
-# Thinknalyze - Microservices Ecosystem
+# ThinkNalyze Deployment Handoff
 
-**Thinknalyze** adalah ekosistem microservices berbasis Golang yang dirancang dengan arsitektur **API Gateway**. Proyek ini menggunakan Docker Compose untuk orkestrasi kontainer, memungkinkan skalabilitas tinggi dan manajemen layanan yang terisolasi.
+This repository contains ThinkNalyze microservices and deployment assets for Railway.
 
----
+## System Overview
+ThinkNalyze runs as Go microservices behind a Gateway service. Authentication and protected route authorization depend on Redis-backed session/token lookup between Gateway and Users.
 
+Current stable production state:
+- Gateway running
+- Users running
+- Account running
+- Login endpoint verified (`POST /account/login/auth` -> 200)
+- Protected endpoint verified (`GET /api/admin/users` -> 200)
+- Redis integrated for auth/session in Gateway and Users
+- Internal routing uses Railway private DNS (`users.railway.internal:8080`)
 
-## 🏗️ Arsitektur Layanan
+## Architecture Summary
+- Gateway: public entrypoint and reverse proxy
+- Users: auth/session logic and protected user/admin APIs
+- Account: account-related flow endpoints
+- Redis: required auth/session state backend
+- Postgres: persistent data store
 
-Sistem ini terdiri dari satu gerbang utama (Gateway) dan lima layanan mikro internal:
+Auth path (high-level):
+1. Client logs in through Gateway
+2. Gateway proxies login to Users
+3. Users validates credentials and writes session/token reference to Redis
+4. Gateway reads Redis-backed auth context for protected routes
 
-| Service | Port Internal | Deskripsi |
-| :--- | :--- | :--- |
-| **Gateway** | **2000** | Entry point (HTTPS), Reverse Proxy, SSL, & CORS |
-| **Notification** | 2001 | Layanan pesan dan notifikasi |
-| **Operational** | 2002 | Layanan manajemen operasional & dashboard |
-| **Subscription** | 2003 | Layanan manajemen paket dan aplikasi |
-| **Tickets** | 2004 | Layanan dukungan dan ticketing |
-| **Users** | 2005 | Layanan autentikasi dan profil pengguna |
+## Documentation
+- [docs/deployment-status.md](docs/deployment-status.md)
+- [docs/environment-setup.md](docs/environment-setup.md)
+- [docs/deployment-guide.md](docs/deployment-guide.md)
 
----
+## Quick Start (Railway)
+1. Create/confirm services: Gateway, Users, Account, Redis, Postgres.
+2. Set required environment variables from [docs/environment-setup.md](docs/environment-setup.md).
+3. Deploy each service with `railway up`.
+4. Validate:
+   - `POST /account/login/auth` returns 200
+   - `GET /api/admin/users` returns 200 (with login cookie/session)
 
-## 📂 Struktur Folder
-
-```text
-thinknalyze/
-├── gateway/           # Core API Gateway
-│   ├── .env           # Gateway configuration (Required: port, timezone)
-│   ├── routes.json    # Dynamic proxy configuration
-│   └── Dockerfile
-├── notification/      # Microservice Notification
-├── operational/       # Microservice Operational
-├── subscription/      # Microservice Subscription
-├── tickets/           # Microservice Tickets
-├── users/             # Microservice Users
-├── docker-compose.yml # Docker orchestration
-└── README.md          # Project documentation
-```
-
----
-
-## 🚀 Persiapan Instalasi
-
-### 1. Prasyarat
-* **Docker** & **Docker Compose V2** terinstal di server.
-
-### 2. Konfigurasi Lingkungan (.env)
-Buat file `.env` di dalam folder `gateway/`:
-```env
-port=2000
-timezone=Asia/Jakarta
-```
-
-### 3. Inisialisasi Go Module (Pertama kali)
-Jalankan perintah ini di setiap folder (termasuk gateway):
-```bash
-go mod init thinknalyze/nama-folder
-go mod tidy
-```
-
----
-
-## 🛠️ Menjalankan Project
-
-Jalankan seluruh layanan menggunakan Docker Compose dari root folder:
-
-```bash
-# Membangun image dan menjalankan kontainer di background
-docker compose up -d --build
-```
-
-Untuk mematikan layanan:
-```bash
-docker compose down
-```
-
----
-
-## 🧪 Pengujian & Verifikasi
-
-Setelah kontainer berjalan, verifikasi koneksi menggunakan `curl` atau browser (abaikan peringatan SSL jika menggunakan self-signed):
-
-* **Gateway Health Check:**
-  ```bash
-  curl -k https://localhost:2000/health
-  ```
-* **Verify Route (Proxy to Users):**
-  ```bash
-  curl -k https://localhost:2000/account/register
-  ```
-
----
-
-## 🔄 Konfigurasi Dinamis (Hot Reload)
-
-Anda dapat mengubah rute di `gateway/routes.json` tanpa perlu membangun ulang kontainer. Setelah mengubah file tersebut, cukup panggil endpoint reload:
-
-**Endpoint:** `POST https://localhost:2000/admin/config/reload`
-
----
-
-## 📝 Cheat Sheet Docker
-
-| Tujuan | Perintah |
-| :--- | :--- |
-| Lihat semua kontainer | `docker compose ps` |
-| Lihat log Gateway | `docker compose logs -f gateway` |
-| Restart satu service | `docker compose restart <nama_service>` |
-| Build ulang tanpa cache | `docker compose build --no-cache` |
-
----
-
-## 📄 Lisensi
-Copyright © 2026. **Thinknalyze**.  
-*Optimized for efficiency and high-concurrency microservices.*
+## Critical Warnings
+- Do not use `localhost` for service-to-service communication on Railway.
+- Do not use `users-service` as target host naming.
+- Use `users.railway.internal:8080`.
+- Railway runtime uses `PORT=8080` in this setup.
+- Redis is required for auth and protected routes.

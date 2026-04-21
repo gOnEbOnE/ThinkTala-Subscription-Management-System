@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/admin"
 	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
@@ -17,6 +18,7 @@ func Init(app *core.App,
 	registerController *register.Controller,
 	kycController *kyc.Controller,
 	kycAdminController *kyc.AdminController,
+	adminController *admin.Controller,
 ) {
 
 	// ==============================
@@ -70,6 +72,7 @@ func Init(app *core.App,
 	// ==============================
 	app.Router.HandleFunc("POST /api/kyc/submit", kycController.Submit)
 	app.Router.HandleFunc("GET /api/kyc/status", kycController.Status)
+	app.Router.HandleFunc("PUT /api/kyc/resubmit", kycController.Resubmit)
 
 	// ==============================
 	// 8. Admin KYC Routes (Protected via Gateway Auth)
@@ -78,5 +81,15 @@ func Init(app *core.App,
 	app.Router.Handle("GET /api/admin/kyc/{id}", http.HandlerFunc(kycAdminController.ServeHTTP))
 	app.Router.Handle("POST /api/admin/kyc/{id}/approve", http.HandlerFunc(kycAdminController.ServeHTTP))
 	app.Router.Handle("POST /api/admin/kyc/{id}/reject", http.HandlerFunc(kycAdminController.ServeHTTP))
+
+	// ==============================
+	// 9. Admin User Management Routes (Protected via Gateway Auth - SUPERADMIN only)
+	// ==============================
+	app.Router.HandleFunc("POST /api/admin/users", adminController.CreateUser)
+	app.Router.HandleFunc("GET /api/admin/users", adminController.GetUsers)
+	app.Router.HandleFunc("GET /api/admin/users/{id}", adminController.GetUserDetail)
+	app.Router.HandleFunc("PUT /api/admin/users/{id}", adminController.EditUser)
+	app.Router.HandleFunc("PATCH /api/admin/users/{id}/deactivate", adminController.DeactivateUser)
+	app.Router.HandleFunc("PATCH /api/admin/users/{id}/reactivate", adminController.ReactivateUser)
 
 }

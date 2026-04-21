@@ -105,20 +105,18 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 // ListPublic mengambil notification aktif sesuai audience, max 20 data.
 func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
 	role = strings.ToLower(strings.TrimSpace(role))
-	audiences := map[string]struct{}{"all": {}}
-	if role != "" {
-		audiences[role] = struct{}{}
+	if role != "" && role != "client" {
+		return []map[string]any{}, nil
 	}
 
-	if role == "client" {
-		if segments, err := r.resolveClientAudienceSegments(strings.TrimSpace(userID)); err == nil {
-			for _, segment := range segments {
-				segment = strings.ToLower(strings.TrimSpace(segment))
-				if segment == "" {
-					continue
-				}
-				audiences[segment] = struct{}{}
+	audiences := map[string]struct{}{"client": {}}
+	if segments, err := r.resolveClientAudienceSegments(strings.TrimSpace(userID)); err == nil {
+		for _, segment := range segments {
+			segment = strings.ToLower(strings.TrimSpace(segment))
+			if segment == "" {
+				continue
 			}
+			audiences[segment] = struct{}{}
 		}
 	}
 
@@ -175,39 +173,65 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 		return nil, nil
 	}
 
-	var status, packageName string
+	var isExpiringSoon bool
 	err := r.db.QueryRow(context.Background(), `
-		SELECT
-			COALESCE(o.status, ''),
-			COALESCE(p.name, '')
-		FROM subscription.orders o
-		LEFT JOIN subscription.packages p ON p.id = o.package_id
-		WHERE o.user_id = $1
-		ORDER BY o.created_at DESC
+		SELECT (s.end_date <= CURRENT_DATE + INTERVAL '7 days') AS is_expiring_soon
+		FROM subscription.subscriptions s
+		WHERE s.user_id = $1
+		  AND s.status = 'ACTIVE'
+		  AND s.end_date >= CURRENT_DATE
+		ORDER BY s.end_date ASC, s.created_at DESC
 		LIMIT 1
-	`, userID).Scan(&status, &packageName)
-	if err != nil {
-		if err == pgx.ErrNoRows {
-			return []string{"client_never_bought"}, nil
+	`, userID).Scan(&isExpiringSoon)
+	if err == nil {
+		if isExpiringSoon {
+			return []string{"client_expiring_soon"}, nil
 		}
+		return []string{"client_paid_active"}, nil
+	}
+	if err != nil && err != pgx.ErrNoRows {
 		return nil, err
 	}
 
-	status = strings.ToUpper(strings.TrimSpace(status))
-	packageName = strings.ToLower(strings.TrimSpace(packageName))
-
-	switch status {
-	case "PAID", "PENDING":
-		segments := []string{"client_paid_active"}
-		if strings.Contains(packageName, "pro") {
-			segments = append(segments, "client_pro_active")
-		}
-		return segments, nil
-	case "EXPIRED", "CANCELLED":
-		return []string{"client_lapsed"}, nil
-	default:
+	var orderStatus string
+	err = r.db.QueryRow(context.Background(), `
+		SELECT COALESCE(status, '')
+		FROM subscription.orders
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+		LIMIT 1
+	`, userID).Scan(&orderStatus)
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, err
+	}
+	orderStatus = strings.ToUpper(strings.TrimSpace(orderStatus))
+	if orderStatus == "PENDING_PAYMENT" || orderStatus == "CANCELLED" {
 		return []string{"client_never_bought"}, nil
 	}
+
+	var latestSubscriptionExpired bool
+	err = r.db.QueryRow(context.Background(), `
+		SELECT (status IN ('EXPIRED', 'CANCELLED') OR end_date < CURRENT_DATE) AS is_expired
+		FROM subscription.subscriptions
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+		LIMIT 1
+	`, userID).Scan(&latestSubscriptionExpired)
+	if err != nil {
+		if err != pgx.ErrNoRows {
+			return nil, err
+		}
+	} else if latestSubscriptionExpired {
+		return []string{"client_lapsed"}, nil
+	}
+
+	if orderStatus == "PAID" {
+		return []string{"client_paid_active"}, nil
+	}
+	if orderStatus == "" {
+		return []string{"client_never_bought"}, nil
+	}
+	return []string{"client_never_bought"}, nil
 }
 
 // GetByID mengambil satu notification berdasarkan ID.
@@ -269,7 +293,7 @@ func (r *Repository) Create(req CreateNotificationRequest, id string) error {
 		typ = "info"
 	}
 	if targetRole == "" {
-		targetRole = "all"
+		targetRole = "client"
 	}
 
 	var ctaURL *string

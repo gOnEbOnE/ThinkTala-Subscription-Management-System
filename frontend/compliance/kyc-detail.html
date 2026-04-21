@@ -201,6 +201,52 @@
                         <div class="info-row"><span class="info-label">Nama</span><span class="info-value" id="modalRejectName">-</span></div>
                         <div class="info-row"><span class="info-label">Email</span><span class="info-value" id="modalRejectEmail">-</span></div>
                     </div>
+
+                    <label class="form-label fw-semibold mb-2" style="color: var(--text-heading);">
+                        <i class="fa-solid fa-list-check me-1 text-danger"></i> Field yang Tidak Sesuai
+                    </label>
+                    <div class="info-card mb-3" style="border-color: rgba(239,68,68,0.2);">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rf_full_name" value="full_name">
+                                    <label class="form-check-label" for="rf_full_name" style="color: var(--text-heading);">Nama Lengkap</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rf_nik" value="nik">
+                                    <label class="form-check-label" for="rf_nik" style="color: var(--text-heading);">NIK</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rf_address" value="address">
+                                    <label class="form-check-label" for="rf_address" style="color: var(--text-heading);">Alamat</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rf_birthdate" value="birthdate">
+                                    <label class="form-check-label" for="rf_birthdate" style="color: var(--text-heading);">Tanggal Lahir</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rf_phone" value="phone">
+                                    <label class="form-check-label" for="rf_phone" style="color: var(--text-heading);">No. Telepon</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="rf_ktp_image" value="ktp_image">
+                                    <label class="form-check-label" for="rf_ktp_image" style="color: var(--text-heading);">Foto KTP</label>
+                                </div>
+                            </div>
+                        </div>
+                        <small class="text-muted d-block mt-2">Pilih field yang perlu diperbaiki oleh pengguna</small>
+                    </div>
+
                     <label class="form-label fw-semibold" style="color: var(--text-heading);">
                         Alasan Penolakan <span class="text-danger">*</span>
                     </label>
@@ -326,10 +372,45 @@
             document.getElementById('actionBar').style.display = 'flex';
         }
 
-        // Rejection reason
-        if (d.status === 'rejected' && d.reject_reason) {
-            document.getElementById('rejectReasonCard').style.display = 'block';
-            document.getElementById('rejectReasonText').textContent = d.reject_reason;
+        // Rejection reason and rejected fields
+        if (d.status === 'rejected') {
+            if (d.reject_reason) {
+                document.getElementById('rejectReasonCard').style.display = 'block';
+                document.getElementById('rejectReasonText').textContent = d.reject_reason;
+            }
+            // Highlight rejected fields in the info card
+            if (d.rejected_fields && d.rejected_fields.length > 0) {
+                var fieldMapping = {
+                    'full_name': 'infoName', 'nik': 'infoNIK', 'address': 'infoAddress',
+                    'birthdate': 'infoDOB', 'phone': 'infoPhone', 'ktp_image': 'ktpViewer'
+                };
+                var fieldLabels = {
+                    'full_name': 'Nama Lengkap', 'nik': 'NIK', 'address': 'Alamat',
+                    'birthdate': 'Tanggal Lahir', 'phone': 'No. Telepon', 'ktp_image': 'Foto KTP'
+                };
+                d.rejected_fields.forEach(function(f) {
+                    var elId = fieldMapping[f];
+                    if (elId) {
+                        var el = document.getElementById(elId);
+                        if (el) {
+                            el.style.color = '#ef4444';
+                            el.style.fontWeight = '700';
+                            // Add a warning icon next to the value
+                            if (el.closest('.info-row')) {
+                                var label = el.closest('.info-row').querySelector('.info-label');
+                                if (label) label.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>' + label.textContent;
+                            }
+                        }
+                    }
+                });
+                // Show summary below reject reason
+                var rejectedList = d.rejected_fields.map(function(f) { return fieldLabels[f] || f; }).join(', ');
+                var summaryEl = document.createElement('p');
+                summaryEl.className = 'mt-2 mb-0 small';
+                summaryEl.style.color = 'var(--text-muted)';
+                summaryEl.innerHTML = '<i class="fa-solid fa-list-check me-1"></i>Field ditolak: <strong>' + rejectedList + '</strong>';
+                document.getElementById('rejectReasonCard').appendChild(summaryEl);
+            }
         }
     }
 
@@ -387,6 +468,11 @@
         document.getElementById('modalRejectName').textContent = kycData.full_name || '-';
         document.getElementById('modalRejectEmail').textContent = kycData.email || '-';
         document.getElementById('rejectReasonInput').value = '';
+        // Reset all field checkboxes
+        ['rf_full_name', 'rf_nik', 'rf_address', 'rf_birthdate', 'rf_phone', 'rf_ktp_image'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.checked = false;
+        });
         toggleRejectBtn();
         new bootstrap.Modal(document.getElementById('rejectModal')).show();
     }
@@ -400,6 +486,13 @@
         var reason = document.getElementById('rejectReasonInput').value.trim();
         if (!reason) return;
 
+        // Collect rejected fields from checkboxes
+        var rejectedFields = [];
+        ['rf_full_name', 'rf_nik', 'rf_address', 'rf_birthdate', 'rf_phone', 'rf_ktp_image'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && el.checked) rejectedFields.push(el.value);
+        });
+
         var btn = document.getElementById('btnConfirmReject');
         btn.disabled = true;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Processing...';
@@ -408,7 +501,7 @@
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reason: reason })
+            body: JSON.stringify({ reason: reason, rejected_fields: rejectedFields })
         })
         .then(function (res) { return res.json().then(function (d) { return { ok: res.ok, data: d }; }); })
         .then(function (result) {

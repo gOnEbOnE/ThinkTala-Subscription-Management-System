@@ -118,9 +118,9 @@ func Migrate() {
 }
 
 // Seed adalah no-op. Template diisi manual via API /api/notification-templates.
-// Event types di-seed dengan event yang sudah pasti, yaitu dari register dan kyc service.
+// Event types di-seed dengan event yang sudah pasti, yaitu dari register, kyc, dan pembayaran.
 func Seed() {
-	knownTypes := []string{"otp_verification", "kyc_approved", "kyc_rejected"}
+	knownTypes := []string{"otp_verification", "kyc_approved", "kyc_rejected", "payment_verified", "payment_rejected"}
 	for _, et := range knownTypes {
 		db().Exec(context.Background(),
 			`INSERT INTO notification_event_types (event_type) VALUES ($1) ON CONFLICT DO NOTHING`, et)

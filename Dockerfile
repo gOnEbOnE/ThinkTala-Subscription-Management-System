@@ -19,7 +19,7 @@ RUN apk --no-cache add tzdata ca-certificates
 COPY --from=builder /repo/gateway/thinknalyze-gateway .
 COPY --from=builder /repo/gateway/routes.json .
 COPY --from=builder /repo/gateway/entrypoint.sh .
-RUN chmod +x entrypoint.sh && mkdir -p certs
+RUN tr -d '\r' < entrypoint.sh > /tmp/ep && mv /tmp/ep entrypoint.sh && chmod +x entrypoint.sh && mkdir -p certs
 COPY --from=builder /repo/gateway/certs/private.pem certs/private.pem
 COPY --from=builder /repo/gateway/certs/public.pem certs/public.pem
 

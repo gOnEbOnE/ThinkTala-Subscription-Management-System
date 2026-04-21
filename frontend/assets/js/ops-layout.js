@@ -15,15 +15,14 @@
     // ── Route guard: redirect to login if no session ─────────────────
     var guardUser = null;
     try { guardUser = JSON.parse(localStorage.getItem('user')); } catch (e) {}
-    if (!guardUser || !guardUser.id) {
-        window.location.href = '/account/login';
-        return;
-    }
+    var hasLocalUser = !!(guardUser && guardUser.id);
 
-    // ── Role guard: /ops/* is only for OPERASIONAL, CEO, SUPERADMIN ──────
-    var _opsRole = (guardUser.role_code || guardUser.level_code || guardUser.level || '').toString().toUpperCase();
-    if (_opsRole !== 'OPERASIONAL' && _opsRole !== 'CEO' && _opsRole !== 'SUPERADMIN') {
-        var _opsRedirect = { 'COMPLIANCE': '/compliance/dashboard', 'CLIENT': '/client/dashboard' };
+    // ── Role guard: shared internal layout for OPERASIONAL/CEO/SUPERADMIN/MANAGEMENT ──────
+    var _opsRole = hasLocalUser
+        ? (guardUser.role_code || guardUser.level_code || guardUser.level || '').toString().toUpperCase()
+        : '';
+    if (hasLocalUser && _opsRole !== 'OPERASIONAL' && _opsRole !== 'CEO' && _opsRole !== 'SUPERADMIN' && _opsRole !== 'MANAGEMENT' && _opsRole !== 'ADMIN') {
+        var _opsRedirect = { 'COMPLIANCE': '/compliance/dashboard', 'CLIENT': '/client/dashboard', 'MANAGEMENT': '/management/dashboard-customers' };
         window.location.href = _opsRedirect[_opsRole] || '/account/login';
         return;
     }
@@ -49,15 +48,28 @@
         '/ops/dashboard'              : { activeKey: 'dashboard' },
         '/ops/notifications'          : { activeKey: 'notifications',          parentKey: 'notif' },
         '/ops/notification-templates' : { activeKey: 'notification-templates', parentKey: 'notif' },
+        '/ops/orders'                 : { activeKey: 'orders' },
+        '/ops/orders-detail'          : { activeKey: 'orders' },
         '/ops/subscriptions'          : { activeKey: 'subscriptions' },
         '/ops/subscriptions-create'   : { activeKey: 'subscriptions' },
         '/ops/subscriptions-edit'     : { activeKey: 'subscriptions' },
+        '/ops/manage-users'           : { activeKey: 'manage-users' },
+        '/ops/create-user'            : { activeKey: 'manage-users' },
+        '/ops/user-detail'            : { activeKey: 'manage-users' },
+        '/ops/edit-user'              : { activeKey: 'manage-users' },
+        '/management/dashboard-customers': { activeKey: 'management-dashboard' },
+        '/management/dashboard-packages': { activeKey: 'management-packages' },
     };
 
     const currentPath = window.location.pathname;
-    const route = ROUTES[currentPath] || {};
+    const route = ROUTES[currentPath] ||
+        (currentPath.startsWith('/dashboard/customer/') ? { activeKey: 'management-dashboard' } :
+            (currentPath.startsWith('/dashboard/packages/') ? { activeKey: 'management-packages' } : {}));
     const activeKey  = route.activeKey  || '';
     const parentKey  = route.parentKey  || '';
+    const canOpenManagement = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'SUPERADMIN' || _opsRole === 'ADMIN';
+    const canOpenPackageSales = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'ADMIN' || _opsRole === 'SUPERADMIN';
+    const canCreateUser = _opsRole === 'SUPERADMIN' || (guardUser && guardUser.level_code && guardUser.level_code.toUpperCase() === 'SUPERADMIN');
 
     // Helper: mark a link active
     function isActive(key) {
@@ -95,6 +107,27 @@
                 <span class="link-text">Dashboard</span>
             </a>
         </li>
+
+        ${canOpenManagement ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-dashboard')}" href="/management/dashboard-customers">
+                <i class="fa-solid fa-chart-line icon-left"></i>
+                <span class="link-text">Customer Churn</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenPackageSales ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-packages')}" href="/management/dashboard-packages">
+                <i class="fa-solid fa-cubes icon-left"></i>
+                <span class="link-text">Package Sales</span>
+            </a>
+        </li>` : ''}
+
+        ${canCreateUser ? `<li class="nav-item">
+            <a class="nav-link${isActive('manage-users')}" href="/ops/manage-users">
+                <i class="fa-solid fa-users icon-left"></i>
+                <span class="link-text">Kelola Akun Internal</span>
+            </a>
+        </li>` : ''}
 
         <!-- Notification (expandable) -->
         <li class="nav-item nav-item-group">
@@ -177,6 +210,7 @@
                 <li><h6 class="dropdown-header">Pilih Simulasi Peran</h6></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('OPERASIONAL')"><i class="fa-solid fa-cogs me-2"></i>Operasional</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('COMPLIANCE')"><i class="fa-solid fa-shield-halved me-2"></i>Compliance</a></li>
+                <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('MANAGEMENT')"><i class="fa-solid fa-chart-line me-2"></i>Management</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('CEO')"><i class="fa-solid fa-briefcase me-2"></i>CEO</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('CLIENT')"><i class="fa-solid fa-user me-2"></i>Client</a></li>
             </ul>
@@ -300,9 +334,11 @@
     function initUserInfo() {
         const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-        // Route guard: redirect to login if no user
+        // Do not force redirect when localStorage is unavailable/stale.
+        // Backend route middleware already protects private pages.
         if (!user || !user.id) {
-            window.location.href = '/account/login';
+            const roleBadge = document.getElementById('roleBadge');
+            if (roleBadge) roleBadge.textContent = 'SESSION';
             return;
         }
 

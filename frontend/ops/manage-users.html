@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Akun Internal | ThinkTala Ops</title>
+    <meta name="description" content="Dashboard untuk mengelola akun internal ThinkTala">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .filter-card {
+            background: var(--bg-card, rgba(30, 32, 48, 0.85));
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .table-card {
+            background: var(--bg-card, rgba(30, 32, 48, 0.85));
+            border-radius: 12px;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status-badge.inactive {
+            background: rgba(148, 163, 184, 0.2);
+            color: #94a3b8;
+        }
+
+        .table-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .page-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .input-custom {
+            background: rgba(15, 17, 28, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0 !important;
+        }
+        .input-custom:focus {
+            background: rgba(15, 17, 28, 0.8);
+            border-color: rgba(0, 180, 216, 0.5);
+            box-shadow: none;
+            outline: none;
+        }
+
+        .role-badge {
+            background: rgba(108, 99, 255, 0.15);
+            color: #818cf8;
+            border: 1px solid rgba(108, 99, 255, 0.3);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .detail-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: #00b4d8;
+            border: 1px solid rgba(0, 180, 216, 0.2);
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .detail-btn:hover {
+            background: rgba(0, 180, 216, 0.15);
+            color: #00b4d8;
+        }
+
+        .action-btn-deactivate {
+            background: rgba(239, 68, 68, 0.08);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .action-btn-deactivate:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .action-btn-activate {
+            background: rgba(16, 185, 129, 0.08);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+        .action-btn-activate:hover {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        /* Confirmation Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 99998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--bg-card, rgba(30, 32, 48, 0.95));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-icon {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 1.5rem;
+        }
+        .modal-icon.danger { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .modal-icon.success { background: rgba(16,185,129,0.15); color: #10b981; }
+        .modal-title { color: #e2e8f0; font-weight: 700; margin-bottom: 8px; }
+        .modal-message { color: #94a3b8; font-size: 0.9rem; margin-bottom: 24px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .modal-actions .btn { min-width: 120px; font-weight: 600; }
+        .btn-confirm-danger { background: linear-gradient(135deg,#dc2626,#b91c1c); color:#fff; border:none; }
+        .btn-confirm-danger:hover { background: linear-gradient(135deg,#ef4444,#dc2626); color:#fff; }
+        .btn-confirm-success { background: linear-gradient(135deg,#059669,#047857); color:#fff; border:none; }
+        .btn-confirm-success:hover { background: linear-gradient(135deg,#10b981,#059669); color:#fff; }
+        .btn-modal-cancel { background: rgba(255,255,255,0.05); color:#94a3b8; border:1px solid rgba(255,255,255,0.1); }
+        .btn-modal-cancel:hover { background: rgba(255,255,255,0.1); color:#e2e8f0; }
+
+        /* Toast */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 99999; }
+        .toast-msg {
+            padding: 14px 20px; border-radius: 10px; color: #fff; font-size: 0.9rem;
+            margin-bottom: 10px; animation: toastSlideIn 0.35s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            display: flex; align-items: center; gap: 10px; max-width: 400px;
+        }
+        .toast-msg.success { background: linear-gradient(135deg,#059669,#047857); }
+        .toast-msg.error { background: linear-gradient(135deg,#dc2626,#b91c1c); }
+        @keyframes toastSlideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+            <div class="modal-icon" id="modalIcon"><i class="fa-solid fa-ban"></i></div>
+            <h5 class="modal-title" id="modalTitle">Konfirmasi</h5>
+            <p class="modal-message" id="modalMessage">Apakah Anda yakin?</p>
+            <div class="modal-actions">
+                <button class="btn btn-modal-cancel" onclick="closeModal()">Batal</button>
+                <button class="btn" id="modalConfirmBtn" onclick="executeAction()">Konfirmasi</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1" style="font-size: 0.82rem;">
+                        <li class="breadcrumb-item"><a href="/ops/dashboard" class="text-decoration-none" style="color: #00b4d8;">Dashboard</a></li>
+                        <li class="breadcrumb-item active" style="color: var(--text-muted);">Kelola Akun Internal</li>
+                    </ol>
+                </nav>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading);">Kelola Akun Internal</h4>
+                <small class="text-muted">Daftar pengguna dengan role internal</small>
+            </div>
+            <a href="/ops/create-user" id="btnCreateUser" class="btn btn-sm px-3 py-2" style="background: var(--accent-cyan); color: #000; font-weight: 600;">
+                <i class="fa-solid fa-plus me-1"></i> Buat Akun Baru
+            </a>
+        </div>
+
+        <!-- Filter -->
+        <div class="filter-card">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">Cari</label>
+                    <input type="text" class="form-control input-custom" id="searchInput" placeholder="Cari nama atau email...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Role</label>
+                    <select class="form-select input-custom" id="filterRole">
+                        <option value="">Semua Role</option>
+                        <option value="OPERASIONAL">Operasional</option>
+                        <option value="COMPLIANCE">Compliance</option>
+                        <option value="MANAJEMEN">Manajemen</option>
+                        <option value="ADMIN_CS">Admin CS</option>
+                        <option value="SUPERADMIN">Superadmin</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">Status</label>
+                    <select class="form-select input-custom" id="filterStatus">
+                        <option value="">Semua Status</option>
+                        <option value="active">Aktif</option>
+                        <option value="inactive">Nonaktif</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" id="btnReset" onclick="resetFilters()">
+                        <i class="fa-solid fa-rotate-left me-1"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card shadow-lg">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="usersTable" style="color: var(--text-main);">
+                    <thead>
+                        <tr class="text-muted small text-uppercase" style="border-bottom: 2px solid rgba(255,255,255,0.05);">
+                            <th style="padding: 16px 20px;">Nama</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Tanggal Dibuat</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- JS-injected -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-pagination" id="paginationControls">
+                <!-- JS-injected -->
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>Operations Panel v1.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js"></script>
+    <script>
+        const API_BASE = '/api/admin/users';
+        let currentPage = 1;
+        const perPage = 20;
+        let debounceTimer = null;
+        let pendingAction = null;
+        let pendingUserId = null;
+        let pendingUserName = null;
+
+        /* ── Render helpers ───────────────────────────── */
+        function renderStatus(status) {
+            const s = (status || '').toLowerCase();
+            if (s === 'active') {
+                return '<span class="status-badge active"><i class="fa-solid fa-check-circle"></i> Aktif</span>';
+            }
+            return '<span class="status-badge inactive"><i class="fa-solid fa-minus-circle"></i> Nonaktif</span>';
+        }
+
+        function formatDate(iso) {
+            if (!iso) return '-';
+            return new Date(iso).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.appendChild(document.createTextNode(text));
+            return div.innerHTML;
+        }
+
+        function showToast(msg, type) {
+            type = type || 'error';
+            var container = document.getElementById('toastContainer');
+            var toast = document.createElement('div');
+            toast.className = 'toast-msg ' + type;
+            var icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+            toast.innerHTML = '<i class="fa-solid ' + icon + '"></i><span>' + escapeHtml(msg) + '</span>';
+            container.appendChild(toast);
+            setTimeout(function() {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(function() { toast.remove(); }, 300);
+            }, 4000);
+        }
+
+        /* ── Action button HTML for each row ──────────── */
+        function renderActionButtons(u) {
+            var isActive = (u.status || '').toLowerCase() === 'active';
+            var detailBtn = '<a href="/ops/user-detail?id=' + u.user_id + '" class="btn btn-sm detail-btn"><i class="fa-solid fa-eye me-1"></i>Detail</a>';
+            var toggleBtn = '';
+            if (isActive) {
+                toggleBtn = '<button class="btn btn-sm action-btn-deactivate" onclick="showConfirmModal(\'deactivate\', \'' + u.user_id + '\', \'' + escapeHtml(u.full_name).replace(/'/g, "\\'") + '\')"><i class="fa-solid fa-ban me-1"></i>Nonaktifkan</button>';
+            } else {
+                toggleBtn = '<button class="btn btn-sm action-btn-activate" onclick="showConfirmModal(\'reactivate\', \'' + u.user_id + '\', \'' + escapeHtml(u.full_name).replace(/'/g, "\\'") + '\')"><i class="fa-solid fa-check-circle me-1"></i>Aktifkan</button>';
+            }
+            return '<div class="d-flex gap-2 justify-content-center">' + detailBtn + toggleBtn + '</div>';
+        }
+
+        /* ── Main data loader ─────────────────────────── */
+        async function loadUsers(page) {
+            if (typeof page === 'number') currentPage = page;
+            const search = document.getElementById('searchInput').value.trim();
+            const role = document.getElementById('filterRole').value;
+            const status = document.getElementById('filterStatus').value;
+
+            const tbody = document.getElementById('usersTableBody');
+            const pagination = document.getElementById('paginationControls');
+
+            // Loading state
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...</td></tr>';
+            pagination.innerHTML = '';
+
+            try {
+                const params = new URLSearchParams({ page: currentPage, per_page: perPage });
+                if (search) params.set('search', search);
+                if (role) params.set('role', role);
+                if (status) params.set('status', status);
+
+                const res = await fetch(API_BASE + '?' + params.toString(), {
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'include'
+                });
+
+                if (!res.ok) {
+                    const errJson = await res.json().catch(() => null);
+                    throw new Error((errJson && errJson.msg) || 'Gagal memuat data (HTTP ' + res.status + ')');
+                }
+
+                const json = await res.json();
+
+                if (!json.status) {
+                    throw new Error(json.msg || 'Terjadi kesalahan');
+                }
+
+                // json.data = { data: [...], total, page, per_page }
+                const payload = json.data || {};
+                const list = payload.data || [];
+                const total = payload.total || 0;
+                const pageNum = payload.page || 1;
+                const pp = payload.per_page || perPage;
+                const totalPages = pp > 0 ? Math.ceil(total / pp) : 1;
+
+                // Empty state
+                if (list.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-5">' +
+                        '<i class="fa-regular fa-folder-open d-block mb-2" style="font-size:2rem;"></i>' +
+                        'Belum ada akun internal yang terdaftar.</td></tr>';
+                    pagination.innerHTML = '';
+                    return;
+                }
+
+                // Render rows
+                tbody.innerHTML = list.map(function(u) {
+                    return '<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">' +
+                        '<td style="padding:16px 20px;"><strong style="color:#e2e8f0;">' + escapeHtml(u.full_name) + '</strong></td>' +
+                        '<td style="color:#94a3b8;">' + escapeHtml(u.email) + '</td>' +
+                        '<td><span class="role-badge">' + escapeHtml(u.role || '-') + '</span></td>' +
+                        '<td>' + renderStatus(u.status) + '</td>' +
+                        '<td class="small text-muted">' + formatDate(u.created_at) + '</td>' +
+                        '<td class="text-center">' + renderActionButtons(u) + '</td>' +
+                    '</tr>';
+                }).join('');
+
+                // Render pagination
+                var startItem = (pageNum - 1) * pp + 1;
+                var endItem = Math.min(pageNum * pp, total);
+
+                pagination.innerHTML =
+                    '<div class="small text-muted">Menampilkan ' + startItem + ' – ' + endItem + ' dari ' + total + ' data</div>' +
+                    '<div class="d-flex gap-2 align-items-center">' +
+                        '<button class="page-btn" onclick="loadUsers(' + (pageNum - 1) + ')"' + (pageNum <= 1 ? ' disabled' : '') + '>' +
+                            '<i class="fa-solid fa-chevron-left"></i> Prev</button>' +
+                        '<span class="small text-muted mx-2">Halaman ' + pageNum + ' / ' + totalPages + '</span>' +
+                        '<button class="page-btn" onclick="loadUsers(' + (pageNum + 1) + ')"' + (pageNum >= totalPages ? ' disabled' : '') + '>' +
+                            'Next <i class="fa-solid fa-chevron-right"></i></button>' +
+                    '</div>';
+
+            } catch (e) {
+                // Error state
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-5">' +
+                    '<i class="fa-solid fa-circle-exclamation me-2"></i>Gagal memuat data: ' + escapeHtml(e.message) + '</td></tr>';
+                pagination.innerHTML = '';
+            }
+        }
+
+        /* ── Filter helpers ───────────────────────────── */
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterRole').value = '';
+            document.getElementById('filterStatus').value = '';
+            loadUsers(1);
+        }
+
+        /* ── Debounce for search (400ms) ──────────────── */
+        document.getElementById('searchInput').addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function() { loadUsers(1); }, 400);
+        });
+
+        /* ── Dropdown auto-filter on change ───────────── */
+        document.getElementById('filterRole').addEventListener('change', function() { loadUsers(1); });
+        document.getElementById('filterStatus').addEventListener('change', function() { loadUsers(1); });
+
+        /* ── Confirmation Modal (PBI-55) ──────────────── */
+        function showConfirmModal(action, userId, userName) {
+            pendingAction = action;
+            pendingUserId = userId;
+            pendingUserName = userName;
+
+            var icon = document.getElementById('modalIcon');
+            var title = document.getElementById('modalTitle');
+            var message = document.getElementById('modalMessage');
+            var confirmBtn = document.getElementById('modalConfirmBtn');
+
+            if (action === 'deactivate') {
+                icon.className = 'modal-icon danger';
+                icon.innerHTML = '<i class="fa-solid fa-ban"></i>';
+                title.textContent = 'Nonaktifkan Akun';
+                message.innerHTML = 'Apakah Anda yakin ingin menonaktifkan akun <strong>' + escapeHtml(userName) + '</strong>?<br><small class="text-muted">User tidak akan bisa login setelah dinonaktifkan.</small>';
+                confirmBtn.className = 'btn btn-confirm-danger';
+            } else {
+                icon.className = 'modal-icon success';
+                icon.innerHTML = '<i class="fa-solid fa-check-circle"></i>';
+                title.textContent = 'Aktifkan Kembali Akun';
+                message.innerHTML = 'Apakah Anda yakin ingin mengaktifkan kembali akun <strong>' + escapeHtml(userName) + '</strong>?<br><small class="text-muted">User akan bisa login kembali setelah diaktifkan.</small>';
+                confirmBtn.className = 'btn btn-confirm-success';
+            }
+            confirmBtn.textContent = 'Konfirmasi';
+            document.getElementById('confirmModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('show');
+            pendingAction = null;
+            pendingUserId = null;
+            pendingUserName = null;
+        }
+
+        async function executeAction() {
+            if (!pendingAction || !pendingUserId) return;
+
+            var endpoint = '/api/admin/users/' + pendingUserId + '/' + pendingAction;
+            var confirmBtn = document.getElementById('modalConfirmBtn');
+
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Memproses...';
+
+            try {
+                var res = await fetch(endpoint, {
+                    method: 'PATCH',
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'include'
+                });
+
+                var data = await res.json();
+
+                if (res.ok && data.status === true) {
+                    var successMsg = pendingAction === 'deactivate'
+                        ? 'Akun berhasil dinonaktifkan'
+                        : 'Akun berhasil diaktifkan kembali';
+                    showToast(successMsg, 'success');
+                    // Reload current page data to reflect changes
+                    loadUsers(currentPage);
+                } else {
+                    showToast(data.msg || 'Gagal memproses permintaan');
+                }
+            } catch (err) {
+                showToast('Koneksi ke server gagal');
+            }
+
+            closeModal();
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Konfirmasi';
+        }
+
+        // Close modal on overlay click
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        /* ── Init ─────────────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', function() { loadUsers(1); });
+    </script>
+</body>
+
+</html>

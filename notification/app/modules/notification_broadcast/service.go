@@ -45,6 +45,7 @@ func (s *Service) Create(req CreateNotificationRequest, id string) error {
 		desc = strings.TrimSpace(req.Message)
 	}
 	typeVal := strings.ToLower(strings.TrimSpace(req.Type))
+	targetRole := strings.ToLower(strings.TrimSpace(req.TargetRole))
 
 	if title == "" {
 		return fmt.Errorf("title wajib diisi")
@@ -58,11 +59,18 @@ func (s *Service) Create(req CreateNotificationRequest, id string) error {
 	if !isValidType(typeVal) {
 		return fmt.Errorf("type tidak valid")
 	}
+	if targetRole == "" {
+		targetRole = "client"
+	}
+	if !isValidTargetRole(targetRole) {
+		return fmt.Errorf("target_role tidak valid")
+	}
 
 	req.Title = title
 	req.Description = desc
 	req.Message = desc
 	req.Type = typeVal
+	req.TargetRole = targetRole
 
 	return s.repo.Create(req, id)
 }
@@ -75,6 +83,12 @@ func (s *Service) Update(id string, req UpdateNotificationRequest) error {
 
 	if req.Type != "" && !isValidType(req.Type) {
 		return fmt.Errorf("type tidak valid")
+	}
+	if targetRole := strings.ToLower(strings.TrimSpace(req.TargetRole)); targetRole != "" {
+		if !isValidTargetRole(targetRole) {
+			return fmt.Errorf("target_role tidak valid")
+		}
+		req.TargetRole = targetRole
 	}
 
 	if strings.TrimSpace(req.Description) == "" && strings.TrimSpace(req.Message) != "" {
@@ -95,6 +109,15 @@ func (s *Service) Delete(id string) error {
 func isValidType(typeVal string) bool {
 	switch strings.ToLower(strings.TrimSpace(typeVal)) {
 	case "system", "promo", "warning", "info", "analysis", "education", "event":
+		return true
+	default:
+		return false
+	}
+}
+
+func isValidTargetRole(targetRole string) bool {
+	switch strings.ToLower(strings.TrimSpace(targetRole)) {
+	case "client", "client_never_bought", "client_paid_active", "client_lapsed", "client_expiring_soon":
 		return true
 	default:
 		return false

@@ -1,0 +1,326 @@
+<div class="container-fluid">
+    <div class="d-md-flex align-items-center justify-content-between mb-4">
+        <div class="mb-3 mb-md-0">
+            <h3 class="fw-bold text-secondary mb-1">Semua Pengguna</h3>
+            </div>
+        <button class="btn btn-primary shadow-sm rounded-pill px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalTambahData">
+            <i class="bi bi-plus-lg me-2"></i>Tambah Data
+        </button>
+    </div>
+
+    <div class="card shadow-lg border-0 bg-body rounded-4 overflow-hidden">
+        <div class="card-header bg-transparent border-bottom border-secondary-subtle py-3 px-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-6">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-sm" style="max-width: 300px;">
+                            <span class="input-group-text bg-body-tertiary border-secondary-subtle border-end-0 rounded-start-3">
+                                <i class="bi bi-search text-muted"></i>
+                            </span>
+                            <input type="text" id="searchInput" class="form-control bg-body-tertiary border-secondary-subtle border-start-0 rounded-end-3" placeholder="Cari nama/nik/kelas...">
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger rounded-3 d-none" id="btnBulkDelete">
+                            <i class="bi bi-trash me-1"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 d-flex justify-content-md-end align-items-center">
+                    <label class="small text-muted me-2 mb-0">Tampilkan:</label>
+                    <select id="limitSelect" class="form-select form-select-sm w-auto bg-body-tertiary border-secondary-subtle text-body rounded-3">
+                        <option value="12">12</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr class="bg-primary-subtle text-primary-emphasis border-bottom border-primary-subtle">
+                            <th scope="col" class="ps-4 py-3" style="width: 40px;">
+                                <div class="form-check">
+                                    <input class="form-check-input border-primary rounded-1" type="checkbox" id="selectAll">
+                                </div>
+                            </th>
+                            <th scope="col" class="py-3 fw-bold">ID</th>
+                            <th scope="col" class="py-3 fw-bold">Nama Lengkap</th>
+                            <th scope="col" class="py-3 fw-bold">Kelas</th>
+                            <th scope="col" class="py-3 fw-bold">Status</th>
+                            <th scope="col" class="py-3 fw-bold text-center pe-4">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0" id="data">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-transparent border-top border-secondary-subtle py-3 px-4">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-6 d-flex align-items-center mb-3 mb-md-0">
+                    <label class="small text-muted me-2 mb-0">Halaman:</label>
+                    <select id="pageSelect" class="form-select form-select-sm w-auto bg-body-tertiary border-secondary-subtle text-body rounded-3">
+                        </select>
+                    <div class="ms-3 d-flex gap-2" id="paginationControls">
+                         <button id="btnPrev" class="btn btn-sm btn-outline-secondary border-secondary-subtle rounded-3 px-3">
+                            <i class="bi bi-chevron-left small"></i>
+                         </button>
+                         <button id="btnNext" class="btn btn-sm btn-outline-secondary border-secondary-subtle rounded-3 px-3">
+                            <i class="bi bi-chevron-right small"></i>
+                         </button>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 text-md-end text-muted small" id="pageInfo">
+                    Menampilkan <span class="fw-bold text-emphasis">0</span> dari <span class="fw-bold text-emphasis">0</span> data
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script data-safe="true">
+(function() {
+    // 1. STATE MANAGEMENT
+    let state = {
+        page: 1,
+        limit: 12,
+        search: '',
+        totalData: 0,
+        totalPages: 0
+    };
+
+    // 2. DOM ELEMENTS
+    const tableBody = document.getElementById('data');
+    const searchInput = document.getElementById('searchInput');
+    const limitSelect = document.getElementById('limitSelect');
+    const pageSelect = document.getElementById('pageSelect');
+    const pageInfo = document.getElementById('pageInfo');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const selectAll = document.getElementById('selectAll');
+    const btnBulkDelete = document.getElementById('btnBulkDelete');
+
+    // 3. FETCH DATA FUNCTION
+    async function fetchData() {
+        // Tampilkan loading skeleton/spinner di tabel
+        tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Memuat data...</td></tr>`;
+        
+        try {
+            // Sesuaikan endpoint API Anda disini
+            const query = new URLSearchParams({
+                page: state.page,
+                limit: state.limit,
+                q: state.search
+            });
+
+            // Ganti '/api/users' dengan endpoint Golang Anda
+            const response = await fetch(`/api/users?${query.toString()}`);
+            
+            // Cek jika sesi habis (redirect login)
+            if (response.redirected && response.url.includes('/login')) {
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!response.ok) throw new Error("Gagal mengambil data");
+
+            const result = await response.json();
+            
+            // Asumsi format JSON: { data: [], meta: { total_items: 100, total_pages: 10 } }
+            // Sesuaikan dengan respon Golang Anda
+            const users = result.data || [];
+            const meta = result.meta || { total_items: 0, total_pages: 1 };
+
+            state.totalData = meta.total_items;
+            state.totalPages = meta.total_pages;
+
+            renderTable(users);
+            renderPagination();
+            resetSelection(); // Reset checkbox setiap load data baru
+
+        } catch (error) {
+            console.error(error);
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Gagal memuat data</td></tr>`;
+        }
+    }
+
+    // 4. RENDER TABLE FUNCTION
+    function renderTable(users) {
+        if (users.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">Tidak ada data ditemukan</td></tr>`;
+            return;
+        }
+
+        const html = users.map(user => `
+            <tr>
+                <td class="ps-4">
+                    <div class="form-check">
+                        <input class="form-check-input row-checkbox" type="checkbox" value="${user.id}">
+                    </div>
+                </td>
+                <td class="fw-bold">#${user.id}</td>
+                <td>${escapeHtml(user.nama_lengkap)}</td>
+                <td>${escapeHtml(user.kelas)}</td>
+                <td>
+                    <span class="badge rounded-pill ${user.status === 'Aktif' ? 'bg-success-subtle text-success border-success-subtle' : 'bg-warning-subtle text-warning border-warning-subtle'} border">
+                        ${escapeHtml(user.status)}
+                    </span>
+                </td>
+                <td class="text-center pe-4">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-light border-secondary-subtle rounded-3 me-1" onclick="editUser('${user.id}')" title="Edit">
+                            <i class="bi bi-pencil-square text-primary"></i>
+                        </button>
+                        <button class="btn btn-sm btn-light border-secondary-subtle rounded-3" onclick="deleteUser('${user.id}')" title="Hapus">
+                            <i class="bi bi-trash3 text-danger"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        tableBody.innerHTML = html;
+        
+        // Re-attach listener untuk checkbox baru
+        attachCheckboxListeners();
+    }
+
+    // 5. RENDER PAGINATION & INFO
+    function renderPagination() {
+        // Update Info Text
+        const start = (state.page - 1) * state.limit + 1;
+        const end = Math.min(start + state.limit - 1, state.totalData);
+        
+        // Handle jika data kosong
+        const displayStart = state.totalData === 0 ? 0 : start;
+        const displayEnd = state.totalData === 0 ? 0 : end;
+
+        pageInfo.innerHTML = `Menampilkan <span class="fw-bold text-emphasis">${displayStart}-${displayEnd}</span> dari <span class="fw-bold text-emphasis">${state.totalData}</span> data`;
+
+        // Update Dropdown Halaman
+        let options = '';
+        for (let i = 1; i <= state.totalPages; i++) {
+            options += `<option value="${i}" ${i === state.page ? 'selected' : ''}>${i}</option>`;
+        }
+        pageSelect.innerHTML = options;
+
+        // Update State Tombol Prev/Next
+        btnPrev.disabled = state.page <= 1;
+        btnNext.disabled = state.page >= state.totalPages;
+    }
+
+    // 6. EVENT LISTENERS
+    
+    // Search dengan Debounce (Supaya tidak request setiap ketik huruf)
+    let debounceTimer;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            state.search = e.target.value;
+            state.page = 1; // Reset ke halaman 1 saat mencari
+            fetchData();
+        }, 500); // Tunggu 500ms setelah user berhenti mengetik
+    });
+
+    // Limit Change
+    limitSelect.addEventListener('change', (e) => {
+        state.limit = parseInt(e.target.value);
+        state.page = 1;
+        fetchData();
+    });
+
+    // Page Select Change
+    pageSelect.addEventListener('change', (e) => {
+        state.page = parseInt(e.target.value);
+        fetchData();
+    });
+
+    // Button Prev
+    btnPrev.addEventListener('click', () => {
+        if (state.page > 1) {
+            state.page--;
+            fetchData();
+        }
+    });
+
+    // Button Next
+    btnNext.addEventListener('click', () => {
+        if (state.page < state.totalPages) {
+            state.page++;
+            fetchData();
+        }
+    });
+
+    // 7. CHECKBOX LOGIC (Dynamic)
+    function attachCheckboxListeners() {
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        
+        rowCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (!this.checked) selectAll.checked = false;
+                checkSelectAllStatus();
+                toggleBulkButton();
+            });
+        });
+    }
+
+    selectAll.addEventListener('change', function() {
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        rowCheckboxes.forEach(cb => cb.checked = this.checked);
+        toggleBulkButton();
+    });
+
+    function checkSelectAllStatus() {
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        if (rowCheckboxes.length > 0 && document.querySelectorAll('.row-checkbox:checked').length === rowCheckboxes.length) {
+            selectAll.checked = true;
+        }
+    }
+
+    function toggleBulkButton() {
+        const checkedCount = document.querySelectorAll('.row-checkbox:checked').length;
+        if (checkedCount > 0) {
+            btnBulkDelete.classList.remove('d-none');
+            // Update teks tombol hapus (opsional)
+            btnBulkDelete.innerHTML = `<i class="bi bi-trash me-1"></i> Hapus (${checkedCount})`;
+        } else {
+            btnBulkDelete.classList.add('d-none');
+        }
+    }
+
+    function resetSelection() {
+        selectAll.checked = false;
+        toggleBulkButton();
+    }
+
+    // Helper: XSS Protection sederhana
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+    
+    // Fungsi Global untuk tombol Aksi (harus ditempel di window karena onclick attribute)
+    window.editUser = function(id) {
+        console.log("Edit user:", id);
+        // Logika buka modal edit disini
+    };
+
+    window.deleteUser = function(id) {
+        if(confirm("Yakin hapus data ini?")) {
+            // Logika fetch delete disini
+            console.log("Delete user:", id);
+            // fetchData(); // Refresh table setelah hapus
+        }
+    };
+
+    // Load Data Pertama Kali
+    fetchData();
+
+})(); // IIFE (Immediately Invoked Function Expression) untuk scope isolation
+</script>

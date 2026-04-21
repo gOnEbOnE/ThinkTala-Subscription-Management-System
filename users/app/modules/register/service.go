@@ -21,7 +21,7 @@ func NewService(repo Repository) *Service {
 }
 
 // dispatchNotification mengirim event ke Notification Service untuk diproses berdasarkan template.
-// Jika Notification Service tidak tersedia atau template belum ada, fallback ke SMTP langsung.
+// Jalur pengiriman email dipusatkan ke Notification Service (Brevo-only).
 func dispatchNotification(eventType, channel, to string, vars map[string]string) {
 
 	// TODO(queue): Aktifkan Redis queue setelah worker siap di-deploy
@@ -41,8 +41,7 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 
 	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
 	if err != nil {
-		log.Printf("[NOTIF] Notification service tidak tersedia (%v), fallback SMTP", err)
-		fallbackSendOTPEmail(to, vars)
+		log.Printf("[NOTIF] Notification service tidak tersedia (%v), tidak ada fallback SMTP", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -50,25 +49,7 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 	if resp.StatusCode != http.StatusOK {
 		var result map[string]any
 		json.NewDecoder(resp.Body).Decode(&result)
-		log.Printf("[NOTIF] Gagal kirim via template (%d: %v), fallback SMTP", resp.StatusCode, result["error"])
-		fallbackSendOTPEmail(to, vars)
-	}
-}
-
-// fallbackSendOTPEmail mengirim email OTP langsung via SMTP jika Notification Service tidak tersedia.
-func fallbackSendOTPEmail(to string, vars map[string]string) {
-	name := vars["name"]
-	otp := vars["otp"]
-	smtpClient := utils.NewSMTPClient()
-	subject := "Kode Verifikasi ThinkNalyze"
-	body := fmt.Sprintf(
-		"Halo %s,\n\nKode verifikasi Anda: %s\n\nKode ini berlaku selama 5 menit.\nJangan bagikan kode ini kepada siapa pun.\n\n— ThinkNalyze Team",
-		name, otp,
-	)
-	if err := smtpClient.SendEmail(to, subject, body); err != nil {
-		log.Printf("[OTP] Gagal mengirim email ke %s: %v", to, err)
-	} else {
-		log.Printf("[OTP] Kode verifikasi (fallback) terkirim ke %s", to)
+		log.Printf("[NOTIF] Gagal kirim via template (%d: %v), tidak ada fallback SMTP", resp.StatusCode, result["error"])
 	}
 }
 

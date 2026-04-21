@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/orders"
 	"github.com/master-abror/zaframework/app/modules/packages"
 	"github.com/master-abror/zaframework/app/routes"
 	"github.com/master-abror/zaframework/core"
@@ -100,8 +101,14 @@ func main() {
 	app.RegisterJob("delete_package", packagesService.ProcessDeletePackageJob)
 	app.RegisterJob("toggle_package_status", packagesService.ProcessTogglePackageStatusJob)
 
+	// PBI-45: Orders Module
+	ordersRepo := orders.NewRepository(app.DB)
+	ordersService := orders.NewService(ordersRepo)
+	ordersController := orders.NewController(app.Dispatcher, app.Response, ordersService)
+	app.RegisterJob("create_order", ordersService.ProcessCreateOrderJob)
+
 	// 4. ROUTING
-	routes.Init(app, packagesController)
+	routes.Init(app, packagesController, ordersController)
 
 	// 5. RUN
 	app.Run()

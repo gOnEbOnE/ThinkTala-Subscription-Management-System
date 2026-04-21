@@ -33,8 +33,8 @@ func (c *AdminController) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Parse query params
-	status := r.URL.Query().Get("status")
-	search := r.URL.Query().Get("search")
+	status := strings.TrimSpace(r.URL.Query().Get("status"))
+	search := strings.TrimSpace(r.URL.Query().Get("search"))
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 	if page < 1 {
@@ -42,6 +42,17 @@ func (c *AdminController) List(w http.ResponseWriter, r *http.Request) {
 	}
 	if limit < 1 {
 		limit = 10
+	}
+
+	// PBI-7: Validate status parameter — only valid values allowed
+	if status != "" {
+		upperStatus := strings.ToUpper(status)
+		validStatuses := map[string]bool{"PENDING": true, "APPROVED": true, "REJECTED": true}
+		if !validStatuses[upperStatus] {
+			resp.ApiJSON(w, r, http.StatusBadRequest, false, "Status tidak valid. Gunakan: PENDING, APPROVED, atau REJECTED", nil)
+			return
+		}
+		status = strings.ToLower(upperStatus)
 	}
 
 	payload := map[string]any{
@@ -57,6 +68,10 @@ func (c *AdminController) List(w http.ResponseWriter, r *http.Request) {
 		errMsg := err.Error()
 		if strings.HasPrefix(errMsg, "FORBIDDEN:") {
 			resp.ApiJSON(w, r, http.StatusForbidden, false, strings.TrimPrefix(errMsg, "FORBIDDEN:"), nil)
+			return
+		}
+		if strings.HasPrefix(errMsg, "BAD_REQUEST:") {
+			resp.ApiJSON(w, r, http.StatusBadRequest, false, strings.TrimPrefix(errMsg, "BAD_REQUEST:"), nil)
 			return
 		}
 		resp.ApiJSON(w, r, http.StatusInternalServerError, false, errMsg, nil)
@@ -173,9 +188,10 @@ func (c *AdminController) Reject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse JSON body for reason
+	// Parse JSON body for reason and rejected fields
 	var body struct {
-		Reason string `json:"reason"`
+		Reason         string   `json:"reason"`
+		RejectedFields []string `json:"rejected_fields"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		resp.ApiJSON(w, r, http.StatusBadRequest, false, "Format request tidak valid", nil)
@@ -188,11 +204,12 @@ func (c *AdminController) Reject(w http.ResponseWriter, r *http.Request) {
 	}
 
 	payload := map[string]any{
-		"role":          role,
-		"kyc_id":        kycID,
-		"reviewer_id":   reviewerID,
-		"action":        "reject",
-		"reject_reason": body.Reason,
+		"role":            role,
+		"kyc_id":          kycID,
+		"reviewer_id":     reviewerID,
+		"action":          "reject",
+		"reject_reason":   body.Reason,
+		"rejected_fields": body.RejectedFields,
 	}
 
 	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_kyc_review", payload, concurrency.PriorityHigh)

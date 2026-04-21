@@ -42,6 +42,10 @@ func (s *Service) ProcessLoginJob(ctx context.Context, payload any) (any, error)
 
 	// Cek status user harus 'active'
 	if strings.ToLower(user.Status) != "active" {
+		// PBI-55: Deactivated users get a specific 403 message
+		if strings.ToLower(user.Status) == "inactive" {
+			return nil, fmt.Errorf("ACCOUNT_DEACTIVATED")
+		}
 		return nil, fmt.Errorf("Akun belum aktif. Silakan verifikasi email terlebih dahulu.")
 	}
 
@@ -71,8 +75,23 @@ func (s *Service) ProcessLoginJob(ctx context.Context, payload any) (any, error)
 		"os":         os,
 	}
 
-	// Pastikan role_code tidak kosong dan dalam format uppercase
-	roleCode := strings.ToUpper(strings.TrimSpace(userData["role_code"].(string)))
+	// Normalisasi level/role untuk otorisasi konsisten lintas service.
+	levelCode := strings.ToUpper(strings.TrimSpace(fmt.Sprint(userData["level_code"])))
+	userData["level_code"] = levelCode
+
+	roleCode := strings.ToUpper(strings.TrimSpace(fmt.Sprint(userData["role_code"])))
+
+	// Super Admin kadang tersimpan dengan role fungsional (mis. CEO).
+	// Untuk autentikasi gateway, role_code harus membawa identitas SUPERADMIN.
+	if levelCode == "SUPERADMIN" {
+		if roleCode != "SUPERADMIN" {
+			userData["original_role"] = userData["role"]
+			userData["original_role_code"] = roleCode
+		}
+		userData["role"] = "Super Admin"
+		roleCode = "SUPERADMIN"
+	}
+
 	userData["role_code"] = roleCode
 
 	token, err := utils.CreateJWT(userData, 24*time.Hour)
@@ -116,6 +135,7 @@ func (s *Service) ProcessAssumeRoleJob(ctx context.Context, payload any) (any, e
 		"CEO":         true,
 		"OPERASIONAL": true,
 		"COMPLIANCE":  true,
+		"MANAGEMENT":  true,
 		"CLIENT":      true,
 	}
 	if !validRoles[targetRoleCode] {
@@ -164,6 +184,8 @@ func (s *Service) ProcessAssumeRoleJob(ctx context.Context, payload any) (any, e
 		redirectURL = "/ops/dashboard"
 	case "COMPLIANCE":
 		redirectURL = "/compliance/dashboard"
+	case "MANAGEMENT", "ADMIN":
+		redirectURL = "/management/dashboard-customers"
 	case "CLIENT":
 		redirectURL = "/client/dashboard"
 	default:

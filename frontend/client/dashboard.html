@@ -8,16 +8,94 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .subscription-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .subscription-item {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .subscription-item-name {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 2px;
+        }
+
+        .subscription-item-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .announcement-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .announcement-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .announcement-title {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            line-height: 1.35;
+        }
+
+        .announcement-desc {
+            margin: 0;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        .announcement-meta {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .announcement-badge {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+
+        .announcement-empty {
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.02);
+        }
+    </style>
 </head>
 <body>
     <div id="client-sidebar-placeholder"></div>
     <div id="client-navbar-placeholder"></div>
 
     <div class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4 gap-2 flex-wrap">
             <div>
-                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Welcome back, <span id="greetName">Client</span> 👋</h4>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Welcome back, <span id="greetName">Client</span> Ã°Å¸â€˜â€¹</h4>
                 <small class="text-muted">Here's your market overview for today</small>
+            </div>
+            <div>
+                <a href="/client/billing-history" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-receipt me-1"></i>Billing History
+                </a>
             </div>
         </div>
 
@@ -71,12 +149,44 @@
             </div>
         </div>
 
+        <!-- Subscription Card -->
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="ai-card shadow-lg">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-muted text-uppercase small mb-0"><i class="fa-solid fa-crown me-2"></i>Subscription Card</h6>
+                        <span id="subStatusBadge" class="badge" style="background:rgba(255,255,255,0.1);color:var(--text-muted);">Loading...</span>
+                    </div>
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-4">
+                            <small class="text-muted text-uppercase" style="font-size:0.68rem;">Paket Aktif</small>
+                            <h5 class="fw-bold mb-0" id="subPackageName" style="color:var(--text-heading);">Belum Berlangganan</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted text-uppercase" style="font-size:0.68rem;">Aktif Sejak</small>
+                            <div class="fw-semibold" id="subStartDate" style="color:var(--text-main);">-</div>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted text-uppercase" style="font-size:0.68rem;">Jatuh Tempo Terdekat</small>
+                            <div class="fw-semibold" id="subEndDate" style="color:var(--text-main);">-</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3" style="border-top:1px solid var(--border-color);">
+                        <small class="text-muted text-uppercase" style="font-size:0.68rem;">Daftar Paket Berjalan</small>
+                        <div id="subPackagesList" class="subscription-list mt-2">
+                            <div class="text-muted small">Memuat daftar paket...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Notifications Section -->
         <div class="row g-4 mb-4">
             <div class="col-12">
                 <div class="ai-card shadow-lg">
                     <h6 class="fw-bold text-muted text-uppercase small mb-3"><i class="fa-solid fa-bullhorn me-2"></i>Latest Announcements</h6>
-                    <div id="clientNotifications">
+                    <div id="clientNotifications" class="announcement-list">
                         <div class="text-center text-muted py-3 small"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</div>
                     </div>
                     <div id="clientNotifHint" class="small text-muted mt-2"></div>
@@ -87,11 +197,11 @@
         <!-- Quick Access -->
         <div class="row g-4 mb-5">
             <div class="col-lg-4 col-md-6">
-                <a href="#" class="text-decoration-none">
+                <a href="/client/billing-history" class="text-decoration-none">
                     <div class="ai-card shadow-lg h-100 text-center p-4" style="transition: transform 0.2s; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <i class="fa-solid fa-globe fa-3x text-cyan mb-3"></i>
-                        <h6 class="fw-bold text-main">Market Insight</h6>
-                        <small class="text-muted">Real-time macro analysis</small>
+                        <i class="fa-solid fa-receipt fa-3x text-cyan mb-3"></i>
+                        <h6 class="fw-bold text-main">Billing History</h6>
+                        <small class="text-muted">Cek status pembayaran & bukti transfer</small>
                     </div>
                 </a>
             </div>
@@ -125,165 +235,317 @@
     <script src="/assets/js/za-theme.js"></script>
     <script src="/assets/js/client-layout.js?v=20260419"></script>
     <script>
-        const DASHBOARD_NOTIFICATION_LIMIT = 5;
+        let subPolling = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             if (user.name) document.getElementById('greetName').textContent = user.name;
+            loadLatestAnnouncements();
             fetchKYCStatus();
-            loadClientNotifications();
+            fetchSubscriptionStatus();
+
+            // Update otomatis tanpa perlu interaksi user.
+            subPolling = setInterval(fetchSubscriptionStatus, 15000);
         });
 
-        function escapeHtml(value) {
-            const div = document.createElement('div');
-            div.textContent = value == null ? '' : String(value);
-            return div.innerHTML;
+        function formatIdDate(dateStr) {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            if (Number.isNaN(d.getTime())) return '-';
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
         }
 
-        function formatNotifDate(value) {
+        function escapeHTML(raw) {
+            return String(raw || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function safeUrl(raw) {
+            const value = String(raw || '').trim();
             if (!value) return '';
-            const dt = new Date(value);
-            if (Number.isNaN(dt.getTime())) return '';
-            return dt.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+            if (/^(https?:\/\/|\/|#)/i.test(value)) return value;
+            return '';
         }
 
-        function notifTypeMeta(type) {
-            const t = (type || '').toLowerCase();
-            if (t === 'promo') {
+        function formatAnnouncementTime(dateValue) {
+            const date = new Date(dateValue);
+            if (Number.isNaN(date.getTime())) return '';
+
+            const diffMinutes = Math.floor((Date.now() - date.getTime()) / 60000);
+            if (diffMinutes < 60) {
+                return Math.max(diffMinutes, 1) + 'm ago';
+            }
+
+            const diffHours = Math.floor(diffMinutes / 60);
+            if (diffHours < 24) {
+                return diffHours + 'h ago';
+            }
+
+            const diffDays = Math.floor(diffHours / 24);
+            if (diffDays < 7) {
+                return diffDays + 'd ago';
+            }
+
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function normalizeAnnouncementType(rawType) {
+            const type = String(rawType || '').toLowerCase();
+            if (type.includes('promo')) return 'promo';
+            if (type.includes('analysis') || type.includes('education')) return 'analysis';
+            if (type.includes('feature') || type.includes('update') || type.includes('system') || type.includes('event') || type.includes('warning') || type.includes('info')) {
+                return 'feature';
+            }
+            return 'feature';
+        }
+
+        function announcementMeta(type) {
+            if (type === 'promo') {
                 return {
-                    badgeClass: 'bg-success bg-opacity-25 text-success',
-                    iconClass: 'fa-solid fa-gift text-success',
-                    actionLabel: 'Read Terms'
+                    label: 'Promo',
+                    icon: 'fa-solid fa-gift',
+                    badgeStyle: 'background: rgba(255, 193, 7, 0.12); color: #ffd966; border: 1px solid rgba(255, 193, 7, 0.25);'
                 };
             }
-            if (t === 'analysis') {
+            if (type === 'analysis') {
                 return {
-                    badgeClass: 'bg-primary bg-opacity-25 text-primary',
-                    iconClass: 'fa-solid fa-chart-column text-primary',
-                    actionLabel: 'Open Report'
-                };
-            }
-            if (t === 'event') {
-                return {
-                    badgeClass: 'bg-danger bg-opacity-25 text-danger',
-                    iconClass: 'fa-solid fa-calendar-days text-danger',
-                    actionLabel: 'View Event'
-                };
-            }
-            if (t === 'warning') {
-                return {
-                    badgeClass: 'bg-warning bg-opacity-25 text-warning',
-                    iconClass: 'fa-solid fa-triangle-exclamation text-warning',
-                    actionLabel: 'Read Notice'
+                    label: 'Analysis',
+                    icon: 'fa-solid fa-chart-column',
+                    badgeStyle: 'background: rgba(59, 130, 246, 0.12); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.25);'
                 };
             }
             return {
-                badgeClass: 'bg-info bg-opacity-25 text-info',
-                iconClass: 'fa-solid fa-bullhorn text-info',
-                actionLabel: 'Read More'
+                label: 'Feature',
+                icon: 'fa-solid fa-bullhorn',
+                badgeStyle: 'background: rgba(0, 242, 255, 0.10); color: #7ee7ff; border: 1px solid rgba(0, 242, 255, 0.22);'
             };
         }
 
-        function renderClientNotifications(items) {
-            const container = document.getElementById('clientNotifications');
-            const countEl = document.getElementById('notifCount');
-            const hintEl = document.getElementById('clientNotifHint');
-            const list = Array.isArray(items) ? items : [];
-            countEl.textContent = String(list.length);
+        function parseAnnouncement(item, index) {
+            const title = String(item.title || '').trim();
+            const description = String(item.description || item.message || '').trim();
+            if (!title && !description) return null;
 
-            if (typeof window.setClientDiscoverCount === 'function') {
-                window.setClientDiscoverCount(list.length);
-            } else {
-                localStorage.setItem('client_discover_count', String(list.length));
+            return {
+                id: item.id || ('announcement-' + index),
+                title: title || 'Untitled announcement',
+                description: description || 'No description available.',
+                type: normalizeAnnouncementType(item.type),
+                createdAt: new Date(item.created_at || item.createdAt || 0),
+                ctaUrl: safeUrl(item.cta_url),
+                imageUrl: safeUrl(item.image_url)
+            };
+        }
+
+        function getAnnouncementQuery() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const params = new URLSearchParams();
+                params.set('role', 'client');
+                if (user.id) params.set('user_id', String(user.id));
+                return params.toString();
+            } catch (err) {
+                return 'role=client';
+            }
+        }
+
+        async function fetchAnnouncements() {
+            const endpoint = '/api/notifications/public?' + getAnnouncementQuery();
+            const res = await fetch(endpoint, {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error('HTTP ' + res.status);
             }
 
-            if (list.length === 0) {
-                container.innerHTML = '<div class="text-center text-muted py-3 small">Belum ada pengumuman saat ini.</div>';
-                if (hintEl) hintEl.textContent = '';
+            const contentType = String(res.headers.get('content-type') || '').toLowerCase();
+            if (!contentType.includes('application/json')) {
+                throw new Error('Non-JSON response');
+            }
+
+            const json = await res.json();
+            return Array.isArray(json.data) ? json.data : [];
+        }
+
+        function renderAnnouncements(items) {
+            const container = document.getElementById('clientNotifications');
+            const hint = document.getElementById('clientNotifHint');
+            const countEl = document.getElementById('notifCount');
+            if (!container) return;
+
+            const total = Array.isArray(items) ? items.length : 0;
+            if (countEl) countEl.textContent = String(total);
+
+            const latest = (Array.isArray(items) ? items : []).slice(0, 5);
+            if (latest.length === 0) {
+                container.innerHTML = '<div class="announcement-empty"><i class="fa-solid fa-bell-slash fa-lg mb-2 d-block"></i>Belum ada announcement yang aktif.</div>';
+                if (hint) hint.textContent = '';
                 return;
             }
 
-            container.innerHTML = list.slice(0, DASHBOARD_NOTIFICATION_LIMIT).map(function (n) {
-                const title = escapeHtml(n.title || 'Informasi');
-                const desc = escapeHtml((n.description || n.message || '').trim());
-                const type = (n.type || 'info').toLowerCase();
-                const meta = notifTypeMeta(type);
-                const dateText = escapeHtml(formatNotifDate(n.created_at));
-                const cta = n.cta_url
-                    ? '<a href="' + escapeHtml(n.cta_url) + '" target="_blank" rel="noopener" class="small text-cyan text-decoration-none">' + meta.actionLabel + ' <i class="fa-solid fa-arrow-up-right-from-square ms-1"></i></a>'
+            container.innerHTML = latest.map(function (item) {
+                const meta = announcementMeta(item.type);
+                const timeLabel = formatAnnouncementTime(item.createdAt);
+                const imageBlock = item.imageUrl
+                    ? '<div class="rounded-3 overflow-hidden flex-shrink-0" style="width:56px;height:56px;border:1px solid var(--border-color);"><img src="' + escapeHTML(item.imageUrl) + '" alt="' + escapeHTML(item.title) + '" style="width:100%;height:100%;object-fit:cover;"></div>'
+                    : '<div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:56px;height:56px;background:rgba(0,242,255,0.08);border:1px solid rgba(0,242,255,0.18);color:var(--accent-cyan);"><i class="' + meta.icon + '"></i></div>';
+                const ctaUrl = item.ctaUrl;
+                const cta = ctaUrl
+                    ? '<a href="' + escapeHTML(ctaUrl) + '" class="btn btn-sm btn-outline-secondary mt-2" target="_blank" rel="noopener">Open Link</a>'
                     : '';
 
                 return [
-                    '<div class="pb-3 mb-3 border-bottom border-secondary border-opacity-25">',
-                    '<div class="d-flex gap-3">',
-                    '<div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:42px;height:42px;background:rgba(255,255,255,0.04);border:1px solid var(--border-color);">',
-                    '<i class="' + meta.iconClass + '"></i>',
-                    '</div>',
-                    '<div class="w-100">',
+                    '<div class="announcement-item d-flex gap-3">',
+                    imageBlock,
+                    '<div class="flex-grow-1" style="min-width:0;">',
                     '<div class="d-flex justify-content-between align-items-start gap-2 mb-1">',
-                    '<span class="badge ' + meta.badgeClass + '">' + escapeHtml(type) + '</span>',
-                    '<small class="text-muted">' + dateText + '</small>',
+                    '<span class="announcement-badge" style="' + meta.badgeStyle + '">' + meta.label + '</span>',
+                    '<small class="announcement-meta">' + escapeHTML(timeLabel || '') + '</small>',
                     '</div>',
-                    '<div class="fw-semibold text-main">' + title + '</div>',
-                    '<div class="small text-muted mb-1">' + (desc || '-') + '</div>',
+                    '<h6 class="announcement-title text-truncate mb-1">' + escapeHTML(item.title) + '</h6>',
+                    '<p class="announcement-desc mb-1">' + escapeHTML(item.description) + '</p>',
                     cta,
-                    '</div>',
                     '</div>',
                     '</div>'
                 ].join('');
             }).join('');
 
-            if (hintEl) {
-                if (list.length > DASHBOARD_NOTIFICATION_LIMIT) {
-                    hintEl.textContent =
-                        'Menampilkan ' + DASHBOARD_NOTIFICATION_LIMIT + ' dari ' + list.length + ' update. ' +
-                        'Lihat sisanya di menu Discover pada sidebar.';
+            if (hint) {
+                if (total > latest.length) {
+                    hint.innerHTML = 'Menampilkan ' + latest.length + ' dari ' + total + ' update. <a href="/client/discover" class="fw-semibold text-decoration-none" style="color: var(--accent-cyan);">Read More <i class="fa-solid fa-arrow-right ms-1"></i></a>';
                 } else {
-                    hintEl.textContent = 'Semua update terbaru sudah ditampilkan di dashboard.';
+                    hint.textContent = 'Menampilkan ' + total + ' update terbaru.';
                 }
             }
         }
 
-        async function loadClientNotifications() {
+        async function loadLatestAnnouncements() {
             const container = document.getElementById('clientNotifications');
+            if (container) {
+                container.innerHTML = '<div class="text-center text-muted py-3 small"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading...</div>';
+            }
+
             try {
-                const user = JSON.parse(localStorage.getItem('user') || '{}');
-                const roleRaw = (user.role_code || user.level_code || user.level || 'CLIENT');
-                const role = String(roleRaw).trim().toLowerCase() || 'client';
-                const userId = String(user.id || '').trim();
+                const source = await fetchAnnouncements();
+                const normalized = source
+                    .map(parseAnnouncement)
+                    .filter(Boolean)
+                    .sort(function (a, b) {
+                        return b.createdAt.getTime() - a.createdAt.getTime();
+                    });
+                renderAnnouncements(normalized);
+            } catch (err) {
+                renderAnnouncements([]);
+            }
+        }
 
-                const qs = new URLSearchParams();
-                qs.set('role', role);
-                if (userId) qs.set('user_id', userId);
+        function normalizeSubscriptionsPayload(json) {
+            if (Array.isArray(json.active_subscriptions)) {
+                return json.active_subscriptions;
+            }
+            if (Array.isArray(json.data)) {
+                return json.data;
+            }
+            if (json.data && typeof json.data === 'object') {
+                return [json.data];
+            }
+            return [];
+        }
 
-                const res = await fetch('/api/notifications/public?' + qs.toString(), {
-                    credentials: 'include',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
+        function renderSubscriptionCard(subscriptions) {
+            const badge = document.getElementById('subStatusBadge');
+            const packageEl = document.getElementById('subPackageName');
+            const startEl = document.getElementById('subStartDate');
+            const endEl = document.getElementById('subEndDate');
+            const currentPlanEl = document.getElementById('currentPlan');
+            const subListEl = document.getElementById('subPackagesList');
+            const list = Array.isArray(subscriptions) ? subscriptions.filter(Boolean) : [];
 
-                if (res.status === 401 || res.status === 403) {
-                    document.getElementById('notifCount').textContent = '0';
-                    container.innerHTML = '<div class="text-center text-muted py-3 small">Sesi berakhir. Silakan login ulang.</div>';
+            if (list.length === 0) {
+                badge.textContent = 'Belum Berlangganan';
+                badge.style.background = 'rgba(255,255,255,0.1)';
+                badge.style.color = 'var(--text-muted)';
+                packageEl.textContent = 'Belum Berlangganan';
+                packageEl.style.color = 'var(--text-heading)';
+                startEl.textContent = '-';
+                endEl.textContent = '-';
+                currentPlanEl.textContent = 'Free';
+                subListEl.innerHTML = '<div class="text-muted small">Belum ada paket aktif saat ini.</div>';
+                return;
+            }
+
+            const sortedByEndDate = list.slice().sort((a, b) => {
+                const d1 = new Date(a.end_date || 0).getTime();
+                const d2 = new Date(b.end_date || 0).getTime();
+                return d1 - d2;
+            });
+            const sortedByStartDate = list.slice().sort((a, b) => {
+                const d1 = new Date(a.start_date || 0).getTime();
+                const d2 = new Date(b.start_date || 0).getTime();
+                return d1 - d2;
+            });
+
+            const packageNames = list.map(item => item.package_name || 'Paket Aktif');
+            const uniqueNames = Array.from(new Set(packageNames));
+
+            badge.textContent = list.length + ' Paket Active';
+            badge.style.background = 'rgba(16,185,129,0.18)';
+            badge.style.color = '#34d399';
+
+            if (uniqueNames.length === 1) {
+                packageEl.textContent = uniqueNames[0];
+                currentPlanEl.textContent = uniqueNames[0];
+            } else {
+                packageEl.textContent = uniqueNames.length + ' paket aktif';
+                currentPlanEl.textContent = uniqueNames.length + ' Paket';
+            }
+
+            packageEl.style.color = '#34d399';
+            startEl.textContent = formatIdDate(sortedByStartDate[0].start_date);
+            endEl.textContent = formatIdDate(sortedByEndDate[0].end_date);
+
+            subListEl.innerHTML = list.map(item => {
+                const packageName = escapeHTML(item.package_name || '-');
+                const periodText = escapeHTML(formatIdDate(item.start_date) + ' - ' + formatIdDate(item.end_date));
+                return '<div class="subscription-item">'
+                    + '<div class="d-flex justify-content-between align-items-center gap-2">'
+                    + '<div class="subscription-item-name">' + packageName + '</div>'
+                    + '<span class="badge" style="background:rgba(16,185,129,0.18);color:#34d399;">ACTIVE</span>'
+                    + '</div>'
+                    + '<div class="subscription-item-meta">Periode: ' + periodText + '</div>'
+                    + '</div>';
+            }).join('');
+        }
+
+        async function fetchSubscriptionStatus() {
+            try {
+                const res = await fetch('/api/subscriptions/me', { credentials: 'include' });
+                if (res.status === 401) {
+                    renderSubscriptionCard([]);
                     return;
                 }
 
-                const contentType = (res.headers.get('content-type') || '').toLowerCase();
-                if (!contentType.includes('application/json')) {
-                    throw new Error('Response bukan JSON');
-                }
-
                 const json = await res.json();
-                if (!res.ok) {
-                    throw new Error(json.error || 'Gagal memuat notifikasi');
+                if (!json.success) {
+                    renderSubscriptionCard([]);
+                    return;
                 }
 
-                renderClientNotifications(Array.isArray(json.data) ? json.data : []);
+                renderSubscriptionCard(normalizeSubscriptionsPayload(json));
             } catch (err) {
-                document.getElementById('notifCount').textContent = '0';
-                container.innerHTML = '<div class="text-center text-muted py-3 small">Gagal memuat pengumuman.</div>';
+                renderSubscriptionCard([]);
             }
         }
 
@@ -318,6 +580,10 @@
                 el.className = 'fw-bold text-muted mb-0';
             }
         }
+
+        window.addEventListener('beforeunload', function () {
+            if (subPolling) clearInterval(subPolling);
+        });
     </script>
 </body>
 </html>

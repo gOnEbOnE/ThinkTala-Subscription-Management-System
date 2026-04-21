@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/smtp"
 	"os"
 	"time"
 )
@@ -22,18 +21,27 @@ type EmailSender interface {
 	SendHTMLEmail(to, subject, htmlBody string) error
 }
 
-// NewEmailSender returns Brevo-based sender if BREVO_API_KEY is set,
-// otherwise falls back to SMTP.
+// NewEmailSender returns a Brevo sender.
+// SMTP fallback is intentionally removed to enforce a single delivery channel.
 func NewEmailSender() EmailSender {
-	// Priority: Brevo > SMTP
 	if key := getEnv("BREVO_API_KEY"); key != "" {
-		from := getEnv("BREVO_FROM_EMAIL", getEnv("SMTP_FROM", "noreply@thinktala.com"))
+		from := getEnv("BREVO_FROM_EMAIL", "noreply@thinktala.com")
 		fromName := getEnv("BREVO_FROM_NAME", "ThinkTala")
 		log.Printf("[EMAIL] Using Brevo HTTP API (from: %s <%s>)", fromName, from)
 		return &BrevoClient{APIKey: key, FromEmail: from, FromName: fromName}
 	}
-	log.Println("[EMAIL] Using SMTP (fallback)")
-	return NewSMTPClient()
+	log.Println("[EMAIL] BREVO_API_KEY is missing - Brevo sender disabled")
+	return &MissingBrevoSender{}
+}
+
+type MissingBrevoSender struct{}
+
+func (m *MissingBrevoSender) SendEmail(_, _, _ string) error {
+	return fmt.Errorf("brevo sender not configured: BREVO_API_KEY is required")
+}
+
+func (m *MissingBrevoSender) SendHTMLEmail(_, _, _ string) error {
+	return fmt.Errorf("brevo sender not configured: BREVO_API_KEY is required")
 }
 
 // ============================================================
@@ -105,62 +113,6 @@ func (b *BrevoClient) send(payload brevoPayload) error {
 	}
 
 	return nil
-}
-
-// ============================================================
-// SMTP Client (legacy, for local dev)
-// ============================================================
-
-// SMTPClient holds SMTP configuration.
-type SMTPClient struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	From     string
-}
-
-// NewSMTPClient creates a new SMTPClient from environment variables.
-func NewSMTPClient() *SMTPClient {
-	return &SMTPClient{
-		Host:     getEnv("SMTP_HOST"),
-		Port:     getEnv("SMTP_PORT", "587"),
-		Username: getEnv("SMTP_USER"),
-		Password: getEnv("SMTP_PASS"),
-		From:     getEnv("SMTP_FROM"),
-	}
-}
-
-// SendEmail sends a plain text email.
-func (s *SMTPClient) SendEmail(to, subject, body string) error {
-	if s.Host == "" {
-		return fmt.Errorf("SMTP configuration missing")
-	}
-
-	auth := smtp.PlainAuth("", s.Username, s.Password, s.Host)
-	msg := []byte(fmt.Sprintf(
-		"To: %s\r\nSubject: %s\r\nContent-Type: text/plain; charset=\"UTF-8\"\r\n\r\n%s\r\n",
-		to, subject, body,
-	))
-
-	addr := fmt.Sprintf("%s:%s", s.Host, s.Port)
-	return smtp.SendMail(addr, auth, s.From, []string{to}, msg)
-}
-
-// SendHTMLEmail sends an HTML email.
-func (s *SMTPClient) SendHTMLEmail(to, subject, htmlBody string) error {
-	if s.Host == "" {
-		return fmt.Errorf("SMTP configuration missing")
-	}
-
-	auth := smtp.PlainAuth("", s.Username, s.Password, s.Host)
-	msg := []byte(fmt.Sprintf(
-		"To: %s\r\nSubject: %s\r\nContent-Type: text/html; charset=\"UTF-8\"\r\n\r\n%s\r\n",
-		to, subject, htmlBody,
-	))
-
-	addr := fmt.Sprintf("%s:%s", s.Host, s.Port)
-	return smtp.SendMail(addr, auth, s.From, []string{to}, msg)
 }
 
 func getEnv(key string, fallback ...string) string {

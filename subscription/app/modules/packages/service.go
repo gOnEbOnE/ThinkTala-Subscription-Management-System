@@ -41,26 +41,27 @@ func NewService(repo Repository) Service {
 
 // PBI-32: Create Package
 func (s *packageService) CreatePackage(ctx context.Context, payload CreatePackageDTO) (*Package, error) {
-	// Validasi business logic
 	if payload.Name == "" {
 		return nil, errors.New("nama paket tidak boleh kosong")
 	}
 	if payload.Price <= 0 {
-		return nil, errors.New("harga harus lebih besar dari 0")
-	}
-	if payload.Duration <= 0 {
-		return nil, errors.New("durasi harus lebih besar dari 0 bulan")
+		return nil, errors.New("harga dasar harus lebih besar dari 0")
 	}
 	if payload.Quota <= 0 {
 		return nil, errors.New("kuota harus lebih besar dari 0")
 	}
-
-	// Validasi: harga tahunan harus >= harga bulanan
-	if payload.PriceYearly > 0 && payload.PriceYearly < payload.Price {
-		return nil, errors.New("harga tahunan tidak boleh lebih rendah dari harga bulanan")
+	if len(payload.PricingTiers) == 0 {
+		return nil, errors.New("minimal harus ada 1 pilihan durasi harga")
+	}
+	for _, t := range payload.PricingTiers {
+		if t.DurationMonths <= 0 {
+			return nil, errors.New("durasi harga harus lebih besar dari 0 bulan")
+		}
+		if t.Price < 0 {
+			return nil, errors.New("harga tidak boleh negatif")
+		}
 	}
 
-	// Validasi: nama paket harus unik
 	existing, err := s.repo.GetPackageByName(ctx, payload.Name)
 	if err != nil {
 		return nil, fmt.Errorf("error validasi nama paket: %v", err)
@@ -88,21 +89,23 @@ func (s *packageService) UpdatePackage(ctx context.Context, id string, payload U
 		return nil, errors.New("nama paket tidak boleh kosong")
 	}
 	if payload.Price <= 0 {
-		return nil, errors.New("harga harus lebih besar dari 0")
-	}
-	if payload.Duration <= 0 {
-		return nil, errors.New("durasi harus lebih besar dari 0 bulan")
+		return nil, errors.New("harga dasar harus lebih besar dari 0")
 	}
 	if payload.Quota <= 0 {
 		return nil, errors.New("kuota harus lebih besar dari 0")
 	}
-
-	// Validasi: harga tahunan harus >= harga bulanan
-	if payload.PriceYearly > 0 && payload.PriceYearly < payload.Price {
-		return nil, errors.New("harga tahunan tidak boleh lebih rendah dari harga bulanan")
+	if len(payload.PricingTiers) == 0 {
+		return nil, errors.New("minimal harus ada 1 pilihan durasi harga")
+	}
+	for _, t := range payload.PricingTiers {
+		if t.DurationMonths <= 0 {
+			return nil, errors.New("durasi harga harus lebih besar dari 0 bulan")
+		}
+		if t.Price < 0 {
+			return nil, errors.New("harga tidak boleh negatif")
+		}
 	}
 
-	// Cek apakah data eksis sebelum update
 	existing, err := s.repo.GetPackageByID(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("error validasi paket: %v", err)
@@ -111,12 +114,6 @@ func (s *packageService) UpdatePackage(ctx context.Context, id string, payload U
 		return nil, errors.New("paket tidak ditemukan atau sudah dihapus")
 	}
 
-	// PBI-34: Tolak update paket yang sedang ACTIVE
-	if existing.Status == "ACTIVE" {
-		return nil, errors.New("tidak dapat mengubah paket yang sedang aktif")
-	}
-
-	// Validasi: nama paket harus unik (exclude paket ini sendiri)
 	duplicateName, err := s.repo.GetPackageByName(ctx, payload.Name)
 	if err != nil {
 		return nil, fmt.Errorf("error validasi nama paket: %v", err)

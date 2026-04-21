@@ -26,7 +26,7 @@ func NewService(repo Repository) *Service {
 }
 
 // dispatchNotification mengirim event KYC ke Notification Service.
-// Urutan: 1) Redis queue → 2) HTTP langsung → 3) SMTP fallback.
+// Urutan: 1) Redis queue → 2) HTTP langsung.
 func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 	// 1. Coba Redis queue terlebih dahulu (async, reliable)
 	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
@@ -34,7 +34,7 @@ func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 		return
 	}
 
-	// 2. Fallback: HTTP langsung ke notification service
+	// 2. HTTP langsung ke notification service
 	baseURL := utils.GetEnv("NOTIFICATION_SERVICE_URL", "http://localhost:5003")
 	payload := map[string]any{
 		"event_type": eventType,
@@ -46,13 +46,7 @@ func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 
 	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
 	if err != nil {
-		log.Printf("[KYC NOTIF] Notification service tidak tersedia (%v), fallback SMTP", err)
-		// Derive status dari eventType agar fallback email sesuai
-		statusFallback := "approved"
-		if strings.Contains(eventType, "reject") {
-			statusFallback = "rejected"
-		}
-		sendKYCFallbackEmail(to, vars["full_name"], statusFallback, vars["reject_reason"])
+		log.Printf("[KYC NOTIF] Notification service tidak tersedia (%v), tidak ada fallback SMTP", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -60,63 +54,7 @@ func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 	if resp.StatusCode != http.StatusOK {
 		var result map[string]any
 		json.NewDecoder(resp.Body).Decode(&result)
-		log.Printf("[KYC NOTIF] Gagal kirim via template (%d), fallback SMTP", resp.StatusCode)
-		statusFallback := "approved"
-		if strings.Contains(eventType, "reject") {
-			statusFallback = "rejected"
-		}
-		sendKYCFallbackEmail(to, vars["full_name"], statusFallback, vars["reject_reason"])
-	}
-}
-
-// sendKYCFallbackEmail mengirim email KYC langsung via SMTP jika Notification Service tidak tersedia.
-func sendKYCFallbackEmail(to, fullName, status, rejectReason string) {
-	smtp := utils.NewSMTPClient()
-	var subject, body string
-
-	if status == "approved" {
-		subject = "✓ Verifikasi KYC Berhasil - ThinkNalyze"
-		body = fmt.Sprintf(
-			"Halo %s,\n\n"+
-				"Selamat! Verifikasi identitas (KYC) Anda telah disetujui.\n\n"+
-				"Anda sekarang memiliki akses penuh ke semua fitur ThinkNalyze, termasuk:\n"+
-				"• Market Insight\n"+
-				"• Deep Scanner\n"+
-				"• Ask Nizza AI Assistant\n"+
-				"• Trading Features\n\n"+
-				"Silakan login ke dashboard Anda untuk mulai menggunakan layanan kami.\n\n"+
-				"Terima kasih telah mempercayai ThinkNalyze.\n\n"+
-				"Salam,\n"+
-				"Tim ThinkNalyze",
-			fullName,
-		)
-	} else if status == "rejected" {
-		subject = "⚠️ Verifikasi KYC Memerlukan Perbaikan - ThinkNalyze"
-		body = fmt.Sprintf(
-			"Halo %s,\n\n"+
-				"Mohon maaf, verifikasi identitas (KYC) Anda memerlukan perbaikan.\n\n"+
-				"ALASAN PENOLAKAN:\n"+
-				"%s\n\n"+
-				"LANGKAH SELANJUTNYA:\n"+
-				"1. Login ke dashboard Anda\n"+
-				"2. Buka menu KYC Verification\n"+
-				"3. Klik tombol \"Perbaiki Data KYC\"\n"+
-				"4. Perbaiki data sesuai alasan penolakan di atas\n"+
-				"5. Submit ulang untuk direview kembali\n\n"+
-				"Jika ada pertanyaan, silakan hubungi tim support kami.\n\n"+
-				"Salam,\n"+
-				"Tim ThinkNalyze",
-			fullName,
-			rejectReason,
-		)
-	} else {
-		return
-	}
-
-	if err := smtp.SendEmail(to, subject, body); err != nil {
-		log.Printf("[KYC NOTIFICATION] Gagal mengirim fallback email ke %s: %v", to, err)
-	} else {
-		log.Printf("[KYC NOTIFICATION] Fallback email terkirim ke %s", to)
+		log.Printf("[KYC NOTIF] Gagal kirim via template (%d: %v), tidak ada fallback SMTP", resp.StatusCode, result["error"])
 	}
 }
 
@@ -256,17 +194,100 @@ func (s *Service) ProcessKYCStatusJob(ctx context.Context, payload any) (any, er
 	}
 
 	return KYCStatusResult{
-		ID:           sub.ID,
-		FullName:     sub.FullName,
-		NIK:          sub.NIK,
-		Address:      sub.Address,
-		Birthdate:    sub.Birthdate,
-		Phone:        sub.Phone,
-		KTPImage:     sub.KTPImage,
-		Status:       sub.Status,
-		RejectReason: sub.RejectReason,
-		ReviewedAt:   sub.ReviewedAt,
-		CreatedAt:    sub.CreatedAt,
+		ID:             sub.ID,
+		FullName:       sub.FullName,
+		NIK:            sub.NIK,
+		Address:        sub.Address,
+		Birthdate:      sub.Birthdate,
+		Phone:          sub.Phone,
+		KTPImage:       sub.KTPImage,
+		Status:         sub.Status,
+		RejectReason:   sub.RejectReason,
+		RejectedFields: sub.RejectedFields,
+		ReviewedAt:     sub.ReviewedAt,
+		CreatedAt:      sub.CreatedAt,
+	}, nil
+}
+
+// ProcessKYCResubmitJob — PBI-8: handler untuk dispatcher job "kyc_resubmit"
+func (s *Service) ProcessKYCResubmitJob(ctx context.Context, payload any) (any, error) {
+	data, ok := payload.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload format")
+	}
+
+	userID, _ := data["user_id"].(string)
+	fullName, _ := data["full_name"].(string)
+	nik, _ := data["nik"].(string)
+	address, _ := data["address"].(string)
+	birthdate, _ := data["birthdate"].(string)
+	phone, _ := data["phone"].(string)
+	ktpImage, _ := data["ktp_image"].(string)
+
+	// ========== VALIDASI ==========
+	fullName = strings.TrimSpace(fullName)
+	nik = strings.TrimSpace(nik)
+	address = strings.TrimSpace(address)
+	birthdate = strings.TrimSpace(birthdate)
+	phone = strings.TrimSpace(phone)
+
+	if fullName == "" || nik == "" || address == "" || birthdate == "" || phone == "" || ktpImage == "" {
+		return nil, fmt.Errorf("semua field wajib diisi (nama, NIK, alamat, tanggal lahir, telepon, KTP)")
+	}
+
+	// Validasi NIK
+	nikRegex := regexp.MustCompile(`^\d{16}$`)
+	if !nikRegex.MatchString(nik) {
+		return nil, fmt.Errorf("NIK harus 16 digit angka")
+	}
+
+	// Validasi tanggal lahir
+	_, err := time.Parse("2006-01-02", birthdate)
+	if err != nil {
+		return nil, fmt.Errorf("format tanggal lahir tidak valid (gunakan YYYY-MM-DD)")
+	}
+
+	// Validasi nomor telepon
+	phoneRegex := regexp.MustCompile(`^\+?\d{10,15}$`)
+	cleanPhone := strings.ReplaceAll(phone, " ", "")
+	cleanPhone = strings.ReplaceAll(cleanPhone, "-", "")
+	if !phoneRegex.MatchString(cleanPhone) {
+		return nil, fmt.Errorf("nomor telepon tidak valid (10-15 digit)")
+	}
+
+	// Cek duplikat NIK untuk user lain
+	nikExistsForOther, err := s.repo.NIKExistsForOtherUser(ctx, nik, userID)
+	if err != nil {
+		return nil, fmt.Errorf("gagal mengecek NIK: %v", err)
+	}
+	if nikExistsForOther {
+		return nil, fmt.Errorf("DUPLICATE_NIK:NIK sudah terdaftar di sistem")
+	}
+
+	// ========== RESUBMIT (TRANSACTIONAL) ==========
+	_, err = s.repo.ResubmitKYC(ctx, userID, fullName, nik, address, birthdate, cleanPhone, ktpImage)
+	if err != nil {
+		errMsg := err.Error()
+		if errMsg == "NO_KYC_RECORD" {
+			return nil, fmt.Errorf("BAD_REQUEST:Anda belum memiliki pengajuan KYC")
+		}
+		if strings.HasPrefix(errMsg, "STATUS_NOT_REJECTED:") {
+			currentStatus := strings.TrimPrefix(errMsg, "STATUS_NOT_REJECTED:")
+			if currentStatus == "pending" {
+				return nil, fmt.Errorf("BAD_REQUEST:Pengajuan KYC Anda masih dalam proses review dan tidak dapat diubah")
+			}
+			if currentStatus == "approved" {
+				return nil, fmt.Errorf("BAD_REQUEST:Pengajuan KYC Anda sudah disetujui dan tidak dapat diubah")
+			}
+			return nil, fmt.Errorf("BAD_REQUEST:Status KYC saat ini tidak memungkinkan resubmit (status: %s)", currentStatus)
+		}
+		return nil, fmt.Errorf("gagal memperbarui data KYC: %v", err)
+	}
+
+	return KYCSubmitResult{
+		ID:      "",
+		Status:  "pending",
+		Message: "Dokumen KYC berhasil dikirim ulang dan sedang dalam proses verifikasi",
 	}, nil
 }
 
@@ -280,7 +301,7 @@ func (s *Service) ProcessAdminKYCListJob(ctx context.Context, payload any) (any,
 	}
 
 	role, _ := data["role"].(string)
-	if role != "COMPLIANCE" && role != "SUPERADMIN" {
+	if role != "COMPLIANCE" && role != "ADMIN_KYC" && role != "SUPERADMIN" {
 		return nil, fmt.Errorf("FORBIDDEN:Anda tidak memiliki akses ke halaman ini")
 	}
 
@@ -320,7 +341,7 @@ func (s *Service) ProcessAdminKYCDetailJob(ctx context.Context, payload any) (an
 	}
 
 	role, _ := data["role"].(string)
-	if role != "COMPLIANCE" && role != "SUPERADMIN" {
+	if role != "COMPLIANCE" && role != "ADMIN_KYC" && role != "SUPERADMIN" {
 		return nil, fmt.Errorf("FORBIDDEN:Anda tidak memiliki akses")
 	}
 
@@ -349,7 +370,7 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 	}
 
 	role, _ := data["role"].(string)
-	if role != "COMPLIANCE" && role != "SUPERADMIN" {
+	if role != "COMPLIANCE" && role != "ADMIN_KYC" && role != "SUPERADMIN" {
 		return nil, fmt.Errorf("FORBIDDEN:Anda tidak memiliki akses")
 	}
 
@@ -357,6 +378,31 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 	reviewerID, _ := data["reviewer_id"].(string)
 	action, _ := data["action"].(string)
 	rejectReason, _ := data["reject_reason"].(string)
+
+	// Extract rejected_fields (optional array of field names)
+	// Handle both []string (from controller) and []any (from JSON deserialization)
+	var rejectedFields []string
+	validFields := map[string]bool{
+		"full_name": true, "nik": true, "address": true,
+		"birthdate": true, "phone": true, "ktp_image": true,
+	}
+	if rf, ok := data["rejected_fields"].([]string); ok {
+		for _, fieldName := range rf {
+			fieldName = strings.TrimSpace(fieldName)
+			if validFields[fieldName] {
+				rejectedFields = append(rejectedFields, fieldName)
+			}
+		}
+	} else if rf, ok := data["rejected_fields"].([]any); ok {
+		for _, f := range rf {
+			if fieldName, ok := f.(string); ok {
+				fieldName = strings.TrimSpace(fieldName)
+				if validFields[fieldName] {
+					rejectedFields = append(rejectedFields, fieldName)
+				}
+			}
+		}
+	}
 
 	if kycID == "" {
 		return nil, fmt.Errorf("kyc_id wajib diisi")
@@ -387,7 +433,7 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 		return nil, fmt.Errorf("action tidak valid (gunakan 'approve' atau 'reject')")
 	}
 
-	if err := s.repo.UpdateStatus(ctx, kycID, newStatus, reviewerID, rejectReason); err != nil {
+	if err := s.repo.UpdateStatus(ctx, kycID, newStatus, reviewerID, rejectReason, rejectedFields); err != nil {
 		return nil, fmt.Errorf("gagal mengupdate status KYC: %v", err)
 	}
 
@@ -407,8 +453,7 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 }
 
 // sendKYCNotification mengirim email notifikasi ke user saat KYC di-approve/reject.
-// dispatchKYCNotification sudah menangani fallback SMTP secara internal —
-// jangan panggil sendKYCFallbackEmail di sini agar tidak terjadi double message.
+// Semua pengiriman dilakukan melalui Notification Service (Brevo-only).
 func (s *Service) sendKYCNotification(email, fullName, status, rejectReason string) {
 	go func() {
 		switch status {

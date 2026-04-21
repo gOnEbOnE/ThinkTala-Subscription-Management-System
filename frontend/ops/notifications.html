@@ -304,15 +304,11 @@
                             <label class="form-label small text-muted">Target Audience</label>
                             <select class="form-select" id="notifTargetRole"
                                 style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
-                                <option value="all">All Users</option>
-                                <option value="client">All Client</option>
-                                <option value="client_never_bought">Client - Never Bought</option>
-                                <option value="client_paid_active">Client - Paid Active</option>
-                                <option value="client_pro_active">Client - Pro Active</option>
-                                <option value="client_lapsed">Client - Lapsed</option>
-                                <option value="operasional">Operasional</option>
-                                <option value="compliance">Compliance</option>
-                                <option value="ceo">CEO</option>
+                                <option value="client">Client - Semua</option>
+                                <option value="client_never_bought">Client - Belum Bayar</option>
+                                <option value="client_paid_active">Client - Sudah Bayar</option>
+                                <option value="client_expiring_soon">Client - Hampir Habis</option>
+                                <option value="client_lapsed">Client - Paket Lapsed</option>
                             </select>
                         </div>
                     </div>
@@ -359,6 +355,18 @@
     <script>
         const API_BASE = '/api/notifications';
         let searchTimer = null;
+        const CLIENT_TARGET_ROLES = new Set([
+            'client',
+            'client_never_bought',
+            'client_paid_active',
+            'client_expiring_soon',
+            'client_lapsed'
+        ]);
+
+        function normalizeTargetRole(value) {
+            const targetRole = String(value || '').trim().toLowerCase();
+            return CLIENT_TARGET_ROLES.has(targetRole) ? targetRole : 'client';
+        }
 
         function showToast(message, type) {
             const t = document.createElement('div');
@@ -395,7 +403,7 @@
             document.getElementById('notifImageUrl').value = '';
             document.getElementById('notifExpiryDate').value = '';
             document.getElementById('notifActive').value = 'true';
-            document.getElementById('notifTargetRole').value = 'all';
+            document.getElementById('notifTargetRole').value = 'client';
             document.getElementById('modalTitle').textContent = 'New Notification';
         }
 
@@ -438,7 +446,7 @@
             document.getElementById('notifImageUrl').value = item.image_url || '';
             document.getElementById('notifExpiryDate').value = toLocalDateTimeInput(item.expiry_date);
             document.getElementById('notifActive').value = item.is_active ? 'true' : 'false';
-            document.getElementById('notifTargetRole').value = (item.target_role || 'all').toLowerCase();
+            document.getElementById('notifTargetRole').value = normalizeTargetRole(item.target_role);
             document.getElementById('modalTitle').textContent = 'Edit Notification';
             new bootstrap.Modal(document.getElementById('notifModal')).show();
         }
@@ -526,7 +534,7 @@
                 cta_url: (document.getElementById('notifCtaUrl').value || '').trim(),
                 image_url: (document.getElementById('notifImageUrl').value || '').trim(),
                 expiry_date: (document.getElementById('notifExpiryDate').value || '').trim(),
-                target_role: (document.getElementById('notifTargetRole').value || '').trim(),
+                target_role: normalizeTargetRole(document.getElementById('notifTargetRole').value),
                 is_active: document.getElementById('notifActive').value === 'true'
             };
 

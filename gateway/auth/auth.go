@@ -61,8 +61,18 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		// ✅ STEP 5: Check role authorization
 		userRole := ""
-		if u, ok := claims.User["role"].(string); ok {
-			userRole = strings.ToUpper(u)
+		if u, ok := claims.User["role_code"].(string); ok {
+			userRole = strings.ToUpper(strings.TrimSpace(u))
+		}
+		if userRole == "" {
+			if u, ok := claims.User["role"].(string); ok {
+				userRole = strings.ToUpper(strings.TrimSpace(u))
+			}
+		}
+
+		levelCode, _ := claims.User["level_code"].(string)
+		if strings.EqualFold(strings.TrimSpace(levelCode), "SUPERADMIN") && !isAssumedRole(claims.User["assumed_role"]) {
+			userRole = "SUPERADMIN"
 		}
 
 		if !isRoleAllowed(path, userRole) {
@@ -103,9 +113,29 @@ func isRoleAllowed(path string, role string) bool {
 	// Normalize role
 	role = strings.ToUpper(strings.TrimSpace(role))
 
+	// Package dashboard is restricted strictly to MANAGEMENT/ADMIN only.
+	if strings.HasPrefix(path, "/api/dashboard/packages") ||
+		strings.HasPrefix(path, "/api/dashboard/package/") ||
+		strings.HasPrefix(path, "/management/dashboard-packages") ||
+		strings.HasPrefix(path, "/dashboard/packages/") {
+		return role == "MANAGEMENT" || role == "ADMIN" || role == "SUPERADMIN"
+	}
+
+	// Management dashboard and APIs are restricted to MANAGEMENT/ADMIN/SUPERADMIN only.
+	if strings.HasPrefix(path, "/api/dashboard/") ||
+		strings.HasPrefix(path, "/management/") ||
+		strings.HasPrefix(path, "/dashboard/customer/") {
+		return role == "MANAGEMENT" || role == "ADMIN" || role == "SUPERADMIN"
+	}
+
 	// SuperAdmin & CEO can access everything
 	if role == "SUPERADMIN" || role == "CEO" {
 		return true
+	}
+
+	// /api/admin/users → SUPERADMIN only (user management)
+	if strings.HasPrefix(path, "/api/admin/users") {
+		return role == "SUPERADMIN"
 	}
 
 	// /api/admin/kyc* → COMPLIANCE & OPERASIONAL
@@ -171,11 +201,24 @@ func CheckRoleAccess(path string, role string) bool {
 	return isRoleAllowed(path, role)
 }
 
+func isAssumedRole(v any) bool {
+	switch x := v.(type) {
+	case bool:
+		return x
+	case string:
+		return strings.EqualFold(strings.TrimSpace(x), "true")
+	default:
+		return false
+	}
+}
+
 type TokenUser struct {
-	ID       string
-	Email    string
-	Role     string
-	RoleCode string
+	ID          string
+	Email       string
+	Role        string
+	RoleCode    string
+	LevelCode   string
+	AssumedRole bool
 }
 
 // GetUserFromToken reads auth cookie, resolves JWT from Redis, validates it,
@@ -214,16 +257,28 @@ func GetUserFromToken(r *http.Request) (*TokenUser, error) {
 	email, _ := u["email"].(string)
 	role, _ := u["role"].(string)
 	roleCode, _ := u["role_code"].(string)
+	levelCode, _ := u["level_code"].(string)
+	assumedRole := isAssumedRole(u["assumed_role"])
 
 	// Fallback if role_code is absent
 	if roleCode == "" {
 		roleCode = strings.ToUpper(strings.TrimSpace(role))
 	}
 
+	// Level SUPERADMIN harus membawa role_code SUPERADMIN, kecuali saat sedang assume role.
+	if strings.EqualFold(strings.TrimSpace(levelCode), "SUPERADMIN") && !assumedRole {
+		roleCode = "SUPERADMIN"
+		if strings.TrimSpace(role) == "" || strings.EqualFold(strings.TrimSpace(role), "CEO") {
+			role = "Super Admin"
+		}
+	}
+
 	return &TokenUser{
-		ID:       id,
-		Email:    email,
-		Role:     role,
-		RoleCode: strings.ToUpper(strings.TrimSpace(roleCode)),
+		ID:          id,
+		Email:       email,
+		Role:        role,
+		RoleCode:    strings.ToUpper(strings.TrimSpace(roleCode)),
+		LevelCode:   strings.ToUpper(strings.TrimSpace(levelCode)),
+		AssumedRole: assumedRole,
 	}, nil
 }

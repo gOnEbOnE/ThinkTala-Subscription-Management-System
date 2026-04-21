@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Package Detail | ThinkTala</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .page-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .title-wrap h1 {
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin: 0;
+        }
+
+        .title-wrap p {
+            margin: 0.25rem 0 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .detail-card,
+        .filter-card,
+        .chart-card {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-panel);
+        }
+
+        .detail-card {
+            padding: 1rem 1.1rem;
+            height: 100%;
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+            font-size: 0.83rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-value {
+            font-size: 1.65rem;
+            font-weight: 700;
+            line-height: 1.15;
+            color: var(--text-heading);
+        }
+
+        .detail-sub {
+            margin-top: 0.35rem;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+        }
+
+        .metric-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.04);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .filter-card {
+            padding: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-strip {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-left,
+        .filter-right {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+        }
+
+        .date-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            min-height: 40px;
+            padding: 0 0.45rem;
+        }
+
+        .date-input {
+            width: 132px;
+            border: 0;
+            background: transparent;
+            color: var(--text-main);
+            outline: none;
+            font-size: 0.86rem;
+        }
+
+        .date-input::-webkit-calendar-picker-indicator {
+            filter: invert(0.85);
+            cursor: pointer;
+        }
+
+        .error-state {
+            display: none;
+            margin-top: 0.75rem;
+            border: 1px solid rgba(249, 62, 62, 0.35);
+            border-radius: 10px;
+            background: rgba(249, 62, 62, 0.08);
+            padding: 0.9rem 1rem;
+            color: #ffc5c5;
+            font-size: 0.9rem;
+        }
+
+        .not-found,
+        .forbidden-wrap {
+            display: none;
+            margin: 1rem 0;
+            border-radius: 12px;
+            padding: 1.3rem;
+            text-align: center;
+        }
+
+        .not-found {
+            border: 1px solid rgba(255, 200, 125, 0.35);
+            background: rgba(255, 200, 125, 0.08);
+            color: #ffd7a8;
+        }
+
+        .forbidden-wrap {
+            border: 1px solid rgba(249, 62, 62, 0.35);
+            background: rgba(249, 62, 62, 0.08);
+            color: #ffd2d2;
+        }
+
+        .forbidden-code {
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+
+        .chart-card {
+            padding: 1rem 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            color: var(--text-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.1rem;
+        }
+
+        .chart-subtitle {
+            color: var(--text-muted);
+            font-size: 0.86rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .chart-wrap {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            min-height: 260px;
+            padding: 0.75rem;
+            position: relative;
+        }
+
+        .chart-skeleton {
+            display: none;
+            position: absolute;
+            inset: 0;
+            border-radius: 10px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.11) 50%, rgba(255, 255, 255, 0.04) 100%);
+            background-size: 220% 100%;
+            animation: shimmer 1.2s linear infinite;
+            z-index: 2;
+        }
+
+        .trend-empty {
+            display: none;
+            margin-top: 0.6rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .custom-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.78rem 1rem;
+            vertical-align: middle;
+        }
+
+        .custom-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .custom-table td {
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .custom-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .money-cell {
+            color: var(--text-heading);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .skeleton-text {
+            color: transparent !important;
+            position: relative;
+            overflow: hidden;
+            border-radius: 6px;
+            min-height: 1rem;
+        }
+
+        .skeleton-text::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.18) 50%, rgba(255, 255, 255, 0.06) 100%);
+            background-size: 220% 100%;
+            animation: shimmer 1.2s linear infinite;
+        }
+
+        .toast-zone {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+            width: 340px;
+            max-width: calc(100vw - 2rem);
+        }
+
+        .toast-lite {
+            display: none;
+            border: 1px solid rgba(249, 62, 62, 0.35);
+            background: rgba(249, 62, 62, 0.95);
+            color: #fff;
+            border-radius: 8px;
+            padding: 0.7rem 0.85rem;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 100% 0;
+            }
+
+            100% {
+                background-position: -120% 0;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .detail-value {
+                font-size: 1.35rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="toast-zone">
+        <div id="errorToast" class="toast-lite"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="page-head">
+            <div class="title-wrap">
+                <h1 id="detailTitle">Package Detail</h1>
+                <p id="detailSubtitle">Detailed package performance and trend</p>
+            </div>
+            <div class="d-flex gap-2">
+                <!-- <button id="backBtn" class="btn btn-sm btn-outline-light">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Back
+                </button>
+                <button id="exportBtn" class="btn btn-sm btn-light fw-semibold">
+                    <i class="fa-solid fa-download me-1"></i>Export
+                </button> -->
+            </div>
+        </div>
+
+        <div id="forbiddenState" class="forbidden-wrap">
+            <div class="forbidden-code">403</div>
+            <div class="h5 mb-2">Access Denied</div>
+            <div>Halaman ini hanya dapat diakses oleh role Management / Admin.</div>
+        </div>
+
+        <div id="notFoundState" class="not-found">
+            <div class="h6 mb-2">Detail package tidak tersedia.</div>
+            <div class="small">Data package yang diminta tidak ditemukan untuk periode ini.</div>
+        </div>
+
+        <div id="detailRoot">
+            <div class="filter-card">
+                <div class="filter-strip">
+                    <div class="filter-left">
+                        <div class="date-wrap">
+                            <i class="fa-regular fa-calendar"></i>
+                            <input id="startDate" class="date-input" type="date">
+                            <span class="text-muted">-</span>
+                            <input id="endDate" class="date-input" type="date">
+                        </div>
+                        <select id="periodType" class="form-select form-select-sm" style="width: 140px;">
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="filter-right">
+                        <button id="refreshBtn" class="btn btn-sm btn-outline-light">
+                            <i class="fa-solid fa-rotate-right me-1"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+                <div id="errorState" class="">
+                    <!-- <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat detail package. Silakan coba lagi.</span> -->
+                    <!-- <button id="retryBtn" class="btn btn-sm btn-outline-light">Retry</button> -->
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-xl-3 col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">
+                            <span>Total Transactions</span>
+                            <span class="metric-icon"><i class="fa-solid fa-bag-shopping"></i></span>
+                        </div>
+                        <div id="totalTransactions" class="detail-value">0</div>
+                        <div class="detail-sub">In selected period</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">
+                            <span>Total Revenue</span>
+                            <span class="metric-icon"><i class="fa-solid fa-wallet"></i></span>
+                        </div>
+                        <div id="totalRevenue" class="detail-value">Rp0</div>
+                        <div class="detail-sub">Gross revenue</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">
+                            <span>Contribution</span>
+                            <span class="metric-icon"><i class="fa-solid fa-chart-pie"></i></span>
+                        </div>
+                        <div id="contributionValue" class="detail-value">0%</div>
+                        <div class="detail-sub">To total package revenue</div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="detail-card">
+                        <div class="detail-label">
+                            <span>Growth Rate</span>
+                            <span class="metric-icon"><i class="fa-solid fa-arrow-trend-up"></i></span>
+                        </div>
+                        <div id="growthValue" class="detail-value">0%</div>
+                        <div class="detail-sub">Compared to previous period</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">Sales Trend</div>
+                <div class="chart-subtitle">Package sales movement over time</div>
+                <div class="chart-wrap">
+                    <div id="trendSkeleton" class="chart-skeleton"></div>
+                    <canvas id="trendChart" height="180"></canvas>
+                </div>
+                <div id="trendEmpty" class="trend-empty">Data trend belum tersedia.</div>
+            </div>
+
+            <div class="chart-card mb-4">
+                <div class="chart-title">Trend Points</div>
+                <div class="chart-subtitle">Monthly period and sales breakdown</div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Sales</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trendTableBody">
+                            <tr>
+                                <td colspan="2" class="text-center text-muted py-4">Memuat data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/management-layout.js?v=20260421"></script>
+    <script>
+        const ALLOWED_ROLES = new Set(['MANAGEMENT', 'ADMIN', 'SUPERADMIN']);
+        let trendChart = null;
+        let fetchController = null;
+        let fetchGeneration = 0;
+
+        const state = {
+            packageId: '',
+            period: 'monthly',
+            startDate: '',
+            endDate: '',
+            payload: null,
+            loading: false,
+        };
+
+        const skeletonIds = ['detailTitle', 'detailSubtitle', 'totalTransactions', 'totalRevenue', 'contributionValue', 'growthValue'];
+
+        function showToast(msg) {
+            const toast = document.getElementById('errorToast');
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            clearTimeout(showToast._t);
+            showToast._t = setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3200);
+        }
+
+        function getCurrentUser() {
+            try {
+                return JSON.parse(localStorage.getItem('user') || 'null');
+            } catch (_e) {
+                return null;
+            }
+        }
+
+        function enforcePageAccess() {
+            const user = getCurrentUser();
+            if (!user || !user.id) {
+                // Rely on backend cookie auth if localStorage is unavailable/stale.
+                return true;
+            }
+            const role = String(user.role_code || user.level_code || user.level || '').toUpperCase();
+            if (!ALLOWED_ROLES.has(role)) {
+                document.getElementById('detailRoot').style.display = 'none';
+                document.getElementById('forbiddenState').style.display = 'block';
+                return false;
+            }
+            return true;
+        }
+
+        function extractPackageId() {
+            const path = window.location.pathname || '';
+            const parts = path.split('/').filter(Boolean);
+            const idx = parts.findIndex((x) => x === 'packages');
+            if (idx < 0 || idx + 1 >= parts.length) return '';
+            return decodeURIComponent(parts[idx + 1] || '').trim();
+        }
+
+        function toInputDate(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getMonthBounds(year, monthIndex) {
+            const start = new Date(year, monthIndex, 1);
+            const end = new Date(year, monthIndex + 1, 0);
+            return { start: toInputDate(start), end: toInputDate(end) };
+        }
+
+        function getYearBounds(year) {
+            const start = new Date(year, 0, 1);
+            const end = new Date(year, 11, 31);
+            return { start: toInputDate(start), end: toInputDate(end) };
+        }
+
+        function syncRangeByPeriod(anchorInputDate) {
+            const safeAnchor = anchorInputDate || state.startDate || toInputDate(new Date());
+            const anchor = new Date(`${safeAnchor}T00:00:00`);
+            if (Number.isNaN(anchor.getTime())) return;
+
+            if (state.period === 'yearly') {
+                const bounds = getYearBounds(anchor.getFullYear());
+                state.startDate = bounds.start;
+                state.endDate = bounds.end;
+            } else {
+                const bounds = getMonthBounds(anchor.getFullYear(), anchor.getMonth());
+                state.startDate = bounds.start;
+                state.endDate = bounds.end;
+            }
+
+            document.getElementById('startDate').value = state.startDate;
+            document.getElementById('endDate').value = state.endDate;
+        }
+
+        function isDateRangeValid() {
+            if (!state.startDate || !state.endDate) return false;
+            const start = new Date(`${state.startDate}T00:00:00`);
+            const end = new Date(`${state.endDate}T00:00:00`);
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return false;
+            return start.getTime() <= end.getTime();
+        }
+
+        function validateDateRangeAndNotify() {
+            if (isDateRangeValid()) return true;
+            showToast('Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+            return false;
+        }
+
+        function initRangeFromQueryOrDefault() {
+            const params = new URLSearchParams(window.location.search);
+            const period = params.get('period');
+            if (period === 'yearly' || period === 'monthly') {
+                state.period = period;
+            }
+            document.getElementById('periodType').value = state.period;
+
+            const startQ = params.get('start_date');
+            const endQ = params.get('end_date');
+            if (startQ && endQ) {
+                state.startDate = startQ;
+                state.endDate = endQ;
+                document.getElementById('startDate').value = startQ;
+                document.getElementById('endDate').value = endQ;
+                if (!isDateRangeValid()) {
+                    syncRangeByPeriod(toInputDate(new Date()));
+                }
+                return;
+            }
+
+            syncRangeByPeriod(toInputDate(new Date()));
+        }
+
+        function getQueryParams() {
+            const params = new URLSearchParams();
+            const dateAnchor = new Date(`${state.startDate}T00:00:00`);
+            const year = dateAnchor.getFullYear();
+            const month = dateAnchor.getMonth() + 1;
+
+            if (state.period === 'monthly') {
+                params.set('month', String(month));
+                params.set('year', String(year));
+            } else {
+                params.set('year', String(year));
+            }
+            params.set('period', state.period);
+            params.set('start_date', state.startDate);
+            params.set('end_date', state.endDate);
+            return params;
+        }
+
+        function formatMoney(value) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                maximumFractionDigits: 0,
+            }).format(Number(value || 0));
+        }
+
+        function showErrorState(show) {
+            document.getElementById('errorState').style.display = show ? 'flex' : 'none';
+        }
+
+        function safeJson(res) {
+            return res.json().catch(() => null);
+        }
+
+        function setSummarySkeleton(show) {
+            skeletonIds.forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.classList.toggle('skeleton-text', show);
+            });
+        }
+
+        function setTrendSkeleton(show) {
+            document.getElementById('trendSkeleton').style.display = show ? 'block' : 'none';
+            document.getElementById('trendChart').style.display = show ? 'none' : 'block';
+        }
+
+        function setLoadingTable() {
+            document.getElementById('trendTableBody').innerHTML = `
+                <tr>
+                    <td><span class="skeleton-text">Loading...</span></td>
+                    <td><span class="skeleton-text">Loading...</span></td>
+                </tr>
+                <tr>
+                    <td><span class="skeleton-text">Loading...</span></td>
+                    <td><span class="skeleton-text">Loading...</span></td>
+                </tr>
+                <tr>
+                    <td><span class="skeleton-text">Loading...</span></td>
+                    <td><span class="skeleton-text">Loading...</span></td>
+                </tr>
+            `;
+        }
+
+        function setLoadingState(show) {
+            state.loading = show;
+            setSummarySkeleton(show);
+            setTrendSkeleton(show);
+            if (show) {
+                setLoadingTable();
+                document.getElementById('trendEmpty').style.display = 'none';
+            }
+
+            ['periodType', 'startDate', 'endDate', 'refreshBtn', 'retryBtn', 'exportBtn'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = show;
+            });
+        }
+
+        function hideSpecialStates() {
+            document.getElementById('forbiddenState').style.display = 'none';
+            document.getElementById('notFoundState').style.display = 'none';
+            document.getElementById('detailRoot').style.display = 'block';
+        }
+
+        function showNotFoundState() {
+            document.getElementById('detailRoot').style.display = 'none';
+            document.getElementById('notFoundState').style.display = 'block';
+        }
+
+        async function fetchDetail() {
+            if (!state.packageId) {
+                showNotFoundState();
+                return;
+            }
+            if (!validateDateRangeAndNotify()) return;
+
+            // Cancel any in-flight request
+            if (fetchController) {
+                fetchController.abort();
+                fetchController = null;
+            }
+
+            const gen = ++fetchGeneration;
+            const controller = new AbortController();
+            fetchController = controller;
+
+            hideSpecialStates();
+            showErrorState(false);
+            setLoadingState(true);
+
+            // Phase 1: Fetch and parse response
+            let body = null;
+            let fetchError = null;
+
+            try {
+                const res = await fetch(`/api/dashboard/package/${encodeURIComponent(state.packageId)}?${getQueryParams().toString()}`, {
+                    credentials: 'include',
+                    signal: controller.signal,
+                });
+
+                // Ignore stale responses
+                if (gen !== fetchGeneration) return;
+
+                if (res.status === 401) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                if (res.status === 403) {
+                    document.getElementById('detailRoot').style.display = 'none';
+                    document.getElementById('forbiddenState').style.display = 'block';
+                    return;
+                }
+                if (res.status === 404) {
+                    showNotFoundState();
+                    return;
+                }
+                if (res.status === 400) {
+                    const errBody = await safeJson(res);
+                    showToast((errBody && errBody.message) || 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+                    setLoadingState(false);
+                    fetchController = null;
+                    return;
+                }
+                if (!res.ok) {
+                    fetchError = 'status_' + res.status;
+                } else {
+                    body = await safeJson(res);
+                }
+            } catch (_e) {
+                if (_e && _e.name === 'AbortError') return;
+                if (gen !== fetchGeneration) return;
+                fetchError = _e;
+            }
+
+            if (gen !== fetchGeneration) return;
+
+            // Phase 2: Render data or show error
+            if (body && body.success && body.data) {
+                state.payload = body.data;
+                try {
+                    renderAll(body.data);
+                } catch (renderErr) {
+                    console.warn('[PackageDetail] render warning:', renderErr);
+                }
+                // Data loaded successfully — never show error banner
+                showErrorState(false);
+            } else {
+                showErrorState(true);
+                renderFallback();
+            }
+
+            if (gen === fetchGeneration) {
+                setLoadingState(false);
+                fetchController = null;
+            }
+        }
+
+        function renderFallback() {
+            document.getElementById('detailTitle').textContent = 'Package Detail';
+            document.getElementById('detailSubtitle').textContent = 'Detailed package performance and trend';
+            document.getElementById('totalTransactions').textContent = '0';
+            document.getElementById('totalRevenue').textContent = formatMoney(0);
+            document.getElementById('contributionValue').textContent = '0%';
+            document.getElementById('growthValue').textContent = '0%';
+            renderTrend([]);
+            renderTrendTable([]);
+        }
+
+        function renderAll(data) {
+            document.getElementById('detailTitle').textContent = data.package_name || 'Package Detail';
+            document.getElementById('detailSubtitle').textContent = `Package ID: ${(data.package_id || '').toUpperCase() || '-'}`;
+
+            document.getElementById('totalTransactions').textContent = Number(data.total_transactions || 0).toLocaleString('id-ID');
+            document.getElementById('totalRevenue').textContent = formatMoney(data.total_revenue || 0);
+            document.getElementById('contributionValue').textContent = `${Number(data.percentage_contribution || 0).toFixed(2)}%`;
+            document.getElementById('growthValue').textContent = `${Number(data.growth_rate || 0).toFixed(2)}%`;
+
+            renderTrend(data.trend || []);
+            renderTrendTable(data.trend || []);
+        }
+
+        function renderTrend(points) {
+            const empty = !Array.isArray(points) || points.length === 0 || points.every((x) => Number(x.sales || 0) === 0);
+            document.getElementById('trendEmpty').style.display = empty ? 'block' : 'none';
+
+            const labels = (points || []).map((x) => x.period);
+            const values = (points || []).map((x) => Number(x.sales || 0));
+
+            if (trendChart) trendChart.destroy();
+            trendChart = new Chart(document.getElementById('trendChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Sales',
+                        data: values,
+                        borderColor: '#00f2ff',
+                        backgroundColor: 'rgba(0,242,255,0.11)',
+                        borderWidth: 2,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: getCss('--text-main', '#e2e8f0') } }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: getCss('--text-muted', '#8b9bb4') },
+                            grid: { color: 'rgba(255,255,255,0.04)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: getCss('--text-muted', '#8b9bb4') },
+                            grid: { color: 'rgba(255,255,255,0.04)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTrendTable(points) {
+            const tbody = document.getElementById('trendTableBody');
+            if (!Array.isArray(points) || points.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-4">Data trend belum tersedia.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = points.map((item) => `
+                <tr>
+                    <td>${escapeHtml(item.period || '-')}</td>
+                    <td class="money-cell">${Number(item.sales || 0).toLocaleString('id-ID')}</td>
+                </tr>
+            `).join('');
+        }
+
+        function getCss(varName, fallback) {
+            const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+            return value || fallback;
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str || '');
+            return div.innerHTML;
+        }
+
+        function csvEscape(value) {
+            const raw = String(value == null ? '' : value);
+            if (/[",\n]/.test(raw)) {
+                return `"${raw.replace(/"/g, '""')}"`;
+            }
+            return raw;
+        }
+
+        function buildCsv(data) {
+            const lines = [];
+            lines.push('Package Detail');
+            lines.push('Field,Value');
+            lines.push(`Package ID,${csvEscape(data.package_id || '')}`);
+            lines.push(`Package Name,${csvEscape(data.package_name || '')}`);
+            lines.push(`Total Transactions,${csvEscape(data.total_transactions || 0)}`);
+            lines.push(`Total Revenue,${csvEscape(data.total_revenue || 0)}`);
+            lines.push(`Contribution (%),${csvEscape(Number(data.percentage_contribution || 0).toFixed(2))}`);
+            lines.push(`Growth Rate (%),${csvEscape(Number(data.growth_rate || 0).toFixed(2))}`);
+            lines.push('');
+            lines.push('Trend');
+            lines.push('Period,Sales');
+            const trend = data.trend || [];
+            if (trend.length === 0) {
+                lines.push('Data trend belum tersedia.,');
+            } else {
+                trend.forEach((item) => {
+                    lines.push(`${csvEscape(item.period)},${csvEscape(item.sales)}`);
+                });
+            }
+            return lines.join('\r\n');
+        }
+
+        function exportDetail() {
+            if (!state.payload) {
+                showToast('Detail package tidak tersedia.');
+                return;
+            }
+            try {
+                const csv = buildCsv(state.payload);
+                const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+                const href = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = href;
+                link.download = `package-detail-${state.payload.package_id || 'unknown'}-${Date.now()}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(href);
+            } catch (_e) {
+                showToast('Gagal mengunduh data.');
+            }
+        }
+
+        function goBack() {
+            const params = getQueryParams();
+            window.location.href = `/management/dashboard-packages?${params.toString()}`;
+        }
+
+        function bindEvents() {
+            document.getElementById('periodType').addEventListener('change', function () {
+                state.period = this.value;
+                syncRangeByPeriod(state.startDate || toInputDate(new Date()));
+                fetchDetail();
+            });
+
+            document.getElementById('startDate').addEventListener('change', function () {
+                state.startDate = this.value;
+                syncRangeByPeriod(this.value);
+                if (!validateDateRangeAndNotify()) return;
+                fetchDetail();
+            });
+
+            document.getElementById('endDate').addEventListener('change', function () {
+                state.endDate = this.value;
+                syncRangeByPeriod(this.value);
+                if (!validateDateRangeAndNotify()) return;
+                fetchDetail();
+            });
+
+            document.getElementById('refreshBtn').addEventListener('click', fetchDetail);
+            document.getElementById('retryBtn').addEventListener('click', fetchDetail);
+            document.getElementById('exportBtn').addEventListener('click', exportDetail);
+            document.getElementById('backBtn').addEventListener('click', goBack);
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!enforcePageAccess()) return;
+
+            state.packageId = extractPackageId();
+            if (!state.packageId) {
+                showNotFoundState();
+                return;
+            }
+
+            initRangeFromQueryOrDefault();
+
+            // Fetch first, THEN bind events to avoid any change events
+            // fired during initialization from triggering a duplicate fetch.
+            fetchDetail().then(function () {
+                bindEvents();
+            });
+        });
+    </script>
+</body>
+
+</html>

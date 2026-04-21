@@ -1,4 +1,39 @@
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: thinknalyze-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=thinknalyze
+    ports:
+      - "5433:5432"
+    volumes:
+      - thinknalyze-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d thinknalyze"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - thinknalyze-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: thinknalyze-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - thinknalyze-redis-data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - thinknalyze-network
+
   # --- API GATEWAY ---
   gateway:
     build:
@@ -14,6 +49,7 @@ services:
       - ./gateway/routes.json:/app/routes.json:ro
       - ./gateway/certs:/app/certs:ro
     depends_on:
+      - management
       - notification
       - operational
       - subscription
@@ -23,11 +59,19 @@ services:
       - thinknalyze-network
 
   # --- MICROSERVICES ---
+  account:
+    build: ./account
+    container_name: thinknalyze-account
+    environment:
+      - PORT=2001
+    networks:
+      - thinknalyze-network
+
   notification:
     build: ./notification
     container_name: thinknalyze-notification
     environment:
-      - PORT=2001
+      - PORT=2002
     networks:
       - thinknalyze-network
 
@@ -35,7 +79,7 @@ services:
     build: ./operational
     container_name: thinknalyze-operational
     environment:
-      - PORT=2002
+      - PORT=2003
     networks:
       - thinknalyze-network
 
@@ -43,7 +87,7 @@ services:
     build: ./subscription
     container_name: thinknalyze-subscription
     environment:
-      - PORT=2003
+      - PORT=2004
     networks:
       - thinknalyze-network
 
@@ -51,7 +95,7 @@ services:
     build: ./tickets
     container_name: thinknalyze-tickets
     environment:
-      - PORT=2004
+      - PORT=2005
     networks:
       - thinknalyze-network
 
@@ -59,10 +103,22 @@ services:
     build: ./users
     container_name: thinknalyze-users
     environment:
-      - PORT=2005
+      - PORT=2006
+    networks:
+      - thinknalyze-network
+
+  management:
+    build: ./management
+    container_name: thinknalyze-management
+    environment:
+      - PORT=5006
     networks:
       - thinknalyze-network
 
 networks:
   thinknalyze-network:
     driver: bridge
+
+volumes:
+  thinknalyze-postgres-data:
+  thinknalyze-redis-data:
