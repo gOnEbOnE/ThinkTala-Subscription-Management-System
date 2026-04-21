@@ -38,7 +38,7 @@
     { "source": "/management/package-detail", "destination": "/frontend/management/package-detail.html" },
     { "source": "/market-insight", "destination": "/frontend/market-insight.html" },
     { "source": "/assets/:path*", "destination": "/frontend/assets/:path*" },
-    { "source": "/account/login/auth", "destination": "https://propensuy-thinktala-production.up.railway.app/account/login/auth" },
-    { "source": "/api/:path*", "destination": "https://propensuy-thinktala-production.up.railway.app/api/:path*" }
+    { "source": "/account/login/auth", "destination": "https://gateway-production-1827.up.railway.app/account/login/auth" },
+    { "source": "/api/:path*", "destination": "https://gateway-production-1827.up.railway.app/api/:path*" }
   ]
 }
