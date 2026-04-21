@@ -48,9 +48,14 @@ func main() {
 	maxConns, _ := strconv.Atoi(utils.GetEnv("APP_DB_MAX_CONN", "10"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
 
+	port := utils.GetEnv("port", "")
+	if port == "" {
+		port = utils.GetEnv("PORT", "5004")
+	}
+
 	cfg := core.Config{
 		AppName:        utils.GetEnv("app_name", "Thinknalyze Subscription Service"),
-		Port:           utils.GetEnv("port", "5004"),
+		Port:           port,
 		Env:            utils.GetEnv("app_env", "development"),
 		AssetsURL:      utils.GetEnv("assets_url"),
 		AllowedOrigins: []string{"*"},
