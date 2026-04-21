@@ -34,7 +34,7 @@ RUN chmod +x /app/users
 
 # Copy entrypoint
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN tr -d '\r' < /app/entrypoint.sh > /tmp/ep.tmp && mv /tmp/ep.tmp /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 COPY public/ ./public/
 # Copy pre-committed RSA key pair (baked into image)
