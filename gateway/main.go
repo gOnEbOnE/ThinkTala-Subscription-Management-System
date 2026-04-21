@@ -188,11 +188,10 @@ func normalizeTargetForEnv(target string) string {
 	}
 
 	replacements := map[string]string{
-		"users.railway.internal:8080":        "localhost:2006",
-		"notification.railway.internal:8080": "localhost:5003",
-		"subscription.railway.internal:8080": "localhost:5004",
-		"operational.railway.internal:8080":  "localhost:5005",
-		"management.railway.internal:8080":   "localhost:5006",
+		"users-service.railway.internal:2006":        "localhost:2006",
+		"notification-service.railway.internal:5003": "localhost:5003",
+		"subscription-service.railway.internal:5004": "localhost:5004",
+		"operational-service.railway.internal:8080":  "localhost:5005",
 	}
 
 	for from, to := range replacements {
@@ -686,7 +685,7 @@ func main() {
 	// --- ORDERS Admin API (role-protected) - OPERASIONAL can access ---
 	ordersTarget := getRouteTarget("/api/admin/orders")
 	if ordersTarget == "" {
-		ordersTarget = "http://subscription.railway.internal:8080"
+		ordersTarget = "http://subscription-service.railway.internal:5004"
 	}
 	http.HandleFunc("/api/admin/orders", withRolesAuth([]string{"OPERASIONAL", "SUPERADMIN", "CEO"},
 		createProxyHandler(ordersTarget, true),
@@ -712,7 +711,7 @@ func main() {
 	// --- MANAGEMENT Dashboard API (role-protected) ---
 	dashboardTarget := getRouteTarget("/api/dashboard/customers")
 	if dashboardTarget == "" {
-		dashboardTarget = "http://management.railway.internal:8080"
+		dashboardTarget = "http://management-service.railway.internal:5006"
 	}
 	http.HandleFunc("/api/dashboard/customers", withRolesAuth([]string{"MANAGEMENT", "SUPERADMIN", "ADMIN"},
 		createProxyHandler(dashboardTarget, true),
