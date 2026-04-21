@@ -41,7 +41,7 @@ jobs:
       - name: Deploy users
         working-directory: users
         run: |
-          railway up --detach \
+          railway up --ci \
             --project "$RAILWAY_PROJECT_ID" \
             --environment "$RAILWAY_ENVIRONMENT" \
             --service users \
@@ -50,7 +50,7 @@ jobs:
       - name: Deploy account
         working-directory: account
         run: |
-          railway up --detach \
+          railway up --ci \
             --project "$RAILWAY_PROJECT_ID" \
             --environment "$RAILWAY_ENVIRONMENT" \
             --service account \
@@ -59,7 +59,7 @@ jobs:
       - name: Deploy management
         working-directory: management
         run: |
-          railway up --detach \
+          railway up --ci \
             --project "$RAILWAY_PROJECT_ID" \
             --environment "$RAILWAY_ENVIRONMENT" \
             --service management \
@@ -68,7 +68,7 @@ jobs:
       - name: Deploy operational
         working-directory: operational
         run: |
-          railway up --detach \
+          railway up --ci \
             --project "$RAILWAY_PROJECT_ID" \
             --environment "$RAILWAY_ENVIRONMENT" \
             --service operational \
@@ -77,7 +77,7 @@ jobs:
       - name: Deploy subscription
         working-directory: subscription
         run: |
-          railway up --detach \
+          railway up --ci \
             --project "$RAILWAY_PROJECT_ID" \
             --environment "$RAILWAY_ENVIRONMENT" \
             --service subscription \
@@ -86,7 +86,7 @@ jobs:
       - name: Deploy tickets
         working-directory: tickets
         run: |
-          railway up --detach \
+          railway up --ci \
             --project "$RAILWAY_PROJECT_ID" \
             --environment "$RAILWAY_ENVIRONMENT" \
             --service tickets \
@@ -95,7 +95,7 @@ jobs:
       - name: Deploy gateway
         working-directory: gateway
         run: |
-          railway up --detach \
+          railway up --ci \
             --project "$RAILWAY_PROJECT_ID" \
             --environment "$RAILWAY_ENVIRONMENT" \
             --service gateway \
@@ -105,7 +105,7 @@ jobs:
         if: ${{ env.DEPLOY_NOTIFICATION == 'true' }}
         working-directory: notification
         run: |
-          railway up --detach \
+          railway up --ci \
             --project "$RAILWAY_PROJECT_ID" \
             --environment "$RAILWAY_ENVIRONMENT" \
             --service notification \
