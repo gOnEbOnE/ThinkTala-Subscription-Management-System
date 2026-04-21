@@ -765,7 +765,10 @@ func main() {
 	// ========================================
 	// 7. Start HTTP server
 	// ========================================
-	port := system.Env("port")
+	port := system.Env("PORT")
+	if port == "" {
+		port = system.Env("port")
+	}
 	if port == "" {
 		port = "2000"
 	}

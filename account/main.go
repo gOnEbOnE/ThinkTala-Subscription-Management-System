@@ -72,10 +72,15 @@ func main() {
 	maxConns, _ := strconv.Atoi(utils.GetEnv("read_db_max_conn", "5"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
 
+	port := utils.GetEnv("PORT", "")
+	if port == "" {
+		port = utils.GetEnv("port", "9002")
+	}
+
 	// Config Engine
 	cfg := core.Config{
 		AppName:        utils.GetEnv("app_name", "ZaFramework"),
-		Port:           utils.GetEnv("port", "9002"),
+		Port:           port,
 		Env:            utils.GetEnv("app_env", "development"),
 		AssetsURL:      utils.GetEnv("assets_url"),
 		SsoAuth:        utils.GetEnv("sso_auth"),
