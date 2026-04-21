@@ -87,61 +87,61 @@
     },
     {
       "path": "/api/admin/packages",
-      "target": "http://subscription.railway.internal:5004",
+      "target": "http://subscription.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/admin/packages/",
-      "target": "http://subscription.railway.internal:5004",
+      "target": "http://subscription.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/subscriptions",
-      "target": "http://subscription.railway.internal:5004",
+      "target": "http://subscription.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["CLIENT", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/subscriptions/",
-      "target": "http://subscription.railway.internal:5004",
+      "target": "http://subscription.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["CLIENT", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/subscription/catalog",
-      "target": "http://subscription.railway.internal:5004",
+      "target": "http://subscription.railway.internal:8080",
       "cors": true
     },
     {
       "path": "/api/admin/orders",
-      "target": "http://subscription.railway.internal:5004",
+      "target": "http://subscription.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/admin/orders/",
-      "target": "http://subscription.railway.internal:5004",
+      "target": "http://subscription.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/operational/",
-      "target": "http://operational.railway.internal:5005",
+      "target": "http://operational.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/orders",
-      "target": "http://subscription.railway.internal:5004",
+      "target": "http://subscription.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["CLIENT"],
@@ -149,7 +149,7 @@
     },
     {
       "path": "/api/orders/",
-      "target": "http://subscription.railway.internal:5004",
+      "target": "http://subscription.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["CLIENT"],
@@ -157,28 +157,28 @@
     },
     {
       "path": "/api/dashboard/customers",
-      "target": "http://management.railway.internal:5006",
+      "target": "http://management.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["MANAGEMENT", "SUPERADMIN", "ADMIN"]
     },
     {
       "path": "/api/dashboard/customer/",
-      "target": "http://management.railway.internal:5006",
+      "target": "http://management.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["MANAGEMENT", "SUPERADMIN", "ADMIN"]
     },
     {
       "path": "/api/dashboard/packages",
-      "target": "http://management.railway.internal:5006",
+      "target": "http://management.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["MANAGEMENT", "ADMIN", "SUPERADMIN"]
     },
     {
       "path": "/api/dashboard/package/",
-      "target": "http://management.railway.internal:5006",
+      "target": "http://management.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["MANAGEMENT", "ADMIN", "SUPERADMIN"]
