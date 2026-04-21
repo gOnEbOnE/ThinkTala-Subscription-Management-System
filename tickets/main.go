@@ -36,7 +36,7 @@ func main() {
 	utils.LoadEnv(".env")
 
 	// Init JWT Keys (Wajib ada file private.pem & public.pem di root)
-	if err := utils.InitJWTLoadKeys("private.pem", "public.pem"); err != nil {
+	if err := utils.InitJWTLoadKeys("certs/private.pem", "certs/public.pem"); err != nil {
 		log.Fatalf("[FATAL] Gagal memuat kunci JWT: %v", err)
 	}
 
@@ -81,11 +81,15 @@ func main() {
 	// Helper parsers
 	maxConns, _ := strconv.Atoi(utils.GetEnv("APP_DB_MAX_CONN", "100"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
+	port := utils.GetEnv("port", "")
+	if port == "" {
+		port = utils.GetEnv("PORT", "2005")
+	}
 
 	// Config Engine
 	cfg := core.Config{
 		AppName:        utils.GetEnv("app_name", "Jakedu Login Service"),
-		Port:           utils.GetEnv("port", "9002"),
+		Port:           port,
 		Env:            utils.GetEnv("app_env", "development"),
 		AssetsURL:      utils.GetEnv("assets_url"),
 		SsoAuth:        utils.GetEnv("sso_auth"),
@@ -176,5 +180,12 @@ func main() {
 	// ============================================================
 	// 4. RUN SERVER
 	// ============================================================
+
+	// Health check endpoint required by Railway
+	app.Router.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
+	})
+
 	app.Run()
 }
