@@ -128,6 +128,12 @@ func Seed() {
 		db().Exec(context.Background(),
 			`INSERT INTO notification_event_types (event_type) VALUES ($1) ON CONFLICT DO NOTHING`, et)
 	}
+	// Remove obsolete event types that were inserted by mistake
+	obsolete := []string{"account_deactivated", "account_reactivated", "user_created"}
+	for _, et := range obsolete {
+		db().Exec(context.Background(),
+			`DELETE FROM notification_event_types WHERE event_type = $1`, et)
+	}
 }
 
 // db adalah shorthand internal agar tidak perlu akses global DB langsung di migrate.
