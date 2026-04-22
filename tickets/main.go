@@ -1,31 +1,14 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
-	"os"
+	"tickets/app/routes"
+	"tickets/core"
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "2004"
-	}
+	app := core.New()
+	defer app.Close()
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
-			"service": "Tickets Service",
-			"status":  "Healthy",
-			"path":    r.URL.Path,
-		})
-	})
-
-	fmt.Printf("Tickets service is running on port %s\n", port)
-	if err := http.ListenAndServe(":"+port, mux); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
+	routes.Init(app)
+	app.Run()
 }

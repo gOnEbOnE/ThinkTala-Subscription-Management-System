@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -30,24 +28,6 @@ func NormalizeTicketCategory(raw string) (string, bool) {
 	default:
 		return "", false
 	}
-}
-
-func NewUUID() (string, error) {
-	b := make([]byte, 16)
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-
-	b[6] = (b[6] & 0x0f) | 0x40
-	b[8] = (b[8] & 0x3f) | 0x80
-
-	hexID := hex.EncodeToString(b)
-	return fmt.Sprintf("%s-%s-%s-%s-%s",
-		hexID[0:8],
-		hexID[8:12],
-		hexID[12:16],
-		hexID[16:20],
-		hexID[20:32]), nil
 }
 
 func ParsePositiveInt(value string, fallback int) int {
