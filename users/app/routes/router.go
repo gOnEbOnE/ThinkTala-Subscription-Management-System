@@ -83,7 +83,12 @@ func Init(app *core.App,
 	app.Router.Handle("POST /api/admin/kyc/{id}/reject", http.HandlerFunc(kycAdminController.ServeHTTP))
 
 	// ==============================
-	// 9. Admin User Management Routes (Protected via Gateway Auth - SUPERADMIN only)
+	// 9. Internal Service-to-Service Routes (no auth, internal network only)
+	// ==============================
+	app.Router.HandleFunc("GET /internal/users/{id}/email", adminController.GetUserEmail)
+
+	// ==============================
+	// 10. Admin User Management Routes (Protected via Gateway Auth - SUPERADMIN only)
 	// ==============================
 	app.Router.HandleFunc("POST /api/admin/users", adminController.CreateUser)
 	app.Router.HandleFunc("GET /api/admin/users", adminController.GetUsers)
@@ -91,5 +96,6 @@ func Init(app *core.App,
 	app.Router.HandleFunc("PUT /api/admin/users/{id}", adminController.EditUser)
 	app.Router.HandleFunc("PATCH /api/admin/users/{id}/deactivate", adminController.DeactivateUser)
 	app.Router.HandleFunc("PATCH /api/admin/users/{id}/reactivate", adminController.ReactivateUser)
+
 
 }

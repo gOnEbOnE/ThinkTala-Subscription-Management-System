@@ -350,3 +350,28 @@ func (c *Controller) ReactivateUser(w http.ResponseWriter, r *http.Request) {
 	ehttp.ApiJSON(w, r, http.StatusOK, true, "Akun berhasil diaktifkan kembali", result)
 }
 
+// GetUserEmail — GET /internal/users/{id}/email (internal service-to-service, no auth)
+func (c *Controller) GetUserEmail(w http.ResponseWriter, r *http.Request) {
+	userID := strings.TrimSpace(r.PathValue("id"))
+	if userID == "" {
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "User ID diperlukan", nil)
+		return
+	}
+
+	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_get_user_detail", userID, concurrency.PriorityHigh)
+	if err != nil {
+		ehttp.ApiJSON(w, r, http.StatusNotFound, false, "User tidak ditemukan", nil)
+		return
+	}
+
+	detail, ok := result.(*UserDetail)
+	if !ok {
+		ehttp.ApiJSON(w, r, http.StatusInternalServerError, false, "Gagal membaca data user", nil)
+		return
+	}
+
+	ehttp.ApiJSON(w, r, http.StatusOK, true, "OK", map[string]string{
+		"name":  detail.FullName,
+		"email": detail.Email,
+	})
+}

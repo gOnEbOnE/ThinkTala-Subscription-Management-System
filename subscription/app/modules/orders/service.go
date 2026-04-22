@@ -51,6 +51,40 @@ func NewService(repo Repository) Service {
 	return &orderService{repo: repo}
 }
 
+// notifBaseURL returns the Notification Service base URL, preferring Railway internal networking.
+func notifBaseURL() string {
+	if url := utils.GetEnv("NOTIFICATION_SERVICE_URL", ""); url != "" {
+		return url
+	}
+	// Railway internal hostname — works without env var on Railway
+	return "http://notification.railway.internal:5003"
+}
+
+// resolveClientEmail attempts to fetch the real email from the Users Service when
+// the subscription DB cannot resolve it via cross-DB join (returns "-").
+func resolveClientEmail(userID string) string {
+	usersURL := utils.GetEnv("USERS_SERVICE_URL", "http://users.railway.internal:8080")
+	resp, err := http.Get(usersURL + "/internal/users/" + userID + "/email")
+	if err != nil {
+		log.Printf("[ORDER NOTIF] Gagal fetch email user %s dari users service: %v", userID, err)
+		return ""
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return ""
+	}
+	var result struct {
+		Data struct {
+			Email string `json:"email"`
+			Name  string `json:"name"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return ""
+	}
+	return strings.TrimSpace(result.Data.Email)
+}
+
 // dispatchNotification mengirim event notifikasi dengan pola yang sama seperti KYC/register.
 // Urutan: 1) Redis queue -> 2) HTTP langsung ke Notification Service.
 func dispatchNotification(eventType, channel, to string, vars map[string]string) {
@@ -59,7 +93,7 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 		return
 	}
 
-	baseURL := utils.GetEnv("NOTIFICATION_SERVICE_URL", "http://localhost:5003")
+	baseURL := notifBaseURL()
 	payload := map[string]any{
 		"event_type": eventType,
 		"channel":    channel,
@@ -68,9 +102,10 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 	}
 	body, _ := json.Marshal(payload)
 
+	log.Printf("[ORDER NOTIF] Mengirim via HTTP ke %s (event=%s to=%s)", baseURL, eventType, to)
 	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
 	if err != nil {
-		log.Printf("[ORDER NOTIF] Notification service tidak tersedia (%v), tidak ada fallback SMTP", err)
+		log.Printf("[ORDER NOTIF] Notification service tidak tersedia (%v)", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -78,20 +113,38 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 	if resp.StatusCode != http.StatusOK {
 		var result map[string]any
 		_ = json.NewDecoder(resp.Body).Decode(&result)
-		log.Printf("[ORDER NOTIF] Gagal kirim via template (%d: %v), tidak ada fallback SMTP", resp.StatusCode, result["error"])
+		log.Printf("[ORDER NOTIF] Gagal kirim via template (%d: %v)", resp.StatusCode, result["error"])
+	} else {
+		log.Printf("[ORDER NOTIF] Berhasil kirim event=%s to=%s", eventType, to)
 	}
 }
 
 // sendOrderNotification mengirim email verifikasi pembayaran ke client secara async.
 func (s *orderService) sendOrderNotification(order *OrderRecord, eventType, paymentStatus, verificationNote string) {
-	if order == nil || strings.TrimSpace(order.ClientEmail) == "" {
+	if order == nil {
 		return
 	}
 
+	userID := order.UserID
+	clientEmail := order.ClientEmail
+	clientName := order.ClientName
+
 	go func() {
+		// Resolve email if cross-DB join returned placeholder
+		if strings.TrimSpace(clientEmail) == "" || clientEmail == "-" {
+			clientEmail = resolveClientEmail(userID)
+			if clientEmail == "" {
+				log.Printf("[ORDER NOTIF] Skipped: email tidak dapat di-resolve untuk user %s (event=%s)", userID, eventType)
+				return
+			}
+		}
+		// Use resolved name or fallback
+		if clientName == "" || clientName == "Unknown" {
+			clientName = clientEmail
+		}
 		vars := map[string]string{
-			"client_name":       order.ClientName,
-			"client_email":      order.ClientEmail,
+			"client_name":       clientName,
+			"client_email":      clientEmail,
 			"invoice_number":    order.InvoiceNumber,
 			"package_name":      order.PackageName,
 			"payment_status":    paymentStatus,
@@ -99,7 +152,7 @@ func (s *orderService) sendOrderNotification(order *OrderRecord, eventType, paym
 			"duration_months":   fmt.Sprintf("%d", order.DurationMonths),
 			"order_id":          order.OrderID,
 		}
-		dispatchNotification(eventType, "email", order.ClientEmail, vars)
+		dispatchNotification(eventType, "email", clientEmail, vars)
 	}()
 }
 
