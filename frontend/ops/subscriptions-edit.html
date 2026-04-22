@@ -315,6 +315,7 @@
         <script>
             let pkgId = null;
             let originalPrice = 0;
+            let originalPriceYearly = 0;
 
             function logout() { fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function () { }); localStorage.removeItem('token'); localStorage.removeItem('user'); sessionStorage.clear(); window.location.href = '/account/login'; }
 

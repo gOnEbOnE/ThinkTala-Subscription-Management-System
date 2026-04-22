@@ -45,6 +45,8 @@ func (c *Controller) Login(w http.ResponseWriter, r *http.Request) {
 func redirectByRole(roleCode string) string {
 	upper := strings.ToUpper(strings.TrimSpace(roleCode))
 	switch upper {
+	case "ADMIN_SUPPORT":
+		return "/ops/tickets"
 	case "OPERASIONAL":
 		return "/ops/dashboard"
 	case "COMPLIANCE":

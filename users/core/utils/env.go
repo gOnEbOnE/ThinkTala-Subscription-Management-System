@@ -9,33 +9,41 @@ import (
 
 var (
 	envCache = make(map[string]string)
-	envOnce  sync.Once
+	envMu    sync.Mutex
+	envLoaded bool
 )
 
-// LoadEnv reads .env file once and caches it
+// LoadEnv reads .env file and caches it.
+// If the file is not found, callers can try another path.
 func LoadEnv(filepath string) {
-	envOnce.Do(func() {
-		f, err := os.Open(filepath)
-		if err != nil {
-			// Optional: log warning if .env not found
-			return
-		}
-		defer f.Close()
+	envMu.Lock()
+	defer envMu.Unlock()
 
-		scanner := bufio.NewScanner(f)
-		for scanner.Scan() {
-			line := strings.TrimSpace(scanner.Text())
-			if line == "" || strings.HasPrefix(line, "#") {
-				continue
-			}
-			parts := strings.SplitN(line, "=", 2)
-			if len(parts) == 2 {
-				key := strings.TrimSpace(parts[0])
-				value := strings.TrimSpace(parts[1])
-				envCache[key] = value
-			}
+	if envLoaded {
+		return
+	}
+
+	f, err := os.Open(filepath)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
 		}
-	})
+		parts := strings.SplitN(line, "=", 2)
+		if len(parts) == 2 {
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+			envCache[key] = value
+		}
+	}
+
+	envLoaded = true
 }
 
 // GetEnv retrieves value from cache or os environment

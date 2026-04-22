@@ -170,6 +170,7 @@ func MigrateAndSeed(db interface{}) {
 	INSERT INTO roles (id, name, code, group_id) VALUES ('af47ce1c-1455-4a20-bafe-c2b7c2ab9995', 'Operasional', 'OPERASIONAL', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
 	INSERT INTO roles (id, name, code, group_id) VALUES ('bf47ce1c-1455-4a20-bafe-c2b7c2ab9996', 'Compliance', 'COMPLIANCE', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
 	INSERT INTO roles (id, name, code, group_id) VALUES ('cf47ce1c-1455-4a20-bafe-c2b7c2ab9997', 'Management', 'MANAGEMENT', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
+	INSERT INTO roles (id, name, code, group_id) VALUES ('ef47ce1c-1455-4a20-bafe-c2b7c2ab9997', 'Customer Support', 'ADMIN_SUPPORT', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
 
 	INSERT INTO users (id, name, email, password, group_id, level_id, role_id, status, created_at, created_by) 
 	VALUES (
@@ -264,6 +265,22 @@ func MigrateAndSeed(db interface{}) {
 		log.Fatalf("Gagal seed Management: %v", err)
 	}
 	log.Println("  ✓ Management (management@thinktala.com / Manage123)")
+
+	// Customer Support (password: Support123)
+	supportPwd := hashPwd("Support123")
+	_, err = pool.Exec(ctx,
+		`INSERT INTO users (id, name, email, password, phone, group_id, level_id, role_id, status, created_at, created_by)
+		 VALUES (
+			'45ef7bff-4c69-4b56-aec8-ef7427601955', 'Customer Support', 'support@thinktala.com',
+			$1, '081234567893',
+			'3e98c63f-5474-4506-826c-ded22b59b3dd', 3, 'ef47ce1c-1455-4a20-bafe-c2b7c2ab9997',
+			'active', CURRENT_TIMESTAMP, '10ef7bff-4c69-4b56-aec8-ef7427601952'
+		) ON CONFLICT (email) DO UPDATE SET password = $1`,
+		supportPwd)
+	if err != nil {
+		log.Fatalf("Gagal seed Customer Support: %v", err)
+	}
+	log.Println("  ✓ Customer Support (support@thinktala.com / Support123)")
 
 	log.Println("Migrasi dan Seeding selesai!")
 }

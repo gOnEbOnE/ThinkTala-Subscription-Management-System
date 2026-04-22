@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Laporan Kendala | ThinkTala Ops</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        .tickets-table {
+            --bs-table-bg: transparent;
+            --bs-table-striped-bg: transparent;
+            --bs-table-hover-bg: rgba(255, 255, 255, 0.03);
+            color: var(--text-main);
+        }
+
+        .tickets-table td,
+        .tickets-table th {
+            border-color: var(--border-color) !important;
+            color: inherit;
+            background: transparent !important;
+        }
+
+        .tickets-table tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.03) !important;
+        }
+
+        .ticket-reporter {
+            font-weight: 600;
+            color: var(--text-heading);
+        }
+
+        .ticket-time-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .filter-select {
+            background: var(--bg-card);
+            border-color: var(--border-color);
+            color: var(--text-main);
+        }
+
+        .filter-select:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 0.2rem rgba(0, 242, 255, 0.12);
+            background: var(--bg-card);
+            color: var(--text-main);
+        }
+
+        .filter-select option {
+            background: #11162a;
+            color: #e6ecff;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+            <div>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Monitoring Laporan Kendala</h4>
+                <small class="text-muted">Pantau dan kelola semua laporan masalah dari pengguna</small>
+            </div>
+        </div>
+
+        <div class="ai-card shadow-lg mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-3 col-md-4">
+                    <label class="form-label small text-muted">Status</label>
+                    <select class="form-select filter-select" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="ON PROCESS">On Process</option>
+                        <option value="DONE">Done</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-4">
+                    <label class="form-label small text-muted">Waktu</label>
+                    <select class="form-select filter-select" id="timeSort">
+                        <option value="newest">Newest</option>
+                        <option value="oldest">Oldest</option>
+                    </select>
+                </div>
+                <div class="col-lg-6 col-md-4">
+                    <label class="form-label small text-muted">Cari Laporan</label>
+                    <div class="input-group">
+                        <span class="input-group-text"
+                            style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-muted);">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" class="form-control" id="searchInput" placeholder="Cari laporan..."
+                            style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ai-card shadow-lg">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 tickets-table">
+                    <thead>
+                        <tr>
+                            <th class="small fw-semibold py-3"
+                                style="text-transform:uppercase;font-size:0.72rem;color:var(--text-muted);border-color:var(--border-color);">
+                                Pelapor</th>
+                            <th class="small fw-semibold py-3"
+                                style="text-transform:uppercase;font-size:0.72rem;color:var(--text-muted);border-color:var(--border-color);">
+                                Waktu</th>
+                            <th class="small fw-semibold py-3"
+                                style="text-transform:uppercase;font-size:0.72rem;color:var(--text-muted);border-color:var(--border-color);">
+                                Judul</th>
+                            <th class="small fw-semibold py-3"
+                                style="text-transform:uppercase;font-size:0.72rem;color:var(--text-muted);border-color:var(--border-color);">
+                                Status</th>
+                            <th class="small fw-semibold py-3 text-end"
+                                style="text-transform:uppercase;font-size:0.72rem;color:var(--text-muted);border-color:var(--border-color);">
+                                Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketsTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3"
+                style="border-top: 1px solid var(--border-color);">
+                <small class="text-muted" id="tableInfo">Memuat data...</small>
+                <div id="paginationControls" class="d-flex gap-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>Operations Panel v1.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js?v=cs-support-2"></script>
+    <script>
+        const DEFAULT_PER_PAGE = 6;
+        const DEFAULT_SORT = 'newest';
+        let state = {
+            search: '',
+            status: '',
+            sort: DEFAULT_SORT,
+            page: 1,
+            per_page: DEFAULT_PER_PAGE
+        };
+        let searchDebounceTimer = null;
+
+        function toPositiveInt(value, fallback) {
+            const parsed = Number.parseInt(String(value || ''), 10);
+            if (Number.isNaN(parsed) || parsed < 1) {
+                return fallback;
+            }
+            return parsed;
+        }
+
+        function normalizeStatus(rawStatus) {
+            const normalized = String(rawStatus || '').toUpperCase().trim();
+            if (normalized === 'ON PROCESS' || normalized === 'DONE') {
+                return normalized;
+            }
+            return '';
+        }
+
+        function parseStateFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const sortParam = String(params.get('sort') || '').toLowerCase();
+
+            state = {
+                search: String(params.get('search') || '').trim(),
+                status: normalizeStatus(params.get('status')),
+                sort: (sortParam === 'oldest' || sortParam === 'asc') ? 'oldest' : 'newest',
+                page: toPositiveInt(params.get('page'), 1),
+                per_page: toPositiveInt(params.get('per_page'), DEFAULT_PER_PAGE)
+            };
+
+            if (state.per_page > 100) {
+                state.per_page = 100;
+            }
+        }
+
+        function syncControlsWithState() {
+            document.getElementById('statusFilter').value = state.status;
+            document.getElementById('searchInput').value = state.search;
+            document.getElementById('timeSort').value = state.sort;
+        }
+
+        function syncURL() {
+            const params = new URLSearchParams();
+            if (state.search) params.set('search', state.search);
+            if (state.status) params.set('status', state.status);
+            if (state.sort !== DEFAULT_SORT) params.set('sort', state.sort);
+            if (state.page > 1) params.set('page', String(state.page));
+            if (state.per_page !== DEFAULT_PER_PAGE) params.set('per_page', String(state.per_page));
+
+            const nextUrl = params.toString()
+                ? `${window.location.pathname}?${params.toString()}`
+                : window.location.pathname;
+
+            window.history.replaceState({}, '', nextUrl);
+        }
+
+        function buildApiQuery() {
+            const params = new URLSearchParams();
+            if (state.search) params.set('search', state.search);
+            if (state.status) params.set('status', state.status);
+            params.set('sort', state.sort);
+            params.set('page', String(state.page));
+            params.set('per_page', String(state.per_page));
+            return params;
+        }
+
+        function parseTicketDate(dateStr) {
+            const raw = String(dateStr || '').trim();
+            const parsed = new Date(raw);
+            if (Number.isNaN(parsed.getTime())) {
+                return parsed;
+            }
+
+            // Backward-compatible fallback: older payloads used `Z` even when wall-clock was local.
+            if (raw.endsWith('Z')) {
+                const localCandidate = new Date(raw.slice(0, -1));
+                if (!Number.isNaN(localCandidate.getTime())) {
+                    const nowMs = Date.now();
+                    const utcLooksTooFuture = (parsed.getTime() - nowMs) > (60 * 60 * 1000);
+                    const localLooksReasonable = localCandidate.getTime() <= (nowMs + (2 * 60 * 1000));
+                    if (utcLooksTooFuture && localLooksReasonable) {
+                        return localCandidate;
+                    }
+                }
+            }
+
+            return parsed;
+        }
+
+        function formatTime(dateStr) {
+            const date = parseTicketDate(dateStr);
+            if (Number.isNaN(date.getTime())) {
+                return { primary: '-', secondary: '-' };
+            }
+
+            const now = new Date();
+            const diffMs = Math.max(0, now.getTime() - date.getTime());
+
+            const oneMinuteMs = 1000 * 60;
+            const oneHourMs = 1000 * 60 * 60;
+            const oneDayMs = 1000 * 60 * 60 * 24;
+
+            let relative = '1 minute';
+            if (diffMs < oneHourMs) {
+                const diffMinutes = Math.ceil(diffMs / oneMinuteMs);
+                const roundedMinutes = Math.max(1, diffMinutes);
+                relative = `${roundedMinutes} ${roundedMinutes === 1 ? 'minute' : 'minutes'}`;
+            } else if (diffMs < oneDayMs) {
+                const diffHours = Math.ceil(diffMs / oneHourMs);
+                relative = `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'}`;
+            } else {
+                const diffDays = Math.ceil(diffMs / oneDayMs);
+                relative = `${diffDays} ${diffDays === 1 ? 'day' : 'days'}`;
+            }
+
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hour = String(date.getHours()).padStart(2, '0');
+            const minute = String(date.getMinutes()).padStart(2, '0');
+
+            return {
+                primary: relative,
+                secondary: `${day}-${month}-${year} ${hour}:${minute}`
+            };
+        }
+
+        function statusBadge(status) {
+            const normalized = String(status || '').toUpperCase();
+            if (normalized === 'DONE') {
+                return '<span class="badge fw-semibold px-2 py-1" style="background:#00d26a;color:#000;font-size:0.72rem;">DONE</span>';
+            }
+            if (normalized === 'ON PROCESS') {
+                return '<span class="badge fw-semibold px-2 py-1" style="background:#ffc107;color:#000;font-size:0.72rem;">ON PROCESS</span>';
+            }
+            return `<span class="badge fw-semibold px-2 py-1" style="background:transparent;border:1px solid var(--border-color);color:var(--text-muted);font-size:0.72rem;">${normalized || 'UNKNOWN'}</span>`;
+        }
+
+        function renderSkeletonRows() {
+            return Array.from({ length: state.per_page }, () => `
+                <tr>
+                    <td class="py-3"><span class="placeholder placeholder-wave col-9"></span></td>
+                    <td class="py-3"><span class="placeholder placeholder-wave col-8"></span></td>
+                    <td class="py-3"><span class="placeholder placeholder-wave col-10"></span></td>
+                    <td class="py-3"><span class="placeholder placeholder-wave col-6"></span></td>
+                    <td class="py-3 text-end"><span class="placeholder placeholder-wave col-5"></span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPagination(meta) {
+            const totalPages = Number(meta.total_pages) || 0;
+            const container = document.getElementById('paginationControls');
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            if (state.page > totalPages) {
+                state.page = totalPages;
+            }
+
+            let html = '';
+            html += `<button class="btn btn-sm btn-outline-secondary" ${state.page === 1 ? 'disabled' : ''} onclick="changePage(${state.page - 1})">Prev</button>`;
+
+            const maxButtons = Math.min(totalPages, 5);
+            for (let i = 1; i <= maxButtons; i++) {
+                html += `<button class="btn btn-sm ${i === state.page ? '' : 'btn-outline-secondary'}" onclick="changePage(${i})" style="min-width:36px;${i === state.page ? 'background:var(--text-heading);color:#000;border-color:var(--text-heading);' : ''}">${i}</button>`;
+            }
+
+            if (totalPages > 5) {
+                html += `<span class="btn btn-sm btn-outline-secondary disabled">...</span>`;
+                html += `<button class="btn btn-sm btn-outline-secondary" onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+
+            html += `<button class="btn btn-sm btn-outline-secondary" ${state.page === totalPages ? 'disabled' : ''} onclick="changePage(${state.page + 1})">Next</button>`;
+            container.innerHTML = html;
+        }
+
+        function renderTable(tickets, meta) {
+            const tableBody = document.getElementById('ticketsTableBody');
+            const tableInfo = document.getElementById('tableInfo');
+            const total = Number(meta.total) || 0;
+            const page = Number(meta.page) || state.page;
+            const perPage = Number(meta.per_page) || state.per_page;
+
+            if (!tickets.length) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-inbox fa-2x mb-2 d-block"></i>
+                            Belum ada laporan kendala.
+                        </td>
+                    </tr>
+                `;
+                tableInfo.textContent = `Showing 0 of ${total} reports`;
+                renderPagination(meta);
+                return;
+            }
+
+            tableBody.innerHTML = tickets.map((ticket) => {
+                const time = formatTime(ticket.created_at);
+                return `
+                    <tr>
+                        <td class="py-3">
+                            <div class="ticket-reporter">${ticket.user_name || '-'}</div>
+                            <small class="text-muted">${ticket.user_email || '-'}</small>
+                        </td>
+                        <td class="py-3">
+                            <div>${time.primary}</div>
+                            <div class="ticket-time-sub">${time.secondary}</div>
+                        </td>
+                        <td class="py-3">${ticket.title || '-'}</td>
+                        <td class="py-3">${statusBadge(ticket.status)}</td>
+                        <td class="py-3 text-end">
+                            <a href="/ops/support-ticket-detail?id=${encodeURIComponent(ticket.id || '')}"
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="fa-solid fa-eye me-1"></i> Lihat Detail
+                            </a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            const start = ((page - 1) * perPage) + 1;
+            const end = start + tickets.length - 1;
+            tableInfo.textContent = `Showing ${start}-${end} of ${total} reports`;
+            renderPagination(meta);
+        }
+
+        function changePage(page) {
+            if (page < 1) {
+                return;
+            }
+            state.page = page;
+            syncURL();
+            loadTickets();
+        }
+
+        async function loadTickets() {
+            const tableBody = document.getElementById('ticketsTableBody');
+            tableBody.innerHTML = renderSkeletonRows();
+            document.getElementById('tableInfo').textContent = 'Memuat data...';
+
+            try {
+                const res = await fetch(`/api/admin/support/tickets?${buildApiQuery().toString()}`, {
+                    credentials: 'include',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-danger">
+                                <i class="fa-solid fa-shield-halved fa-2x mb-2 d-block"></i>
+                                Anda tidak memiliki akses ke halaman ticket.
+                            </td>
+                        </tr>
+                    `;
+                    document.getElementById('tableInfo').textContent = 'Akses ditolak';
+                    document.getElementById('paginationControls').innerHTML = '';
+                    return;
+                }
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+
+                const data = await res.json();
+                const tickets = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+                const meta = (data && data.pagination) ? data.pagination : {
+                    page: state.page,
+                    per_page: state.per_page,
+                    total: tickets.length,
+                    total_pages: tickets.length > 0 ? 1 : 0,
+                    has_next: false,
+                    has_prev: false
+                };
+
+                state.page = toPositiveInt(meta.page, state.page);
+                state.per_page = toPositiveInt(meta.per_page, state.per_page);
+                syncURL();
+                renderTable(tickets, meta);
+            } catch (err) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-danger">
+                            <i class="fa-solid fa-circle-exclamation fa-2x mb-2 d-block"></i>
+                            Gagal memuat data support tickets.
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('tableInfo').textContent = 'Gagal memuat';
+                document.getElementById('paginationControls').innerHTML = '';
+                console.warn('Failed to load support tickets:', err);
+            }
+        }
+
+        document.getElementById('statusFilter').addEventListener('change', () => {
+            state.status = normalizeStatus(document.getElementById('statusFilter').value);
+            state.page = 1;
+            syncURL();
+            loadTickets();
+        });
+
+        document.getElementById('timeSort').addEventListener('change', () => {
+            const rawSort = String(document.getElementById('timeSort').value || '').toLowerCase();
+            state.sort = (rawSort === 'oldest') ? 'oldest' : 'newest';
+            state.page = 1;
+            syncURL();
+            loadTickets();
+        });
+
+        document.getElementById('searchInput').addEventListener('input', (event) => {
+            const nextSearch = event.target.value.trim();
+            if (searchDebounceTimer) {
+                clearTimeout(searchDebounceTimer);
+            }
+            searchDebounceTimer = setTimeout(() => {
+                state.search = nextSearch;
+                state.page = 1;
+                syncURL();
+                loadTickets();
+            }, 500);
+        });
+
+        window.addEventListener('popstate', () => {
+            parseStateFromURL();
+            syncControlsWithState();
+            loadTickets();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            parseStateFromURL();
+            syncControlsWithState();
+            syncURL();
+            loadTickets();
+        });
+
+        window.changePage = changePage;
+    </script>
+</body>
+
+</html>

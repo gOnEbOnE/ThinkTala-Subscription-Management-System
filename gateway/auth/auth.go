@@ -11,18 +11,35 @@ import (
 	"github.com/master-abror/zaframework/core/utils"
 )
 
+func resolveClaimsFromCookie(cookieValue string) (*utils.AppClaims, error) {
+	if strings.TrimSpace(cookieValue) == "" {
+		return nil, errors.New("empty token cookie")
+	}
+
+	// Legacy flow: cookie contains encrypted Redis key -> resolve raw JWT from Redis.
+	if decryptedKey, err := utils.Decrypt(cookieValue); err == nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+
+		if jwtRaw, redisErr := utils.RedisGet(ctx, string(decryptedKey)); redisErr == nil {
+			return utils.ValidateJWT(jwtRaw)
+		}
+	}
+
+	// Fallback local flow: cookie contains raw JWT directly.
+	return utils.ValidateJWT(cookieValue)
+}
+
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
 		log.Printf("[AUTH] Path: %s", path)
 
-		// Skip public paths
 		if isPublicPath(path) {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		// ✅ STEP 1: Get token from cookie
 		tokenCookie, err := r.Cookie("token")
 		if err != nil {
 			log.Printf("[AUTH] No token cookie found")
@@ -30,36 +47,13 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		encryptedKey := tokenCookie.Value
-
-		// ✅ STEP 2: Decrypt key to get UUID
-		decryptedKey, err := utils.Decrypt(encryptedKey)
-		if err != nil {
-			log.Printf("[AUTH] Failed to decrypt token: %v", err)
-			http.Redirect(w, r, "/account/login", http.StatusSeeOther)
-			return
-		}
-
-		// ✅ STEP 3: Get RAW JWT from Redis using UUID key
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
-		jwtRaw, err := utils.RedisGet(ctx, string(decryptedKey))
-		if err != nil {
-			log.Printf("[AUTH] Token error: %v", err)
-			http.Redirect(w, r, "/account/login", http.StatusSeeOther)
-			return
-		}
-
-		// ✅ STEP 4: Validate JWT
-		claims, err := utils.ValidateJWT(jwtRaw)
+		claims, err := resolveClaimsFromCookie(tokenCookie.Value)
 		if err != nil {
 			log.Printf("[AUTH] Invalid token: %v", err)
 			http.Redirect(w, r, "/account/login", http.StatusSeeOther)
 			return
 		}
 
-		// ✅ STEP 5: Check role authorization
 		userRole := ""
 		if u, ok := claims.User["role_code"].(string); ok {
 			userRole = strings.ToUpper(strings.TrimSpace(u))
@@ -81,8 +75,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// ✅ STEP 6: Add user info to context
-		ctx = context.WithValue(r.Context(), "user_role", userRole)
+		ctx := context.WithValue(r.Context(), "user_role", userRole)
 		ctx = context.WithValue(ctx, "user_id", claims.User["id"])
 		ctx = context.WithValue(ctx, "user_email", claims.User["email"])
 
@@ -110,7 +103,6 @@ func isPublicPath(path string) bool {
 }
 
 func isRoleAllowed(path string, role string) bool {
-	// Normalize role
 	role = strings.ToUpper(strings.TrimSpace(role))
 
 	// Package dashboard is restricted strictly to MANAGEMENT/ADMIN only.
@@ -128,6 +120,15 @@ func isRoleAllowed(path string, role string) bool {
 		return role == "MANAGEMENT" || role == "ADMIN" || role == "SUPERADMIN"
 	}
 
+	// Customer Support access
+	if strings.HasPrefix(path, "/ops/tickets") || strings.HasPrefix(path, "/ops/support-ticket-detail") {
+		return role == "ADMIN_SUPPORT"
+	}
+
+	if strings.HasPrefix(path, "/api/admin/support/tickets") {
+		return role == "ADMIN_SUPPORT"
+	}
+
 	// SuperAdmin & CEO can access everything
 	if role == "SUPERADMIN" || role == "CEO" {
 		return true
@@ -138,57 +139,50 @@ func isRoleAllowed(path string, role string) bool {
 		return role == "SUPERADMIN"
 	}
 
-	// /api/admin/kyc* → COMPLIANCE & OPERASIONAL
 	if strings.HasPrefix(path, "/api/admin/kyc") {
 		return role == "COMPLIANCE" || role == "OPERASIONAL"
 	}
 
-	// /api/admin/* → OPERASIONAL only
 	if strings.HasPrefix(path, "/api/admin/") {
 		return role == "OPERASIONAL"
 	}
 
-	// /api/subscription/catalog → CLIENT, OPERASIONAL, and above can view
 	if strings.HasPrefix(path, "/api/subscription/") {
 		return role == "CLIENT" || role == "OPERASIONAL"
 	}
 
-	// /api/kyc/ → CLIENT can access their own KYC endpoints
 	if strings.HasPrefix(path, "/api/kyc/") {
 		return role == "CLIENT" || role == "COMPLIANCE" || role == "OPERASIONAL"
 	}
 
-	// /api/notifications* → OPERASIONAL only (not CLIENT)
 	if strings.HasPrefix(path, "/api/notifications") {
 		return role == "OPERASIONAL"
 	}
 
-	// /api/help/ → OPERASIONAL can manage notification templates
 	if strings.HasPrefix(path, "/api/help/") {
 		return role == "OPERASIONAL"
 	}
 
-	// /api/operational/ → OPERASIONAL only
 	if strings.HasPrefix(path, "/api/operational/") {
 		return role == "OPERASIONAL"
 	}
 
-	// /api/ops/ → OPERASIONAL can access ops APIs
 	if strings.HasPrefix(path, "/api/ops/") {
 		return role == "OPERASIONAL"
 	}
 
-	// /client/* → CLIENT role
 	if strings.HasPrefix(path, "/client/") && role == "CLIENT" {
 		return true
 	}
 
-	// /ops/* → OPERASIONAL role
+	if strings.HasPrefix(path, "/support/") && role == "CLIENT" {
+		return true
+	}
+
 	if strings.HasPrefix(path, "/ops/") && role == "OPERASIONAL" {
 		return true
 	}
 
-	// /compliance/* → COMPLIANCE role
 	if strings.HasPrefix(path, "/compliance/") && role == "COMPLIANCE" {
 		return true
 	}
@@ -196,7 +190,6 @@ func isRoleAllowed(path string, role string) bool {
 	return false
 }
 
-// CheckRoleAccess is an exported wrapper for role/path authorization.
 func CheckRoleAccess(path string, role string) bool {
 	return isRoleAllowed(path, role)
 }
@@ -221,32 +214,13 @@ type TokenUser struct {
 	AssumedRole bool
 }
 
-// GetUserFromToken reads auth cookie, resolves JWT from Redis, validates it,
-// then returns minimal user info used by gateway routing.
 func GetUserFromToken(r *http.Request) (*TokenUser, error) {
-	// 1) Cookie: encrypted redis key
 	tokenCookie, err := r.Cookie("token")
 	if err != nil || tokenCookie.Value == "" {
 		return nil, errors.New("token cookie not found")
 	}
 
-	// 2) Decrypt key (UUID/string key for redis lookup)
-	decryptedKey, err := utils.Decrypt(tokenCookie.Value)
-	if err != nil {
-		return nil, err
-	}
-
-	// 3) Read raw JWT from redis
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	jwtRaw, err := utils.RedisGet(ctx, string(decryptedKey))
-	if err != nil {
-		return nil, err
-	}
-
-	// 4) Validate JWT (RSA)
-	claims, err := utils.ValidateJWT(jwtRaw)
+	claims, err := resolveClaimsFromCookie(tokenCookie.Value)
 	if err != nil {
 		return nil, err
 	}
@@ -260,7 +234,6 @@ func GetUserFromToken(r *http.Request) (*TokenUser, error) {
 	levelCode, _ := u["level_code"].(string)
 	assumedRole := isAssumedRole(u["assumed_role"])
 
-	// Fallback if role_code is absent
 	if roleCode == "" {
 		roleCode = strings.ToUpper(strings.TrimSpace(role))
 	}

@@ -24,6 +24,7 @@ func main() {
 	// ============================================================
 
 	utils.LoadEnv(".env")
+	utils.LoadEnv("users/.env")
 
 	if err := utils.InitJWTLoadKeys("certs/private.pem", "certs/public.pem"); err != nil {
 		log.Fatalf("[FATAL] Gagal memuat kunci JWT: %v", err)
@@ -106,7 +107,11 @@ func main() {
 
 	app := core.New(cfg)
 
-	database.MigrateAndSeed(app.DB)
+	if app.DB != nil && app.DB.Pool != nil {
+		database.MigrateAndSeed(app.DB)
+	} else {
+		log.Println("[DB] Skipping migration: database connection is not initialized")
+	}
 
 	// ============================================================
 	// 2. WIRING FEATURES (Dependency Injection)

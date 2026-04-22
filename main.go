@@ -199,6 +199,7 @@ func main() {
 		{"account", "account", "2001"},
 		{"gateway", "gateway", "2000"},
 		{"users", "users", "2006"},
+		{"tickets", "tickets", "2004"},
 		{"notification", "notification", "5003"},
 		{"operational", "operational", "5005"},
 		{"subscription", "subscription", "5004"},

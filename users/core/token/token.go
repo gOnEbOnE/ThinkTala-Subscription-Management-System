@@ -30,6 +30,11 @@ type CurrentUser struct {
 }
 
 func SetUserAuthz(w http.ResponseWriter, r *http.Request, token_value string) (string, error) {
+	if !utils.IsRedisEnabled() {
+		_, _ = session.Set(w, r, "token", token_value)
+		return token_value, nil
+	}
+
 	token_key, err := utils.CreateUUID()
 	if err != nil {
 		return "", err
@@ -45,7 +50,7 @@ func SetUserAuthz(w http.ResponseWriter, r *http.Request, token_value string) (s
 
 	ctx := r.Context()
 
-	v := utils.GetEnv("SESSION_LIFETIME")
+	v := utils.GetEnv("SESSION_LIFETIME", "86400")
 	sec, err := strconv.Atoi(v)
 	if err != nil {
 		return "", err
@@ -72,9 +77,57 @@ func GetUserAuthz(r *http.Request, key string) (*CurrentUser, error) {
 		return nil, errors.New("token_key_encrypt is missing or not string")
 	}
 
+	if !utils.IsRedisEnabled() {
+		claims, err := utils.ValidateJWT(tokenStr)
+		if err != nil {
+			return nil, err
+		}
+
+		u := claims.User
+		photoStr, _ := u["photo"].(string)
+
+		currentUser := CurrentUser{
+			ID:      u["id"].(string),
+			Name:    u["name"].(string),
+			Email:   u["email"].(string),
+			Role:    u["role"].(string),
+			RoleID:  u["role_id"].(string),
+			Level:   u["level"].(string),
+			LevelID: u["level_id"].(string),
+			Group:   u["group"].(string),
+			GroupID: u["group_id"].(string),
+			Status:  u["status"].(string),
+			Photo:   &photoStr,
+		}
+
+		return &currentUser, nil
+	}
+
 	token_key_decrypt, err := utils.Decrypt(tokenStr)
 	if err != nil {
-		return nil, err
+		claims, jwtErr := utils.ValidateJWT(tokenStr)
+		if jwtErr != nil {
+			return nil, err
+		}
+
+		u := claims.User
+		photoStr, _ := u["photo"].(string)
+
+		currentUser := CurrentUser{
+			ID:      u["id"].(string),
+			Name:    u["name"].(string),
+			Email:   u["email"].(string),
+			Role:    u["role"].(string),
+			RoleID:  u["role_id"].(string),
+			Level:   u["level"].(string),
+			LevelID: u["level_id"].(string),
+			Group:   u["group"].(string),
+			GroupID: u["group_id"].(string),
+			Status:  u["status"].(string),
+			Photo:   &photoStr,
+		}
+
+		return &currentUser, nil
 	}
 
 	ctx := r.Context()
