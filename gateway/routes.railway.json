@@ -143,6 +143,34 @@
       "roles": ["OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
+      "path": "/api/user/support/tickets",
+      "target": "http://tickets.railway.internal:8080",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/user/support/tickets/",
+      "target": "http://tickets.railway.internal:8080",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/admin/support/tickets",
+      "target": "http://tickets.railway.internal:8080",
+      "cors": true,
+      "auth": true,
+      "roles": ["ADMIN_SUPPORT", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/admin/support/tickets/",
+      "target": "http://tickets.railway.internal:8080",
+      "cors": true,
+      "auth": true,
+      "roles": ["ADMIN_SUPPORT", "SUPERADMIN", "CEO"]
+    },
+    {
       "path": "/api/operational/",
       "target": "http://operational.railway.internal:8080",
       "cors": true,
