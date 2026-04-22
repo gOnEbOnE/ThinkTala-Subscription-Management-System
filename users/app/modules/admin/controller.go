@@ -78,7 +78,7 @@ func (c *Controller) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// 8. Validasi role harus ada di daftar yang diizinkan
 	if !AllowedRoles[input.Role] {
-		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAJEMEN, ADMIN_CS", nil)
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAGEMENT, ADMIN_CS", nil)
 		return
 	}
 
@@ -240,7 +240,7 @@ func (c *Controller) EditUser(w http.ResponseWriter, r *http.Request) {
 	if hasRole {
 		roleVal := strings.TrimSpace(strings.ToUpper(*input.Role))
 		if !AllowedRoles[roleVal] {
-			ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAJEMEN, ADMIN_CS", nil)
+			ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAGEMENT, ADMIN_CS", nil)
 			return
 		}
 		input.Role = &roleVal
