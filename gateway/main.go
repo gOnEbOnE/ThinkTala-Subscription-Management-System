@@ -192,6 +192,8 @@ func normalizeTargetForEnv(target string) string {
 		"notification-service.railway.internal:5003": "localhost:5003",
 		"subscription-service.railway.internal:5004": "localhost:5004",
 		"operational-service.railway.internal:8080":  "localhost:5005",
+		"tickets-service.railway.internal:2004":      "localhost:2004",
+		"management-service.railway.internal:5006":   "localhost:5006",
 	}
 
 	for from, to := range replacements {

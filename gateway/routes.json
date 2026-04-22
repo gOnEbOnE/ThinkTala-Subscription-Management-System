@@ -5,47 +5,47 @@
   "routes": [
     {
       "path": "/api/auth/register",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true
     },
     {
       "path": "/api/auth/verify-otp",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true
     },
     {
       "path": "/api/auth/resend-otp",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true
     },
     {
       "path": "/api/auth",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true
     },
     {
       "path": "/api/auth/logout",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true
     },
     {
       "path": "/api/auth/assume-role",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true
     },
     {
       "path": "/api/auth/roles",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true
     },
     {
       "path": "/account/login/auth",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true
     },
     {
       "path": "/api/kyc/",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -56,41 +56,41 @@
     },
     {
       "path": "/api/admin/kyc",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true,
       "auth": true,
       "roles": ["ADMIN_KYC", "COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/admin/kyc/",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true,
       "auth": true,
       "roles": ["ADMIN_KYC", "COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/notifications/public",
-      "target": "http://localhost:5003",
+      "target": "http://notification-service.railway.internal:5003",
       "cors": true
     },
     {
       "path": "/api/notifications/public/",
-      "target": "http://localhost:5003",
+      "target": "http://notification-service.railway.internal:5003",
       "cors": true
     },
     {
       "path": "/api/notifications/public",
-      "target": "http://localhost:5003",
+      "target": "http://notification-service.railway.internal:5003",
       "cors": true
     },
     {
       "path": "/api/notifications/public/",
-      "target": "http://localhost:5003",
+      "target": "http://notification-service.railway.internal:5003",
       "cors": true
     },
     {
       "path": "/api/notifications",
-      "target": "http://localhost:5003",
+      "target": "http://notification-service.railway.internal:5003",
       "cors": true,
       "auth": true,
       "roles": [
@@ -101,7 +101,7 @@
     },
     {
       "path": "/api/notifications/",
-      "target": "http://localhost:5003",
+      "target": "http://notification-service.railway.internal:5003",
       "cors": true,
       "auth": true,
       "roles": [
@@ -112,7 +112,7 @@
     },
     {
       "path": "/api/help/",
-      "target": "http://localhost:5003",
+      "target": "http://notification-service.railway.internal:5003",
       "cors": true,
       "auth": true,
       "roles": [
@@ -125,7 +125,7 @@
     },
     {
       "path": "/api/admin/packages",
-      "target": "http://localhost:5004",
+      "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -136,7 +136,7 @@
     },
     {
       "path": "/api/admin/packages/",
-      "target": "http://localhost:5004",
+      "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -147,7 +147,7 @@
     },
     {
       "path": "/api/subscriptions",
-      "target": "http://localhost:5004",
+      "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -158,7 +158,7 @@
     },
     {
       "path": "/api/subscriptions/",
-      "target": "http://localhost:5004",
+      "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -169,26 +169,26 @@
     },
     {
       "path": "/api/user/support/tickets",
-      "target": "http://localhost:2004",
+      "target": "http://tickets-service.railway.internal:2004",
       "cors": true,
       "auth": true,
       "roles": ["CLIENT", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/user/support/tickets/",
-      "target": "http://localhost:2004",
+      "target": "http://tickets-service.railway.internal:2004",
       "cors": true,
       "auth": true,
       "roles": ["CLIENT", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/subscription/catalog",
-      "target": "http://localhost:5004",
+      "target": "http://subscription-service.railway.internal:5004",
       "cors": true
     },
     {
       "path": "/api/admin/orders",
-      "target": "http://localhost:5005",
+      "target": "http://operational-service.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": [
@@ -199,7 +199,7 @@
     },
     {
       "path": "/api/admin/orders/",
-      "target": "http://localhost:5005",
+      "target": "http://operational-service.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": [
@@ -210,14 +210,14 @@
     },
     {
       "path": "/api/admin/support/tickets",
-      "target": "http://localhost:2004",
+      "target": "http://tickets-service.railway.internal:2004",
       "cors": true,
       "auth": true,
       "roles": ["ADMIN_SUPPORT", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/operational/",
-      "target": "http://localhost:5005",
+      "target": "http://operational-service.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": [
@@ -228,7 +228,7 @@
     },
     {
       "path": "/api/orders",
-      "target": "http://localhost:5004",
+      "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -238,7 +238,7 @@
     },
     {
       "path": "/api/orders/",
-      "target": "http://localhost:5004",
+      "target": "http://subscription-service.railway.internal:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -248,7 +248,7 @@
     },
     {
       "path": "/api/dashboard/customers",
-      "target": "http://localhost:5006",
+      "target": "http://management-service.railway.internal:5006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -259,7 +259,7 @@
     },
     {
       "path": "/api/dashboard/customer/",
-      "target": "http://localhost:5006",
+      "target": "http://management-service.railway.internal:5006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -270,7 +270,7 @@
     },
     {
       "path": "/api/dashboard/packages",
-      "target": "http://localhost:5006",
+      "target": "http://management-service.railway.internal:5006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -281,21 +281,21 @@
     },
     {
       "path": "/api/dashboard/package/",
-      "target": "http://localhost:5006",
+      "target": "http://management-service.railway.internal:5006",
       "cors": true,
       "auth": true,
       "roles": ["MANAGEMENT", "ADMIN", "SUPERADMIN"]
     },
     {
       "path": "/api/admin/users",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true,
       "auth": true,
       "roles": ["SUPERADMIN"]
     },
     {
       "path": "/api/admin/users/",
-      "target": "http://localhost:2006",
+      "target": "http://users-service.railway.internal:2006",
       "cors": true,
       "auth": true,
       "roles": ["SUPERADMIN"]
