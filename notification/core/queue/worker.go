@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	template "notification/app/modules/template_notification"
@@ -25,22 +27,37 @@ func StartWorker(ctx context.Context, svc *template.Service) {
 		port := getEnv("redis_port", "6379")
 		addr = host + ":" + port
 	}
-	pass := getEnv("redis_pass", "")
+	pass := strings.TrimSpace(getEnv("redis_pass", ""))
+	dbStr := getEnv("redis_db", "0")
+	dbNum, err := strconv.Atoi(dbStr)
+	if err != nil {
+		dbNum = 0
+	}
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:        addr,
 		Password:    pass,
+		DB:          dbNum,
 		DialTimeout: 5 * time.Second,
 	})
 	defer rdb.Close()
 
-	// Test koneksi awal
-	if err := rdb.Ping(ctx).Err(); err != nil {
-		log.Printf("[QUEUE WORKER] Redis tidak tersedia (%v) — queue worker tidak aktif", err)
-		return
+	// Retry koneksi agar worker tidak mati permanen jika Redis belum siap saat startup.
+	for {
+		if err := rdb.Ping(ctx).Err(); err != nil {
+			select {
+			case <-ctx.Done():
+				log.Println("[QUEUE WORKER] Stopped (context cancelled)")
+				return
+			case <-time.After(5 * time.Second):
+				log.Printf("[QUEUE WORKER] Redis tidak tersedia (%v) — retry 5s", err)
+				continue
+			}
+		}
+		break
 	}
 
-	log.Printf("[QUEUE WORKER] Started — listening on %s key=%s", addr, QueueKey)
+	log.Printf("[QUEUE WORKER] Started — listening on %s db=%d key=%s", addr, dbNum, QueueKey)
 
 	for {
 		// BLPOP: blocking pop dari kiri (FIFO dengan RPUSH dari producer)

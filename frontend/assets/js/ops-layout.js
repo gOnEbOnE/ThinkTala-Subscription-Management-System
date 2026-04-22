@@ -141,7 +141,7 @@
                 <li>
                     <a class="nav-link${isActive('notifications')}" href="/ops/notifications">
                         <i class="fa-solid fa-list me-2" style="font-size:.85rem"></i>
-                        <span>Monitoring</span>
+                        <span>Notification Management</span>
                     </a>
                 </li>
                 <li>

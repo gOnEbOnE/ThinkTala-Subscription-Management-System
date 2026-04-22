@@ -5,8 +5,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
 	"time"
+
+	oputils "operational/core/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -17,6 +21,9 @@ var db *pgxpool.Pool
 
 func main() {
 	godotenv.Load()
+	if err := oputils.InitRedis(); err != nil {
+		log.Printf("[OPERATIONAL] Redis init failed: %v", err)
+	}
 
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		getEnv("DB_USER", "postgres"),
@@ -48,8 +55,8 @@ func main() {
 		c.File("./public/views/notifications.html")
 	})
 	r.GET("/ops/notification-templates", func(c *gin.Context) {
-        c.File("./public/views/notification-templates.html")
-    })
+		c.File("./public/views/notification-templates.html")
+	})
 	r.GET("/ops/subscriptions", func(c *gin.Context) {
 		c.File("./public/views/subscriptions.html")
 	})
@@ -69,7 +76,10 @@ func main() {
 	// Orders API
 	adminOrders := r.Group("/api/admin")
 	{
-		adminOrders.GET("/orders", listOrders)
+		adminOrders.GET("/orders", proxySubscriptionOrder)
+		adminOrders.GET("/orders/:id", proxySubscriptionOrder)
+		adminOrders.GET("/orders/:id/payment-proof", proxySubscriptionOrder)
+		adminOrders.PATCH("/orders/:id/verify", proxySubscriptionOrder)
 	}
 
 	// KYC API (if exists)
@@ -148,49 +158,50 @@ func listKYC(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": list})
 }
 
-func listOrders(c *gin.Context) {
-	query := `
-		SELECT
-			o.id,
-			o.invoice_number,
-			COALESCE(u.name, 'Unknown') AS client_name,
-			COALESCE(p.name, 'Unknown') AS package_name,
-			o.total_price,
-			o.status,
-			o.created_at
-		FROM subscription.orders o
-		LEFT JOIN users u ON u.id = o.user_id
-		LEFT JOIN subscription.packages p ON p.id = o.package_id
-		ORDER BY o.created_at DESC
-	`
-
-	rows, err := db.Query(context.Background(), query)
+func proxySubscriptionOrder(c *gin.Context) {
+	targetBase := getEnv("SUBSCRIPTION_SERVICE_URL", "http://localhost:5004")
+	targetURL, err := url.Parse(targetBase)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "error_message": "URL service subscription tidak valid"})
 		return
 	}
-	defer rows.Close()
 
-	var list []map[string]any
-	for rows.Next() {
-		var orderID, invoiceNumber, clientName, packageName, status string
-		var totalPrice float64
-		var createdAt time.Time
-		rows.Scan(&orderID, &invoiceNumber, &clientName, &packageName, &totalPrice, &status, &createdAt)
-		list = append(list, map[string]any{
-			"order_id":       orderID,
-			"invoice_number": invoiceNumber,
-			"client_name":    clientName,
-			"package_name":   packageName,
-			"total_price":    totalPrice,
-			"status":         status,
-			"created_at":     createdAt,
-		})
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+		log.Printf("[OPERATIONAL] proxy order ke subscription gagal: %v", err)
+		c.JSON(http.StatusBadGateway, gin.H{"success": false, "error_message": "service subscription tidak tersedia"})
 	}
-	if list == nil {
-		list = []map[string]any{}
+
+	proxy.ServeHTTP(c.Writer, c.Request.Clone(c.Request.Context()))
+}
+
+type sqlNullTime struct {
+	Time  time.Time
+	Valid bool
+}
+
+func (n *sqlNullTime) Scan(value any) error {
+	if value == nil {
+		n.Time = time.Time{}
+		n.Valid = false
+		return nil
 	}
-	c.JSON(http.StatusOK, list)
+
+	var t time.Time
+	switch v := value.(type) {
+	case time.Time:
+		t = v
+	case *time.Time:
+		if v != nil {
+			t = *v
+		}
+	default:
+		return fmt.Errorf("unsupported time type %T", value)
+	}
+
+	n.Time = t
+	n.Valid = true
+	return nil
 }
 
 func reviewKYC(c *gin.Context) {

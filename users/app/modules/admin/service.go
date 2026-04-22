@@ -43,37 +43,37 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 
 	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
 	if err != nil {
-		log.Printf("[ADMIN-NOTIF] Notification service tidak tersedia (%v), fallback SMTP", err)
-		fallbackSendCredentialsEmail(to, vars)
+		log.Printf("[ADMIN-NOTIF] Notification service tidak tersedia (%v), tidak ada fallback SMTP", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("[ADMIN-NOTIF] Gagal kirim via template (status %d), fallback SMTP", resp.StatusCode)
-		fallbackSendCredentialsEmail(to, vars)
+		var result map[string]any
+		json.NewDecoder(resp.Body).Decode(&result)
+		log.Printf("[ADMIN-NOTIF] Gagal kirim via template (%d: %v), tidak ada fallback SMTP", resp.StatusCode, result["error"])
 	}
 }
 
-// fallbackSendCredentialsEmail mengirim email kredensial langsung via SMTP
-func fallbackSendCredentialsEmail(to string, vars map[string]string) {
-	name := vars["name"]
-	email := vars["email"]
-	password := vars["password"]
-	role := vars["role"]
+// // fallbackSendCredentialsEmail mengirim email kredensial langsung via SMTP
+// func fallbackSendCredentialsEmail(to string, vars map[string]string) {
+// 	name := vars["name"]
+// 	email := vars["email"]
+// 	password := vars["password"]
+// 	role := vars["role"]
 
-	smtpClient := utils.NewSMTPClient()
-	subject := "Akun ThinkNalyze Anda Telah Dibuat"
-	body := fmt.Sprintf(
-		"Halo %s,\n\nAkun ThinkNalyze Anda telah berhasil dibuat oleh administrator.\n\nBerikut kredensial login Anda:\nEmail: %s\nPassword: %s\nRole: %s\n\nSilakan login di ThinkNalyze dan segera ubah password Anda.\n\n-- ThinkNalyze Team",
-		name, email, password, role,
-	)
-	if err := smtpClient.SendEmail(to, subject, body); err != nil {
-		log.Printf("[ADMIN-NOTIF] Gagal mengirim email ke %s: %v", to, err)
-	} else {
-		log.Printf("[ADMIN-NOTIF] Email kredensial (fallback) terkirim ke %s", to)
-	}
-}
+// 	smtpClient := utils.NewSMTPClient()
+// 	subject := "Akun ThinkNalyze Anda Telah Dibuat"
+// 	body := fmt.Sprintf(
+// 		"Halo %s,\n\nAkun ThinkNalyze Anda telah berhasil dibuat oleh administrator.\n\nBerikut kredensial login Anda:\nEmail: %s\nPassword: %s\nRole: %s\n\nSilakan login di ThinkNalyze dan segera ubah password Anda.\n\n-- ThinkNalyze Team",
+// 		name, email, password, role,
+// 	)
+// 	if err := smtpClient.SendEmail(to, subject, body); err != nil {
+// 		log.Printf("[ADMIN-NOTIF] Gagal mengirim email ke %s: %v", to, err)
+// 	} else {
+// 		log.Printf("[ADMIN-NOTIF] Email kredensial (fallback) terkirim ke %s", to)
+// 	}
+// }
 
 // ProcessCreateUserJob — dipanggil oleh worker untuk proses pembuatan user internal
 func (s *Service) ProcessCreateUserJob(ctx context.Context, payload any) (any, error) {

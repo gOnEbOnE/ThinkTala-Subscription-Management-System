@@ -258,6 +258,15 @@ func withRoleAuth(h http.HandlerFunc) http.HandlerFunc {
 		user, err := auth.GetUserFromToken(r)
 		if err != nil {
 			log.Printf("[AUTH] Token error: %v", err)
+			if strings.HasPrefix(r.URL.Path, "/api/") ||
+				strings.Contains(r.Header.Get("Accept"), "application/json") ||
+				r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`{"error":"Unauthorized","message":"Please log in"}`))
+				return
+			}
+
 			http.Redirect(w, r, "/account/login", http.StatusFound)
 			return
 		}
@@ -648,8 +657,22 @@ func main() {
 
 	// --- SUBSCRIPTION SERVICE (role-protected) ---
 	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
+	notifPublicTarget := getRouteTarget("/api/notifications/public")
+	if notifPublicTarget == "" {
+		notifPublicTarget = getRouteTarget("/api/notifications/public/")
+	}
+	if notifPublicTarget == "" {
+		notifPublicTarget = "http://localhost:5003"
+	}
+	http.HandleFunc("/api/notifications/public", createProxyHandler(notifPublicTarget, true))
+	http.HandleFunc("/api/notifications/public/", createProxyHandler(notifPublicTarget, true))
+	log.Printf("[GW] Public API: /api/notifications/public -> %s", notifPublicTarget)
+
+	// --- SUBSCRIPTION SERVICE (role-protected) ---
+	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
 	subTarget := getRouteTarget("/api/admin/packages")
 	if subTarget == "" {
+		subTarget = "http://localhost:5004"
 		subTarget = "http://localhost:5004"
 	}
 	http.HandleFunc("/api/admin/packages", withRoleAuth(
@@ -673,6 +696,7 @@ func main() {
 	kycTarget := getRouteTarget("/api/admin/kyc")
 	if kycTarget == "" {
 		kycTarget = "http://localhost:2006"
+		kycTarget = "http://localhost:2006"
 	}
 	http.HandleFunc("/api/admin/kyc", withRoleAuth(
 		createProxyHandler(kycTarget, true),
@@ -685,7 +709,7 @@ func main() {
 	// --- ORDERS Admin API (role-protected) - OPERASIONAL can access ---
 	ordersTarget := getRouteTarget("/api/admin/orders")
 	if ordersTarget == "" {
-		ordersTarget = "http://subscription-service.railway.internal:5004"
+		ordersTarget = "http://localhost:5005"
 	}
 	http.HandleFunc("/api/admin/orders", withRolesAuth([]string{"OPERASIONAL", "SUPERADMIN", "CEO"},
 		createProxyHandler(ordersTarget, true),
@@ -744,6 +768,9 @@ func main() {
 	for _, route := range config.Routes {
 		if strings.HasPrefix(route.Path, "/api/") {
 			// Skip routes already registered above
+			if route.Path == "/api/notifications/public" || route.Path == "/api/notifications/public/" {
+				continue
+			}
 			if strings.HasPrefix(route.Path, "/api/admin/") ||
 				strings.HasPrefix(route.Path, "/api/subscription/") ||
 				strings.HasPrefix(route.Path, "/api/kyc") ||

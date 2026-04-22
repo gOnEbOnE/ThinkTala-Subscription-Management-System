@@ -1,10 +1,16 @@
 package orders
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"net/http"
 	"strings"
+
+	"github.com/master-abror/zaframework/core/utils"
 )
 
 // ==========================================
@@ -43,6 +49,58 @@ type orderService struct {
 
 func NewService(repo Repository) Service {
 	return &orderService{repo: repo}
+}
+
+// dispatchNotification mengirim event notifikasi dengan pola yang sama seperti KYC/register.
+// Urutan: 1) Redis queue -> 2) HTTP langsung ke Notification Service.
+func dispatchNotification(eventType, channel, to string, vars map[string]string) {
+	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
+		log.Printf("[ORDER NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
+		return
+	}
+
+	baseURL := utils.GetEnv("NOTIFICATION_SERVICE_URL", "http://localhost:5003")
+	payload := map[string]any{
+		"event_type": eventType,
+		"channel":    channel,
+		"to":         to,
+		"vars":       vars,
+	}
+	body, _ := json.Marshal(payload)
+
+	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
+	if err != nil {
+		log.Printf("[ORDER NOTIF] Notification service tidak tersedia (%v), tidak ada fallback SMTP", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var result map[string]any
+		_ = json.NewDecoder(resp.Body).Decode(&result)
+		log.Printf("[ORDER NOTIF] Gagal kirim via template (%d: %v), tidak ada fallback SMTP", resp.StatusCode, result["error"])
+	}
+}
+
+// sendOrderNotification mengirim email verifikasi pembayaran ke client secara async.
+func (s *orderService) sendOrderNotification(order *OrderRecord, eventType, paymentStatus, verificationNote string) {
+	if order == nil || strings.TrimSpace(order.ClientEmail) == "" {
+		return
+	}
+
+	go func() {
+		vars := map[string]string{
+			"client_name":       order.ClientName,
+			"client_email":      order.ClientEmail,
+			"invoice_number":    order.InvoiceNumber,
+			"package_name":      order.PackageName,
+			"payment_status":    paymentStatus,
+			"verification_note": verificationNote,
+			"duration_months":   fmt.Sprintf("%d", order.DurationMonths),
+			"order_id":          order.OrderID,
+		}
+		dispatchNotification(eventType, "email", order.ClientEmail, vars)
+	}()
 }
 
 // CreateOrder — validasi + tentukan harga dari package_pricing + buat order
@@ -364,6 +422,12 @@ func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectR
 			return nil, fmt.Errorf("gagal aktivasi subscription otomatis: %w", err)
 		}
 	}
+
+	eventType := "payment_verified"
+	if action == "REJECT" {
+		eventType = "payment_rejected"
+	}
+	s.sendOrderNotification(rec, eventType, newStatus, verificationNote)
 
 	return &VerifyResult{
 		Message:          "Status pembayaran berhasil diperbarui",

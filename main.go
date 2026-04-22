@@ -91,9 +91,22 @@ func isPortAvailable(port string) bool {
 
 func findListeningPIDs(port string) ([]string, error) {
 	if runtime.GOOS == "windows" {
-		return nil, fmt.Errorf("auto-kill port not supported on windows")
+		intPIDs, err := getListeningPIDsWindows(port)
+		if err != nil {
+			return nil, err
+		}
+		selfPID := os.Getpid()
+		var pids []string
+		for _, pid := range intPIDs {
+			if pid == selfPID {
+				continue
+			}
+			pids = append(pids, strconv.Itoa(pid))
+		}
+		return pids, nil
 	}
 
+	// Linux/macOS
 	cmd := exec.Command("lsof", "-tiTCP:"+port, "-sTCP:LISTEN")
 	out, err := cmd.Output()
 	if err != nil {

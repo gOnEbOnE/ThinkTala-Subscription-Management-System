@@ -69,6 +69,26 @@
       "roles": ["ADMIN_KYC", "COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
+      "path": "/api/notifications/public",
+      "target": "http://localhost:5003",
+      "cors": true
+    },
+    {
+      "path": "/api/notifications/public/",
+      "target": "http://localhost:5003",
+      "cors": true
+    },
+    {
+      "path": "/api/notifications/public",
+      "target": "http://localhost:5003",
+      "cors": true
+    },
+    {
+      "path": "/api/notifications/public/",
+      "target": "http://localhost:5003",
+      "cors": true
+    },
+    {
       "path": "/api/notifications",
       "target": "http://localhost:5003",
       "cors": true,
@@ -154,7 +174,7 @@
     },
     {
       "path": "/api/admin/orders",
-      "target": "http://subscription-service.railway.internal:5004",
+      "target": "http://localhost:5005",
       "cors": true,
       "auth": true,
       "roles": [
@@ -165,7 +185,7 @@
     },
     {
       "path": "/api/admin/orders/",
-      "target": "http://subscription-service.railway.internal:5004",
+      "target": "http://localhost:5005",
       "cors": true,
       "auth": true,
       "roles": [
@@ -187,7 +207,7 @@
     },
     {
       "path": "/api/orders",
-      "target": "http://subscription-service.railway.internal:5004",
+      "target": "http://localhost:5004",
       "cors": true,
       "auth": true,
       "roles": [
@@ -197,7 +217,7 @@
     },
     {
       "path": "/api/orders/",
-      "target": "http://subscription-service.railway.internal:5004",
+      "target": "http://localhost:5004",
       "cors": true,
       "auth": true,
       "roles": [
