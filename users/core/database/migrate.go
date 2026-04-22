@@ -139,6 +139,9 @@ func MigrateAndSeed(db interface{}) {
 
 	-- Upgrade ktp_image to TEXT if it was previously VARCHAR(500)
 	ALTER TABLE kyc_submissions ALTER COLUMN ktp_image TYPE TEXT;
+
+	-- Add rejected_fields column if not exists (TEXT[] for storing field names)
+	ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS rejected_fields TEXT[];
 	`
 
 	log.Println("Menjalankan Migrasi PostgreSQL...")

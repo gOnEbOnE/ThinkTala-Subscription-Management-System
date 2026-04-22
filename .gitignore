@@ -25,6 +25,7 @@ gateway/certs/*.key
 
 # --- Dependencies ---
 vendor/
+!gateway/vendor/
 go.work.sum
 
 # --- IDE, OS & Editors ---
