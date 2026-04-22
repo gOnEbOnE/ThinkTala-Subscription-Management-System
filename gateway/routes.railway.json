@@ -65,6 +65,16 @@
       "roles": ["ADMIN_KYC", "COMPLIANCE", "OPERASIONAL", "SUPERADMIN", "CEO"]
     },
     {
+      "path": "/api/notifications/public",
+      "target": "http://notification.railway.internal:5003",
+      "cors": true
+    },
+    {
+      "path": "/api/notifications/public/",
+      "target": "http://notification.railway.internal:5003",
+      "cors": true
+    },
+    {
       "path": "/api/notifications",
       "target": "http://notification.railway.internal:5003",
       "cors": true,
