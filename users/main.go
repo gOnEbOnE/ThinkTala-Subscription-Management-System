@@ -7,9 +7,11 @@ import (
 	"time"
 
 	"github.com/master-abror/zaframework/app/modules/admin"
+	"github.com/master-abror/zaframework/app/modules/compliance"
 	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
+	"github.com/master-abror/zaframework/app/modules/reset"
 	"github.com/master-abror/zaframework/app/routes"
 	"github.com/master-abror/zaframework/core"
 	"github.com/master-abror/zaframework/core/concurrency"
@@ -138,6 +140,12 @@ func main() {
 	adminService := admin.NewService(adminRepo)
 	adminController := admin.NewController(app.Dispatcher, app.Response)
 
+	// --- Feature: Password Reset ---
+	resetAPIHandler := reset.NewAPIHandler(app.DB)
+
+	// --- Feature: Compliance Dashboard ---
+	complianceDashboard := compliance.NewDashboardHandler(app.DB)
+
 	// Register Job Handlers (Workers)
 	app.RegisterJob("auth", loginService.ProcessLoginJob)
 	app.RegisterJob("register", registerService.ProcessRegisterJob)
@@ -166,6 +174,8 @@ func main() {
 		kycController,
 		kycAdminController,
 		adminController,
+		resetAPIHandler,
+		complianceDashboard,
 	)
 
 	// ============================================================

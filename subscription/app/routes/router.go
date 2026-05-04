@@ -4,13 +4,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/dashboard"
 	"github.com/master-abror/zaframework/app/modules/orders"
 	"github.com/master-abror/zaframework/app/modules/packages"
 	"github.com/master-abror/zaframework/core"
 )
 
 // Init mendaftarkan semua route subscription service
-func Init(app *core.App, packagesController *packages.Controller, ordersController *orders.Controller) {
+func Init(app *core.App, packagesController *packages.Controller, ordersController *orders.Controller, dashboardHandler *dashboard.Handler) {
 
 	// Static assets
 	fs := http.FileServer(http.Dir("./public/assets"))
@@ -47,6 +48,9 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	// PBI-37: Get Active Catalog for Client
 	app.Router.HandleFunc("GET /api/subscription/catalog", packagesController.GetCatalogHandler)
 
+	// Sprint 3 public alias
+	app.Router.HandleFunc("GET /api/packages", packagesController.GetCatalogHandler)
+
 	// Legacy alias sesuai routes.json gateway
 	app.Router.HandleFunc("GET /api/subscriptions", packagesController.GetPackagesAdminHandler)
 
@@ -72,4 +76,10 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	// ===================================================
 	app.Router.HandleFunc("PATCH /api/admin/orders/{id}/activate", ordersController.ActivateOrderHandler)
 	app.Router.HandleFunc("GET /api/subscriptions/me", ordersController.GetMySubscriptionHandler)
+
+	// ===================================================
+	// Sprint 3 B7: Operational Dashboard
+	// ===================================================
+	app.Router.HandleFunc("GET /api/superadmin/dashboard/operational", dashboardHandler.GetOperationalDashboard)
+	app.Router.HandleFunc("GET /internal/dashboard/ops-summary", dashboardHandler.GetInternalOpsSummary)
 }

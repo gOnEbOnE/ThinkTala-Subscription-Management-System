@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/master-abror/zaframework/core/concurrency"
@@ -162,7 +163,18 @@ func (c *Controller) ListOrdersClientHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	list, err := c.service.ListOrdersForClient(r.Context(), userID)
+	q := r.URL.Query()
+	pageVal, _ := strconv.Atoi(q.Get("page"))
+	limitVal, _ := strconv.Atoi(q.Get("limit"))
+	filter := ClientOrderFilter{
+		Status:    strings.TrimSpace(q.Get("status")),
+		StartDate: strings.TrimSpace(q.Get("start_date")),
+		EndDate:   strings.TrimSpace(q.Get("end_date")),
+		Page:      pageVal,
+		Limit:     limitVal,
+	}
+
+	list, err := c.service.ListOrdersForClient(r.Context(), userID, filter)
 	if err != nil {
 		statusCode := http.StatusBadRequest
 		if strings.Contains(strings.ToLower(err.Error()), "gagal") {
@@ -440,7 +452,19 @@ func (c *Controller) ListOrdersAdminHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	list, err := c.service.ListOrdersForAdmin(r.Context())
+	q := r.URL.Query()
+	pageVal, _ := strconv.Atoi(q.Get("page"))
+	limitVal, _ := strconv.Atoi(q.Get("limit"))
+	adminFilter := AdminOrderFilter{
+		Status:    strings.TrimSpace(q.Get("status")),
+		Search:    strings.TrimSpace(q.Get("search")),
+		StartDate: strings.TrimSpace(q.Get("start_date")),
+		EndDate:   strings.TrimSpace(q.Get("end_date")),
+		Page:      pageVal,
+		Limit:     limitVal,
+	}
+
+	list, err := c.service.ListOrdersForAdmin(r.Context(), adminFilter)
 	if err != nil {
 		statusCode := http.StatusBadRequest
 		if strings.Contains(strings.ToLower(err.Error()), "gagal") {
@@ -611,7 +635,8 @@ func (c *Controller) VerifyOrderHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	result, err := c.service.VerifyOrder(r.Context(), orderID, action, dto.RejectReason)
+	adminID := strings.TrimSpace(r.Header.Get("X-User-ID"))
+	result, err := c.service.VerifyOrder(r.Context(), orderID, action, dto.RejectReason, adminID)
 	if err != nil {
 		if errors.Is(err, ErrOrderNotFound) {
 			w.WriteHeader(http.StatusNotFound)

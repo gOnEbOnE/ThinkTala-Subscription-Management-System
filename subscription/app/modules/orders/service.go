@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/master-abror/zaframework/core/utils"
 )
@@ -19,14 +20,14 @@ import (
 
 type Service interface {
 	CreateOrder(ctx context.Context, userID string, dto CreateOrderDTO) (*Order, error)
-	ListOrdersForClient(ctx context.Context, userID string) ([]ClientOrderListItem, error)
+	ListOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error)
 	GetOrderDetailForClient(ctx context.Context, userID, orderID string) (*ClientOrderDetail, error)
 	UploadPaymentProof(ctx context.Context, userID, orderID string, file PaymentProofFile) (*UploadPaymentProofResult, error)
 	GetPaymentProofForClient(ctx context.Context, userID, orderID string) (*PaymentProofFile, error)
-	ListOrdersForAdmin(ctx context.Context) ([]AdminOrderListItem, error)
+	ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error)
 	GetOrderDetailForAdmin(ctx context.Context, orderID string) (*AdminOrderDetail, error)
 	GetPaymentProofForAdmin(ctx context.Context, orderID string) (*PaymentProofFile, error)
-	VerifyOrder(ctx context.Context, orderID, action, rejectReason string) (*VerifyResult, error)
+	VerifyOrder(ctx context.Context, orderID, action, rejectReason, adminID string) (*VerifyResult, error)
 	ActivateOrderSystem(ctx context.Context, orderID string) (*ActivationResult, error)
 	GetActiveSubscriptions(ctx context.Context, userID string) ([]SubscriptionStatus, error)
 	GetActiveSubscription(ctx context.Context, userID string) (*SubscriptionStatus, error)
@@ -227,11 +228,11 @@ func (s *orderService) CreateOrder(ctx context.Context, userID string, dto Creat
 	return s.repo.CreateOrder(ctx, userID, dto, price)
 }
 
-func (s *orderService) ListOrdersForClient(ctx context.Context, userID string) ([]ClientOrderListItem, error) {
+func (s *orderService) ListOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error) {
 	if strings.TrimSpace(userID) == "" {
 		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
 	}
-	return s.repo.ListOrdersByUser(ctx, userID)
+	return s.repo.ListOrdersByUser(ctx, userID, filter)
 }
 
 func (s *orderService) GetOrderDetailForClient(ctx context.Context, userID, orderID string) (*ClientOrderDetail, error) {
@@ -356,8 +357,8 @@ func (s *orderService) GetPaymentProofForClient(ctx context.Context, userID, ord
 	return proof, nil
 }
 
-func (s *orderService) ListOrdersForAdmin(ctx context.Context) ([]AdminOrderListItem, error) {
-	return s.repo.ListOrdersForAdmin(ctx)
+func (s *orderService) ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error) {
+	return s.repo.ListOrdersForAdmin(ctx, filter)
 }
 
 func (s *orderService) GetOrderDetailForAdmin(ctx context.Context, orderID string) (*AdminOrderDetail, error) {
@@ -425,7 +426,7 @@ func (s *orderService) GetPaymentProofForAdmin(ctx context.Context, orderID stri
 	return proof, nil
 }
 
-func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectReason string) (*VerifyResult, error) {
+func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectReason, adminID string) (*VerifyResult, error) {
 	if strings.TrimSpace(orderID) == "" {
 		return nil, errors.New("id pesanan wajib diisi")
 	}
@@ -464,14 +465,14 @@ func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectR
 		verificationNote = rejectReason
 	}
 
-	if err := s.repo.UpdateOrderStatus(ctx, orderID, newStatus, verificationNote); err != nil {
+	if err := s.repo.UpdateOrderStatus(ctx, orderID, newStatus, verificationNote, adminID); err != nil {
 		return nil, err
 	}
 
 	if action == "APPROVE" {
 		if _, err := s.repo.CreateSubscriptionFromOrder(ctx, orderID); err != nil {
 			// Best-effort rollback supaya status order konsisten jika auto-activate gagal.
-			_ = s.repo.UpdateOrderStatus(ctx, orderID, "PENDING_PAYMENT", "")
+			_ = s.repo.UpdateOrderStatus(ctx, orderID, "PENDING_PAYMENT", "", "")
 			return nil, fmt.Errorf("gagal aktivasi subscription otomatis: %w", err)
 		}
 	}
@@ -511,7 +512,18 @@ func (s *orderService) GetActiveSubscriptions(ctx context.Context, userID string
 	if strings.TrimSpace(userID) == "" {
 		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
 	}
-	return s.repo.ListActiveSubscriptionsByUser(ctx, userID)
+	list, err := s.repo.ListActiveSubscriptionsByUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range list {
+		days := int(time.Until(list[i].EndDate).Hours() / 24)
+		if days < 0 {
+			days = 0
+		}
+		list[i].DaysRemaining = days
+	}
+	return list, nil
 }
 
 func (s *orderService) GetActiveSubscription(ctx context.Context, userID string) (*SubscriptionStatus, error) {

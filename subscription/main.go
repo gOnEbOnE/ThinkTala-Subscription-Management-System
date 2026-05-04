@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/dashboard"
 	"github.com/master-abror/zaframework/app/modules/orders"
 	"github.com/master-abror/zaframework/app/modules/packages"
 	"github.com/master-abror/zaframework/app/routes"
@@ -112,8 +113,11 @@ func main() {
 	ordersController := orders.NewController(app.Dispatcher, app.Response, ordersService)
 	app.RegisterJob("create_order", ordersService.ProcessCreateOrderJob)
 
+	// Dashboard
+	dashboardHandler := dashboard.NewHandler(app.DB)
+
 	// 4. ROUTING
-	routes.Init(app, packagesController, ordersController)
+	routes.Init(app, packagesController, ordersController, dashboardHandler)
 
 	// 5. RUN
 	app.Run()

@@ -86,6 +86,8 @@ func MigrateAndSeed(db interface{}) {
 		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS payment_proof_content_type VARCHAR(100) DEFAULT '';
 		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS payment_proof_uploaded_at TIMESTAMP;
 		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS verification_note TEXT DEFAULT '';
+		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS verified_by UUID;
+		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS verified_at TIMESTAMP;
 	EXCEPTION WHEN others THEN NULL;
 	END $$;
 

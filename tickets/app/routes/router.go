@@ -16,6 +16,10 @@ func Init(app *core.App) {
 	app.Router.HandleFunc("/api/user/support/tickets", support.HandleCreateUserSupportTicket(app.DB))
 	app.Router.HandleFunc("/api/user/support/tickets/", support.HandleCreateUserSupportTicket(app.DB))
 
+	// Dashboard routes
+	app.Router.HandleFunc("/api/superadmin/dashboard/support", support.HandleSupportDashboard(app.DB))
+	app.Router.HandleFunc("/internal/dashboard/support-summary", support.HandleSupportInternalSummary(app.DB))
+
 	app.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]any{
