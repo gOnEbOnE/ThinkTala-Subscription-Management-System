@@ -95,14 +95,47 @@ func (h *APIHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	frontendURL := utils.GetEnv("FRONTEND_URL", "http://localhost:3000")
+	resetURL := fmt.Sprintf("%s/reset-password?token=%s", frontendURL, token)
 	go func() {
-		smtp := utils.NewSMTPClient()
+		sender := utils.NewEmailSender()
 		subject := "Reset Kata Sandi ThinkNalyze"
-		body := fmt.Sprintf(
-			"Klik tautan berikut untuk mereset kata sandi Anda (berlaku 15 menit):\n%s/reset-password?token=%s\n\nJika Anda tidak meminta reset, abaikan email ini.",
-			frontendURL, token,
-		)
-		if err := smtp.SendEmail(email, subject, body); err != nil {
+		htmlBody := fmt.Sprintf(`<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f6f9;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 0;">
+    <tr><td align="center">
+      <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
+        <tr><td style="background:#1a1c2e;padding:28px 36px;text-align:center;">
+          <span style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.5px;">ThinkNalyze</span>
+        </td></tr>
+        <tr><td style="padding:36px 36px 28px;">
+          <p style="margin:0 0 16px;font-size:16px;color:#1a1c2e;font-weight:600;">Halo,</p>
+          <p style="margin:0 0 20px;font-size:14px;color:#4a5568;line-height:1.6;">
+            Kami menerima permintaan untuk mereset kata sandi akun ThinkNalyze Anda.
+            Klik tombol di bawah untuk membuat kata sandi baru. Tautan ini berlaku selama <strong>15 menit</strong>.
+          </p>
+          <table cellpadding="0" cellspacing="0" width="100%%"><tr><td align="center" style="padding:8px 0 24px;">
+            <a href="%s" style="display:inline-block;background:#4e73df;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;">
+              Reset Kata Sandi
+            </a>
+          </td></tr></table>
+          <p style="margin:0 0 8px;font-size:13px;color:#718096;">Atau salin tautan berikut ke browser Anda:</p>
+          <p style="margin:0 0 24px;font-size:12px;color:#4e73df;word-break:break-all;">%s</p>
+          <hr style="border:none;border-top:1px solid #e8ecf0;margin:0 0 20px;">
+          <p style="margin:0;font-size:12px;color:#a0aec0;line-height:1.6;">
+            Jika Anda tidak meminta reset kata sandi, abaikan email ini — akun Anda tetap aman.
+          </p>
+        </td></tr>
+        <tr><td style="background:#f7f9fc;padding:16px 36px;text-align:center;">
+          <p style="margin:0;font-size:11px;color:#a0aec0;">&copy; 2026 ThinkNalyze. All rights reserved.</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`, resetURL, resetURL)
+		if err := sender.SendHTMLEmail(email, subject, htmlBody); err != nil {
 			log.Printf("[RESET] failed send email to %s: %v", email, err)
 		}
 	}()
