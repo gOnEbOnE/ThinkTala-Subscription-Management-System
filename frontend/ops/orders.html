@@ -8,8 +8,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
     <link rel="stylesheet" href="/assets/css/styles.css?v=2">
     <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
     <style>
@@ -98,9 +99,24 @@
 
         <!-- Table Section -->
         <div class="ai-card">
-            <div class="mb-3">
-                <h6 class="fw-bold mb-0" style="color: var(--text-heading)">Semua Pesanan</h6>
-                <small class="text-muted" id="tableSubtitle">Memuat data...</small>
+            <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                <div>
+                    <h6 class="fw-bold mb-0" style="color: var(--text-heading)">Semua Pesanan</h6>
+                    <small class="text-muted" id="tableSubtitle">Memuat data...</small>
+                </div>
+                <div class="d-flex gap-2 align-items-center flex-wrap">
+                    <select class="form-select form-select-sm" id="filterStatus" style="max-width:180px;" onchange="applyFilter()">
+                        <option value="">Semua Status</option>
+                        <option value="PENDING_PAYMENT">Pending</option>
+                        <option value="PAID">Paid</option>
+                        <option value="CANCELLED">Cancelled</option>
+                        <option value="EXPIRED">Expired</option>
+                    </select>
+                    <input type="text" class="form-control form-control-sm" id="filterSearch" placeholder="Cari nama / invoice..." style="max-width:220px;" oninput="applyFilter()">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="loadOrders()" title="Refresh">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover mb-0 orders-table">
@@ -282,11 +298,26 @@
     <script src="/assets/js/ops-layout.js?v=cs-support-2"></script>
     <script>
         let allOrders = [];
+        let filteredOrders = [];
         let currentPage = 1;
         const perPage = 10;
         let selectedOrder = null;
         let pendingAction = '';
         let autoOpenOrderId = '';
+
+        function applyFilter() {
+            currentPage = 1;
+            var status = document.getElementById('filterStatus').value;
+            var search = (document.getElementById('filterSearch').value || '').toLowerCase().trim();
+            filteredOrders = allOrders.filter(function (o) {
+                var matchStatus = !status || normalizeStatus(o.status) === status;
+                var matchSearch = !search ||
+                    (o.invoice_number || '').toLowerCase().indexOf(search) >= 0 ||
+                    (o.client_name || '').toLowerCase().indexOf(search) >= 0;
+                return matchStatus && matchSearch;
+            });
+            renderTable(filteredOrders);
+        }
 
         function formatRp(val) {
             return 'Rp ' + Number(val || 0).toLocaleString('id-ID');
@@ -589,7 +620,7 @@
                     }
                     return o;
                 });
-                renderTable(allOrders);
+                applyFilter();
                 fillDetailModal(selectedOrder);
 
                 bootstrap.Modal.getInstance(document.getElementById('confirmLayerModal')).hide();
@@ -608,7 +639,7 @@
 
         function changePage(page) {
             currentPage = page;
-            renderTable(allOrders);
+            renderTable(filteredOrders.length || document.getElementById('filterStatus').value || (document.getElementById('filterSearch').value || '').trim() ? filteredOrders : allOrders);
         }
 
         async function loadOrders() {
@@ -620,8 +651,9 @@
                 }
                 const json = await res.json();
                 allOrders = Array.isArray(json) ? json : (json.data || []);
+                filteredOrders = allOrders.slice();
                 currentPage = 1;
-                renderTable(allOrders);
+                applyFilter();
 
                 if (autoOpenOrderId) {
                     openOrderDetail(autoOpenOrderId);

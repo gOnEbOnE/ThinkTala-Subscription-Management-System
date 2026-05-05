@@ -39,6 +39,8 @@
     { "source": "/ops/user-detail", "destination": "/ops/user-detail.html" },
     { "source": "/management/dashboard-customers", "destination": "/management/dashboard-customers.html" },
     { "source": "/management/dashboard-packages", "destination": "/management/dashboard-packages.html" },
+    { "source": "/management/dashboard-compliance", "destination": "/management/dashboard-compliance.html" },
+    { "source": "/management/dashboard-support", "destination": "/management/dashboard-support.html" },
     { "source": "/management/customer-detail", "destination": "/management/customer-detail.html" },
     { "source": "/management/package-detail", "destination": "/management/package-detail.html" },
     { "source": "/market-insight", "destination": "/market-insight.html" },

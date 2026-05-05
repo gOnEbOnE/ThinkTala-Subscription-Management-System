@@ -70,6 +70,17 @@ func (h *APIHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Rate-limit: if an active token already exists, silently return success
+	var activeCount int
+	countErr := h.DB.Pool.QueryRow(r.Context(),
+		`SELECT COUNT(*) FROM password_reset_tokens WHERE user_id = $1 AND expires_at > NOW() AND used_at IS NULL`,
+		userID,
+	).Scan(&activeCount)
+	if countErr == nil && activeCount > 0 {
+		writeJSON(w, http.StatusOK, successMsg)
+		return
+	}
+
 	token := uuid.New().String()
 	expiresAt := time.Now().Add(15 * time.Minute)
 
@@ -107,7 +118,7 @@ func (h *APIHandler) ValidateResetToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	token := strings.TrimSpace(r.URL.Query().Get("token"))
-	invalid := map[string]string{"error": "Token tidak valid atau sudah kadaluarsa"}
+	invalid := map[string]string{"error": "Tautan tidak valid atau sudah kadaluarsa. Silakan minta tautan reset baru."}
 
 	if token == "" {
 		writeJSON(w, http.StatusBadRequest, invalid)
@@ -119,13 +130,13 @@ func (h *APIHandler) ValidateResetToken(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var expiresAt time.Time
-	var usedAt *time.Time
+	var exists bool
 	err := h.DB.Pool.QueryRow(r.Context(),
-		`SELECT expires_at, used_at FROM password_reset_tokens WHERE token = $1 LIMIT 1`, token,
-	).Scan(&expiresAt, &usedAt)
+		`SELECT EXISTS(SELECT 1 FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW() AND used_at IS NULL)`,
+		token,
+	).Scan(&exists)
 
-	if err != nil || time.Now().After(expiresAt) || usedAt != nil {
+	if err != nil || !exists {
 		writeJSON(w, http.StatusBadRequest, invalid)
 		return
 	}
@@ -155,7 +166,7 @@ func (h *APIHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token := strings.TrimSpace(body.Token)
-	invalid := map[string]string{"error": "Token tidak valid atau sudah kadaluarsa"}
+	invalid := map[string]string{"error": "Tautan tidak valid atau sudah kadaluarsa. Silakan minta tautan reset baru."}
 
 	if token == "" {
 		writeJSON(w, http.StatusBadRequest, invalid)
@@ -167,15 +178,14 @@ func (h *APIHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Re-validate token
+	// Re-validate token with server-side expiry/used check
 	var tokenID, userID string
-	var expiresAt time.Time
-	var usedAt *time.Time
 	err := h.DB.Pool.QueryRow(r.Context(),
-		`SELECT id, user_id, expires_at, used_at FROM password_reset_tokens WHERE token = $1 LIMIT 1`, token,
-	).Scan(&tokenID, &userID, &expiresAt, &usedAt)
+		`SELECT id, user_id FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW() AND used_at IS NULL LIMIT 1`,
+		token,
+	).Scan(&tokenID, &userID)
 
-	if err == pgx.ErrNoRows || err != nil || time.Now().After(expiresAt) || usedAt != nil {
+	if err == pgx.ErrNoRows || err != nil {
 		writeJSON(w, http.StatusBadRequest, invalid)
 		return
 	}
