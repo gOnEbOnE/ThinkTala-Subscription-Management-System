@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password | ThinkNalyze AI</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --bg-body:#fff; --bg-banner:#050509; --accent-cyan:#00b4d8; --text-heading:#0f172a; --text-main:#334155; --text-muted:#64748b; --border-color:#e2e8f0; }
+        body { background-color:var(--bg-body); color:var(--text-main); font-family:'Inter',sans-serif; height:100vh; overflow:hidden; }
+        .login-wrapper { height:100vh; width:100%; }
+        .banner-side { background-color:var(--bg-banner); position:relative; display:flex; flex-direction:column; justify-content:flex-end; padding:80px 60px; overflow:hidden; }
+        #particles-js { position:absolute; width:100%; height:100%; top:0; left:0; background-color:#070716; z-index:0; filter:drop-shadow(0 0 8px rgba(0,242,255,0.8)); }
+        .banner-side::before { content:''; position:absolute; top:0; left:0; right:0; bottom:0; background:linear-gradient(180deg,rgba(5,5,9,0) 0%,rgba(5,5,9,0.9) 100%); z-index:1; pointer-events:none; }
+        .banner-content { position:relative; z-index:2; max-width:600px; pointer-events:none; }
+        .testimonial-text { font-size:1.8rem; font-weight:300; line-height:1.4; color:#fff; margin-bottom:20px; font-style:italic; text-shadow:0 2px 10px rgba(0,0,0,0.5); }
+        .testimonial-author { font-weight:700; color:#00f2ff; text-transform:uppercase; letter-spacing:1px; font-size:0.9rem; }
+        .form-side { background:#fff; display:flex; align-items:center; justify-content:center; padding:40px; position:relative; }
+        .form-side::before { content:''; position:absolute; width:600px; height:600px; background:radial-gradient(circle,rgba(189,0,255,0.04) 0%,transparent 70%); top:-100px; right:-100px; z-index:0; }
+        .login-container { width:100%; max-width:400px; z-index:1; }
+        .brand-logo { font-size:2rem; font-weight:800; color:var(--text-heading); text-decoration:none; }
+        .form-label { font-size:0.85rem; color:var(--text-heading); margin-bottom:8px; font-weight:600; }
+        .input-group-text { background:#f8fafc; border:1px solid var(--border-color); border-right:none; color:var(--text-muted)!important; }
+        .form-control { background:#fff; border:1px solid var(--border-color); color:var(--text-heading)!important; padding:12px 15px; border-radius:0 8px 8px 0; }
+        .form-control::placeholder { color:#94a3b8!important; opacity:0.7; }
+        .form-control:focus { background:#fff; border-color:#00b4d8; box-shadow:0 0 0 4px rgba(0,180,216,0.1); }
+        .btn-primary-glow { background:linear-gradient(135deg,#00b4d8,#0077b6); border:none; color:#fff; font-weight:700; padding:12px; border-radius:8px; width:100%; transition:0.3s; }
+        .btn-primary-glow:hover { transform:translateY(-2px); box-shadow:0 5px 15px rgba(0,180,216,0.3); color:#fff; }
+        .btn-primary-glow:disabled { opacity:0.7; transform:none; color:#fff; cursor:not-allowed; }
+        .link-cyan { color:#00b4d8; text-decoration:none; transition:0.2s; font-weight:600; }
+        .link-cyan:hover { text-decoration:underline; color:#0077b6; }
+        .toast-container { position:fixed; top:20px; right:20px; z-index:9999; }
+        .toast-msg { padding:14px 20px; border-radius:10px; color:#fff; font-size:0.9rem; margin-bottom:10px; animation:slideIn 0.3s ease; box-shadow:0 5px 15px rgba(0,0,0,0.2); }
+        .toast-msg.success { background:#059669; }
+        .toast-msg.error { background:#dc2626; }
+        @keyframes slideIn { from{transform:translateX(100%);opacity:0;} to{transform:translateX(0);opacity:1;} }
+        .token-invalid-box { background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:20px; text-align:center; }
+        @media(max-width:992px) { .banner-side{display:none;} .form-side{background:#f8fafc;} }
+    </style>
+</head>
+<body>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="container-fluid p-0">
+        <div class="row g-0 login-wrapper">
+            <div class="col-lg-6 banner-side">
+                <div id="particles-js"></div>
+                <div class="banner-content">
+                    <div class="mb-4">
+                        <span class="badge bg-dark border border-secondary px-3 py-2 rounded-pill shadow">
+                            <i class="fa-solid fa-shield-halved me-2" style="color:#00f2ff;"></i> Account Security
+                        </span>
+                    </div>
+                    <blockquote class="testimonial-text">"Security is not a product, but a process. Protecting your account is protecting your investments."</blockquote>
+                    <div class="testimonial-author">— ThinkNalyze Security</div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 form-side">
+                <div class="login-container">
+                    <div class="mb-5">
+                        <a href="/" class="brand-logo">Think<span style="color:#00b4d8;">Nalyze</span></a>
+                    </div>
+
+                    <!-- STEP 1: Forgot password (no token in URL) -->
+                    <div id="stepForgot">
+                        <div class="mb-4">
+                            <h2 class="fw-bold mb-2" style="color:var(--text-heading);">Forgot password?</h2>
+                            <p style="color:var(--text-muted);">Enter your email address and we'll send you a reset link.</p>
+                        </div>
+
+                        <form id="forgotForm">
+                            <div class="mb-4">
+                                <label class="form-label">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="forgotEmail" placeholder="name@company.com" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary-glow" id="btnForgot" disabled>
+                                Send Reset Link
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <a href="/account/login" class="link-cyan small"><i class="fa-solid fa-arrow-left me-1"></i>Back to Sign In</a>
+                        </div>
+                    </div>
+
+                    <!-- STEP 1 success state -->
+                    <div id="stepForgotSuccess" style="display:none; text-align:center;">
+                        <div class="mb-4">
+                            <i class="fa-solid fa-paper-plane" style="font-size:3rem; color:#00b4d8;"></i>
+                        </div>
+                        <h2 class="fw-bold mb-2" style="color:var(--text-heading);">Check your email</h2>
+                        <p style="color:var(--text-muted);">If your email is registered, you'll receive a reset link shortly. The link is valid for 15 minutes.</p>
+                        <a href="/account/login" class="btn btn-primary-glow mt-3">Back to Sign In</a>
+                    </div>
+
+                    <!-- STEP 2: Set new password (token present in URL) -->
+                    <div id="stepReset" style="display:none;">
+                        <div class="mb-4">
+                            <h2 class="fw-bold mb-2" style="color:var(--text-heading);">Set new password</h2>
+                            <p style="color:var(--text-muted);">Enter your new password below.</p>
+                        </div>
+
+                        <form id="resetForm">
+                            <div class="mb-3">
+                                <label class="form-label">New Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="newPassword" placeholder="Min. 8 characters" required minlength="8">
+                                    <span class="input-group-text" id="toggleNew" style="border-left:none; border-radius:0 8px 8px 0; cursor:pointer; background:white;">
+                                        <i class="fa-regular fa-eye-slash"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Confirm New Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Repeat your password" required minlength="8">
+                                    <span class="input-group-text" id="toggleConfirm" style="border-left:none; border-radius:0 8px 8px 0; cursor:pointer; background:white;">
+                                        <i class="fa-regular fa-eye-slash"></i>
+                                    </span>
+                                </div>
+                                <div id="matchHint" class="small mt-1" style="display:none;"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary-glow" id="btnReset" disabled>
+                                Reset Password
+                            </button>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <a href="/account/login" class="link-cyan small"><i class="fa-solid fa-arrow-left me-1"></i>Back to Sign In</a>
+                        </div>
+                    </div>
+
+                    <!-- Token invalid state -->
+                    <div id="stepTokenInvalid" style="display:none;">
+                        <div class="token-invalid-box">
+                            <i class="fa-solid fa-circle-exclamation mb-3" style="font-size:2.5rem; color:#dc2626;"></i>
+                            <h5 class="fw-bold" style="color:#dc2626;">Link Expired or Invalid</h5>
+                            <p class="small mb-3" style="color:var(--text-muted);">This reset link has expired or already been used. Please request a new one.</p>
+                            <a href="/account/reset" class="btn btn-primary-glow">Request New Link</a>
+                        </div>
+                    </div>
+
+                    <!-- Reset success state -->
+                    <div id="stepResetSuccess" style="display:none; text-align:center;">
+                        <div class="mb-4">
+                            <i class="fa-solid fa-circle-check" style="font-size:3rem; color:#059669;"></i>
+                        </div>
+                        <h2 class="fw-bold mb-2" style="color:var(--text-heading);">Password changed!</h2>
+                        <p style="color:var(--text-muted);">Your password has been reset successfully. You can now sign in with your new password.</p>
+                        <a href="/account/login" class="btn btn-primary-glow mt-3">Sign In</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS("particles-js",{"particles":{"number":{"value":100,"density":{"enable":true,"value_area":800}},"color":{"value":"#00f2ff"},"shape":{"type":"circle"},"opacity":{"value":0.8,"random":true,"anim":{"enable":true,"speed":1,"opacity_min":0.3}},"size":{"value":4,"random":true,"anim":{"enable":true,"speed":2,"size_min":0.1}},"line_linked":{"enable":true,"distance":150,"color":"#00f2ff","opacity":0.6,"width":1.5},"move":{"enable":true,"speed":1.5,"direction":"none","random":true,"out_mode":"out"}},"interactivity":{"detect_on":"window","events":{"onhover":{"enable":true,"mode":"grab"},"onclick":{"enable":true,"mode":"push"}},"modes":{"grab":{"distance":200,"line_linked":{"opacity":1}},"push":{"particles_nb":4}}},"retina_detect":true});
+
+        function showToast(msg, type = 'error') {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            t.className = `toast-msg ${type}`;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => t.remove(), 4000);
+        }
+
+        function show(id) {
+            ['stepForgot','stepForgotSuccess','stepReset','stepTokenInvalid','stepResetSuccess'].forEach(s => {
+                document.getElementById(s).style.display = s === id ? '' : 'none';
+            });
+        }
+
+        function togglePw(toggleId, inputId) {
+            document.getElementById(toggleId).addEventListener('click', function() {
+                const pw = document.getElementById(inputId);
+                const icon = this.querySelector('i');
+                if (pw.type === 'password') { pw.type = 'text'; icon.classList.replace('fa-eye-slash','fa-eye'); }
+                else { pw.type = 'password'; icon.classList.replace('fa-eye','fa-eye-slash'); }
+            });
+        }
+        togglePw('toggleNew', 'newPassword');
+        togglePw('toggleConfirm', 'confirmPassword');
+
+        // ── On load: decide which step to show ──
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (token) {
+            // Validate token first
+            (async () => {
+                try {
+                    const res = await fetch('/api/auth/reset-password/validate?token=' + encodeURIComponent(token));
+                    if (res.ok) {
+                        show('stepReset');
+                    } else {
+                        show('stepTokenInvalid');
+                    }
+                } catch {
+                    show('stepTokenInvalid');
+                }
+            })();
+        } else {
+            show('stepForgot');
+        }
+
+        // ── Step 1: Forgot password form ──
+        const forgotEmail = document.getElementById('forgotEmail');
+        const btnForgot = document.getElementById('btnForgot');
+
+        forgotEmail.addEventListener('input', () => {
+            btnForgot.disabled = forgotEmail.value.trim() === '';
+        });
+
+        document.getElementById('forgotForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = forgotEmail.value.trim();
+            if (!email) return;
+
+            btnForgot.disabled = true;
+            btnForgot.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Sending...';
+
+            try {
+                await fetch('/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                // Always show success (anti-enumeration)
+                show('stepForgotSuccess');
+            } catch {
+                showToast('Gagal mengirim permintaan. Coba lagi.');
+                btnForgot.disabled = false;
+                btnForgot.innerHTML = 'Send Reset Link';
+            }
+        });
+
+        // ── Step 2: Reset password form ──
+        const newPw = document.getElementById('newPassword');
+        const confirmPw = document.getElementById('confirmPassword');
+        const btnReset = document.getElementById('btnReset');
+        const matchHint = document.getElementById('matchHint');
+
+        function validateResetForm() {
+            const ok = newPw.value.length >= 8 && confirmPw.value.length >= 8;
+            const match = newPw.value === confirmPw.value;
+
+            if (confirmPw.value.length > 0) {
+                matchHint.style.display = '';
+                if (match) {
+                    matchHint.innerHTML = '<span style="color:#059669;"><i class="fa-solid fa-check me-1"></i>Passwords match</span>';
+                } else {
+                    matchHint.innerHTML = '<span style="color:#dc2626;"><i class="fa-solid fa-xmark me-1"></i>Passwords do not match</span>';
+                }
+            } else {
+                matchHint.style.display = 'none';
+            }
+
+            btnReset.disabled = !(ok && match);
+        }
+
+        newPw.addEventListener('input', validateResetForm);
+        confirmPw.addEventListener('input', validateResetForm);
+
+        document.getElementById('resetForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (newPw.value !== confirmPw.value) { showToast('Password tidak cocok!'); return; }
+            if (newPw.value.length < 8) { showToast('Password minimal 8 karakter!'); return; }
+
+            btnReset.disabled = true;
+            btnReset.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Resetting...';
+
+            try {
+                const res = await fetch('/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, new_password: newPw.value })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    show('stepResetSuccess');
+                } else {
+                    const msg = data.error || 'Gagal mereset password. Token mungkin sudah kadaluarsa.';
+                    if (msg.toLowerCase().includes('token')) {
+                        show('stepTokenInvalid');
+                    } else {
+                        showToast(msg);
+                        btnReset.disabled = false;
+                        btnReset.innerHTML = 'Reset Password';
+                    }
+                }
+            } catch {
+                showToast('Gagal terhubung ke server. Coba lagi.');
+                btnReset.disabled = false;
+                btnReset.innerHTML = 'Reset Password';
+            }
+        });
+    </script>
+</body>
+</html>

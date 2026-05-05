@@ -4,13 +4,15 @@
   "trailingSlash": false,
   "redirects": [
     { "source": "/login", "destination": "/account/login", "permanent": false },
-    { "source": "/register", "destination": "/account/register", "permanent": false }
+    { "source": "/register", "destination": "/account/register", "permanent": false },
+    { "source": "/reset-password", "destination": "/account/reset", "permanent": false }
   ],
   "rewrites": [
     { "source": "/", "destination": "/landing.html" },
     { "source": "/account/login", "destination": "/account/login.html" },
     { "source": "/account/register", "destination": "/account/register.html" },
     { "source": "/account/verify-otp", "destination": "/account/verify-otp.html" },
+    { "source": "/account/reset", "destination": "/account/reset.html" },
     { "source": "/ops/dashboard", "destination": "/ops/dashboard.html" },
     { "source": "/ops/notifications", "destination": "/ops/notifications.html" },
     { "source": "/ops/subscriptions", "destination": "/ops/subscriptions.html" },

@@ -88,6 +88,8 @@ func isPublicPath(path string) bool {
 		"/account/login",
 		"/account/register",
 		"/account/verify-otp",
+		"/account/reset",
+		"/reset-password",
 		"/api/auth",
 		"/api/auth/",
 		"/assets/",
