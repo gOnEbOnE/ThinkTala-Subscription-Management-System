@@ -96,7 +96,7 @@ func (h *APIHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 
 	var userID, fullName string
 	err := h.DB.Pool.QueryRow(r.Context(),
-		`SELECT id, COALESCE(NULLIF(full_name, ''), NULLIF(name, ''), split_part(email, '@', 1)) FROM users WHERE email = $1 AND status = 'active' LIMIT 1`,
+		`SELECT id, COALESCE(NULLIF(name, ''), split_part(email, '@', 1)) FROM users WHERE email = $1 AND status = 'active' LIMIT 1`,
 		email,
 	).Scan(&userID, &fullName)
 	if err != nil {
