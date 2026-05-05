@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -129,56 +130,49 @@ func Seed() {
 			`INSERT INTO notification_event_types (event_type) VALUES ($1) ON CONFLICT DO NOTHING`, et)
 	}
 
-	// Seed default template for password_reset if not yet created via API
-	db().Exec(context.Background(), `
-		INSERT INTO notification_templates (id, name, event_type, channel, subject, content, created_by)
-		VALUES (
-			gen_random_uuid()::text,
-			'Reset Kata Sandi',
-			'password_reset',
-			'email',
-			'Reset Kata Sandi ThinkNalyze',
-			'<!DOCTYPE html>
-<html lang="id">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f4f6f9;font-family:''Segoe UI'',Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9;padding:40px 0;">
-    <tr><td align="center">
-      <table width="520" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);">
-        <tr><td style="background:#1a1c2e;padding:28px 36px;text-align:center;">
-          <span style="color:#ffffff;font-size:22px;font-weight:700;">ThinkNalyze</span>
-        </td></tr>
-        <tr><td style="padding:36px 36px 28px;">
-          <p style="margin:0 0 16px;font-size:16px;color:#1a1c2e;font-weight:600;">Halo, {{full_name}}</p>
-          <p style="margin:0 0 20px;font-size:14px;color:#4a5568;line-height:1.6;">
-            Kami menerima permintaan untuk mereset kata sandi akun ThinkNalyze Anda.
-            Klik tombol di bawah untuk membuat kata sandi baru. Tautan ini berlaku selama <strong>15 menit</strong>.
-          </p>
-          <table cellpadding="0" cellspacing="0" width="100%"><tr><td align="center" style="padding:8px 0 24px;">
-            <a href="{{reset_url}}" style="display:inline-block;background:#4e73df;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 36px;border-radius:8px;">
-              Reset Kata Sandi
-            </a>
-          </td></tr></table>
-          <p style="margin:0 0 8px;font-size:13px;color:#718096;">Atau salin tautan berikut ke browser Anda:</p>
-          <p style="margin:0 0 24px;font-size:12px;color:#4e73df;word-break:break-all;">{{reset_url}}</p>
-          <hr style="border:none;border-top:1px solid #e8ecf0;margin:0 0 20px;">
-          <p style="margin:0;font-size:12px;color:#a0aec0;line-height:1.6;">
-            Jika Anda tidak meminta reset kata sandi, abaikan email ini — akun Anda tetap aman.
-          </p>
-        </td></tr>
-        <tr><td style="background:#f7f9fc;padding:16px 36px;text-align:center;">
-          <p style="margin:0;font-size:11px;color:#a0aec0;">&copy; 2026 ThinkNalyze. All rights reserved.</p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
+	// Seed default template for password_reset using parameterized query (avoids gen_random_uuid dependency)
+	resetTemplateHTML := `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f6fb;margin:0;padding:40px 20px;">
+  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:36px;box-shadow:0 4px 24px rgba(78,115,223,0.10);border:1px solid #eaecf0;">
+    <div style="margin-bottom:24px;">
+      <span style="font-size:1.2rem;font-weight:700;color:#1a1c23;">Think<span style="color:#4e73df;">Nalyze</span></span>
+    </div>
+    <h2 style="font-size:1.2rem;font-weight:700;color:#1a1c23;margin:0 0 8px;">Reset Kata Sandi</h2>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 8px;">Halo, {{full_name}}.</p>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 24px;">
+      Kami menerima permintaan reset kata sandi untuk akun Anda.
+      Klik tombol di bawah untuk melanjutkan.
+      Tautan ini berlaku selama <strong>15 menit</strong> dan hanya dapat digunakan <strong>satu kali</strong>.
+    </p>
+    <a href="{{reset_url}}" style="display:block;text-align:center;background:linear-gradient(135deg,#4e73df,#6f42c1);color:#fff;text-decoration:none;padding:14px 24px;border-radius:10px;font-weight:600;font-size:0.95rem;margin-bottom:20px;">
+      Reset Kata Sandi Saya
+    </a>
+    <p style="color:#9ca3af;font-size:0.78rem;line-height:1.6;margin:0;border-top:1px solid #f0f0f0;padding-top:16px;">
+      Jika Anda tidak meminta reset ini, abaikan email ini. Kata sandi Anda tidak akan berubah.
+    </p>
+  </div>
 </body>
-</html>',
-			'system'
-		)
-		ON CONFLICT (event_type, channel) DO NOTHING
-	`)
-	log.Println("[NOTIFICATION] password_reset template seeded")
+</html>`
+
+	_, seedErr := db().Exec(context.Background(),
+		`INSERT INTO notification_templates (id, name, event_type, channel, subject, content, created_by)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		 ON CONFLICT (event_type, channel) DO NOTHING`,
+		uuid.New().String(),
+		"Reset Kata Sandi",
+		"password_reset",
+		"email",
+		"Reset Kata Sandi ThinkNalyze",
+		resetTemplateHTML,
+		"system",
+	)
+	if seedErr != nil {
+		log.Printf("[NOTIFICATION] WARN: failed to seed password_reset template: %v", seedErr)
+	} else {
+		log.Println("[NOTIFICATION] password_reset template seed OK (or already exists)")
+	}
 	// Remove obsolete event types that were inserted by mistake
 	obsolete := []string{"account_deactivated", "account_reactivated", "user_created"}
 	for _, et := range obsolete {
