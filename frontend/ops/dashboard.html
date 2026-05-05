@@ -81,7 +81,7 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="row g-4 mb-5">
+        <div class="row g-4 mb-4">
             <div class="col-lg-6">
                 <a href="/ops/notifications" class="text-decoration-none">
                     <div class="ai-card shadow-lg h-100 p-4" style="transition: transform 0.2s; cursor: pointer;"
@@ -92,8 +92,7 @@
                                     class="fa-solid fa-bell fa-2x text-warning"></i></div>
                             <div>
                                 <h5 class="fw-bold text-main mb-1">Manage Notifications</h5>
-                                <p class="text-muted mb-0 small">Create, edit, and delete system notifications for users
-                                </p>
+                                <p class="text-muted mb-0 small">Create, edit, and delete system notifications for users</p>
                             </div>
                             <i class="fa-solid fa-arrow-right text-muted ms-auto fa-lg"></i>
                         </div>
@@ -110,13 +109,55 @@
                                     class="fa-solid fa-crown fa-2x text-success"></i></div>
                             <div>
                                 <h5 class="fw-bold text-main mb-1">Manage Subscriptions</h5>
-                                <p class="text-muted mb-0 small">Create, edit, and manage subscription packages &
-                                    pricing</p>
+                                <p class="text-muted mb-0 small">Create, edit, and manage subscription packages & pricing</p>
                             </div>
                             <i class="fa-solid fa-arrow-right text-muted ms-auto fa-lg"></i>
                         </div>
                     </div>
                 </a>
+            </div>
+        </div>
+
+        <!-- Division Performance (SUPERADMIN / CEO / MANAGEMENT only) -->
+        <div id="divisionSection" style="display:none;">
+            <div class="mb-3">
+                <h6 class="fw-bold text-muted text-uppercase" style="font-size:0.75rem; letter-spacing:0.08em;">Kinerja Divisi</h6>
+            </div>
+            <div class="row g-4 mb-5">
+                <div class="col-lg-6">
+                    <a href="/management/dashboard-compliance" class="text-decoration-none">
+                        <div class="ai-card shadow-lg h-100 p-4" style="transition: transform 0.2s; cursor: pointer;"
+                            onmouseover="this.style.transform='translateY(-5px)'"
+                            onmouseout="this.style.transform='translateY(0)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-primary bg-opacity-10 p-4 me-4"><i
+                                        class="fa-solid fa-shield-halved fa-2x text-primary"></i></div>
+                                <div>
+                                    <h5 class="fw-bold text-main mb-1">Kinerja Compliance</h5>
+                                    <p class="text-muted mb-0 small">SLA rate & statistik review KYC per admin</p>
+                                </div>
+                                <i class="fa-solid fa-arrow-right text-muted ms-auto fa-lg"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    <a href="/management/dashboard-support" class="text-decoration-none">
+                        <div class="ai-card shadow-lg h-100 p-4" style="transition: transform 0.2s; cursor: pointer;"
+                            onmouseover="this.style.transform='translateY(-5px)'"
+                            onmouseout="this.style.transform='translateY(0)'">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-info bg-opacity-10 p-4 me-4"><i
+                                        class="fa-solid fa-headset fa-2x text-cyan"></i></div>
+                                <div>
+                                    <h5 class="fw-bold text-main mb-1">Kinerja Support</h5>
+                                    <p class="text-muted mb-0 small">Completion rate & penyelesaian tiket per admin</p>
+                                </div>
+                                <i class="fa-solid fa-arrow-right text-muted ms-auto fa-lg"></i>
+                            </div>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -168,6 +209,16 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadDashboardStats();
+
+            // Show division performance section for SUPERADMIN / CEO / MANAGEMENT
+            try {
+                const u = JSON.parse(localStorage.getItem('user') || '{}');
+                const role = String(u.role_code || u.level_code || '').toUpperCase();
+                if (['SUPERADMIN', 'CEO', 'MANAGEMENT'].includes(role)) {
+                    const sec = document.getElementById('divisionSection');
+                    if (sec) sec.style.display = '';
+                }
+            } catch (e) {}
         });
     </script>
 </body>

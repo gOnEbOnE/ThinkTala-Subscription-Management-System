@@ -76,8 +76,10 @@
         '/ops/create-user'            : { activeKey: 'manage-users' },
         '/ops/user-detail'            : { activeKey: 'manage-users' },
         '/ops/edit-user'              : { activeKey: 'manage-users' },
-        '/management/dashboard-customers': { activeKey: 'management-dashboard' },
-        '/management/dashboard-packages': { activeKey: 'management-packages' },
+        '/management/dashboard-customers'  : { activeKey: 'management-dashboard' },
+        '/management/dashboard-packages'  : { activeKey: 'management-packages' },
+        '/management/dashboard-compliance': { activeKey: 'management-compliance' },
+        '/management/dashboard-support'   : { activeKey: 'management-support' },
     };
 
     const currentPath = window.location.pathname;
@@ -88,6 +90,7 @@
     const parentKey  = route.parentKey  || '';
     const canOpenManagement = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'SUPERADMIN' || _opsRole === 'ADMIN';
     const canOpenPackageSales = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'ADMIN' || _opsRole === 'SUPERADMIN';
+    const canOpenDivisionDash = !hasLocalUser || _opsRole === 'SUPERADMIN' || _opsRole === 'CEO' || _opsRole === 'MANAGEMENT';
     const canCreateUser = _opsRole === 'SUPERADMIN' || (guardUser && guardUser.level_code && guardUser.level_code.toUpperCase() === 'SUPERADMIN');
 
     // Helper: mark a link active
@@ -138,6 +141,20 @@
             <a class="nav-link${isActive('management-packages')}" href="/management/dashboard-packages">
                 <i class="fa-solid fa-cubes icon-left"></i>
                 <span class="link-text">Package Sales</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenDivisionDash ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-compliance')}" href="/management/dashboard-compliance">
+                <i class="fa-solid fa-shield-halved icon-left"></i>
+                <span class="link-text">Kinerja Compliance</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenDivisionDash ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-support')}" href="/management/dashboard-support">
+                <i class="fa-solid fa-headset icon-left"></i>
+                <span class="link-text">Kinerja Support</span>
             </a>
         </li>` : ''}
 
