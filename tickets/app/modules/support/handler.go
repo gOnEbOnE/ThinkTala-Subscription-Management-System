@@ -428,12 +428,7 @@ func handleCreateAdminSupportTicketReply(w http.ResponseWriter, r *http.Request,
 		nextStatus = normalizedRequestedStatus
 	}
 
-	replyID, err := utils.NewUUID()
-	if err != nil {
-		log.Printf("[ERROR] Failed generating support reply id: %v", err)
-		corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to save support reply")
-		return
-	}
+	replyID := utils.NewUUID()
 
 	createdAt := config.NormalizeNaiveTimestampToAppTZ(time.Now().In(config.SupportAppLocation()))
 
@@ -600,12 +595,7 @@ func HandleCreateUserSupportTicket(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		ticketID, err := utils.NewUUID()
-		if err != nil {
-			log.Printf("[ERROR] Failed generating ticket id: %v", err)
-			corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to create ticket")
-			return
-		}
+		ticketID := utils.NewUUID()
 
 		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 		defer cancel()
