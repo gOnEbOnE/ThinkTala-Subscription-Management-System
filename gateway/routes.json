@@ -248,7 +248,18 @@
     },
     {
       "path": "/api/dashboard/customers",
-      "target": "http://management-service.railway.internal:5006",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "MANAGEMENT",
+        "SUPERADMIN",
+        "ADMIN"
+      ]
+    },
+    {
+      "path": "/api/dashboard/customers/export",
+      "target": "http://localhost:5006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -259,7 +270,7 @@
     },
     {
       "path": "/api/dashboard/customer/",
-      "target": "http://management-service.railway.internal:5006",
+      "target": "http://localhost:5006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -270,7 +281,18 @@
     },
     {
       "path": "/api/dashboard/packages",
-      "target": "http://management-service.railway.internal:5006",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "MANAGEMENT",
+        "ADMIN",
+        "SUPERADMIN"
+      ]
+    },
+    {
+      "path": "/api/dashboard/packages/export",
+      "target": "http://localhost:5006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -281,7 +303,7 @@
     },
     {
       "path": "/api/dashboard/package/",
-      "target": "http://management-service.railway.internal:5006",
+      "target": "http://localhost:5006",
       "cors": true,
       "auth": true,
       "roles": ["MANAGEMENT", "ADMIN", "SUPERADMIN"]
