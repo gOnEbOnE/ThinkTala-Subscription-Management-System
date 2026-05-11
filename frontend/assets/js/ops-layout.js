@@ -78,8 +78,9 @@
         '/ops/edit-user'              : { activeKey: 'manage-users' },
         '/management/dashboard-customers'  : { activeKey: 'management-dashboard' },
         '/management/dashboard-packages'  : { activeKey: 'management-packages' },
-        '/management/dashboard-compliance': { activeKey: 'management-compliance' },
-        '/management/dashboard-support'   : { activeKey: 'management-support' },
+        '/management/dashboard-compliance'  : { activeKey: 'management-compliance' },
+        '/management/dashboard-support'    : { activeKey: 'management-support' },
+        '/management/dashboard-operational': { activeKey: 'management-operational' },
     };
 
     const currentPath = window.location.pathname;
@@ -155,6 +156,13 @@
             <a class="nav-link${isActive('management-support')}" href="/management/dashboard-support">
                 <i class="fa-solid fa-headset icon-left"></i>
                 <span class="link-text">Kinerja Support</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenDivisionDash ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-operational')}" href="/management/dashboard-operational">
+                <i class="fa-solid fa-boxes-stacked icon-left"></i>
+                <span class="link-text">Kinerja Operasional</span>
             </a>
         </li>` : ''}
 

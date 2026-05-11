@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Analytics | ThinkTala Management</title>
+    <title>Operasional Analytics | ThinkTala Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -88,8 +88,6 @@
             border-bottom: 1px solid var(--border-color);
             white-space: nowrap;
         }
-        .analytics-table th.sortable { cursor: pointer; user-select: none; }
-        .analytics-table th.sortable:hover { color: var(--text-heading); }
         .analytics-table td {
             padding: 0.85rem 1rem;
             font-size: 0.9rem;
@@ -100,24 +98,7 @@
         .analytics-table tr:last-child td { border-bottom: 0; }
         .analytics-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
 
-        .admin-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 7px;
-            background: rgba(255,255,255,0.1);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.78rem;
-            color: var(--text-heading);
-            margin-right: 0.6rem;
-            flex-shrink: 0;
-        }
-        .admin-cell { display: flex; align-items: center; }
-        .admin-name { font-weight: 600; color: var(--text-heading); }
-
-        .cr-badge {
+        .status-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
@@ -126,22 +107,9 @@
             font-size: 0.8rem;
             font-weight: 700;
         }
-        .cr-green { background: rgba(16,185,129,0.15); color: #34d399; }
-        .cr-amber { background: rgba(234,179,8,0.15);  color: #fbbf24; }
-        .cr-red   { background: rgba(239,68,68,0.15);  color: #f87171; }
-
-        .rank-num {
-            display: inline-flex;
-            width: 24px;
-            height: 24px;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 0.78rem;
-            font-weight: 700;
-            background: rgba(255,255,255,0.06);
-            color: var(--text-muted);
-        }
+        .status-pending  { background: rgba(234,179,8,0.15);  color: #fbbf24; }
+        .status-paid     { background: rgba(16,185,129,0.15); color: #34d399; }
+        .status-cancelled{ background: rgba(239,68,68,0.15);  color: #f87171; }
     </style>
 </head>
 <body>
@@ -152,80 +120,97 @@
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
                 <h4 class="fw-bold mb-0" style="color:var(--text-heading);">
-                    <i class="fa-solid fa-headset me-2" style="color:#60a5fa;"></i>Support Analytics
+                    <i class="fa-solid fa-boxes-stacked me-2" style="color:#fbbf24;"></i>Operasional Analytics
                 </h4>
-                <small class="text-muted">Performa tim customer support berdasarkan tiket yang ditangani</small>
+                <small class="text-muted">Statistik order & subscription berdasarkan data real-time</small>
             </div>
             <button class="btn btn-sm btn-outline-secondary" onclick="loadData()" title="Refresh">
                 <i class="fa-solid fa-arrows-rotate me-1"></i>Refresh
             </button>
         </div>
 
-        <!-- Stat Cards -->
-        <div class="row g-3 mb-4">
+        <!-- Order Stat Cards -->
+        <div class="row g-3 mb-3">
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Tiket Terbuka
-                        <span class="metric-icon" style="color:#fbbf24;border-color:rgba(234,179,8,0.3);"><i class="fa-solid fa-ticket"></i></span>
+                        Pending Pembayaran
+                        <span class="metric-icon" style="color:#fbbf24;border-color:rgba(234,179,8,0.3);"><i class="fa-solid fa-clock"></i></span>
                     </div>
-                    <div class="stat-value text-warning" id="statOpen">—</div>
+                    <div class="stat-value text-warning" id="statPending">—</div>
                 </div>
             </div>
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Tiket Selesai
+                        Order Dibayar
                         <span class="metric-icon" style="color:#34d399;border-color:rgba(16,185,129,0.3);"><i class="fa-solid fa-circle-check"></i></span>
                     </div>
-                    <div class="stat-value text-success" id="statResolved">—</div>
+                    <div class="stat-value text-success" id="statPaid">—</div>
                 </div>
             </div>
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Masuk Hari Ini
+                        Order Dibatalkan
+                        <span class="metric-icon" style="color:#f87171;border-color:rgba(239,68,68,0.3);"><i class="fa-solid fa-circle-xmark"></i></span>
+                    </div>
+                    <div class="stat-value text-danger" id="statCancelled">—</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        Order Hari Ini
                         <span class="metric-icon"><i class="fa-solid fa-calendar-day"></i></span>
                     </div>
                     <div class="stat-value" id="statToday">—</div>
                 </div>
             </div>
+        </div>
+
+        <!-- Subscription Stat Cards -->
+        <div class="row g-3 mb-4">
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Overall Completion Rate
-                        <span class="metric-icon" style="color:#818cf8;border-color:rgba(129,140,248,0.3);"><i class="fa-solid fa-chart-pie"></i></span>
+                        Subscription Aktif
+                        <span class="metric-icon" style="color:#818cf8;border-color:rgba(129,140,248,0.3);"><i class="fa-solid fa-crown"></i></span>
                     </div>
-                    <div class="stat-value" style="color:#818cf8;" id="statCompletion">—</div>
+                    <div class="stat-value" style="color:#818cf8;" id="statSubActive">—</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-label">
+                        Subscription Expired
+                        <span class="metric-icon" style="color:#f87171;border-color:rgba(239,68,68,0.3);"><i class="fa-solid fa-hourglass-end"></i></span>
+                    </div>
+                    <div class="stat-value text-danger" id="statSubExpired">—</div>
                 </div>
             </div>
         </div>
 
-        <!-- Per-Admin Table -->
+        <!-- Recent Pending Orders Table -->
         <div class="table-card">
             <div class="table-card-header">
                 <div>
-                    <div class="table-card-title">Performa Admin Support</div>
-                    <div class="table-card-sub">Completion rate berdasarkan tiket yang berhasil diselesaikan</div>
-                </div>
-                <div>
-                    <input type="text" class="form-control form-control-sm" id="searchAdmin" placeholder="Cari admin..." style="max-width:200px;" oninput="filterTable()">
+                    <div class="table-card-title">Order Menunggu Pembayaran</div>
+                    <div class="table-card-sub">Daftar order dengan status PENDING_PAYMENT — paling lama di atas</div>
                 </div>
             </div>
             <div class="table-responsive">
-                <table class="analytics-table" id="adminTable">
+                <table class="analytics-table" id="ordersTable">
                     <thead>
                         <tr>
-                            <th style="width:44px;">#</th>
-                            <th>Nama Admin</th>
-                            <th class="sortable" onclick="sortBy('tickets')" title="Klik untuk sort">
-                                Tiket Ditangani <i class="fa-solid fa-sort ms-1" id="sortIconTickets" style="opacity:0.4;"></i>
-                            </th>
-                            <th>Completion Rate</th>
-                            <th>Total Reply</th>
+                            <th>#</th>
+                            <th>Invoice</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Tanggal Order</th>
                         </tr>
                     </thead>
-                    <tbody id="adminTableBody">
+                    <tbody id="ordersTableBody">
                         <tr><td colspan="5" class="text-center text-muted py-5">
                             <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...
                         </td></tr>
@@ -242,93 +227,68 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/za-theme.js"></script>
-    <script src="/assets/js/ops-layout.js?v=mgmt-support-1"></script>
+    <script src="/assets/js/ops-layout.js?v=mgmt-operational-1"></script>
     <script>
-    var allAdminStats = [];
-    var sortDir = -1;
-
     document.addEventListener('DOMContentLoaded', function () { loadData(); });
 
     function loadData() {
-        fetch('/api/superadmin/dashboard/support', { credentials: 'include' })
+        fetch('/api/superadmin/dashboard/operational', { credentials: 'include' })
             .then(function (r) {
                 if (r.status === 401) { window.location.href = '/account/login'; return null; }
                 return r.json();
             })
             .then(function (data) {
                 if (!data) return;
-                var s = data.stats || {};
-                document.getElementById('statOpen').textContent     = s.total_open     != null ? s.total_open     : '—';
-                document.getElementById('statResolved').textContent = s.total_resolved != null ? s.total_resolved : '—';
-                document.getElementById('statToday').textContent    = s.total_today    != null ? s.total_today    : '—';
-                document.getElementById('statCompletion').textContent = s.overall_completion_rate != null
-                    ? s.overall_completion_rate.toFixed(1) + '%'
-                    : '—';
+                var o = data.order_stats || {};
+                var s = data.subscription_stats || {};
 
-                allAdminStats = Array.isArray(data.admin_stats) ? data.admin_stats : [];
-                renderTable(allAdminStats);
+                document.getElementById('statPending').textContent   = o.total_pending_payment != null ? o.total_pending_payment : '—';
+                document.getElementById('statPaid').textContent      = o.total_paid           != null ? o.total_paid           : '—';
+                document.getElementById('statCancelled').textContent = o.total_cancelled      != null ? o.total_cancelled      : '—';
+                document.getElementById('statToday').textContent     = o.total_today          != null ? o.total_today          : '—';
+                document.getElementById('statSubActive').textContent  = s.total_active  != null ? s.total_active  : '—';
+                document.getElementById('statSubExpired').textContent = s.total_expired != null ? s.total_expired : '—';
+
+                renderTable(Array.isArray(data.recent_pending) ? data.recent_pending : []);
             })
             .catch(function (err) {
-                console.error('[Support Dashboard] fetch error:', err);
-                document.getElementById('statOpen').textContent     = '—';
-                document.getElementById('statResolved').textContent = '—';
-                document.getElementById('statToday').textContent    = '—';
-                document.getElementById('statCompletion').textContent = '—';
-                var tbody = document.getElementById('adminTableBody');
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-5">' +
+                console.error('[Operational Dashboard] fetch error:', err);
+                ['statPending','statPaid','statCancelled','statToday','statSubActive','statSubExpired']
+                    .forEach(function (id) { document.getElementById(id).textContent = '—'; });
+                document.getElementById('ordersTableBody').innerHTML =
+                    '<tr><td colspan="5" class="text-center text-danger py-5">' +
                     '<i class="fa-solid fa-circle-exclamation me-2"></i>Gagal memuat data dari server</td></tr>';
             });
     }
 
-    function crClass(rate) {
-        if (rate >= 90) return 'cr-green';
-        if (rate >= 70) return 'cr-amber';
-        return 'cr-red';
-    }
-
-    function adminLabel(s) {
-        return s.admin_name || s.admin_id || '—';
-    }
-
     function renderTable(rows) {
-        var q = (document.getElementById('searchAdmin').value || '').toLowerCase().trim();
-        var filtered = rows.filter(function (r) {
-            return !q || adminLabel(r).toLowerCase().indexOf(q) >= 0;
-        });
-
-        var tbody = document.getElementById('adminTableBody');
-        if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5"><i class="fa-solid fa-inbox me-2"></i>Tidak ada data</td></tr>';
+        var tbody = document.getElementById('ordersTableBody');
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5">' +
+                '<i class="fa-solid fa-inbox me-2"></i>Tidak ada order pending saat ini</td></tr>';
             return;
         }
-
-        tbody.innerHTML = filtered.map(function (s, i) {
-            var name = adminLabel(s);
-            var initial = name.charAt(0).toUpperCase();
-            var cls = crClass(s.completion_rate);
-            var icon = s.completion_rate >= 90 ? 'fa-circle-check' : s.completion_rate >= 70 ? 'fa-circle-half-stroke' : 'fa-circle-exclamation';
+        tbody.innerHTML = rows.map(function (o, i) {
             return '<tr>' +
-                '<td><span class="rank-num">' + (i + 1) + '</span></td>' +
-                '<td><div class="admin-cell">' +
-                    '<span class="admin-avatar">' + esc(initial) + '</span>' +
-                    '<span class="admin-name">' + esc(name) + '</span>' +
-                '</div></td>' +
-                '<td><strong>' + (s.tickets_handled || 0) + '</strong></td>' +
-                '<td><span class="cr-badge ' + cls + '"><i class="fa-solid ' + icon + '"></i>' + (s.completion_rate || 0).toFixed(1) + '%</span></td>' +
-                '<td style="color:var(--text-muted);">' + (s.total_replies || 0) + '</td>' +
+                '<td style="color:var(--text-muted);">' + (i + 1) + '</td>' +
+                '<td><strong>' + esc(o.invoice_number || o.id || '—') + '</strong></td>' +
+                '<td><span class="status-badge status-pending"><i class="fa-solid fa-clock"></i>' + esc(o.status) + '</span></td>' +
+                '<td style="color:#34d399;font-weight:600;">Rp ' + formatPrice(o.total_price) + '</td>' +
+                '<td style="color:var(--text-muted);">' + formatDate(o.created_at) + '</td>' +
                 '</tr>';
         }).join('');
     }
 
-    function filterTable() { renderTable(allAdminStats); }
+    function formatPrice(n) {
+        if (!n && n !== 0) return '—';
+        return Number(n).toLocaleString('id-ID');
+    }
 
-    function sortBy(field) {
-        sortDir *= -1;
-        allAdminStats.sort(function (a, b) { return sortDir * ((b.tickets_handled || 0) - (a.tickets_handled || 0)); });
-        renderTable(allAdminStats);
-        var icon = document.getElementById('sortIconTickets');
-        icon.className = 'fa-solid ms-1 ' + (sortDir === -1 ? 'fa-sort-down' : 'fa-sort-up');
-        icon.style.opacity = '1';
+    function formatDate(s) {
+        if (!s) return '—';
+        try {
+            return new Date(s).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        } catch (e) { return s; }
     }
 
     function esc(s) {
