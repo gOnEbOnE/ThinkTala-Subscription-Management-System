@@ -253,6 +253,9 @@
         fetch('/api/superadmin/dashboard/support', { credentials: 'include' })
             .then(function (r) {
                 if (r.status === 401) { window.location.href = '/account/login'; return null; }
+                if (!r.ok) return r.json().catch(function() { return {}; }).then(function(e) {
+                    throw new Error(e.error || 'HTTP ' + r.status);
+                });
                 return r.json();
             })
             .then(function (data) {
@@ -298,7 +301,8 @@
 
         var tbody = document.getElementById('adminTableBody');
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5"><i class="fa-solid fa-inbox me-2"></i>Tidak ada data</td></tr>';
+            var emptyMsg = q ? 'Tidak ada admin yang cocok dengan pencarian' : 'Belum ada admin CS yang aktif pada periode ini';
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5"><i class="fa-solid fa-inbox me-2"></i>' + emptyMsg + '</td></tr>';
             return;
         }
 

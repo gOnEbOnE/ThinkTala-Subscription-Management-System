@@ -62,7 +62,7 @@ func HandleSupportDashboard(db *sql.DB) http.HandlerFunc {
 				COUNT(*)                                   AS total,
 				COALESCE(ROUND(
 					COUNT(*) FILTER (WHERE status = 'DONE')::numeric / NULLIF(COUNT(*), 0) * 100, 1
-				), 0) AS overall_completion_rate
+				), 0)::float8 AS overall_completion_rate
 			FROM support_tickets
 		`)
 		if err := row.Scan(&stats.TotalOpen, &stats.TotalResolved, &stats.TotalToday, &stats.TotalAll, &stats.OverallCompletionRate); err != nil {
@@ -94,12 +94,12 @@ func HandleSupportDashboard(db *sql.DB) http.HandlerFunc {
 
 		adminRows, adminErr := db.QueryContext(ctx, `
 			SELECT
-				str.admin_id,
+				str.admin_id::text,
 				COUNT(DISTINCT str.ticket_id) AS tickets_handled,
 				COALESCE(ROUND(
 					COUNT(DISTINCT CASE WHEN st.status != 'ON PROCESS' THEN str.ticket_id END)::numeric
 					/ NULLIF(COUNT(DISTINCT str.ticket_id), 0) * 100, 1
-				), 0) AS completion_rate,
+				), 0)::float8 AS completion_rate,
 				COUNT(*) AS total_replies
 			FROM support_ticket_replies str
 			JOIN support_tickets st ON st.id = str.ticket_id

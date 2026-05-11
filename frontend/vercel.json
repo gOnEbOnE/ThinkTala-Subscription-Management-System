@@ -39,6 +39,7 @@
     { "source": "/ops/user-detail", "destination": "/ops/user-detail.html" },
     { "source": "/management/dashboard-customers", "destination": "/management/dashboard-customers.html" },
     { "source": "/management/dashboard-packages", "destination": "/management/dashboard-packages.html" },
+    { "source": "/management/dashboard-overview", "destination": "/management/dashboard-overview.html" },
     { "source": "/management/dashboard-compliance", "destination": "/management/dashboard-compliance.html" },
     { "source": "/management/dashboard-support", "destination": "/management/dashboard-support.html" },
     { "source": "/management/dashboard-operational", "destination": "/management/dashboard-operational.html" },

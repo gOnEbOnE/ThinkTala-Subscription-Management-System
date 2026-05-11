@@ -78,6 +78,7 @@
         '/ops/edit-user'              : { activeKey: 'manage-users' },
         '/management/dashboard-customers'  : { activeKey: 'management-dashboard' },
         '/management/dashboard-packages'  : { activeKey: 'management-packages' },
+        '/management/dashboard-overview'    : { activeKey: 'management-overview' },
         '/management/dashboard-compliance'  : { activeKey: 'management-compliance' },
         '/management/dashboard-support'    : { activeKey: 'management-support' },
         '/management/dashboard-operational': { activeKey: 'management-operational' },
@@ -142,6 +143,13 @@
             <a class="nav-link${isActive('management-packages')}" href="/management/dashboard-packages">
                 <i class="fa-solid fa-cubes icon-left"></i>
                 <span class="link-text">Package Sales</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenDivisionDash ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-overview')}" href="/management/dashboard-overview">
+                <i class="fa-solid fa-chart-pie icon-left"></i>
+                <span class="link-text">Overview Kinerja</span>
             </a>
         </li>` : ''}
 
