@@ -6,7 +6,7 @@ import "time"
 var AllowedRoles = map[string]bool{
 	"OPERASIONAL": true,
 	"COMPLIANCE":  true,
-	"MANAJEMEN":   true,
+	"MANAGEMENT":  true,
 	"ADMIN_CS":    true,
 }
 

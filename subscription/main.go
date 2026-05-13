@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/dashboard"
 	"github.com/master-abror/zaframework/app/modules/orders"
 	"github.com/master-abror/zaframework/app/modules/packages"
 	"github.com/master-abror/zaframework/app/routes"
@@ -48,9 +49,14 @@ func main() {
 	maxConns, _ := strconv.Atoi(utils.GetEnv("APP_DB_MAX_CONN", "10"))
 	workerMult, _ := strconv.Atoi(utils.GetEnv("APP_WORKER_MULTIPLIER", "4"))
 
+	port := utils.GetEnv("port", "")
+	if port == "" {
+		port = utils.GetEnv("PORT", "5004")
+	}
+
 	cfg := core.Config{
 		AppName:        utils.GetEnv("app_name", "Thinknalyze Subscription Service"),
-		Port:           utils.GetEnv("port", "5004"),
+		Port:           port,
 		Env:            utils.GetEnv("app_env", "development"),
 		AssetsURL:      utils.GetEnv("assets_url"),
 		AllowedOrigins: []string{"*"},
@@ -107,8 +113,11 @@ func main() {
 	ordersController := orders.NewController(app.Dispatcher, app.Response, ordersService)
 	app.RegisterJob("create_order", ordersService.ProcessCreateOrderJob)
 
+	// Dashboard
+	dashboardHandler := dashboard.NewHandler(app.DB)
+
 	// 4. ROUTING
-	routes.Init(app, packagesController, ordersController)
+	routes.Init(app, packagesController, ordersController, dashboardHandler)
 
 	// 5. RUN
 	app.Run()

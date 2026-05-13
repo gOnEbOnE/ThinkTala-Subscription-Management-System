@@ -91,7 +91,7 @@ func (s *Service) ProcessCreateUserJob(ctx context.Context, payload any) (any, e
 	// 1. Validasi role
 	if !AllowedRoles[role] {
 		log.Printf("[ADMIN] action=CREATE_USER admin=%s target=%s role=%s result=FAILED reason=invalid_role", adminEmail, email, role)
-		return nil, fmt.Errorf("Role '%s' tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAJEMEN, ADMIN_CS", role)
+		return nil, fmt.Errorf("Role '%s' tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAGEMENT, ADMIN_CS", role)
 	}
 
 	// 2. Cek email unik
@@ -264,7 +264,7 @@ func (s *Service) ProcessEditUserJob(ctx context.Context, payload any) (any, err
 	if hasRole && newRole != "" {
 		roleUpper := strings.ToUpper(newRole)
 		if !AllowedRoles[roleUpper] {
-			return nil, fmt.Errorf("Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAJEMEN, ADMIN_CS")
+			return nil, fmt.Errorf("Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAGEMENT, ADMIN_CS")
 		}
 		roleID, err := s.repo.FindRoleByCode(ctx, roleUpper)
 		if err != nil || roleID == "" {

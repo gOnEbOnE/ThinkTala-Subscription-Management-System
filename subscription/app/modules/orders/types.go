@@ -117,6 +117,26 @@ type SubscriptionStatus struct {
 	StartDate      time.Time `json:"start_date"`
 	EndDate        time.Time `json:"end_date"`
 	Status         string    `json:"status"`
+	DaysRemaining  int       `json:"days_remaining"`
+}
+
+// ClientOrderFilter - filter parameter untuk GET /api/orders (client)
+type ClientOrderFilter struct {
+	Status    string
+	StartDate string
+	EndDate   string
+	Page      int
+	Limit     int
+}
+
+// AdminOrderFilter - filter parameter untuk GET /api/admin/orders
+type AdminOrderFilter struct {
+	Status    string
+	Search    string
+	StartDate string
+	EndDate   string
+	Page      int
+	Limit     int
 }
 
 // UploadPaymentProofResult - response upload bukti transfer

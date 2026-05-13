@@ -1,0 +1,843 @@
+{
+  "nodes": [
+    {
+      "id": "account_dashboard_summary_page",
+      "label": "Account Dashboard Summary View",
+      "file_type": "code",
+      "source_file": "users/public/views/account/dashboard/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_users_active_page",
+      "label": "Active Users Table View",
+      "file_type": "code",
+      "source_file": "users/public/views/account/users/active.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_users_banned_page",
+      "label": "Banned Users Table View",
+      "file_type": "code",
+      "source_file": "users/public/views/account/users/banned.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_users_inactive_page",
+      "label": "Inactive Users Management View",
+      "file_type": "code",
+      "source_file": "users/public/views/account/users/inactive.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_users_generic_page",
+      "label": "Generic Users Table View",
+      "file_type": "code",
+      "source_file": "users/public/views/account/users/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_wrapper_navigation_shell",
+      "label": "Account Wrapper Navigation Shell",
+      "file_type": "code",
+      "source_file": "users/public/views/account/wrapper/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_wrapper_settings_page",
+      "label": "Account Settings Password View",
+      "file_type": "code",
+      "source_file": "users/public/views/account/wrapper/settings.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_users_generic_api",
+      "label": "Users Listing API Endpoint",
+      "file_type": "code",
+      "source_file": "users/public/views/account/users/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_users_inactive_data_api",
+      "label": "Inactive Users Data API Endpoint",
+      "file_type": "code",
+      "source_file": "users/public/views/account/users/inactive.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_users_detail_api",
+      "label": "User Detail API Endpoint",
+      "file_type": "code",
+      "source_file": "users/public/views/account/users/inactive.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "account_users_update_api",
+      "label": "User Update API Endpoint",
+      "file_type": "code",
+      "source_file": "users/public/views/account/users/inactive.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_zaframework_manual",
+      "label": "ZAFramework Documentation",
+      "file_type": "document",
+      "source_file": "users/public/views/docs/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_worker_pool_concept",
+      "label": "Worker Pool Concurrency Concept",
+      "file_type": "document",
+      "source_file": "users/public/views/docs/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_db_bypass_concept",
+      "label": "Database Bypass Mode Concept",
+      "file_type": "document",
+      "source_file": "users/public/views/docs/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_rationale_non_blocking_response",
+      "label": "Rationale: Background Jobs Avoid Blocking User Responses",
+      "file_type": "document",
+      "source_file": "users/public/views/docs/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "docs_rationale_nil_safe_runtime",
+      "label": "Rationale: Keep App Running Without Database",
+      "file_type": "document",
+      "source_file": "users/public/views/docs/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_jakarta_dashboard_mock",
+      "label": "Modern Jakarta Dashboard Mockup",
+      "file_type": "document",
+      "source_file": "users/public/views/landing/index copy 2.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_pinkai_marketing_page",
+      "label": "Pink AI Marketing Landing Page",
+      "file_type": "document",
+      "source_file": "users/public/views/landing/index copy.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_macroquant_dashboard",
+      "label": "MacroQuant Dashboard Page",
+      "file_type": "code",
+      "source_file": "users/public/views/landing/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_macroquant_full_suite",
+      "label": "MacroQuant Full Suite Single-Page Dashboard",
+      "file_type": "code",
+      "source_file": "users/public/views/landing/index2.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_macroquant_macrodata_page",
+      "label": "MacroQuant Macro Data Page",
+      "file_type": "code",
+      "source_file": "users/public/views/landing/macrodata.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_thinkarah_blueprint",
+      "label": "ThinkArah Project Blueprint",
+      "file_type": "document",
+      "source_file": "users/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_thinkarah_confluence_logic",
+      "label": "Confluence 3 Judges Logic",
+      "file_type": "document",
+      "source_file": "users/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_thinkarah_fear_greed_filter",
+      "label": "Fear and Greed Risk Brake",
+      "file_type": "document",
+      "source_file": "users/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_thinkarah_rationale_three_judges",
+      "label": "Rationale: Require Multi-Algorithm Agreement",
+      "file_type": "document",
+      "source_file": "users/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "landing_thinkarah_rationale_avoid_top_buy",
+      "label": "Rationale: Block Buys in Extreme Greed",
+      "file_type": "document",
+      "source_file": "users/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_login_modern_page",
+      "label": "Modern Login Page",
+      "file_type": "code",
+      "source_file": "users/public/views/login/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_login_legacy_page",
+      "label": "Legacy Login Page",
+      "file_type": "code",
+      "source_file": "users/public/views/login1/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_register_page",
+      "label": "Multi-Step Registration Page",
+      "file_type": "code",
+      "source_file": "users/public/views/register/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_verify_otp_page",
+      "label": "OTP Verification Page",
+      "file_type": "code",
+      "source_file": "users/public/views/register/verify-otp.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_reset_page",
+      "label": "Reset Password Form Page",
+      "file_type": "code",
+      "source_file": "users/public/views/reset/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_login_api_modern",
+      "label": "Modern Login Auth API Endpoint",
+      "file_type": "code",
+      "source_file": "users/public/views/login/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_login_api_legacy",
+      "label": "Legacy Login Auth API Endpoint",
+      "file_type": "code",
+      "source_file": "users/public/views/login1/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_register_api",
+      "label": "Register API Endpoint",
+      "file_type": "code",
+      "source_file": "users/public/views/register/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_verify_otp_api",
+      "label": "Verify OTP API Endpoint",
+      "file_type": "code",
+      "source_file": "users/public/views/register/verify-otp.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_resend_otp_api",
+      "label": "Resend OTP API Endpoint",
+      "file_type": "code",
+      "source_file": "users/public/views/register/verify-otp.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_register_route",
+      "label": "Account Register Route",
+      "file_type": "code",
+      "source_file": "users/public/views/login/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_login_route",
+      "label": "Account Login Route",
+      "file_type": "code",
+      "source_file": "users/public/views/register/verify-otp.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    },
+    {
+      "id": "auth_password_reset_route",
+      "label": "Account Reset Route",
+      "file_type": "code",
+      "source_file": "users/public/views/login/page.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null
+    }
+  ],
+  "edges": [
+    {
+      "source": "account_wrapper_navigation_shell",
+      "target": "account_users_inactive_page",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/account/wrapper/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_wrapper_navigation_shell",
+      "target": "account_wrapper_settings_page",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/account/wrapper/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_users_active_page",
+      "target": "account_users_generic_api",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/account/users/active.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_users_generic_page",
+      "target": "account_users_generic_api",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/account/users/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_users_inactive_page",
+      "target": "account_users_inactive_data_api",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/account/users/inactive.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_users_inactive_page",
+      "target": "account_users_detail_api",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/account/users/inactive.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_users_inactive_page",
+      "target": "account_users_update_api",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/account/users/inactive.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "docs_zaframework_manual",
+      "target": "docs_worker_pool_concept",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/docs/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "docs_zaframework_manual",
+      "target": "docs_db_bypass_concept",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/docs/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "docs_rationale_non_blocking_response",
+      "target": "docs_worker_pool_concept",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/docs/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "docs_rationale_nil_safe_runtime",
+      "target": "docs_db_bypass_concept",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/docs/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "landing_thinkarah_blueprint",
+      "target": "landing_thinkarah_confluence_logic",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "landing_thinkarah_blueprint",
+      "target": "landing_thinkarah_fear_greed_filter",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "landing_thinkarah_rationale_three_judges",
+      "target": "landing_thinkarah_confluence_logic",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "landing_thinkarah_rationale_avoid_top_buy",
+      "target": "landing_thinkarah_fear_greed_filter",
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/landing/thinkarah.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_login_modern_page",
+      "target": "auth_login_api_modern",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/login/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_login_modern_page",
+      "target": "auth_password_reset_route",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/login/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_login_modern_page",
+      "target": "auth_register_route",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/login/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_login_legacy_page",
+      "target": "auth_login_api_legacy",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/login1/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_register_page",
+      "target": "auth_register_api",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/register/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_register_page",
+      "target": "auth_verify_otp_page",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/register/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_verify_otp_page",
+      "target": "auth_verify_otp_api",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/register/verify-otp.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_verify_otp_page",
+      "target": "auth_resend_otp_api",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/register/verify-otp.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_verify_otp_page",
+      "target": "auth_login_route",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/register/verify-otp.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_verify_otp_page",
+      "target": "auth_register_route",
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1,
+      "source_file": "users/public/views/register/verify-otp.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_login_legacy_page",
+      "target": "auth_register_route",
+      "relation": "references",
+      "confidence": "AMBIGUOUS",
+      "confidence_score": 0.2,
+      "source_file": "users/public/views/login1/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_login_legacy_page",
+      "target": "auth_password_reset_route",
+      "relation": "references",
+      "confidence": "AMBIGUOUS",
+      "confidence_score": 0.2,
+      "source_file": "users/public/views/login1/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_wrapper_navigation_shell",
+      "target": "account_dashboard_summary_page",
+      "relation": "references",
+      "confidence": "AMBIGUOUS",
+      "confidence_score": 0.25,
+      "source_file": "users/public/views/account/wrapper/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_users_active_page",
+      "target": "account_users_generic_page",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "users/public/views/account/users/active.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "account_users_banned_page",
+      "target": "account_users_inactive_page",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.84,
+      "source_file": "users/public/views/account/users/banned.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "landing_macroquant_dashboard",
+      "target": "landing_macroquant_macrodata_page",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "users/public/views/landing/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "landing_macroquant_dashboard",
+      "target": "landing_macroquant_full_suite",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.88,
+      "source_file": "users/public/views/landing/index.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_login_modern_page",
+      "target": "auth_login_legacy_page",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.9,
+      "source_file": "users/public/views/login/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "auth_register_page",
+      "target": "auth_reset_page",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.66,
+      "source_file": "users/public/views/register/page.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "landing_jakarta_dashboard_mock",
+      "target": "account_wrapper_navigation_shell",
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "users/public/views/landing/index copy 2.html",
+      "source_location": null,
+      "weight": 1
+    },
+    {
+      "source": "landing_pinkai_marketing_page",
+      "target": "docs_zaframework_manual",
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.62,
+      "source_file": "users/public/views/landing/index copy.html",
+      "source_location": null,
+      "weight": 1
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "account_user_admin_flow",
+      "label": "Account User Administration Flow",
+      "nodes": [
+        "account_wrapper_navigation_shell",
+        "account_users_inactive_page",
+        "account_users_detail_api",
+        "account_users_update_api"
+      ],
+      "relation": "implement",
+      "confidence": "INFERRED",
+      "confidence_score": 0.86,
+      "source_file": "users/public/views/account/wrapper/page.html"
+    },
+    {
+      "id": "auth_onboarding_and_access_flow",
+      "label": "Authentication and Onboarding Flow",
+      "nodes": [
+        "auth_login_modern_page",
+        "auth_register_page",
+        "auth_verify_otp_page",
+        "auth_login_api_modern",
+        "auth_register_api",
+        "auth_verify_otp_api"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.89,
+      "source_file": "users/public/views/login/page.html"
+    },
+    {
+      "id": "macroquant_analytics_cluster",
+      "label": "MacroQuant Analytics Experience Cluster",
+      "nodes": [
+        "landing_macroquant_dashboard",
+        "landing_macroquant_full_suite",
+        "landing_macroquant_macrodata_page",
+        "landing_thinkarah_blueprint"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.82,
+      "source_file": "users/public/views/landing/index.html"
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

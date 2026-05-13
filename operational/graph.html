@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operational Service - Knowledge Graph</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f0f0f; color: #e0e0e0; }
+        .container { display: flex; height: 100vh; }
+        #graph { flex: 1; background: #1a1a1a; }
+        .sidebar { width: 320px; background: #252525; overflow-y: auto; padding: 20px; border-left: 1px solid #333; }
+        .sidebar h2 { color: #4a9eff; margin-bottom: 15px; font-size: 16px; }
+        .stat { margin-bottom: 12px; padding: 10px; background: #333; border-radius: 4px; font-size: 13px; }
+        .stat-label { color: #999; font-size: 11px; text-transform: uppercase; }
+        .stat-value { color: #4a9eff; font-weight: bold; font-size: 18px; }
+        .node-list { margin-top: 20px; }
+        .node-item { padding: 8px; margin: 5px 0; background: #333; border-radius: 3px; font-size: 12px; cursor: pointer; border-left: 3px solid #4a9eff; }
+        .node-item:hover { background: #3a3a3a; }
+        .god-node { border-left-color: #ff6b6b; background: #2a2020; }
+        h3 { color: #4a9eff; font-size: 14px; margin-top: 15px; margin-bottom: 10px; }
+        .edge-type { padding: 5px 8px; margin: 3px 0; background: #2a2a2a; border-radius: 3px; font-size: 11px; }
+        code { background: #1a1a1a; padding: 2px 4px; border-radius: 2px; font-family: 'Monaco', monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="graph"></div>
+        <div class="sidebar">
+            <h2>📊 Operational Service Graph</h2>
+            
+            <div class="stat">
+                <div class="stat-label">Total Nodes</div>
+                <div class="stat-value">202</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Total Edges</div>
+                <div class="stat-value">476</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Avg Degree</div>
+                <div class="stat-value">3.98</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Communities</div>
+                <div class="stat-value">6</div>
+            </div>
+
+            <h3>⭐ God Nodes</h3>
+            <div class="node-list">
+                <div class="node-item god-node">middleware.go<br><small>25 connections</small></div>
+                <div class="node-item god-node">app.New()<br><small>23 connections</small></div>
+                <div class="node-item god-node">session.Get()<br><small>17 connections</small></div>
+                <div class="node-item god-node">methods.go<br><small>16 connections</small></div>
+                <div class="node-item god-node">main.go<br><small>15 connections</small></div>
+            </div>
+
+            <h3>🔗 Edge Types</h3>
+            <div class="edge-type">📞 <strong>calls</strong> - 160</div>
+            <div class="edge-type">📦 <strong>imports_from</strong> - 149</div>
+            <div class="edge-type">📋 <strong>contains</strong> - 120</div>
+            <div class="edge-type">🔧 <strong>method</strong> - 47</div>
+
+            <h3>🎯 Key Patterns</h3>
+            <div style="font-size: 12px; line-height: 1.6;">
+                <p><strong>Security Stack:</strong> JWT + Redis + Crypto</p>
+                <p><strong>Concurrency:</strong> Circuit Breaker, Rate Limiter, Worker Pool</p>
+                <p><strong>Architecture:</strong> Middleware-first with session management</p>
+                <p><strong>Status:</strong> 🟢 Production-Ready</p>
+            </div>
+
+            <h3>📄 Analysis</h3>
+            <p style="font-size: 11px; color: #999; line-height: 1.5;">
+                Middleware-centric microservice with centralized request handling, secure session management, and robust concurrency controls. High coupling in middleware suggests refactoring opportunity.
+            </p>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Sample god nodes and key connections
+        var nodes = new vis.DataSet([
+            {id: 1, label: "middleware.go", title: "Central HTTP middleware (25 connections)", color: "#ff6b6b", size: 40, font: {size: 16, bold: {color: "#ff6b6b"}}, group: "critical"},
+            {id: 2, label: "app.New()", title: "App constructor and init (23 connections)", color: "#ff6b6b", size: 38, group: "critical"},
+            {id: 3, label: "session.Get()", title: "Session state retrieval (17 connections)", color: "#ffa94d", size: 32, group: "important"},
+            {id: 4, label: "methods.go", title: "Session operations (16 connections)", color: "#ffa94d", size: 30, group: "important"},
+            {id: 5, label: "main.go", title: "Service entrypoint (15 connections)", color: "#ffa94d", size: 28, group: "important"},
+            {id: 6, label: "jwt.go", title: "JWT validation (13 connections)", color: "#74c0fc", size: 25, group: "security"},
+            {id: 7, label: "redis.go", title: "Redis client (13 connections)", color: "#74c0fc", size: 25, group: "security"},
+            {id: 8, label: "response.go", title: "HTTP responses (12 connections)", color: "#9775fa", size: 22, group: "utils"},
+            {id: 9, label: "crypto.go", title: "Cryptography (10 connections)", color: "#74c0fc", size: 20, group: "security"},
+            {id: 10, label: "circuit_breaker.go", title: "Resilience (8 connections)", color: "#4a9eff", size: 18, group: "concurrency"},
+        ]);
+
+        var edges = new vis.DataSet([
+            // Request flow
+            {from: 1, to: 2, label: "calls", arrows: "to", color: {color: "#666"}, width: 3},
+            {from: 1, to: 3, label: "uses", arrows: "to", color: {color: "#666"}, width: 2},
+            {from: 1, to: 6, label: "validates", arrows: "to", color: {color: "#ff6b6b"}, width: 2},
+            {from: 1, to: 7, label: "manages", arrows: "to", color: {color: "#ff6b6b"}, width: 2},
+            
+            // Initialization
+            {from: 5, to: 2, label: "initializes", arrows: "to", color: {color: "#888"}, width: 2},
+            {from: 2, to: 4, label: "sets up", arrows: "to", color: {color: "#888"}, width: 1},
+            {from: 2, to: 8, label: "configures", arrows: "to", color: {color: "#888"}, width: 1},
+            
+            // Session management
+            {from: 3, to: 7, label: "reads", arrows: "to", color: {color: "#666"}, width: 1},
+            {from: 4, to: 7, label: "writes", arrows: "to", color: {color: "#666"}, width: 1},
+            
+            // Resilience
+            {from: 1, to: 10, label: "uses", arrows: "to", color: {color: "#4a9eff"}, width: 1},
+            
+            // Response formatting
+            {from: 2, to: 8, label: "uses", arrows: "to", color: {color: "#999"}, width: 1},
+        ]);
+
+        var container = document.getElementById('graph');
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+        var options = {
+            physics: {
+                enabled: true,
+                barnesHut: {
+                    gravitationalConstant: -30000,
+                    centralGravity: 0.3,
+                    springLength: 150,
+                    damping: 0.4
+                },
+                maxVelocity: 50,
+                solver: 'barnesHut',
+                timestep: 0.5
+            },
+            interaction: {
+                hover: true,
+                tooltipDelay: 100,
+                navigationButtons: true,
+                keyboard: true,
+            },
+            nodes: {
+                shape: 'circle',
+                font: {
+                    size: 14,
+                    color: '#e0e0e0',
+                    face: 'sans-serif'
+                },
+                borderWidth: 2,
+                borderWidthSelected: 4,
+                shadow: {
+                    enabled: true,
+                    color: 'rgba(0,0,0,0.3)',
+                    size: 10
+                }
+            },
+            edges: {
+                width: 2,
+                color: {
+                    color: '#666',
+                    highlight: '#4a9eff',
+                    hover: '#888'
+                },
+                font: {
+                    size: 12,
+                    color: '#999'
+                },
+                smooth: {
+                    type: 'continuous'
+                },
+                arrows: {
+                    to: {enabled: true, scaleFactor: 0.5}
+                }
+            },
+            groups: {
+                critical: { color: { background: '#ff6b6b', border: '#c92a2a' } },
+                important: { color: { background: '#ffa94d', border: '#f76707' } },
+                security: { color: { background: '#74c0fc', border: '#1c7ed6' } },
+                concurrency: { color: { background: '#4a9eff', border: '#0052cc' } },
+                utils: { color: { background: '#9775fa', border: '#5f3dc4' } }
+            }
+        };
+
+        var network = new vis.Network(container, data, options);
+        network.fit({animation: {duration: 1000, easingFunction: 'easeInOutQuad'}});
+
+        // Add legend
+        console.log("Operational Service Knowledge Graph loaded");
+        console.log("God Nodes: middleware.go, app.New(), session.Get(), methods.go, main.go");
+        console.log("Edge distribution: calls (160), imports_from (149), contains (120), method (47)");
+        console.log("Communities: 6 (235 in main component)");
+    </script>
+</body>
+</html>

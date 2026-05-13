@@ -19,11 +19,22 @@ type userRepo struct {
 	db *database.DBWrapper
 }
 
+func (r *userRepo) ensureDBReady() error {
+	if r == nil || r.db == nil || r.db.Pool == nil {
+		return fmt.Errorf("database connection is not initialized")
+	}
+	return nil
+}
+
 func NewRepository(db *database.DBWrapper) Repository {
 	return &userRepo{db: db}
 }
 
 func (r *userRepo) FindUser(ctx context.Context, key, value string) (*User, error) {
+	if err := r.ensureDBReady(); err != nil {
+		return nil, err
+	}
+
 	var u User
 
 	query := fmt.Sprintf(`
@@ -61,6 +72,10 @@ func (r *userRepo) FindUser(ctx context.Context, key, value string) (*User, erro
 
 // FindRoleByCode mengambil role berdasarkan code
 func (r *userRepo) FindRoleByCode(ctx context.Context, code string) (*RoleInfo, error) {
+	if err := r.ensureDBReady(); err != nil {
+		return nil, err
+	}
+
 	var role RoleInfo
 	err := r.db.Pool.QueryRow(ctx,
 		"SELECT id, name, code FROM roles WHERE UPPER(code) = UPPER($1)", code,
@@ -76,6 +91,10 @@ func (r *userRepo) FindRoleByCode(ctx context.Context, code string) (*RoleInfo, 
 
 // GetAllRoles mengambil semua role yang tersedia
 func (r *userRepo) GetAllRoles(ctx context.Context) ([]RoleInfo, error) {
+	if err := r.ensureDBReady(); err != nil {
+		return nil, err
+	}
+
 	rows, err := r.db.Pool.Query(ctx, "SELECT id, name, code FROM roles ORDER BY name")
 	if err != nil {
 		return nil, err

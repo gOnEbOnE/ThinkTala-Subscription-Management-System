@@ -25,6 +25,7 @@ gateway/certs/*.key
 
 # --- Dependencies ---
 vendor/
+!gateway/vendor/
 go.work.sum
 
 # --- IDE, OS & Editors ---
@@ -43,3 +44,10 @@ Thumbs.db
 # --- Docker ---
 .docker/operational/operational
 gateway/routes.local.json
+
+.claude/
+.claude-flow/
+.github/
+.go-run-tmp/
+.swarm/
+CLAUDE.md

@@ -13,7 +13,6 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/joho/godotenv v1.5.1
-	github.com/master-abror/zaframework v0.0.0
 	github.com/mssola/user_agent v0.6.0
 	github.com/rbcervilla/redisstore/v9 v9.0.0
 	github.com/redis/go-redis/v9 v9.17.2
@@ -21,8 +20,6 @@ require (
 	golang.org/x/crypto v0.48.0
 	golang.org/x/time v0.15.0
 )
-
-replace github.com/master-abror/zaframework => ../users
 
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
@@ -56,7 +53,7 @@ require (
 	github.com/ugorji/go/codec v1.3.1 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.5.0 // indirect
 	golang.org/x/arch v0.22.0 // indirect
-	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
+	golang.org/x/image v0.12.0 // indirect
 	golang.org/x/net v0.51.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect

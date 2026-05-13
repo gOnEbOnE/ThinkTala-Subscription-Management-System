@@ -60,13 +60,17 @@ func (s *Service) Delete(id string) error {
 
 // Send mencari template berdasarkan event_type+channel, render placeholder, simpan log, lalu kirim.
 func (s *Service) Send(req SendRequest) error {
+	log.Printf("[NOTIF SEND] Received event_type=%s channel=%s to=%s", req.EventType, req.Channel, req.To)
+
 	// Catat event_type ke registry agar muncul di dropdown
 	s.repo.RegisterEventType(req.EventType)
 
 	tpl, err := s.repo.GetByEventType(req.EventType, req.Channel)
 	if err != nil {
+		log.Printf("[NOTIF SEND] Template NOT found for event_type=%s channel=%s: %v", req.EventType, req.Channel, err)
 		return fmt.Errorf("template tidak ditemukan untuk event_type=%s channel=%s", req.EventType, req.Channel)
 	}
+	log.Printf("[NOTIF SEND] Template found for event_type=%s, sending to %s", req.EventType, req.To)
 
 	subject := ""
 	if tpl.Subject != nil {

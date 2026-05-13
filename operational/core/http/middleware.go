@@ -11,8 +11,8 @@ import (
 
 	"github.com/fatih/color" // Pastikan sudah go get
 	"github.com/gorilla/csrf"
-	"github.com/master-abror/zaframework/core/session"
-	"github.com/master-abror/zaframework/core/utils"
+	"operational/core/session"
+	"operational/core/utils"
 	"golang.org/x/time/rate" // Pastikan sudah go get
 )
 

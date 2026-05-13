@@ -32,12 +32,6 @@ RUN apk --no-cache add tzdata
 COPY --from=builder /app/tickets /app/tickets
 RUN chmod +x /app/tickets
 
-# Copy env file (opsional)
-# Copy env file
-COPY .env .env
-
-# ---> TAMBAHKAN BARIS INI UNTUK MENGCOPY FILE PEM <---
-COPY private.pem public.pem ./
 
 COPY public/ ./public/
 

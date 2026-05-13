@@ -142,7 +142,12 @@ func loadConfig() (*Config, error) {
 	merged := &Config{AllowedOrigins: []string{"*"}}
 	loadedFrom := make([]string, 0, 2)
 
-	baseCandidates := []string{"routes.json", "config/routes.json"}
+	baseCandidates := []string{
+		"routes.json",
+		"config/routes.json",
+		"gateway/routes.json",
+		"gateway/config/routes.json",
+	}
 	for _, path := range baseCandidates {
 		if _, err := os.Stat(path); err == nil {
 			cfg, err := readConfig(path)
@@ -192,6 +197,8 @@ func normalizeTargetForEnv(target string) string {
 		"notification-service.railway.internal:5003": "localhost:5003",
 		"subscription-service.railway.internal:5004": "localhost:5004",
 		"operational-service.railway.internal:8080":  "localhost:5005",
+		"tickets.railway.internal:8080":              "localhost:2005",
+		"management-service.railway.internal:5006":   "localhost:5006",
 	}
 
 	for from, to := range replacements {
@@ -510,7 +517,13 @@ func main() {
 	// 2. Static assets (no auth)
 	// ========================================
 	assetsDir := filepath.Join(frontendDir, "assets")
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsDir))))
+	assetsHandler := http.FileServer(http.Dir(assetsDir))
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		assetsHandler.ServeHTTP(w, r)
+	})))
 
 	// ========================================
 	// 3. Protected Dashboard Pages (with Role Auth)
@@ -521,6 +534,9 @@ func main() {
 
 	// /client/* → Only CLIENT, SUPERADMIN
 	http.HandleFunc("/client/", withRoleAuth(serveFrontendPage(frontendDir, "client", "dashboard")))
+	http.HandleFunc("/support/create", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/client/support-create", http.StatusFound)
+	}))
 
 	// /compliance/* → Only COMPLIANCE, SUPERADMIN
 	http.HandleFunc("/compliance/", withRoleAuth(serveFrontendPage(frontendDir, "compliance", "dashboard")))
@@ -655,6 +671,15 @@ func main() {
 		return ""
 	}
 
+	getRouteConfig := func(path string) (RouteConfig, bool) {
+		for _, route := range config.Routes {
+			if route.Path == path {
+				return route, true
+			}
+		}
+		return RouteConfig{}, false
+	}
+
 	// --- SUBSCRIPTION SERVICE (role-protected) ---
 	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
 	notifPublicTarget := getRouteTarget("/api/notifications/public")
@@ -668,11 +693,55 @@ func main() {
 	http.HandleFunc("/api/notifications/public/", createProxyHandler(notifPublicTarget, true))
 	log.Printf("[GW] Public API: /api/notifications/public -> %s", notifPublicTarget)
 
+	notifRoute, notifRouteOk := getRouteConfig("/api/notifications/")
+	if !notifRouteOk {
+		notifRoute, notifRouteOk = getRouteConfig("/api/notifications")
+	}
+	if notifRouteOk {
+		notifHandler := createProxyHandler(notifRoute.Target, notifRoute.CORS)
+		isUUIDLike := func(value string) bool {
+			if len(value) != 36 {
+				return false
+			}
+			for i, ch := range value {
+				switch i {
+				case 8, 13, 18, 23:
+					if ch != '-' {
+						return false
+					}
+				default:
+					if !(ch >= '0' && ch <= '9') && !(ch >= 'a' && ch <= 'f') && !(ch >= 'A' && ch <= 'F') {
+						return false
+					}
+				}
+			}
+			return true
+		}
+
+		if notifRoute.Auth {
+			http.HandleFunc("/api/notifications", withRolesAuth(notifRoute.Roles, notifHandler))
+		} else {
+			http.HandleFunc("/api/notifications", notifHandler)
+		}
+		http.HandleFunc("/api/notifications/", func(w http.ResponseWriter, r *http.Request) {
+			suffix := strings.TrimPrefix(r.URL.Path, "/api/notifications/")
+			if r.Method == http.MethodGet && suffix != "" && !strings.Contains(suffix, "/") && isUUIDLike(suffix) {
+				notifHandler(w, r)
+				return
+			}
+			if notifRoute.Auth {
+				withRolesAuth(notifRoute.Roles, notifHandler)(w, r)
+				return
+			}
+			notifHandler(w, r)
+		})
+		log.Printf("[GW] API: /api/notifications/:id -> %s (public GET)", notifRoute.Target)
+	}
+
 	// --- SUBSCRIPTION SERVICE (role-protected) ---
 	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
 	subTarget := getRouteTarget("/api/admin/packages")
 	if subTarget == "" {
-		subTarget = "http://localhost:5004"
 		subTarget = "http://localhost:5004"
 	}
 	http.HandleFunc("/api/admin/packages", withRoleAuth(
@@ -681,21 +750,21 @@ func main() {
 	http.HandleFunc("/api/admin/packages/", withRoleAuth(
 		createProxyHandler(subTarget, true),
 	))
-	// PBI-37: Public catalog — CLIENT, OPERASIONAL, CEO, SUPERADMIN
+	// PBI-37: Public catalog — no auth required
 	catalogTarget := getRouteTarget("/api/subscription/catalog")
 	if catalogTarget == "" {
 		catalogTarget = subTarget
 	}
-	http.HandleFunc("/api/subscription/catalog", withRoleAuth(
-		createProxyHandler(catalogTarget, true),
-	))
+	http.HandleFunc("/api/subscription/catalog", createProxyHandler(catalogTarget, true))
+	// /api/packages — public alias (Sprint 3 spec)
+	http.HandleFunc("/api/packages", createProxyHandler(subTarget, true))
 	log.Printf("[GW] Protected API: /api/admin/packages -> %s (CEO/SUPERADMIN/OPERASIONAL)", subTarget)
-	log.Printf("[GW] Protected API: /api/subscription/catalog -> %s (CLIENT+)", catalogTarget)
+	log.Printf("[GW] Public API: /api/subscription/catalog -> %s", catalogTarget)
+	log.Printf("[GW] Public API: /api/packages -> %s", subTarget)
 
 	// --- KYC Admin API (role-protected) - COMPLIANCE & OPERASIONAL can access ---
 	kycTarget := getRouteTarget("/api/admin/kyc")
 	if kycTarget == "" {
-		kycTarget = "http://localhost:2006"
 		kycTarget = "http://localhost:2006"
 	}
 	http.HandleFunc("/api/admin/kyc", withRoleAuth(
@@ -709,7 +778,7 @@ func main() {
 	// --- ORDERS Admin API (role-protected) - OPERASIONAL can access ---
 	ordersTarget := getRouteTarget("/api/admin/orders")
 	if ordersTarget == "" {
-		ordersTarget = "http://localhost:5005"
+		ordersTarget = "http://localhost:5004" // subscription service
 	}
 	http.HandleFunc("/api/admin/orders", withRolesAuth([]string{"OPERASIONAL", "SUPERADMIN", "CEO"},
 		createProxyHandler(ordersTarget, true),
@@ -731,6 +800,15 @@ func main() {
 		createProxyHandler(adminUsersTarget, true),
 	))
 	log.Printf("[GW] Protected API: /api/admin/users -> %s (SUPERADMIN)", adminUsersTarget)
+
+	// --- INTERNAL ACCOUNTS alias - Sprint 3 (SUPERADMIN only) ---
+	http.HandleFunc("/api/admin/internal-accounts", withRolesAuth([]string{"SUPERADMIN"},
+		createProxyHandler(adminUsersTarget, true),
+	))
+	http.HandleFunc("/api/admin/internal-accounts/", withRolesAuth([]string{"SUPERADMIN"},
+		createProxyHandler(adminUsersTarget, true),
+	))
+	log.Printf("[GW] Protected API: /api/admin/internal-accounts -> %s (SUPERADMIN)", adminUsersTarget)
 
 	// --- MANAGEMENT Dashboard API (role-protected) ---
 	dashboardTarget := getRouteTarget("/api/dashboard/customers")
@@ -754,6 +832,19 @@ func main() {
 	log.Printf("[GW] Protected API: /api/dashboard/packages -> %s (MANAGEMENT/ADMIN/SUPERADMIN)", dashboardTarget)
 	log.Printf("[GW] Protected API: /api/dashboard/package/* -> %s (MANAGEMENT/ADMIN/SUPERADMIN)", dashboardTarget)
 
+	// --- SUPPORT TICKETS Admin API (role-protected) - ADMIN_SUPPORT only ---
+	supportTicketsTarget := getRouteTarget("/api/admin/support/tickets")
+	if supportTicketsTarget == "" {
+		supportTicketsTarget = "http://localhost:2004"
+	}
+	http.HandleFunc("/api/admin/support/tickets", withRolesAuth([]string{"ADMIN_SUPPORT", "SUPERADMIN", "CEO"},
+		createProxyHandler(supportTicketsTarget, true),
+	))
+	http.HandleFunc("/api/admin/support/tickets/", withRolesAuth([]string{"ADMIN_SUPPORT", "SUPERADMIN", "CEO"},
+		createProxyHandler(supportTicketsTarget, true),
+	))
+	log.Printf("[GW] Protected API: /api/admin/support/tickets -> %s (ADMIN_SUPPORT)", supportTicketsTarget)
+
 	// --- KYC Client API (role-protected) - CLIENT can access their own KYC ---
 	kycClientTarget := getRouteTarget("/api/kyc/")
 	if kycClientTarget == "" {
@@ -764,6 +855,40 @@ func main() {
 	))
 	log.Printf("[GW] Protected API: /api/kyc/ -> %s (CLIENT+)", kycClientTarget)
 
+	// --- Sprint 3 B2/B3: Password Reset (public, no auth) ---
+	usersTarget := getRouteTarget("/api/auth/register")
+	if usersTarget == "" {
+		usersTarget = "http://localhost:2006"
+	}
+	http.HandleFunc("/api/auth/forgot-password", createProxyHandler(usersTarget, true))
+	http.HandleFunc("/api/auth/reset-password/validate", createProxyHandler(usersTarget, true))
+	http.HandleFunc("/api/auth/reset-password", createProxyHandler(usersTarget, true))
+	log.Printf("[GW] Public API: /api/auth/forgot-password -> %s", usersTarget)
+	log.Printf("[GW] Public API: /api/auth/reset-password -> %s", usersTarget)
+
+	// --- Sprint 3 B5/B6/B7/B8: Superadmin Dashboards (SUPERADMIN only) ---
+	managementTarget := getRouteTarget("/api/dashboard/customers")
+	if managementTarget == "" {
+		managementTarget = "http://localhost:5006"
+	}
+	ticketsTarget := getRouteTarget("/api/admin/support/tickets")
+	if ticketsTarget == "" {
+		ticketsTarget = "http://localhost:2004"
+	}
+	http.HandleFunc("/api/superadmin/dashboard/compliance", withRolesAuth([]string{"SUPERADMIN"},
+		createProxyHandler(usersTarget, true),
+	))
+	http.HandleFunc("/api/superadmin/dashboard/support", withRolesAuth([]string{"SUPERADMIN"},
+		createProxyHandler(ticketsTarget, true),
+	))
+	http.HandleFunc("/api/superadmin/dashboard/operational", withRolesAuth([]string{"SUPERADMIN"},
+		createProxyHandler(subTarget, true),
+	))
+	http.HandleFunc("/api/superadmin/dashboard/overview", withRolesAuth([]string{"SUPERADMIN"},
+		createProxyHandler(managementTarget, true),
+	))
+	log.Printf("[GW] Protected API: /api/superadmin/dashboard/* -> multiple services (SUPERADMIN)")
+
 	// --- Generic API proxy from routes.json (with optional role auth) ---
 	for _, route := range config.Routes {
 		if strings.HasPrefix(route.Path, "/api/") {
@@ -771,10 +896,17 @@ func main() {
 			if route.Path == "/api/notifications/public" || route.Path == "/api/notifications/public/" {
 				continue
 			}
+			if route.Path == "/api/notifications" || route.Path == "/api/notifications/" {
+				continue
+			}
 			if strings.HasPrefix(route.Path, "/api/admin/") ||
 				strings.HasPrefix(route.Path, "/api/subscription/") ||
 				strings.HasPrefix(route.Path, "/api/kyc") ||
-				strings.HasPrefix(route.Path, "/api/dashboard/") {
+				strings.HasPrefix(route.Path, "/api/dashboard/") ||
+				strings.HasPrefix(route.Path, "/api/superadmin/") ||
+				route.Path == "/api/auth/forgot-password" ||
+				route.Path == "/api/auth/reset-password" ||
+				strings.HasPrefix(route.Path, "/api/auth/reset-password") {
 				continue
 			}
 			routeCopy := route // capture loop variable
@@ -792,7 +924,10 @@ func main() {
 	// ========================================
 	// 7. Start HTTP server
 	// ========================================
-	port := system.Env("port")
+	port := system.Env("PORT")
+	if port == "" {
+		port = system.Env("port")
+	}
 	if port == "" {
 		port = "2000"
 	}
@@ -826,6 +961,8 @@ func redirectByRole(roleCode string) string {
 	switch strings.ToUpper(roleCode) {
 	case "OPERASIONAL", "CEO":
 		return "/ops/dashboard"
+	case "ADMIN_SUPPORT":
+		return "/ops/tickets"
 	case "COMPLIANCE":
 		return "/compliance/dashboard"
 	case "MANAGEMENT", "ADMIN":

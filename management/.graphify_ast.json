@@ -1,0 +1,1798 @@
+{
+  "nodes": [
+    {
+      "id": "management_main_go",
+      "label": "main.go",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1"
+    },
+    {
+      "id": "management_monthlypoint",
+      "label": "monthlyPoint",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L23"
+    },
+    {
+      "id": "management_churnratepoint",
+      "label": "churnRatePoint",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L28"
+    },
+    {
+      "id": "management_loyalcustomeritem",
+      "label": "loyalCustomerItem",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L33"
+    },
+    {
+      "id": "management_churnedcustomeritem",
+      "label": "churnedCustomerItem",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L43"
+    },
+    {
+      "id": "management_dashboardcustomerpayload",
+      "label": "dashboardCustomerPayload",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L52"
+    },
+    {
+      "id": "management_customerdetailpayload",
+      "label": "customerDetailPayload",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L85"
+    },
+    {
+      "id": "management_requestaudit",
+      "label": "requestAudit",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L95"
+    },
+    {
+      "id": "management_dummycustomer",
+      "label": "dummyCustomer",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L104"
+    },
+    {
+      "id": "management_packagesalesdistributionpoint",
+      "label": "packageSalesDistributionPoint",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L117"
+    },
+    {
+      "id": "management_packagerevenuecontributionpoint",
+      "label": "packageRevenueContributionPoint",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L123"
+    },
+    {
+      "id": "management_packagesalestrendpoint",
+      "label": "packageSalesTrendPoint",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L130"
+    },
+    {
+      "id": "management_packageperformanceitem",
+      "label": "packagePerformanceItem",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L137"
+    },
+    {
+      "id": "management_dashboardpackagepayload",
+      "label": "dashboardPackagePayload",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L146"
+    },
+    {
+      "id": "management_packagedetailtrendpoint",
+      "label": "packageDetailTrendPoint",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L187"
+    },
+    {
+      "id": "management_packagedetailpayload",
+      "label": "packageDetailPayload",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L192"
+    },
+    {
+      "id": "management_packagecatalogitem",
+      "label": "packageCatalogItem",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L203"
+    },
+    {
+      "id": "management_dummypackagetransaction",
+      "label": "dummyPackageTransaction",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L210"
+    },
+    {
+      "id": "main_main",
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L218"
+    },
+    {
+      "id": "main_getenv",
+      "label": "getEnv()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L264"
+    },
+    {
+      "id": "main_requiremanagementrole",
+      "label": "requireManagementRole()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L271"
+    },
+    {
+      "id": "main_requirepackagedashboardrole",
+      "label": "requirePackageDashboardRole()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L288"
+    },
+    {
+      "id": "main_getdashboardcustomers",
+      "label": "getDashboardCustomers()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L305"
+    },
+    {
+      "id": "main_getdashboardcustomerdetail",
+      "label": "getDashboardCustomerDetail()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L335"
+    },
+    {
+      "id": "main_getdashboardpackages",
+      "label": "getDashboardPackages()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L351"
+    },
+    {
+      "id": "main_getdashboardpackagedetail",
+      "label": "getDashboardPackageDetail()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L381"
+    },
+    {
+      "id": "main_builddummypackagedashboardpayload",
+      "label": "buildDummyPackageDashboardPayload()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L404"
+    },
+    {
+      "id": "main_builddummypackagedetailpayload",
+      "label": "buildDummyPackageDetailPayload()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L578"
+    },
+    {
+      "id": "main_getpackagecatalog",
+      "label": "getPackageCatalog()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L650"
+    },
+    {
+      "id": "main_getdummypackagetransactions",
+      "label": "getDummyPackageTransactions()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L659"
+    },
+    {
+      "id": "main_aggregatepackagemetrics",
+      "label": "aggregatePackageMetrics()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L732"
+    },
+    {
+      "id": "main_getmetrictransactions",
+      "label": "getMetricTransactions()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L756"
+    },
+    {
+      "id": "main_packageperiodlabel",
+      "label": "packagePeriodLabel()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L763"
+    },
+    {
+      "id": "main_parseperiod",
+      "label": "parsePeriod()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L774"
+    },
+    {
+      "id": "main_previousperiod",
+      "label": "previousPeriod()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L841"
+    },
+    {
+      "id": "main_countactivecustomers",
+      "label": "countActiveCustomers()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L848"
+    },
+    {
+      "id": "main_countactiveatdate",
+      "label": "countActiveAtDate()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L869"
+    },
+    {
+      "id": "main_countchurnedcustomers",
+      "label": "countChurnedCustomers()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L890"
+    },
+    {
+      "id": "main_countloyalcustomers",
+      "label": "countLoyalCustomers()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L922"
+    },
+    {
+      "id": "main_fetchmonthlynewcustomers",
+      "label": "fetchMonthlyNewCustomers()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L964"
+    },
+    {
+      "id": "main_fetchmonthlychurncustomers",
+      "label": "fetchMonthlyChurnCustomers()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L997"
+    },
+    {
+      "id": "main_fetchtoployalcustomers",
+      "label": "fetchTopLoyalCustomers()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1045"
+    },
+    {
+      "id": "main_fetchrecentlychurnedcustomers",
+      "label": "fetchRecentlyChurnedCustomers()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1146"
+    },
+    {
+      "id": "main_buildmonthbuckets",
+      "label": "buildMonthBuckets()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1238"
+    },
+    {
+      "id": "main_monthkey",
+      "label": "monthKey()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1252"
+    },
+    {
+      "id": "main_calculaterate",
+      "label": "calculateRate()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1256"
+    },
+    {
+      "id": "main_comparerate",
+      "label": "compareRate()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1264"
+    },
+    {
+      "id": "main_comparefloatrate",
+      "label": "compareFloatRate()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1274"
+    },
+    {
+      "id": "main_round2",
+      "label": "round2()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1284"
+    },
+    {
+      "id": "main_calctotalpages",
+      "label": "calcTotalPages()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1288"
+    },
+    {
+      "id": "main_parseintdefault",
+      "label": "parseIntDefault()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1295"
+    },
+    {
+      "id": "main_handleservererror",
+      "label": "handleServerError()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1306"
+    },
+    {
+      "id": "main_ensuremanagementschema",
+      "label": "ensureManagementSchema()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1314"
+    },
+    {
+      "id": "main_isdashboardsourceready",
+      "label": "isDashboardSourceReady()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1333"
+    },
+    {
+      "id": "main_buildemptydashboardpayload",
+      "label": "buildEmptyDashboardPayload()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1348"
+    },
+    {
+      "id": "main_builddummydashboardpayload",
+      "label": "buildDummyDashboardPayload()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1377"
+    },
+    {
+      "id": "main_builddummycustomerdetail",
+      "label": "buildDummyCustomerDetail()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1534"
+    },
+    {
+      "id": "main_getdummycustomers",
+      "label": "getDummyCustomers()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1555"
+    },
+    {
+      "id": "main_iswithinrange",
+      "label": "isWithinRange()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1584"
+    },
+    {
+      "id": "main_iscustomeractiveinrange",
+      "label": "isCustomerActiveInRange()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1588"
+    },
+    {
+      "id": "main_iscustomerchurnedinrange",
+      "label": "isCustomerChurnedInRange()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1593"
+    },
+    {
+      "id": "main_dummydurationmonths",
+      "label": "dummyDurationMonths()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1600"
+    },
+    {
+      "id": "main_countdummyactiveatdate",
+      "label": "countDummyActiveAtDate()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1619"
+    },
+    {
+      "id": "main_countdummyactiveinrange",
+      "label": "countDummyActiveInRange()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1630"
+    },
+    {
+      "id": "main_countdummychurnedinrange",
+      "label": "countDummyChurnedInRange()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1640"
+    },
+    {
+      "id": "main_auditmiddleware",
+      "label": "auditMiddleware()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1650"
+    },
+    {
+      "id": "main_setauditerror",
+      "label": "setAuditError()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1668"
+    },
+    {
+      "id": "main_saveauditlog",
+      "label": "saveAuditLog()",
+      "file_type": "code",
+      "source_file": "management\\main.go",
+      "source_location": "L1675"
+    }
+  ],
+  "edges": [
+    {
+      "source": "management_main_go",
+      "target": "context",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "errors",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "fmt",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "log",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "math",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "http",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "os",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "sort",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "strconv",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "strings",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "time",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "gin",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "pgxpool",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "godotenv",
+      "relation": "imports_from",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_monthlypoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_churnratepoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_loyalcustomeritem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_churnedcustomeritem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_dashboardcustomerpayload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L52",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_customerdetailpayload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_requestaudit",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L95",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_dummycustomer",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L104",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_packagesalesdistributionpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_packagerevenuecontributionpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L123",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_packagesalestrendpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L130",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_packageperformanceitem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L137",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_dashboardpackagepayload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L146",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_packagedetailtrendpoint",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L187",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_packagedetailpayload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L192",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_packagecatalogitem",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L203",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "management_dummypackagetransaction",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L210",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_main",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L218",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_getenv",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L264",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_requiremanagementrole",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L271",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_requirepackagedashboardrole",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L288",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_getdashboardcustomers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L305",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_getdashboardcustomerdetail",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L335",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_getdashboardpackages",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L351",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_getdashboardpackagedetail",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L381",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_builddummypackagedashboardpayload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L404",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_builddummypackagedetailpayload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L578",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_getpackagecatalog",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L650",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_getdummypackagetransactions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L659",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_aggregatepackagemetrics",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L732",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_getmetrictransactions",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L756",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_packageperiodlabel",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L763",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_parseperiod",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L774",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_previousperiod",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L841",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_countactivecustomers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L848",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_countactiveatdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L869",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_countchurnedcustomers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L890",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_countloyalcustomers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L922",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_fetchmonthlynewcustomers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L964",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_fetchmonthlychurncustomers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L997",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_fetchtoployalcustomers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1045",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_fetchrecentlychurnedcustomers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1146",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_buildmonthbuckets",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1238",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_monthkey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1252",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_calculaterate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1256",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_comparerate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1264",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_comparefloatrate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1274",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_round2",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1284",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_calctotalpages",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1288",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_parseintdefault",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1295",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_handleservererror",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1306",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_ensuremanagementschema",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1314",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_isdashboardsourceready",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1333",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_buildemptydashboardpayload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1348",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_builddummydashboardpayload",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1377",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_builddummycustomerdetail",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1534",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_getdummycustomers",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1555",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_iswithinrange",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1584",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_iscustomeractiveinrange",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1588",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_iscustomerchurnedinrange",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1593",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_dummydurationmonths",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1600",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_countdummyactiveatdate",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1619",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_countdummyactiveinrange",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1630",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_countdummychurnedinrange",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1640",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_auditmiddleware",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1650",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_setauditerror",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1668",
+      "weight": 1.0
+    },
+    {
+      "source": "management_main_go",
+      "target": "main_saveauditlog",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1675",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "main_getenv",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L222",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "main_ensuremanagementschema",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L237",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "main_auditmiddleware",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L242",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "main_requiremanagementrole",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L249",
+      "weight": 1.0
+    },
+    {
+      "source": "main_main",
+      "target": "main_requirepackagedashboardrole",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L253",
+      "weight": 1.0
+    },
+    {
+      "source": "main_requiremanagementrole",
+      "target": "main_setauditerror",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L279",
+      "weight": 1.0
+    },
+    {
+      "source": "main_requirepackagedashboardrole",
+      "target": "main_setauditerror",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L296",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardcustomers",
+      "target": "main_parseperiod",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L306",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardcustomers",
+      "target": "main_setauditerror",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L308",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardcustomers",
+      "target": "main_parseintdefault",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L313",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardcustomers",
+      "target": "main_builddummydashboardpayload",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L326",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardcustomerdetail",
+      "target": "main_builddummycustomerdetail",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L342",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardpackages",
+      "target": "main_parseperiod",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L352",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardpackages",
+      "target": "main_setauditerror",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L354",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardpackages",
+      "target": "main_parseintdefault",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L359",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardpackages",
+      "target": "main_builddummypackagedashboardpayload",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L372",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardpackagedetail",
+      "target": "main_parseperiod",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L388",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardpackagedetail",
+      "target": "main_setauditerror",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L390",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdashboardpackagedetail",
+      "target": "main_builddummypackagedetailpayload",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L395",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_getdummypackagetransactions",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L405",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_getpackagecatalog",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L406",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_aggregatepackagemetrics",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L412",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_previousperiod",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L413",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_packageperiodlabel",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L420",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_comparerate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L459",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_round2",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L462",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_calctotalpages",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L529",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_buildmonthbuckets",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L561",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedashboardpayload",
+      "target": "main_getmetrictransactions",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L568",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedetailpayload",
+      "target": "main_getpackagecatalog",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L579",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedetailpayload",
+      "target": "main_getdummypackagetransactions",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L593",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedetailpayload",
+      "target": "main_aggregatepackagemetrics",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L594",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedetailpayload",
+      "target": "main_previousperiod",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L595",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedetailpayload",
+      "target": "main_comparerate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L615",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedetailpayload",
+      "target": "main_round2",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L618",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedetailpayload",
+      "target": "main_buildmonthbuckets",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L621",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummypackagedetailpayload",
+      "target": "main_getmetrictransactions",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L628",
+      "weight": 1.0
+    },
+    {
+      "source": "main_getdummypackagetransactions",
+      "target": "main_getpackagecatalog",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L664",
+      "weight": 1.0
+    },
+    {
+      "source": "main_aggregatepackagemetrics",
+      "target": "main_iswithinrange",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L739",
+      "weight": 1.0
+    },
+    {
+      "source": "main_fetchmonthlynewcustomers",
+      "target": "main_monthkey",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L992",
+      "weight": 1.0
+    },
+    {
+      "source": "main_fetchmonthlychurncustomers",
+      "target": "main_monthkey",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1040",
+      "weight": 1.0
+    },
+    {
+      "source": "main_calculaterate",
+      "target": "main_round2",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1261",
+      "weight": 1.0
+    },
+    {
+      "source": "main_comparerate",
+      "target": "main_round2",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1271",
+      "weight": 1.0
+    },
+    {
+      "source": "main_comparefloatrate",
+      "target": "main_round2",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1281",
+      "weight": 1.0
+    },
+    {
+      "source": "main_handleservererror",
+      "target": "main_setauditerror",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1307",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_getdummycustomers",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1378",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_iscustomeractiveinrange",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1389",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_dummydurationmonths",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1393",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_iscustomerchurnedinrange",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1398",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_countdummyactiveatdate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1403",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_calculaterate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1404",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_previousperiod",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1406",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_countdummyactiveinrange",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1407",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_countdummychurnedinrange",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1408",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_comparerate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1418",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_comparefloatrate",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1419",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_buildmonthbuckets",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1421",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_iswithinrange",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1431",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummydashboardpayload",
+      "target": "main_calctotalpages",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1499",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummycustomerdetail",
+      "target": "main_getdummycustomers",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1535",
+      "weight": 1.0
+    },
+    {
+      "source": "main_builddummycustomerdetail",
+      "target": "main_dummydurationmonths",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1544",
+      "weight": 1.0
+    },
+    {
+      "source": "main_iscustomerchurnedinrange",
+      "target": "main_iswithinrange",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1597",
+      "weight": 1.0
+    },
+    {
+      "source": "main_countdummyactiveinrange",
+      "target": "main_iscustomeractiveinrange",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1633",
+      "weight": 1.0
+    },
+    {
+      "source": "main_countdummychurnedinrange",
+      "target": "main_iscustomerchurnedinrange",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1643",
+      "weight": 1.0
+    },
+    {
+      "source": "main_auditmiddleware",
+      "target": "main_saveauditlog",
+      "relation": "calls",
+      "confidence": "EXTRACTED",
+      "source_file": "management\\main.go",
+      "source_location": "L1662",
+      "weight": 1.0
+    }
+  ],
+  "input_tokens": 0,
+  "output_tokens": 0
+}

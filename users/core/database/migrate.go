@@ -139,6 +139,21 @@ func MigrateAndSeed(db interface{}) {
 
 	-- Upgrade ktp_image to TEXT if it was previously VARCHAR(500)
 	ALTER TABLE kyc_submissions ALTER COLUMN ktp_image TYPE TEXT;
+
+	-- Add rejected_fields column if not exists (TEXT[] for storing field names)
+	ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS rejected_fields TEXT[];
+
+	CREATE TABLE IF NOT EXISTS password_reset_tokens (
+		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+		user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		token UUID NOT NULL UNIQUE,
+		expires_at TIMESTAMP NOT NULL,
+		used_at TIMESTAMP,
+		created_at TIMESTAMP NOT NULL DEFAULT NOW()
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token ON password_reset_tokens(token);
+	CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);
 	`
 
 	log.Println("Menjalankan Migrasi PostgreSQL...")
@@ -167,6 +182,7 @@ func MigrateAndSeed(db interface{}) {
 	INSERT INTO roles (id, name, code, group_id) VALUES ('af47ce1c-1455-4a20-bafe-c2b7c2ab9995', 'Operasional', 'OPERASIONAL', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
 	INSERT INTO roles (id, name, code, group_id) VALUES ('bf47ce1c-1455-4a20-bafe-c2b7c2ab9996', 'Compliance', 'COMPLIANCE', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
 	INSERT INTO roles (id, name, code, group_id) VALUES ('cf47ce1c-1455-4a20-bafe-c2b7c2ab9997', 'Management', 'MANAGEMENT', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
+	INSERT INTO roles (id, name, code, group_id) VALUES ('ef47ce1c-1455-4a20-bafe-c2b7c2ab9997', 'Customer Support', 'ADMIN_SUPPORT', '3e98c63f-5474-4506-826c-ded22b59b3dd') ON CONFLICT (id) DO NOTHING;
 
 	INSERT INTO users (id, name, email, password, group_id, level_id, role_id, status, created_at, created_by) 
 	VALUES (
@@ -261,6 +277,22 @@ func MigrateAndSeed(db interface{}) {
 		log.Fatalf("Gagal seed Management: %v", err)
 	}
 	log.Println("  ✓ Management (management@thinktala.com / Manage123)")
+
+	// Customer Support (password: Support123)
+	supportPwd := hashPwd("Support123")
+	_, err = pool.Exec(ctx,
+		`INSERT INTO users (id, name, email, password, phone, group_id, level_id, role_id, status, created_at, created_by)
+		 VALUES (
+			'45ef7bff-4c69-4b56-aec8-ef7427601955', 'Customer Support', 'support@thinktala.com',
+			$1, '081234567893',
+			'3e98c63f-5474-4506-826c-ded22b59b3dd', 3, 'ef47ce1c-1455-4a20-bafe-c2b7c2ab9997',
+			'active', CURRENT_TIMESTAMP, '10ef7bff-4c69-4b56-aec8-ef7427601952'
+		) ON CONFLICT (email) DO UPDATE SET password = $1`,
+		supportPwd)
+	if err != nil {
+		log.Fatalf("Gagal seed Customer Support: %v", err)
+	}
+	log.Println("  ✓ Customer Support (support@thinktala.com / Support123)")
 
 	log.Println("Migrasi dan Seeding selesai!")
 }

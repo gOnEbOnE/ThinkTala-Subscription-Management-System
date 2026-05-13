@@ -1,0 +1,12 @@
+# import config
+packagefile context=C:\Users\yovan\AppData\Local\go-build\de\de9b707c08f537cd1e995322edd78ee5cbd891309bb261161017e98c4c1d08a7-d
+packagefile github.com/master-abror/zaframework/core/concurrency=C:\Users\yovan\AppData\Local\go-build\5e\5e2c021d53346e9e3c1d64d06e5476933c0632635256b4c66ee95d716064c5b9-d
+packagefile github.com/master-abror/zaframework/core/database=C:\Users\yovan\Documents\SEMESTER 6\propensii\.go-run-tmp\go-build3952021737\b206\_pkg_.a
+packagefile github.com/master-abror/zaframework/core/http=C:\Users\yovan\AppData\Local\go-build\fd\fd747336074d28fc68754c606afa9371ecc1279a290e7d7756c18f2d231d5c99-d
+packagefile github.com/master-abror/zaframework/core/utils=C:\Users\yovan\AppData\Local\go-build\89\89014fd77c6ce12a6e0f2ec39764e5d21bec90824696f143df57eb09430fafb4-d
+packagefile log=C:\Users\yovan\AppData\Local\go-build\09\09fbea7c3ef42e8a74c5e5bef3f9ff386b78b3354e0915be3b64d3e53537417b-d
+packagefile net/http=C:\Users\yovan\AppData\Local\go-build\b9\b96d3659cae533e43427206ded2fed528c2bb67a98ed30ec80fbe0a12269d974-d
+packagefile os=C:\Users\yovan\AppData\Local\go-build\6d\6d65fcdbe43fb8ca927d4bfc1e00f60426edb008458e1510d70d946c4507d746-d
+packagefile os/signal=C:\Users\yovan\AppData\Local\go-build\e5\e5e9142c9b918e3893f698d1d84b4d47734384036cfbdb0768945e00c4e176e6-d
+packagefile syscall=C:\Users\yovan\AppData\Local\go-build\3d\3dee3a62384f5da67deca0ac3869f9a7ec424dbb03002c1dec43353d54d2f81d-d
+packagefile time=C:\Users\yovan\AppData\Local\go-build\6b\6b6b728fcd59a2ea84a13cc62c224b99a029c57c84a63b33792fc34160437768-d

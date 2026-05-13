@@ -22,9 +22,9 @@ type Repository interface {
 	GetPricingTier(ctx context.Context, packageID string, durationMonths int) (float64, error)
 	CreateOrder(ctx context.Context, userID string, dto CreateOrderDTO, totalPrice float64) (*Order, error)
 	GetOrderByID(ctx context.Context, orderID string) (*OrderRecord, error)
-	ListOrdersByUser(ctx context.Context, userID string) ([]ClientOrderListItem, error)
-	ListOrdersForAdmin(ctx context.Context) ([]AdminOrderListItem, error)
-	UpdateOrderStatus(ctx context.Context, orderID, newStatus, verificationNote string) error
+	ListOrdersByUser(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error)
+	ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error)
+	UpdateOrderStatus(ctx context.Context, orderID, newStatus, verificationNote, adminID string) error
 	SavePaymentProof(ctx context.Context, orderID string, file PaymentProofFile) (*UploadPaymentProofResult, error)
 	GetPaymentProof(ctx context.Context, orderID string) (*PaymentProofFile, error)
 	CreateSubscriptionFromOrder(ctx context.Context, orderID string) (*ActivationResult, error)
@@ -238,10 +238,40 @@ func (r *orderRepo) GetOrderByID(ctx context.Context, orderID string) (*OrderRec
 	return rec, nil
 }
 
-// ListOrdersByUser mengambil riwayat pesanan milik user client
-func (r *orderRepo) ListOrdersByUser(ctx context.Context, userID string) ([]ClientOrderListItem, error) {
-	rows, err := r.db.Pool.Query(ctx,
-		`SELECT
+// ListOrdersByUser mengambil riwayat pesanan milik user client dengan filter opsional
+func (r *orderRepo) ListOrdersByUser(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error) {
+	args := []interface{}{userID}
+	where := []string{"o.user_id = $1"}
+	idx := 2
+
+	if filter.Status != "" {
+		where = append(where, fmt.Sprintf("o.status = $%d", idx))
+		args = append(args, strings.ToUpper(filter.Status))
+		idx++
+	}
+	if filter.StartDate != "" {
+		where = append(where, fmt.Sprintf("o.created_at >= $%d", idx))
+		args = append(args, filter.StartDate)
+		idx++
+	}
+	if filter.EndDate != "" {
+		where = append(where, fmt.Sprintf("o.created_at <= $%d", idx))
+		args = append(args, filter.EndDate)
+		idx++
+	}
+
+	page := filter.Page
+	if page < 1 {
+		page = 1
+	}
+	limit := filter.Limit
+	if limit < 1 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	query := fmt.Sprintf(`
+		SELECT
 			o.id,
 			o.invoice_number,
 			COALESCE(p.name, '-') AS package_name,
@@ -251,12 +281,16 @@ func (r *orderRepo) ListOrdersByUser(ctx context.Context, userID string) ([]Clie
 			(o.payment_proof IS NOT NULL AND octet_length(o.payment_proof) > 0) AS has_payment_proof,
 			o.payment_proof_uploaded_at,
 			o.created_at
-		 FROM subscription.orders o
-		 LEFT JOIN subscription.packages p ON p.id = o.package_id
-		 WHERE o.user_id = $1
-		 ORDER BY o.created_at DESC`,
-		userID,
+		FROM subscription.orders o
+		LEFT JOIN subscription.packages p ON p.id = o.package_id
+		WHERE %s
+		ORDER BY o.created_at DESC
+		LIMIT $%d OFFSET $%d`,
+		strings.Join(where, " AND "), idx, idx+1,
 	)
+	args = append(args, limit, offset)
+
+	rows, err := r.db.Pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("gagal mengambil riwayat order client: %w", err)
 	}
@@ -287,42 +321,87 @@ func (r *orderRepo) ListOrdersByUser(ctx context.Context, userID string) ([]Clie
 	return list, nil
 }
 
-// ListOrdersForAdmin mengambil daftar order untuk operasional
-func (r *orderRepo) ListOrdersForAdmin(ctx context.Context) ([]AdminOrderListItem, error) {
-	queryWithUsers := `SELECT
-		o.id,
-		o.invoice_number,
-		COALESCE(u.name, 'Unknown') AS client_name,
-		COALESCE(p.name, '-') AS package_name,
-		o.total_price,
-		o.payment_method,
-		o.status,
-		(o.payment_proof IS NOT NULL AND octet_length(o.payment_proof) > 0) AS has_payment_proof,
-		o.payment_proof_uploaded_at,
-		o.created_at
-	FROM subscription.orders o
-	LEFT JOIN users u ON u.id = o.user_id
-	LEFT JOIN subscription.packages p ON p.id = o.package_id
-	ORDER BY o.created_at DESC`
+// ListOrdersForAdmin mengambil daftar order untuk operasional dengan filter opsional
+func (r *orderRepo) ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error) {
+	args := []interface{}{}
+	where := []string{"1=1"}
+	idx := 1
 
-	queryWithoutUsers := `SELECT
-		o.id,
-		o.invoice_number,
-		'Unknown' AS client_name,
-		COALESCE(p.name, '-') AS package_name,
-		o.total_price,
-		o.payment_method,
-		o.status,
-		(o.payment_proof IS NOT NULL AND octet_length(o.payment_proof) > 0) AS has_payment_proof,
-		o.payment_proof_uploaded_at,
-		o.created_at
-	FROM subscription.orders o
-	LEFT JOIN subscription.packages p ON p.id = o.package_id
-	ORDER BY o.created_at DESC`
+	if filter.Status != "" {
+		where = append(where, fmt.Sprintf("o.status = $%d", idx))
+		args = append(args, strings.ToUpper(filter.Status))
+		idx++
+	}
+	if filter.StartDate != "" {
+		where = append(where, fmt.Sprintf("o.created_at >= $%d", idx))
+		args = append(args, filter.StartDate)
+		idx++
+	}
+	if filter.EndDate != "" {
+		where = append(where, fmt.Sprintf("o.created_at <= $%d", idx))
+		args = append(args, filter.EndDate)
+		idx++
+	}
 
-	rows, err := r.db.Pool.Query(ctx, queryWithUsers)
+	page := filter.Page
+	if page < 1 {
+		page = 1
+	}
+	limit := filter.Limit
+	if limit < 1 {
+		limit = 20
+	}
+	offset := (page - 1) * limit
+
+	whereSQL := strings.Join(where, " AND ")
+
+	// Search filter only applies when users table is joined
+	searchArgs := append([]interface{}{}, args...)
+	searchWhere := whereSQL
+	if filter.Search != "" {
+		pat := "%" + filter.Search + "%"
+		searchWhere += fmt.Sprintf(" AND (u.name ILIKE $%d OR u.email ILIKE $%d)", idx, idx+1)
+		searchArgs = append(searchArgs, pat, pat)
+		idx += 2
+	}
+
+	searchArgs = append(searchArgs, limit, offset)
+	argsNoSearch := append(args, limit, offset)
+
+	buildQuery := func(withUsers bool, w string) string {
+		join := ""
+		clientName := "'Unknown' AS client_name"
+		if withUsers {
+			join = "LEFT JOIN users u ON u.id = o.user_id"
+			clientName = "COALESCE(u.name, 'Unknown') AS client_name"
+		}
+		return fmt.Sprintf(`
+			SELECT
+				o.id,
+				o.invoice_number,
+				%s,
+				COALESCE(p.name, '-') AS package_name,
+				o.total_price,
+				o.payment_method,
+				o.status,
+				(o.payment_proof IS NOT NULL AND octet_length(o.payment_proof) > 0) AS has_payment_proof,
+				o.payment_proof_uploaded_at,
+				o.created_at
+			FROM subscription.orders o
+			%s
+			LEFT JOIN subscription.packages p ON p.id = o.package_id
+			WHERE %s
+			ORDER BY o.created_at DESC
+			LIMIT $%d OFFSET $%d`,
+			clientName, join, w, idx, idx+1,
+		)
+	}
+
+	rows, err := r.db.Pool.Query(ctx, buildQuery(true, searchWhere), searchArgs...)
 	if err != nil && strings.Contains(err.Error(), `relation "users" does not exist`) {
-		rows, err = r.db.Pool.Query(ctx, queryWithoutUsers)
+		// Reset idx for no-users query (search not applicable)
+		idx = len(args) + 1
+		rows, err = r.db.Pool.Query(ctx, buildQuery(false, whereSQL), argsNoSearch...)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("gagal mengambil daftar order admin: %w", err)
@@ -355,16 +434,33 @@ func (r *orderRepo) ListOrdersForAdmin(ctx context.Context) ([]AdminOrderListIte
 	return list, nil
 }
 
-// UpdateOrderStatus mengubah status order
-func (r *orderRepo) UpdateOrderStatus(ctx context.Context, orderID, newStatus, verificationNote string) error {
-	cmd, err := r.db.Pool.Exec(ctx,
-		`UPDATE subscription.orders
-		 SET status = $2,
-		     verification_note = $3,
-		     updated_at = NOW()
-		 WHERE id = $1`,
-		orderID, newStatus, strings.TrimSpace(verificationNote),
-	)
+// UpdateOrderStatus mengubah status order; adminID diset sebagai verified_by jika tidak kosong
+func (r *orderRepo) UpdateOrderStatus(ctx context.Context, orderID, newStatus, verificationNote, adminID string) error {
+	var cmd interface{ RowsAffected() int64 }
+	var err error
+
+	adminID = strings.TrimSpace(adminID)
+	if adminID != "" {
+		cmd, err = r.db.Pool.Exec(ctx,
+			`UPDATE subscription.orders
+			 SET status = $2,
+			     verification_note = $3,
+			     verified_by = $4,
+			     verified_at = NOW(),
+			     updated_at = NOW()
+			 WHERE id = $1`,
+			orderID, newStatus, strings.TrimSpace(verificationNote), adminID,
+		)
+	} else {
+		cmd, err = r.db.Pool.Exec(ctx,
+			`UPDATE subscription.orders
+			 SET status = $2,
+			     verification_note = $3,
+			     updated_at = NOW()
+			 WHERE id = $1`,
+			orderID, newStatus, strings.TrimSpace(verificationNote),
+		)
+	}
 	if err != nil {
 		return fmt.Errorf("gagal mengubah status order: %w", err)
 	}

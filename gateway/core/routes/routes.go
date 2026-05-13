@@ -101,8 +101,8 @@ func SetupRoutes(router *gin.Engine) {
 	// Compliance KYC APIs → Operational service
 	router.Any("/api/compliance/*path", reverseProxy(opsURL))
 
-	// Client KYC APIs → Operational service
-	router.Any("/api/kyc/*path", reverseProxy(opsURL))
+	// Client KYC APIs → Users service
+	router.Any("/api/kyc/*path", reverseProxy(usersURL))
 
 	log.Println("[GATEWAY] Routes configured")
 }

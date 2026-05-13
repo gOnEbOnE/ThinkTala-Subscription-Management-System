@@ -7,9 +7,11 @@ import (
 	"time"
 
 	"github.com/master-abror/zaframework/app/modules/admin"
+	"github.com/master-abror/zaframework/app/modules/compliance"
 	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
+	"github.com/master-abror/zaframework/app/modules/reset"
 	"github.com/master-abror/zaframework/app/routes"
 	"github.com/master-abror/zaframework/core"
 	"github.com/master-abror/zaframework/core/concurrency"
@@ -24,6 +26,7 @@ func main() {
 	// ============================================================
 
 	utils.LoadEnv(".env")
+	utils.LoadEnv("users/.env")
 
 	if err := utils.InitJWTLoadKeys("certs/private.pem", "certs/public.pem"); err != nil {
 		log.Fatalf("[FATAL] Gagal memuat kunci JWT: %v", err)
@@ -106,7 +109,11 @@ func main() {
 
 	app := core.New(cfg)
 
-	database.MigrateAndSeed(app.DB)
+	if app.DB != nil && app.DB.Pool != nil {
+		database.MigrateAndSeed(app.DB)
+	} else {
+		log.Println("[DB] Skipping migration: database connection is not initialized")
+	}
 
 	// ============================================================
 	// 2. WIRING FEATURES (Dependency Injection)
@@ -132,6 +139,12 @@ func main() {
 	adminRepo := admin.NewRepository(app.DB)
 	adminService := admin.NewService(adminRepo)
 	adminController := admin.NewController(app.Dispatcher, app.Response)
+
+	// --- Feature: Password Reset ---
+	resetAPIHandler := reset.NewAPIHandler(app.DB)
+
+	// --- Feature: Compliance Dashboard ---
+	complianceDashboard := compliance.NewDashboardHandler(app.DB)
 
 	// Register Job Handlers (Workers)
 	app.RegisterJob("auth", loginService.ProcessLoginJob)
@@ -161,6 +174,8 @@ func main() {
 		kycController,
 		kycAdminController,
 		adminController,
+		resetAPIHandler,
+		complianceDashboard,
 	)
 
 	// ============================================================

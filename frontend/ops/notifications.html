@@ -12,6 +12,9 @@
         rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/styles.css?v=2">
     <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+
     <style>
         .notification-desc {
             max-width: 440px;
@@ -48,6 +51,149 @@
             background: #1d4ed8;
             color: #ffffff;
         }
+
+        /* ── Quill Editor Dark Theme ───────────────────────── */
+        .quill-wrapper {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-card);
+        }
+
+        .quill-wrapper:focus-within {
+            border-color: rgba(0, 242, 255, 0.5);
+            box-shadow: 0 0 0 3px rgba(0, 242, 255, 0.1);
+        }
+
+        /* Quill toolbar */
+        .quill-wrapper .ql-toolbar {
+            background: rgba(0, 0, 0, 0.25);
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 6px 10px;
+            flex-wrap: wrap;
+        }
+
+        .quill-wrapper .ql-toolbar .ql-stroke {
+            stroke: rgba(200, 220, 255, 0.7);
+        }
+
+        .quill-wrapper .ql-toolbar .ql-fill {
+            fill: rgba(200, 220, 255, 0.7);
+        }
+
+        .quill-wrapper .ql-toolbar .ql-picker-label,
+        .quill-wrapper .ql-toolbar button {
+            color: rgba(200, 220, 255, 0.7);
+        }
+
+        .quill-wrapper .ql-toolbar button:hover .ql-stroke,
+        .quill-wrapper .ql-toolbar .ql-picker-label:hover .ql-stroke {
+            stroke: #00f2ff;
+        }
+
+        .quill-wrapper .ql-toolbar button:hover .ql-fill,
+        .quill-wrapper .ql-toolbar .ql-picker-label:hover .ql-fill {
+            fill: #00f2ff;
+        }
+
+        .quill-wrapper .ql-toolbar button:hover,
+        .quill-wrapper .ql-toolbar .ql-picker-label:hover {
+            color: #00f2ff;
+        }
+
+        .quill-wrapper .ql-toolbar button.ql-active .ql-stroke,
+        .quill-wrapper .ql-toolbar .ql-picker-label.ql-active .ql-stroke {
+            stroke: #00f2ff;
+        }
+
+        .quill-wrapper .ql-toolbar button.ql-active,
+        .quill-wrapper .ql-toolbar .ql-picker-label.ql-active {
+            color: #00f2ff;
+        }
+
+        .quill-wrapper .ql-toolbar .ql-picker-options {
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .quill-wrapper .ql-toolbar .ql-picker-item {
+            color: rgba(200,220,255,0.8);
+        }
+
+        .quill-wrapper .ql-toolbar .ql-picker-item:hover,
+        .quill-wrapper .ql-toolbar .ql-picker-item.ql-selected {
+            color: #00f2ff;
+        }
+
+        /* Quill editor area */
+        .quill-wrapper .ql-container {
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.98rem;
+            background: transparent;
+        }
+
+        .quill-wrapper .ql-editor {
+            min-height: 180px;
+            max-height: 360px;
+            overflow-y: auto;
+            color: var(--text-main);
+            background: var(--bg-card);
+            padding: 14px 16px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0,242,255,0.2) transparent;
+        }
+
+        .quill-wrapper .ql-editor.ql-blank::before {
+            color: var(--text-muted);
+            font-style: normal;
+        }
+
+        .quill-wrapper .ql-editor h1,
+        .quill-wrapper .ql-editor h2,
+        .quill-wrapper .ql-editor h3 {
+            color: #f0f8ff;
+        }
+
+        .quill-wrapper .ql-editor a {
+            color: #00f2ff;
+        }
+
+        .quill-wrapper .ql-editor blockquote {
+            border-left: 3px solid rgba(0,242,255,0.5);
+            padding-left: 14px;
+            color: rgba(200,220,255,0.65);
+        }
+
+        .quill-wrapper .ql-editor pre.ql-syntax {
+            background: rgba(0,0,0,0.4);
+            border-radius: 6px;
+            color: #7ee787;
+        }
+
+        /* Quill tooltip dark */
+        .ql-tooltip {
+            background: #111827 !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            color: var(--text-main) !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+            border-radius: 8px !important;
+        }
+
+        .ql-tooltip input {
+            background: rgba(0,0,0,0.4) !important;
+            border: 1px solid rgba(255,255,255,0.15) !important;
+            color: var(--text-main) !important;
+            border-radius: 6px !important;
+        }
+
+        .ql-tooltip a {
+            color: #00f2ff !important;
+        }
+
 
         .notif-table {
             background: transparent !important;
@@ -160,6 +306,19 @@
         .toast-msg.error {
             background: #dc2626;
         }
+
+        .pin-inline-badge {
+            border: 1px solid rgba(0, 242, 255, 0.4);
+            background: rgba(0, 242, 255, 0.12);
+            color: var(--accent-cyan);
+            border-radius: 999px;
+            font-size: 0.66rem;
+            padding: 2px 8px;
+            margin-left: 8px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
     </style>
 </head>
 
@@ -258,8 +417,11 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label small text-muted">Description <span class="text-danger">*</span></label>
-                        <textarea class="form-control" id="notifDescription" rows="4" placeholder="Isi notifikasi"
-                            style="background: var(--bg-card); border-color: var(--border-color); color: var(--text-main);"></textarea>
+                        <div class="quill-wrapper" id="quillWrapper">
+                            <!-- Toolbar defined via Quill options -->
+                            <div id="quillEditor"></div>
+                        </div>
+                        <input type="hidden" id="notifDescription">
                     </div>
                     <div class="row g-3">
                         <div class="col-md-4">
@@ -311,6 +473,13 @@
                                 <option value="client_lapsed">Client - Paket Lapsed</option>
                             </select>
                         </div>
+                        <div class="col-md-12">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="notifPinned" role="switch">
+                                <label class="form-check-label" for="notifPinned">Pin ke Discover Featured</label>
+                                <div class="small text-muted" id="pinnedSlotHint">Jika aktif, news ini diprioritaskan tampil di dua kartu Featured.</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-secondary" style="border-opacity: 0.2;">
@@ -352,9 +521,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/za-theme.js"></script>
     <script src="/assets/js/ops-layout.js"></script>
+    <!-- Quill JS -->
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+
     <script>
         const API_BASE = '/api/notifications';
+        const PINNED_MAX = 2;
         let searchTimer = null;
+        let pinnedUsed = 0;
         const CLIENT_TARGET_ROLES = new Set([
             'client',
             'client_never_bought',
@@ -382,6 +556,85 @@
             return div.innerHTML;
         }
 
+        function stripHtml(value) {
+            const div = document.createElement('div');
+            div.innerHTML = value == null ? '' : String(value);
+            return div.textContent || '';
+        }
+
+        let quillInstance = null;
+
+        function getDescriptionEditor() {
+            // Legacy — kept for compatibility
+            return document.getElementById('quillEditor');
+        }
+
+        function setDescriptionHtml(value) {
+            const html = String(value || '').trim();
+            if (quillInstance) {
+                quillInstance.setContents([]);  // clear
+                if (html) {
+                    const delta = quillInstance.clipboard.convert({ html });
+                    quillInstance.setContents(delta, 'silent');
+                }
+            }
+            document.getElementById('notifDescription').value = html;
+        }
+
+        function getDescriptionHtml() {
+            if (quillInstance) {
+                // Get the semantic HTML from the editor
+                const editorEl = quillInstance.root;
+                const raw = editorEl ? editorEl.innerHTML : '';
+                // If Quill has just a <p><br></p>, treat as empty
+                return raw === '<p><br></p>' ? '' : raw.trim();
+            }
+            return String(document.getElementById('notifDescription').value || '').trim();
+        }
+
+        function getDescriptionText() {
+            if (quillInstance) {
+                return quillInstance.getText().trim();
+            }
+            const editor = document.getElementById('quillEditor');
+            return editor ? editor.textContent.trim() : '';
+        }
+
+        function initDescriptionEditor() {
+            const toolbarOptions = [
+                [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'header': [1, 2, 3, 4, false] }],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+                [{ 'indent': '-1' }, { 'indent': '+1' }],
+                [{ 'align': [] }],
+                ['blockquote', 'code-block'],
+                ['link'],
+                ['clean']
+            ];
+
+            quillInstance = new Quill('#quillEditor', {
+                modules: {
+                    toolbar: {
+                        container: toolbarOptions
+                    }
+                },
+                placeholder: 'Tulis isi notifikasi di sini...',
+                theme: 'snow'
+            });
+
+            // Move toolbar inside quillWrapper before the editor
+            const wrapper = document.getElementById('quillWrapper');
+            const toolbar = wrapper.querySelector('.ql-toolbar');
+            if (toolbar) wrapper.insertBefore(toolbar, wrapper.firstChild);
+
+            // Sync hidden input on every change
+            quillInstance.on('text-change', function () {
+                document.getElementById('notifDescription').value = getDescriptionHtml();
+            });
+        }
+
         function toLocalDateTimeInput(value) {
             if (!value) return '';
             const d = new Date(value);
@@ -394,17 +647,66 @@
             return y + '-' + m + '-' + day + 'T' + hh + ':' + mm;
         }
 
+        function getEditingItem() {
+            const id = document.getElementById('notifId').value;
+            if (!id) return null;
+            return cachedNotifications.find(function (n) { return n.id === id; }) || null;
+        }
+
+        function updatePinnedSlotUI() {
+            const hintEl = document.getElementById('pinnedSlotHint');
+            const pinnedEl = document.getElementById('notifPinned');
+            if (!hintEl || !pinnedEl) return;
+
+            const editingItem = getEditingItem();
+            const editingPinned = !!(editingItem && editingItem.is_pinned);
+            const isFull = pinnedUsed >= PINNED_MAX;
+            const canEnable = !isFull || editingPinned;
+
+            pinnedEl.disabled = !canEnable;
+
+            if (isFull && !editingPinned) {
+                pinnedEl.checked = false;
+                hintEl.textContent = 'Slot pinned: ' + pinnedUsed + '/' + PINNED_MAX + ' (Penuh). Unpin/hapus salah satu news pinned untuk buka slot.';
+                return;
+            }
+
+            const remaining = Math.max(0, PINNED_MAX - pinnedUsed + (editingPinned ? 1 : 0));
+            hintEl.textContent = 'Slot pinned: ' + pinnedUsed + '/' + PINNED_MAX + ' (Sisa slot untuk post ini: ' + remaining + ').';
+        }
+
+        async function refreshPinnedUsage() {
+            try {
+                const res = await fetch(API_BASE, { credentials: 'include' });
+                const json = await res.json();
+                if (!res.ok) {
+                    throw new Error(json.error || 'Gagal cek slot pinned');
+                }
+                const allItems = Array.isArray(json.data) ? json.data : [];
+                pinnedUsed = allItems.reduce(function (sum, item) {
+                    return sum + (item && item.is_pinned ? 1 : 0);
+                }, 0);
+            } catch (e) {
+                pinnedUsed = (Array.isArray(cachedNotifications) ? cachedNotifications : []).reduce(function (sum, item) {
+                    return sum + (item && item.is_pinned ? 1 : 0);
+                }, 0);
+            }
+            updatePinnedSlotUI();
+        }
+
         function resetForm() {
             document.getElementById('notifId').value = '';
             document.getElementById('notifTitle').value = '';
-            document.getElementById('notifDescription').value = '';
+            setDescriptionHtml('');
             document.getElementById('notifType').value = 'system';
             document.getElementById('notifCtaUrl').value = '';
             document.getElementById('notifImageUrl').value = '';
             document.getElementById('notifExpiryDate').value = '';
             document.getElementById('notifActive').value = 'true';
             document.getElementById('notifTargetRole').value = 'client';
+            document.getElementById('notifPinned').checked = false;
             document.getElementById('modalTitle').textContent = 'New Notification';
+            updatePinnedSlotUI();
         }
 
         function typeBadge(type) {
@@ -440,14 +742,16 @@
         function openEdit(item) {
             document.getElementById('notifId').value = item.id || '';
             document.getElementById('notifTitle').value = item.title || '';
-            document.getElementById('notifDescription').value = item.description || item.message || '';
+            setDescriptionHtml(item.description || item.message || '');
             document.getElementById('notifType').value = (item.type || 'system').toLowerCase();
             document.getElementById('notifCtaUrl').value = item.cta_url || '';
             document.getElementById('notifImageUrl').value = item.image_url || '';
             document.getElementById('notifExpiryDate').value = toLocalDateTimeInput(item.expiry_date);
             document.getElementById('notifActive').value = item.is_active ? 'true' : 'false';
             document.getElementById('notifTargetRole').value = normalizeTargetRole(item.target_role);
+            document.getElementById('notifPinned').checked = !!item.is_pinned;
             document.getElementById('modalTitle').textContent = 'Edit Notification';
+            updatePinnedSlotUI();
             new bootstrap.Modal(document.getElementById('notifModal')).show();
         }
 
@@ -459,13 +763,15 @@
             }
 
             tbody.innerHTML = list.map(function (n, i) {
-                const desc = escapeHtml((n.description || n.message || '').trim());
+                const descRaw = stripHtml((n.description || n.message || '').trim());
+                const desc = escapeHtml(descRaw);
                 const createdAt = n.created_at ? new Date(n.created_at).toLocaleString('id-ID') : '-';
+                const pinnedBadge = n.is_pinned ? '<span class="pin-inline-badge">Pinned</span>' : '';
                 return [
                     '<tr>',
                     '<td class="small">' + (i + 1) + '</td>',
                     '<td>',
-                    '<div class="fw-semibold" style="color:var(--text-heading)">' + escapeHtml(n.title || '-') + '</div>',
+                    '<div class="fw-semibold" style="color:var(--text-heading)">' + escapeHtml(n.title || '-') + pinnedBadge + '</div>',
                     '<div class="small text-muted notification-desc" title="' + desc + '">' + (desc || '-') + '</div>',
                     '</td>',
                     '<td>' + typeBadge(n.type) + '</td>',
@@ -501,7 +807,7 @@
             if (!keyword) return list;
             return list.filter(function (n) {
                 const title = (n.title || '').toLowerCase();
-                const desc = (n.description || n.message || '').toLowerCase();
+                const desc = stripHtml(n.description || n.message || '').toLowerCase();
                 return title.indexOf(keyword) >= 0 || desc.indexOf(keyword) >= 0;
             });
         }
@@ -520,25 +826,41 @@
                 }
                 cachedNotifications = Array.isArray(json.data) ? json.data : [];
                 renderTable(applyLocalSearch(cachedNotifications));
+                await refreshPinnedUsage();
             } catch (e) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Gagal memuat daftar</td></tr>';
+                updatePinnedSlotUI();
             }
         }
 
         async function saveNotification() {
             const id = document.getElementById('notifId').value;
+            const editingItem = getEditingItem();
+            const wasPinned = !!(editingItem && editingItem.is_pinned);
+            const wantsPinned = document.getElementById('notifPinned').checked;
+
+            if (wantsPinned && !wasPinned && pinnedUsed >= PINNED_MAX) {
+                showToast('Slot pinned sudah penuh. Unpin/hapus news pinned yang ada dulu.', 'error');
+                updatePinnedSlotUI();
+                return;
+            }
+
+            const descriptionHtml = getDescriptionHtml();
+            const descriptionText = getDescriptionText();
+
             const payload = {
                 title: (document.getElementById('notifTitle').value || '').trim(),
-                description: (document.getElementById('notifDescription').value || '').trim(),
+                description: descriptionHtml,
                 type: (document.getElementById('notifType').value || '').trim(),
                 cta_url: (document.getElementById('notifCtaUrl').value || '').trim(),
                 image_url: (document.getElementById('notifImageUrl').value || '').trim(),
                 expiry_date: (document.getElementById('notifExpiryDate').value || '').trim(),
                 target_role: normalizeTargetRole(document.getElementById('notifTargetRole').value),
-                is_active: document.getElementById('notifActive').value === 'true'
+                is_active: document.getElementById('notifActive').value === 'true',
+                is_pinned: wantsPinned
             };
 
-            if (!payload.title || !payload.description || !payload.type) {
+            if (!payload.title || !descriptionText || !payload.type) {
                 showToast('Field wajib: title, description, type', 'error');
                 return;
             }
@@ -559,7 +881,7 @@
                 }
                 bootstrap.Modal.getInstance(document.getElementById('notifModal')).hide();
                 showToast(id ? 'Notifikasi berhasil diperbarui' : 'Notifikasi berhasil dibuat', 'success');
-                loadNotifications();
+                await loadNotifications();
             } catch (e) {
                 showToast(e.message || 'Gagal menyimpan notifikasi', 'error');
             }
@@ -586,8 +908,20 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            initDescriptionEditor();
             document.getElementById('filterType').addEventListener('change', loadNotifications);
             document.getElementById('filterStatus').addEventListener('change', loadNotifications);
+            document.getElementById('notifPinned').addEventListener('change', function (event) {
+                if (event.target.checked) {
+                    const editingItem = getEditingItem();
+                    const wasPinned = !!(editingItem && editingItem.is_pinned);
+                    if (!wasPinned && pinnedUsed >= PINNED_MAX) {
+                        event.target.checked = false;
+                        showToast('Slot pinned sudah penuh. Unpin/hapus news pinned yang ada dulu.', 'error');
+                    }
+                }
+                updatePinnedSlotUI();
+            });
             document.getElementById('searchInput').addEventListener('input', function () {
                 if (searchTimer) {
                     clearTimeout(searchTimer);
@@ -600,5 +934,4 @@
         });
     </script>
 </body>
-
 </html>

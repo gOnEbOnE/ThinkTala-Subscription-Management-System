@@ -3,8 +3,10 @@ package notification
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"notification/core/database"
 
@@ -37,6 +39,8 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 			image_url,
 			expiry_date,
 			is_active,
+			is_pinned,
+			view_count,
 			created_at,
 			created_by,
 			updated_at,
@@ -85,6 +89,8 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 			&n.ImageURL,
 			&n.ExpiryDate,
 			&n.IsActive,
+			&n.IsPinned,
+			&n.ViewCount,
 			&n.CreatedAt,
 			&n.CreatedBy,
 			&n.UpdatedAt,
@@ -94,6 +100,7 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 			return nil, err
 		}
 		n.Status = deriveStatus(n.IsActive, n.ExpiryDate)
+		applyDetailFlags(&n)
 		list = append(list, n)
 	}
 	if list == nil {
@@ -104,35 +111,22 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 
 // ListPublic mengambil notification aktif sesuai audience, max 20 data.
 func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
-	role = strings.ToLower(strings.TrimSpace(role))
-	if role != "" && role != "client" {
+	audienceKeys, err := r.buildAudienceKeys(role, userID)
+	if err != nil {
+		return nil, err
+	}
+	if len(audienceKeys) == 0 {
 		return []map[string]any{}, nil
-	}
-
-	audiences := map[string]struct{}{"client": {}}
-	if segments, err := r.resolveClientAudienceSegments(strings.TrimSpace(userID)); err == nil {
-		for _, segment := range segments {
-			segment = strings.ToLower(strings.TrimSpace(segment))
-			if segment == "" {
-				continue
-			}
-			audiences[segment] = struct{}{}
-		}
-	}
-
-	audienceKeys := make([]string, 0, len(audiences))
-	for key := range audiences {
-		audienceKeys = append(audienceKeys, key)
 	}
 
 	rows, err := r.db.Query(context.Background(), `
 		SELECT id, title, COALESCE(description, message, '') AS description, type, target_role,
-		       cta_url, image_url, expiry_date, created_at
+		       cta_url, image_url, expiry_date, created_at, is_pinned
 		FROM notifications
 		WHERE is_active = TRUE
 		  AND (expiry_date IS NULL OR expiry_date > NOW())
 		  AND LOWER(target_role) = ANY($1)
-		ORDER BY created_at DESC LIMIT 20
+		ORDER BY is_pinned DESC, created_at DESC LIMIT 20
 	`, audienceKeys)
 	if err != nil {
 		return nil, err
@@ -145,19 +139,27 @@ func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
 		var ctaURL, imageURL *string
 		var expiryDate *time.Time
 		var createdAt time.Time
-		err = rows.Scan(&id, &title, &desc, &typ, &target, &ctaURL, &imageURL, &expiryDate, &createdAt)
+		var isPinned bool
+		err = rows.Scan(&id, &title, &desc, &typ, &target, &ctaURL, &imageURL, &expiryDate, &createdAt, &isPinned)
 		if err != nil {
 			return nil, err
 		}
+		plainDesc := normalizePlainText(desc)
+		isLong := isLongContent(plainDesc)
+		excerpt := buildExcerpt(plainDesc)
 		list = append(list, map[string]any{
 			"id":          id,
 			"title":       title,
-			"description": desc,
-			"message":     desc,
+			"description": excerpt,
+			"message":     excerpt,
+			"excerpt":     excerpt,
 			"type":        typ,
 			"target_role": target,
 			"cta_url":     ctaURL,
 			"image_url":   imageURL,
+			"is_pinned":   isPinned,
+			"has_detail":  isLong,
+			"is_long_content": isLong,
 			"expiry_date": expiryDate,
 			"created_at":  createdAt,
 		})
@@ -234,6 +236,32 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 	return []string{"client_never_bought"}, nil
 }
 
+func (r *Repository) buildAudienceKeys(role, userID string) ([]string, error) {
+	role = strings.ToLower(strings.TrimSpace(role))
+	if role != "" && role != "client" {
+		return []string{}, nil
+	}
+
+	audiences := map[string]struct{}{"client": {}}
+	if segments, err := r.resolveClientAudienceSegments(strings.TrimSpace(userID)); err == nil {
+		for _, segment := range segments {
+			segment = strings.ToLower(strings.TrimSpace(segment))
+			if segment == "" {
+				continue
+			}
+			audiences[segment] = struct{}{}
+		}
+	} else if err != nil {
+		return nil, err
+	}
+
+	audienceKeys := make([]string, 0, len(audiences))
+	for key := range audiences {
+		audienceKeys = append(audienceKeys, key)
+	}
+	return audienceKeys, nil
+}
+
 // GetByID mengambil satu notification berdasarkan ID.
 func (r *Repository) GetByID(id string) (Notification, error) {
 	var n Notification
@@ -249,6 +277,8 @@ func (r *Repository) GetByID(id string) (Notification, error) {
 			image_url,
 			expiry_date,
 			is_active,
+			is_pinned,
+			view_count,
 			created_at,
 			created_by,
 			updated_at,
@@ -265,6 +295,8 @@ func (r *Repository) GetByID(id string) (Notification, error) {
 		&n.ImageURL,
 		&n.ExpiryDate,
 		&n.IsActive,
+		&n.IsPinned,
+		&n.ViewCount,
 		&n.CreatedAt,
 		&n.CreatedBy,
 		&n.UpdatedAt,
@@ -272,6 +304,67 @@ func (r *Repository) GetByID(id string) (Notification, error) {
 	)
 	if err == nil {
 		n.Status = deriveStatus(n.IsActive, n.ExpiryDate)
+		applyDetailFlags(&n)
+	}
+	return n, err
+}
+
+// GetPublicByID mengambil notification untuk client dan menambah view_count.
+func (r *Repository) GetPublicByID(id, role, userID string) (Notification, error) {
+	audienceKeys, err := r.buildAudienceKeys(role, userID)
+	if err != nil {
+		return Notification{}, err
+	}
+	if len(audienceKeys) == 0 {
+		return Notification{}, pgx.ErrNoRows
+	}
+
+	var n Notification
+	err = r.db.QueryRow(context.Background(), `
+		UPDATE notifications
+		SET view_count = view_count + 1
+		WHERE id = $1
+		  AND is_active = TRUE
+		  AND (expiry_date IS NULL OR expiry_date > NOW())
+		  AND LOWER(target_role) = ANY($2)
+		RETURNING
+			id,
+			title,
+			COALESCE(description, message, '') AS description,
+			COALESCE(message, description, '') AS message,
+			type,
+			target_role,
+			cta_url,
+			image_url,
+			expiry_date,
+			is_active,
+			is_pinned,
+			view_count,
+			created_at,
+			created_by,
+			updated_at,
+			updated_by
+	`, id, audienceKeys).Scan(
+		&n.ID,
+		&n.Title,
+		&n.Description,
+		&n.Message,
+		&n.Type,
+		&n.TargetRole,
+		&n.CTAURL,
+		&n.ImageURL,
+		&n.ExpiryDate,
+		&n.IsActive,
+		&n.IsPinned,
+		&n.ViewCount,
+		&n.CreatedAt,
+		&n.CreatedBy,
+		&n.UpdatedAt,
+		&n.UpdatedBy,
+	)
+	if err == nil {
+		n.Status = deriveStatus(n.IsActive, n.ExpiryDate)
+		applyDetailFlags(&n)
 	}
 	return n, err
 }
@@ -288,6 +381,10 @@ func (r *Repository) Create(req CreateNotificationRequest, id string) error {
 	isActive := true
 	if req.IsActive != nil {
 		isActive = *req.IsActive
+	}
+	isPinned := false
+	if req.IsPinned != nil {
+		isPinned = *req.IsPinned
 	}
 	if typ == "" {
 		typ = "info"
@@ -321,10 +418,10 @@ func (r *Repository) Create(req CreateNotificationRequest, id string) error {
 
 	_, err := r.db.Exec(context.Background(), `
 		INSERT INTO notifications
-			(id, title, message, description, type, target_role, cta_url, image_url, expiry_date, is_active, created_by)
+			(id, title, message, description, type, target_role, cta_url, image_url, expiry_date, is_active, is_pinned, created_by)
 		VALUES
-			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-	`, id, req.Title, desc, desc, typ, targetRole, ctaURL, imageURL, expiryAt, isActive, createdBy)
+			($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+	`, id, req.Title, desc, desc, typ, targetRole, ctaURL, imageURL, expiryAt, isActive, isPinned, createdBy)
 	return err
 }
 
@@ -365,10 +462,11 @@ func (r *Repository) Update(id string, req UpdateNotificationRequest) error {
 			image_url   = COALESCE(NULLIF($7,''), image_url),
 			expiry_date = COALESCE($8, expiry_date),
 			is_active   = COALESCE($9, is_active),
-			updated_by  = $10,
+			is_pinned   = COALESCE($10, is_pinned),
+			updated_by  = $11,
 			updated_at  = CURRENT_TIMESTAMP
 		WHERE id = $1
-	`, id, req.Title, desc, typ, targetRole, ctaURL, imageURL, expiryAt, req.IsActive, updatedBy)
+	`, id, req.Title, desc, typ, targetRole, ctaURL, imageURL, expiryAt, req.IsActive, req.IsPinned, updatedBy)
 	if err != nil {
 		return err
 	}
@@ -390,6 +488,19 @@ func (r *Repository) Delete(id string) error {
 	return err
 }
 
+func (r *Repository) countPinned(excludeID string) (int, error) {
+	ctx := context.Background()
+	var count int
+
+	if strings.TrimSpace(excludeID) == "" {
+		err := r.db.QueryRow(ctx, `SELECT COUNT(*) FROM notifications WHERE is_pinned = TRUE`).Scan(&count)
+		return count, err
+	}
+
+	err := r.db.QueryRow(ctx, `SELECT COUNT(*) FROM notifications WHERE is_pinned = TRUE AND id <> $1`, excludeID).Scan(&count)
+	return count, err
+}
+
 func deriveStatus(isActive bool, expiryDate *time.Time) string {
 	if expiryDate != nil && expiryDate.Before(time.Now()) {
 		return "expired"
@@ -398,6 +509,48 @@ func deriveStatus(isActive bool, expiryDate *time.Time) string {
 		return "active"
 	}
 	return "inactive"
+}
+
+const (
+	excerptMaxRunes = 180
+)
+
+var htmlTagRe = regexp.MustCompile(`<[^>]*>`)
+
+func normalizePlainText(value string) string {
+	clean := htmlTagRe.ReplaceAllString(value, "")
+	clean = strings.ReplaceAll(clean, "\u00a0", " ")
+	clean = strings.TrimSpace(clean)
+	if clean == "" {
+		return ""
+	}
+	return strings.Join(strings.Fields(clean), " ")
+}
+
+func buildExcerpt(value string) string {
+	plain := normalizePlainText(value)
+	if plain == "" {
+		return ""
+	}
+	if utf8.RuneCountInString(plain) <= excerptMaxRunes {
+		return plain
+	}
+	runes := []rune(plain)
+	trimmed := strings.TrimSpace(string(runes[:excerptMaxRunes]))
+	return strings.TrimRight(trimmed, " .,") + "..."
+}
+
+func isLongContent(value string) bool {
+	plain := normalizePlainText(value)
+	return utf8.RuneCountInString(plain) > excerptMaxRunes
+}
+
+func applyDetailFlags(n *Notification) {
+	plain := normalizePlainText(n.Description)
+	isLong := isLongContent(plain)
+	n.IsLong = isLong
+	n.HasDetail = isLong
+	n.Excerpt = buildExcerpt(plain)
 }
 
 func parseFlexibleTime(raw string) (time.Time, error) {

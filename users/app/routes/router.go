@@ -5,9 +5,11 @@ import (
 	"time"
 
 	"github.com/master-abror/zaframework/app/modules/admin"
+	"github.com/master-abror/zaframework/app/modules/compliance"
 	"github.com/master-abror/zaframework/app/modules/kyc"
 	"github.com/master-abror/zaframework/app/modules/login"
 	"github.com/master-abror/zaframework/app/modules/register"
+	"github.com/master-abror/zaframework/app/modules/reset"
 	"github.com/master-abror/zaframework/core"
 	middleware "github.com/master-abror/zaframework/core/http"
 )
@@ -19,6 +21,8 @@ func Init(app *core.App,
 	kycController *kyc.Controller,
 	kycAdminController *kyc.AdminController,
 	adminController *admin.Controller,
+	resetAPIHandler *reset.APIHandler,
+	complianceDashboard *compliance.DashboardHandler,
 ) {
 
 	// ==============================
@@ -83,7 +87,12 @@ func Init(app *core.App,
 	app.Router.Handle("POST /api/admin/kyc/{id}/reject", http.HandlerFunc(kycAdminController.ServeHTTP))
 
 	// ==============================
-	// 9. Admin User Management Routes (Protected via Gateway Auth - SUPERADMIN only)
+	// 9. Internal Service-to-Service Routes (no auth, internal network only)
+	// ==============================
+	app.Router.HandleFunc("GET /internal/users/{id}/email", adminController.GetUserEmail)
+
+	// ==============================
+	// 10. Admin User Management Routes (Protected via Gateway Auth - SUPERADMIN only)
 	// ==============================
 	app.Router.HandleFunc("POST /api/admin/users", adminController.CreateUser)
 	app.Router.HandleFunc("GET /api/admin/users", adminController.GetUsers)
@@ -91,5 +100,27 @@ func Init(app *core.App,
 	app.Router.HandleFunc("PUT /api/admin/users/{id}", adminController.EditUser)
 	app.Router.HandleFunc("PATCH /api/admin/users/{id}/deactivate", adminController.DeactivateUser)
 	app.Router.HandleFunc("PATCH /api/admin/users/{id}/reactivate", adminController.ReactivateUser)
+
+	// ==============================
+	// 11. Sprint 3 alias: /api/admin/internal-accounts (SUPERADMIN only)
+	// ==============================
+	app.Router.HandleFunc("GET /api/admin/internal-accounts", adminController.GetUsers)
+	app.Router.HandleFunc("POST /api/admin/internal-accounts", adminController.CreateUser)
+	app.Router.HandleFunc("PUT /api/admin/internal-accounts/{id}", adminController.EditUser)
+	app.Router.HandleFunc("PATCH /api/admin/internal-accounts/{id}/deactivate", adminController.DeactivateUser)
+	app.Router.HandleFunc("PATCH /api/admin/internal-accounts/{id}/reactivate", adminController.ReactivateUser)
+
+	// ==============================
+	// 12. Password Reset Routes (Public)
+	// ==============================
+	app.Router.HandleFunc("POST /api/auth/forgot-password", resetAPIHandler.ForgotPassword)
+	app.Router.HandleFunc("GET /api/auth/reset-password/validate", resetAPIHandler.ValidateResetToken)
+	app.Router.HandleFunc("POST /api/auth/reset-password", resetAPIHandler.ResetPassword)
+
+	// ==============================
+	// 13. Compliance Dashboard (SUPERADMIN, enforced by gateway)
+	// ==============================
+	app.Router.HandleFunc("GET /api/superadmin/dashboard/compliance", complianceDashboard.GetDashboard)
+	app.Router.HandleFunc("GET /internal/dashboard/kyc-summary", complianceDashboard.GetInternalSummary)
 
 }

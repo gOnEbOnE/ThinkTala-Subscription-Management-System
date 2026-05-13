@@ -1,0 +1,15 @@
+# import config
+packagefile github.com/master-abror/zaframework/app/modules/kyc=C:\Users\yovan\AppData\Local\go-build\87\8767ae0b113ceba3fd8cb5f2f15863a573d15d92e58fa1c89816f29e60cf379c-d
+packagefile github.com/master-abror/zaframework/app/modules/login=C:\Users\yovan\Documents\SEMESTER 6\propensii\.go-run-tmp\go-build4138566094\b312\_pkg_.a
+packagefile github.com/master-abror/zaframework/app/modules/register=C:\Users\yovan\AppData\Local\go-build\61\611137375548b35f890af6f7c70cc827912437af0fb0ff398bc5cffb553f0521-d
+packagefile github.com/master-abror/zaframework/app/routes=C:\Users\yovan\Documents\SEMESTER 6\propensii\.go-run-tmp\go-build4138566094\b315\_pkg_.a
+packagefile github.com/master-abror/zaframework/core=C:\Users\yovan\AppData\Local\go-build\1e\1eddd0346b1f61c6af949124b78ccde01aab854443727a3eef7f96ea8bc1dab7-d
+packagefile github.com/master-abror/zaframework/core/concurrency=C:\Users\yovan\AppData\Local\go-build\5e\5e2c021d53346e9e3c1d64d06e5476933c0632635256b4c66ee95d716064c5b9-d
+packagefile github.com/master-abror/zaframework/core/database=C:\Users\yovan\AppData\Local\go-build\da\dafa9c0a8116fd851f6d8bcb2be03b4eaaba1a9e08db67cc12bf3f54b0856e03-d
+packagefile github.com/master-abror/zaframework/core/session=C:\Users\yovan\AppData\Local\go-build\aa\aa632574d97c79798b997811c9ffcae9e8aab0590a1319f0b602e8678824f71e-d
+packagefile github.com/master-abror/zaframework/core/utils=C:\Users\yovan\AppData\Local\go-build\89\89014fd77c6ce12a6e0f2ec39764e5d21bec90824696f143df57eb09430fafb4-d
+packagefile log=C:\Users\yovan\AppData\Local\go-build\09\09fbea7c3ef42e8a74c5e5bef3f9ff386b78b3354e0915be3b64d3e53537417b-d
+packagefile net/http=C:\Users\yovan\AppData\Local\go-build\b9\b96d3659cae533e43427206ded2fed528c2bb67a98ed30ec80fbe0a12269d974-d
+packagefile strconv=C:\Users\yovan\AppData\Local\go-build\7a\7a7047a6d27ce084c219cc8e17245669b1e290c2d77594f6f19714bbb4a3dd8a-d
+packagefile time=C:\Users\yovan\AppData\Local\go-build\6b\6b6b728fcd59a2ea84a13cc62c224b99a029c57c84a63b33792fc34160437768-d
+packagefile runtime=C:\Users\yovan\AppData\Local\go-build\c6\c68c1df726da3f3e04dbf7af34addaa5367a09c425515a338069b4693cace785-d

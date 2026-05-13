@@ -78,7 +78,7 @@ func (c *Controller) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// 8. Validasi role harus ada di daftar yang diizinkan
 	if !AllowedRoles[input.Role] {
-		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAJEMEN, ADMIN_CS", nil)
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAGEMENT, ADMIN_CS", nil)
 		return
 	}
 
@@ -240,7 +240,7 @@ func (c *Controller) EditUser(w http.ResponseWriter, r *http.Request) {
 	if hasRole {
 		roleVal := strings.TrimSpace(strings.ToUpper(*input.Role))
 		if !AllowedRoles[roleVal] {
-			ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAJEMEN, ADMIN_CS", nil)
+			ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Role tidak valid. Role yang diizinkan: OPERASIONAL, COMPLIANCE, MANAGEMENT, ADMIN_CS", nil)
 			return
 		}
 		input.Role = &roleVal
@@ -350,3 +350,28 @@ func (c *Controller) ReactivateUser(w http.ResponseWriter, r *http.Request) {
 	ehttp.ApiJSON(w, r, http.StatusOK, true, "Akun berhasil diaktifkan kembali", result)
 }
 
+// GetUserEmail — GET /internal/users/{id}/email (internal service-to-service, no auth)
+func (c *Controller) GetUserEmail(w http.ResponseWriter, r *http.Request) {
+	userID := strings.TrimSpace(r.PathValue("id"))
+	if userID == "" {
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "User ID diperlukan", nil)
+		return
+	}
+
+	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_get_user_detail", userID, concurrency.PriorityHigh)
+	if err != nil {
+		ehttp.ApiJSON(w, r, http.StatusNotFound, false, "User tidak ditemukan", nil)
+		return
+	}
+
+	detail, ok := result.(*UserDetail)
+	if !ok {
+		ehttp.ApiJSON(w, r, http.StatusInternalServerError, false, "Gagal membaca data user", nil)
+		return
+	}
+
+	ehttp.ApiJSON(w, r, http.StatusOK, true, "OK", map[string]string{
+		"name":  detail.FullName,
+		"email": detail.Email,
+	})
+}

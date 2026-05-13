@@ -1,0 +1,22 @@
+# import config
+packagefile bytes=C:\Users\yovan\AppData\Local\go-build\c6\c609a204aaec4b4911654b5957914792eeb751cb4ee01ae15e1afe3361b05b11-d
+packagefile context=C:\Users\yovan\AppData\Local\go-build\de\de9b707c08f537cd1e995322edd78ee5cbd891309bb261161017e98c4c1d08a7-d
+packagefile encoding/base64=C:\Users\yovan\AppData\Local\go-build\10\107abb2f1260fdf718b9ec17b176bb8a7fd5bc0534583b5cc8179b9031cfee71-d
+packagefile encoding/json=C:\Users\yovan\AppData\Local\go-build\b4\b481a50b4984d89913124c49e34c06c7cbe477f753a4caecaadba6291360ce92-d
+packagefile errors=C:\Users\yovan\AppData\Local\go-build\60\60b2b16cf97e7047df9762a969461630da96999df5504f3be1758c726a04b111-d
+packagefile fmt=C:\Users\yovan\AppData\Local\go-build\20\207f6635331b9a1c4d35dd7629029b2e850226585f05c753c5eca3310391c2be-d
+packagefile github.com/google/uuid=C:\Users\yovan\AppData\Local\go-build\9b\9bff1a201c32ef3a7487b9989393404d515d524620b490c7a4677e590c745bc6-d
+packagefile github.com/jackc/pgx/v5=C:\Users\yovan\AppData\Local\go-build\9a\9a2c84999354c0877b5f44e4908c0cbeed4867c528669549136a034a78c3a053-d
+packagefile github.com/master-abror/zaframework/core/concurrency=C:\Users\yovan\AppData\Local\go-build\5e\5e2c021d53346e9e3c1d64d06e5476933c0632635256b4c66ee95d716064c5b9-d
+packagefile github.com/master-abror/zaframework/core/database=C:\Users\yovan\Documents\SEMESTER 6\propensii\.go-run-tmp\go-build3952021737\b206\_pkg_.a
+packagefile github.com/master-abror/zaframework/core/http=C:\Users\yovan\AppData\Local\go-build\fd\fd747336074d28fc68754c606afa9371ecc1279a290e7d7756c18f2d231d5c99-d
+packagefile github.com/master-abror/zaframework/core/utils=C:\Users\yovan\AppData\Local\go-build\89\89014fd77c6ce12a6e0f2ec39764e5d21bec90824696f143df57eb09430fafb4-d
+packagefile io=C:\Users\yovan\AppData\Local\go-build\4f\4f513c0fcdffdbeb1bb65d558ffcbc5d771527b40158479683574ca1585ecc49-d
+packagefile log=C:\Users\yovan\AppData\Local\go-build\09\09fbea7c3ef42e8a74c5e5bef3f9ff386b78b3354e0915be3b64d3e53537417b-d
+packagefile mime=C:\Users\yovan\AppData\Local\go-build\26\26dcd9164ad95f25c195ec03bf4613bcb5950a0ac055708502c4c912ca5f83db-d
+packagefile net/http=C:\Users\yovan\AppData\Local\go-build\b9\b96d3659cae533e43427206ded2fed528c2bb67a98ed30ec80fbe0a12269d974-d
+packagefile path/filepath=C:\Users\yovan\AppData\Local\go-build\94\943e0751f14e68114407cb079fd36deb094898fde84c00ca4a730acf5fc59ff5-d
+packagefile regexp=C:\Users\yovan\AppData\Local\go-build\dc\dc4ac402105357babc6e6ff8d9769d108624efabadb8bd401f07e64a5ba4486a-d
+packagefile strconv=C:\Users\yovan\AppData\Local\go-build\7a\7a7047a6d27ce084c219cc8e17245669b1e290c2d77594f6f19714bbb4a3dd8a-d
+packagefile strings=C:\Users\yovan\AppData\Local\go-build\bb\bb220c3fe80d5e749c9382ac634507db68495a2af21b9a9fd847547eb08f02ef-d
+packagefile time=C:\Users\yovan\AppData\Local\go-build\6b\6b6b728fcd59a2ea84a13cc62c224b99a029c57c84a63b33792fc34160437768-d

@@ -55,6 +55,28 @@ func (ctrl *Controller) ListPublic(c *gin.Context) {
 
 // Get mengembalikan satu notification berdasarkan ID.
 func (ctrl *Controller) Get(c *gin.Context) {
+	role := strings.TrimSpace(c.GetHeader("X-User-Role"))
+	if role == "" {
+		role = strings.TrimSpace(c.Query("role"))
+	}
+	userID := strings.TrimSpace(c.GetHeader("X-User-ID"))
+	if userID == "" {
+		userID = strings.TrimSpace(c.Query("user_id"))
+	}
+	if role == "" {
+		role = "client"
+	}
+
+	if strings.EqualFold(role, "client") {
+		n, err := ctrl.svc.GetPublicByID(c.Param("id"), role, userID)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Notification tidak ditemukan."})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"data": n})
+		return
+	}
+
 	n, err := ctrl.svc.GetByID(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Notification tidak ditemukan."})

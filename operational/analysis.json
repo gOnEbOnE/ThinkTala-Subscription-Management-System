@@ -1,0 +1,147 @@
+{
+  "graph_stats": {
+    "total_nodes": 202,
+    "total_edges": 476,
+    "avg_degree": 3.98,
+    "total_components": 6,
+    "largest_component_size": 235
+  },
+  "god_nodes": [
+    {
+      "id": "operational_core_http_middleware_go",
+      "label": "middleware.go",
+      "in_degree": 0,
+      "out_degree": 25,
+      "total_degree": 25,
+      "centrality": 0.124,
+      "source_file": "operational\\core\\http\\middleware.go"
+    },
+    {
+      "id": "app_new",
+      "label": "New()",
+      "in_degree": 19,
+      "out_degree": 4,
+      "total_degree": 23,
+      "centrality": 0.114,
+      "source_file": "operational\\core\\app.go"
+    },
+    {
+      "id": "methods_get",
+      "label": "Get()",
+      "in_degree": 14,
+      "out_degree": 3,
+      "total_degree": 17,
+      "centrality": 0.085,
+      "source_file": "operational\\core\\session\\methods.go"
+    },
+    {
+      "id": "operational_core_session_methods_go",
+      "label": "methods.go",
+      "in_degree": 0,
+      "out_degree": 16,
+      "total_degree": 16,
+      "centrality": 0.08,
+      "source_file": "operational\\core\\session\\methods.go"
+    },
+    {
+      "id": "operational_main_go",
+      "label": "main.go",
+      "in_degree": 0,
+      "out_degree": 15,
+      "total_degree": 15,
+      "centrality": 0.075,
+      "source_file": "operational\\main.go"
+    },
+    {
+      "id": "operational_core_app_go",
+      "label": "app.go",
+      "in_degree": 0,
+      "out_degree": 14,
+      "total_degree": 14,
+      "centrality": 0.07,
+      "source_file": "operational\\core\\app.go"
+    },
+    {
+      "id": "operational_core_utils_jwt_go",
+      "label": "jwt.go",
+      "in_degree": 0,
+      "out_degree": 13,
+      "total_degree": 13,
+      "centrality": 0.065,
+      "source_file": "operational\\core\\utils\\jwt.go"
+    },
+    {
+      "id": "operational_core_utils_redis_go",
+      "label": "redis.go",
+      "in_degree": 0,
+      "out_degree": 13,
+      "total_degree": 13,
+      "centrality": 0.065,
+      "source_file": "operational\\core\\utils\\redis.go"
+    },
+    {
+      "id": "za_form_secureform",
+      "label": "SecureForm",
+      "in_degree": 1,
+      "out_degree": 12,
+      "total_degree": 13,
+      "centrality": 0.065,
+      "source_file": "operational\\public\\assets\\js\\za-form.js"
+    },
+    {
+      "id": "operational_core_http_response_go",
+      "label": "response.go",
+      "in_degree": 0,
+      "out_degree": 12,
+      "total_degree": 12,
+      "centrality": 0.06,
+      "source_file": "operational\\core\\http\\response.go"
+    }
+  ],
+  "node_types": {
+    "code": 188,
+    "document": 14
+  },
+  "relation_distribution": {
+    "calls": 160,
+    "imports_from": 149,
+    "contains": 120,
+    "method": 47
+  },
+  "communities": {
+    "count": 6,
+    "sizes": [
+      235,
+      7,
+      4,
+      4,
+      2,
+      1
+    ]
+  },
+  "key_patterns": {
+    "high_fanout_nodes": [
+      [
+        "operational_core_http_middleware_go",
+        25
+      ],
+      [
+        "app_new",
+        23
+      ],
+      [
+        "methods_get",
+        17
+      ],
+      [
+        "operational_core_session_methods_go",
+        16
+      ],
+      [
+        "operational_main_go",
+        15
+      ]
+    ],
+    "isolated_nodes": 1
+  }
+}

@@ -1,0 +1,8 @@
+# import config
+packagefile github.com/master-abror/zaframework/app/modules/kyc=C:\Users\yovan\Documents\SEMESTER 6\propensii\.go-run-tmp\go-build3952021737\b002\_pkg_.a
+packagefile github.com/master-abror/zaframework/app/modules/login=C:\Users\yovan\Documents\SEMESTER 6\propensii\.go-run-tmp\go-build3952021737\b312\_pkg_.a
+packagefile github.com/master-abror/zaframework/app/modules/register=C:\Users\yovan\Documents\SEMESTER 6\propensii\.go-run-tmp\go-build3952021737\b314\_pkg_.a
+packagefile github.com/master-abror/zaframework/core=C:\Users\yovan\Documents\SEMESTER 6\propensii\.go-run-tmp\go-build3952021737\b316\_pkg_.a
+packagefile github.com/master-abror/zaframework/core/http=C:\Users\yovan\AppData\Local\go-build\fd\fd747336074d28fc68754c606afa9371ecc1279a290e7d7756c18f2d231d5c99-d
+packagefile net/http=C:\Users\yovan\AppData\Local\go-build\b9\b96d3659cae533e43427206ded2fed528c2bb67a98ed30ec80fbe0a12269d974-d
+packagefile time=C:\Users\yovan\AppData\Local\go-build\6b\6b6b728fcd59a2ea84a13cc62c224b99a029c57c84a63b33792fc34160437768-d

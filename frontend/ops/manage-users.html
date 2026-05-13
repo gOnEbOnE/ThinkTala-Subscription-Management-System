@@ -138,6 +138,23 @@
             color: #10b981;
         }
 
+        /* Override Bootstrap table defaults so text stays readable on dark background */
+        #usersTable {
+            --bs-table-color: #e2e8f0;
+            --bs-table-bg: transparent;
+            --bs-table-hover-bg: rgba(255, 255, 255, 0.03);
+            --bs-table-hover-color: #e2e8f0;
+            --bs-table-border-color: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+        }
+        #usersTable th {
+            color: #8b9bb4;
+            background: transparent;
+        }
+        #usersTable td {
+            color: #e2e8f0;
+        }
+
         /* Confirmation Modal */
         .modal-overlay {
             position: fixed;
@@ -251,7 +268,7 @@
                         <option value="">Semua Role</option>
                         <option value="OPERASIONAL">Operasional</option>
                         <option value="COMPLIANCE">Compliance</option>
-                        <option value="MANAJEMEN">Manajemen</option>
+                        <option value="MANAGEMENT">Manajemen</option>
                         <option value="ADMIN_CS">Admin CS</option>
                         <option value="SUPERADMIN">Superadmin</option>
                     </select>

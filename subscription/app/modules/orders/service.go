@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/master-abror/zaframework/core/utils"
 )
@@ -19,14 +20,14 @@ import (
 
 type Service interface {
 	CreateOrder(ctx context.Context, userID string, dto CreateOrderDTO) (*Order, error)
-	ListOrdersForClient(ctx context.Context, userID string) ([]ClientOrderListItem, error)
+	ListOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error)
 	GetOrderDetailForClient(ctx context.Context, userID, orderID string) (*ClientOrderDetail, error)
 	UploadPaymentProof(ctx context.Context, userID, orderID string, file PaymentProofFile) (*UploadPaymentProofResult, error)
 	GetPaymentProofForClient(ctx context.Context, userID, orderID string) (*PaymentProofFile, error)
-	ListOrdersForAdmin(ctx context.Context) ([]AdminOrderListItem, error)
+	ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error)
 	GetOrderDetailForAdmin(ctx context.Context, orderID string) (*AdminOrderDetail, error)
 	GetPaymentProofForAdmin(ctx context.Context, orderID string) (*PaymentProofFile, error)
-	VerifyOrder(ctx context.Context, orderID, action, rejectReason string) (*VerifyResult, error)
+	VerifyOrder(ctx context.Context, orderID, action, rejectReason, adminID string) (*VerifyResult, error)
 	ActivateOrderSystem(ctx context.Context, orderID string) (*ActivationResult, error)
 	GetActiveSubscriptions(ctx context.Context, userID string) ([]SubscriptionStatus, error)
 	GetActiveSubscription(ctx context.Context, userID string) (*SubscriptionStatus, error)
@@ -51,6 +52,40 @@ func NewService(repo Repository) Service {
 	return &orderService{repo: repo}
 }
 
+// notifBaseURL returns the Notification Service base URL, preferring Railway internal networking.
+func notifBaseURL() string {
+	if url := utils.GetEnv("NOTIFICATION_SERVICE_URL", ""); url != "" {
+		return url
+	}
+	// Railway internal hostname — works without env var on Railway
+	return "http://notification.railway.internal:5003"
+}
+
+// resolveClientEmail attempts to fetch the real email from the Users Service when
+// the subscription DB cannot resolve it via cross-DB join (returns "-").
+func resolveClientEmail(userID string) string {
+	usersURL := utils.GetEnv("USERS_SERVICE_URL", "http://users.railway.internal:8080")
+	resp, err := http.Get(usersURL + "/internal/users/" + userID + "/email")
+	if err != nil {
+		log.Printf("[ORDER NOTIF] Gagal fetch email user %s dari users service: %v", userID, err)
+		return ""
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return ""
+	}
+	var result struct {
+		Data struct {
+			Email string `json:"email"`
+			Name  string `json:"name"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return ""
+	}
+	return strings.TrimSpace(result.Data.Email)
+}
+
 // dispatchNotification mengirim event notifikasi dengan pola yang sama seperti KYC/register.
 // Urutan: 1) Redis queue -> 2) HTTP langsung ke Notification Service.
 func dispatchNotification(eventType, channel, to string, vars map[string]string) {
@@ -61,7 +96,7 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 		log.Printf("[ORDER NOTIF] Publish queue gagal, fallback HTTP: event=%s to=%s err=%v", eventType, to, err)
 	}
 
-	baseURL := utils.GetEnv("NOTIFICATION_SERVICE_URL", "http://localhost:5003")
+	baseURL := notifBaseURL()
 	payload := map[string]any{
 		"event_type": eventType,
 		"channel":    channel,
@@ -70,9 +105,10 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 	}
 	body, _ := json.Marshal(payload)
 
+	log.Printf("[ORDER NOTIF] Mengirim via HTTP ke %s (event=%s to=%s)", baseURL, eventType, to)
 	resp, err := http.Post(baseURL+"/api/notifications/send", "application/json", bytes.NewReader(body))
 	if err != nil {
-		log.Printf("[ORDER NOTIF] Notification service tidak tersedia (%v), tidak ada fallback SMTP", err)
+		log.Printf("[ORDER NOTIF] Notification service tidak tersedia (%v)", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -80,8 +116,9 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 	if resp.StatusCode != http.StatusOK {
 		var result map[string]any
 		_ = json.NewDecoder(resp.Body).Decode(&result)
-		log.Printf("[ORDER NOTIF] Gagal kirim via template (%d: %v), tidak ada fallback SMTP", resp.StatusCode, result["error"])
-		return
+		log.Printf("[ORDER NOTIF] Gagal kirim via template (%d: %v)", resp.StatusCode, result["error"])
+	} else {
+		log.Printf("[ORDER NOTIF] Berhasil kirim event=%s to=%s", eventType, to)
 	}
 
 	log.Printf("[ORDER NOTIF] Event dikirim via HTTP fallback: event=%s to=%s", eventType, to)
@@ -89,21 +126,39 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 
 // sendOrderNotification mengirim email verifikasi pembayaran ke client.
 func (s *orderService) sendOrderNotification(order *OrderRecord, eventType, paymentStatus, verificationNote string) {
-	if order == nil || strings.TrimSpace(order.ClientEmail) == "" {
+	if order == nil {
 		return
 	}
 
-	vars := map[string]string{
-		"client_name":       order.ClientName,
-		"client_email":      order.ClientEmail,
-		"invoice_number":    order.InvoiceNumber,
-		"package_name":      order.PackageName,
-		"payment_status":    paymentStatus,
-		"verification_note": verificationNote,
-		"duration_months":   fmt.Sprintf("%d", order.DurationMonths),
-		"order_id":          order.OrderID,
-	}
-	dispatchNotification(eventType, "email", order.ClientEmail, vars)
+	userID := order.UserID
+	clientEmail := order.ClientEmail
+	clientName := order.ClientName
+
+	go func() {
+		// Resolve email if cross-DB join returned placeholder
+		if strings.TrimSpace(clientEmail) == "" || clientEmail == "-" {
+			clientEmail = resolveClientEmail(userID)
+			if clientEmail == "" {
+				log.Printf("[ORDER NOTIF] Skipped: email tidak dapat di-resolve untuk user %s (event=%s)", userID, eventType)
+				return
+			}
+		}
+		// Use resolved name or fallback
+		if clientName == "" || clientName == "Unknown" {
+			clientName = clientEmail
+		}
+		vars := map[string]string{
+			"client_name":       clientName,
+			"client_email":      clientEmail,
+			"invoice_number":    order.InvoiceNumber,
+			"package_name":      order.PackageName,
+			"payment_status":    paymentStatus,
+			"verification_note": verificationNote,
+			"duration_months":   fmt.Sprintf("%d", order.DurationMonths),
+			"order_id":          order.OrderID,
+		}
+		dispatchNotification(eventType, "email", clientEmail, vars)
+	}()
 }
 
 // CreateOrder — validasi + tentukan harga dari package_pricing + buat order
@@ -177,11 +232,11 @@ func (s *orderService) CreateOrder(ctx context.Context, userID string, dto Creat
 	return s.repo.CreateOrder(ctx, userID, dto, price)
 }
 
-func (s *orderService) ListOrdersForClient(ctx context.Context, userID string) ([]ClientOrderListItem, error) {
+func (s *orderService) ListOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error) {
 	if strings.TrimSpace(userID) == "" {
 		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
 	}
-	return s.repo.ListOrdersByUser(ctx, userID)
+	return s.repo.ListOrdersByUser(ctx, userID, filter)
 }
 
 func (s *orderService) GetOrderDetailForClient(ctx context.Context, userID, orderID string) (*ClientOrderDetail, error) {
@@ -306,8 +361,8 @@ func (s *orderService) GetPaymentProofForClient(ctx context.Context, userID, ord
 	return proof, nil
 }
 
-func (s *orderService) ListOrdersForAdmin(ctx context.Context) ([]AdminOrderListItem, error) {
-	return s.repo.ListOrdersForAdmin(ctx)
+func (s *orderService) ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error) {
+	return s.repo.ListOrdersForAdmin(ctx, filter)
 }
 
 func (s *orderService) GetOrderDetailForAdmin(ctx context.Context, orderID string) (*AdminOrderDetail, error) {
@@ -375,7 +430,7 @@ func (s *orderService) GetPaymentProofForAdmin(ctx context.Context, orderID stri
 	return proof, nil
 }
 
-func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectReason string) (*VerifyResult, error) {
+func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectReason, adminID string) (*VerifyResult, error) {
 	if strings.TrimSpace(orderID) == "" {
 		return nil, errors.New("id pesanan wajib diisi")
 	}
@@ -414,14 +469,14 @@ func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectR
 		verificationNote = rejectReason
 	}
 
-	if err := s.repo.UpdateOrderStatus(ctx, orderID, newStatus, verificationNote); err != nil {
+	if err := s.repo.UpdateOrderStatus(ctx, orderID, newStatus, verificationNote, adminID); err != nil {
 		return nil, err
 	}
 
 	if action == "APPROVE" {
 		if _, err := s.repo.CreateSubscriptionFromOrder(ctx, orderID); err != nil {
 			// Best-effort rollback supaya status order konsisten jika auto-activate gagal.
-			_ = s.repo.UpdateOrderStatus(ctx, orderID, "PENDING_PAYMENT", "")
+			_ = s.repo.UpdateOrderStatus(ctx, orderID, "PENDING_PAYMENT", "", "")
 			return nil, fmt.Errorf("gagal aktivasi subscription otomatis: %w", err)
 		}
 	}
@@ -461,7 +516,18 @@ func (s *orderService) GetActiveSubscriptions(ctx context.Context, userID string
 	if strings.TrimSpace(userID) == "" {
 		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
 	}
-	return s.repo.ListActiveSubscriptionsByUser(ctx, userID)
+	list, err := s.repo.ListActiveSubscriptionsByUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range list {
+		days := int(time.Until(list[i].EndDate).Hours() / 24)
+		if days < 0 {
+			days = 0
+		}
+		list[i].DaysRemaining = days
+	}
+	return list, nil
 }
 
 func (s *orderService) GetActiveSubscription(ctx context.Context, userID string) (*SubscriptionStatus, error) {

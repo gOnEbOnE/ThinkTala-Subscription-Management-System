@@ -21,4 +21,7 @@ func Register(r *gin.Engine, dashboardHandler *dashboard.Handler) {
 		dashboardGroup.GET("/packages", dashboard.RequirePackageDashboardRole(), dashboardHandler.GetDashboardPackages)
 		dashboardGroup.GET("/package/:id", dashboard.RequirePackageDashboardRole(), dashboardHandler.GetDashboardPackageDetail)
 	}
+
+	// Sprint 3 B8: Overview dashboard (SUPERADMIN, enforced by gateway)
+	r.GET("/api/superadmin/dashboard/overview", dashboardHandler.GetOverviewDashboard)
 }

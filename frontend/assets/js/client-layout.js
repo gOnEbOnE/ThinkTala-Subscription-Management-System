@@ -37,6 +37,7 @@
     function isBillingActive() {
         return (path === '/client/billing-history' || path === '/client/order-detail' || path === '/client/checkout') ? ' active' : '';
     }
+    function isTicketActive() { return (path === '/client/support-tickets' || path === '/support/create' || path === '/client/support-create') ? ' active' : ''; }
 
     // ── Sidebar HTML ──────────────────────────────────────────────
     var sidebarHTML =
@@ -60,6 +61,7 @@
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-wand-magic-sparkles icon-left"></i><span class="link-text">Ask Nizza</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="sidebar-section-label"><span class="link-text"></span></li>' +
                 '<li class="nav-item"><a class="nav-link' + isKycActive() + '" href="/client/kyc-status"><i class="fa-solid fa-id-card icon-left"></i><span class="link-text">KYC Verification</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isTicketActive() + '" href="/client/support-create"><i class="fa-solid fa-ticket icon-left"></i><span class="link-text">Ticket</span></a></li>' +
             '</ul>' +
             '<ul class="nav flex-column mb-5">' +
                 '<li class="nav-item"><a class="nav-link' + isMembershipActive() + '" href="/client/packages-catalog"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span></a></li>' +
@@ -87,13 +89,13 @@
                 '<div class="dropdown ms-1">' +
                     '<a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown">' +
                         '<div class="rounded-circle p-1 position-relative" style="border: 2px solid var(--accent-cyan);">' +
-                            '<img src="https://ui-avatars.com/api/?name=Client&background=0b0e17&color=fff" class="rounded-circle" width="34" height="34" id="avatarImg">' +
+                            '<img src="https://ui-avatars.com/api/?name=User&background=0b0e17&color=fff" class="rounded-circle" width="34" height="34" id="avatarImg">' +
                         '</div>' +
                     '</a>' +
                     '<ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-3">' +
                         '<li class="px-3 py-2">' +
-                            '<span class="d-block fw-bold text-main" id="userName">Client</span>' +
-                            '<small class="text-muted" id="userEmail">client@thinktala.com</small>' +
+                            '<span class="d-block fw-bold text-main" id="userName">User</span>' +
+                            '<small class="text-muted" id="userEmail">-</small>' +
                         '</li>' +
                         '<li><hr class="dropdown-divider border-secondary opacity-25"></li>' +
                         '<li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>' +
