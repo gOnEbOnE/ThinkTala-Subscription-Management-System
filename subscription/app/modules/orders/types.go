@@ -78,7 +78,7 @@ type AdminOrderDetail struct {
 	InvoiceNumber          string     `json:"invoice_number"`
 	UserID                 string     `json:"user_id"`
 	ClientName             string     `json:"client_name"`
-	ClientEmail            string     `json:"client_email"`
+		ClientEmail            string     `json:"client_email"`
 	PackageID              string     `json:"package_id"`
 	PackageName            string     `json:"package_name"`
 	DurationMonths         int        `json:"duration_months"`
