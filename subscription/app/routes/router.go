@@ -72,6 +72,7 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	app.Router.HandleFunc("GET /api/admin/orders", ordersController.ListOrdersAdminHandler)
 	app.Router.HandleFunc("GET /api/admin/orders/{id}", ordersController.GetOrderDetailAdminHandler)
 	app.Router.HandleFunc("GET /api/admin/orders/{id}/payment-proof", ordersController.GetPaymentProofAdminHandler)
+	app.Router.HandleFunc("GET /api/admin/orders/{id}/invoice", ordersController.GetInvoiceAdminHandler)
 	app.Router.HandleFunc("PATCH /api/admin/orders/{id}/verify", ordersController.VerifyOrderHandler)
 
 	// ===================================================

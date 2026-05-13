@@ -37,6 +37,7 @@ type Service interface {
 	GetActiveSubscription(ctx context.Context, userID string) (*SubscriptionStatus, error)
 	RenewSubscription(ctx context.Context, userID string, dto RenewOrderDTO) (*RenewOrderResult, error)
 	GetInvoice(ctx context.Context, userID, orderID string) ([]byte, string, error)
+	GetInvoiceForAdmin(ctx context.Context, orderID string) ([]byte, string, error)
 	ProcessCreateOrderJob(ctx context.Context, payload interface{}) (interface{}, error)
 }
 
@@ -665,11 +666,34 @@ func (s *orderService) GetInvoice(ctx context.Context, userID, orderID string) (
 		return nil, "", errors.New("invoice hanya tersedia untuk pesanan dengan status PAID")
 	}
 
+	return generateInvoicePDF(rec)
+}
+
+// GetInvoiceForAdmin — generate PDF invoice tanpa cek kepemilikan (untuk OPERASIONAL)
+func (s *orderService) GetInvoiceForAdmin(ctx context.Context, orderID string) ([]byte, string, error) {
+	if strings.TrimSpace(orderID) == "" {
+		return nil, "", errors.New("id pesanan wajib diisi")
+	}
+
+	rec, err := s.repo.GetOrderByID(ctx, orderID)
+	if err != nil {
+		return nil, "", err
+	}
+	if rec == nil {
+		return nil, "", ErrOrderNotFound
+	}
+	if rec.Status != "PAID" {
+		return nil, "", errors.New("invoice hanya tersedia untuk pesanan dengan status PAID")
+	}
+
+	return generateInvoicePDF(rec)
+}
+
+func generateInvoicePDF(rec *OrderRecord) ([]byte, string, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetMargins(20, 20, 20)
 
-	// Header
 	pdf.SetFont("Helvetica", "B", 22)
 	pdf.SetTextColor(30, 30, 30)
 	pdf.CellFormat(0, 12, "ThinkNalyze", "", 1, "L", false, 0, "")
@@ -683,7 +707,6 @@ func (s *orderService) GetInvoice(ctx context.Context, userID, orderID string) (
 	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
 	pdf.Ln(6)
 
-	// Invoice title
 	pdf.SetFont("Helvetica", "B", 16)
 	pdf.SetTextColor(30, 30, 30)
 	pdf.CellFormat(0, 10, "INVOICE", "", 1, "R", false, 0, "")
@@ -695,7 +718,6 @@ func (s *orderService) GetInvoice(ctx context.Context, userID, orderID string) (
 
 	pdf.Ln(8)
 
-	// Field rows
 	printRow := func(label, value string) {
 		pdf.SetFont("Helvetica", "B", 10)
 		pdf.SetTextColor(80, 80, 80)
@@ -710,6 +732,7 @@ func (s *orderService) GetInvoice(ctx context.Context, userID, orderID string) (
 		clientName = "-"
 	}
 	printRow("Nama Klien", clientName)
+	printRow("Email", rec.ClientEmail)
 	printRow("Paket", rec.PackageName)
 	printRow("Durasi", fmt.Sprintf("%d bulan", rec.DurationMonths))
 	printRow("Metode Pembayaran", rec.PaymentMethod)
@@ -720,7 +743,6 @@ func (s *orderService) GetInvoice(ctx context.Context, userID, orderID string) (
 	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
 	pdf.Ln(6)
 
-	// Total
 	pdf.SetFont("Helvetica", "B", 12)
 	pdf.SetTextColor(30, 30, 30)
 	pdf.CellFormat(55, 8, "Total Pembayaran", "", 0, "L", false, 0, "")
@@ -736,7 +758,6 @@ func (s *orderService) GetInvoice(ctx context.Context, userID, orderID string) (
 	if err := pdf.Output(&buf); err != nil {
 		return nil, "", fmt.Errorf("gagal generate PDF: %w", err)
 	}
-
 	return buf.Bytes(), rec.InvoiceNumber, nil
 }
 

@@ -966,6 +966,52 @@ func (c *Controller) GetInvoiceHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(pdfBytes)
 }
 
+// GetInvoiceAdminHandler — GET /api/admin/orders/{id}/invoice (PBI-64, admin view)
+func (c *Controller) GetInvoiceAdminHandler(w http.ResponseWriter, r *http.Request) {
+	role := roleCode(r)
+	if role != "OPERASIONAL" && role != "SUPERADMIN" && role != "CEO" {
+		w.WriteHeader(http.StatusForbidden)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "endpoint ini hanya dapat diakses oleh role OPERASIONAL",
+		})
+		return
+	}
+
+	orderID := r.PathValue("id")
+	if orderID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "ID pesanan harus disertakan pada URL",
+		})
+		return
+	}
+
+	pdfBytes, invoiceNum, err := c.service.GetInvoiceForAdmin(r.Context(), orderID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrOrderNotFound):
+			w.WriteHeader(http.StatusNotFound)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": "Data pesanan tidak ditemukan",
+			})
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": err.Error(),
+			})
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", `attachment; filename="`+invoiceNum+`.pdf"`)
+	_, _ = w.Write(pdfBytes)
+}
+
 // GetMySubscriptionHandler — GET /api/subscriptions/me
 func (c *Controller) GetMySubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 	if roleCode(r) != "CLIENT" {
