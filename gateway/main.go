@@ -776,7 +776,7 @@ func main() {
 	// --- SUPPORT TICKETS Admin API (role-protected) - ADMIN_SUPPORT only ---
 	supportTicketsTarget := getRouteTarget("/api/admin/support/tickets")
 	if supportTicketsTarget == "" {
-		supportTicketsTarget = "http://localhost:2004"
+		supportTicketsTarget = "http://tickets.railway.internal:8080"
 	}
 	http.HandleFunc("/api/admin/support/tickets", withRolesAuth([]string{"ADMIN_SUPPORT", "SUPERADMIN", "CEO"},
 		createProxyHandler(supportTicketsTarget, true),
@@ -814,7 +814,7 @@ func main() {
 	}
 	ticketsTarget := getRouteTarget("/api/admin/support/tickets")
 	if ticketsTarget == "" {
-		ticketsTarget = "http://localhost:2004"
+		ticketsTarget = "http://tickets.railway.internal:8080"
 	}
 	log.Printf("[STARTUP] tickets proxy target: %s", ticketsTarget)
 	http.HandleFunc("/api/superadmin/dashboard/compliance", withRolesAuth([]string{"SUPERADMIN"},
