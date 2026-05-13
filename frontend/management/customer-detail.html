@@ -37,8 +37,8 @@
             top: 1rem;
             right: 1rem;
             z-index: 9999;
-            border: 1px solid rgba(249, 62, 62, 0.35);
-            background: rgba(249, 62, 62, 0.95);
+            border: 1px solid rgba(53, 208, 127, 0.35);
+            background: rgba(53, 208, 127, 0.95);
             color: #fff;
             border-radius: 8px;
             padding: 0.7rem 0.85rem;
@@ -156,7 +156,20 @@
             }
 
             try {
-                const res = await fetch(`/api/dashboard/customer/${encodeURIComponent(id)}`, { credentials: 'include' });
+                let user = null;
+                try { user = JSON.parse(localStorage.getItem('user') || 'null'); } catch (_e) {}
+                const userRole = (user?.role_code || user?.level_code || user?.level || '').toUpperCase();
+                
+                const headers = {};
+                if (userRole) {
+                    headers['X-User-Role'] = userRole;
+                }
+                
+                const res = await fetch(`/api/dashboard/customer/${encodeURIComponent(id)}`, {
+                    method: 'GET',
+                    headers: headers,
+                    credentials: 'include'
+                });
                 if (res.status === 404) {
                     showToast('Detail customer tidak tersedia.');
                     return;

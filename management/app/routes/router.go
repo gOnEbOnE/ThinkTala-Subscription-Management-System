@@ -17,8 +17,10 @@ func Register(r *gin.Engine, dashboardHandler *dashboard.Handler) {
 	dashboardGroup.Use(dashboard.RequireManagementRole())
 	{
 		dashboardGroup.GET("/customers", dashboardHandler.GetDashboardCustomers)
+		dashboardGroup.GET("/customers/export", dashboardHandler.ExportDashboardCustomers)
 		dashboardGroup.GET("/customer/:id", dashboardHandler.GetDashboardCustomerDetail)
 		dashboardGroup.GET("/packages", dashboard.RequirePackageDashboardRole(), dashboardHandler.GetDashboardPackages)
+		dashboardGroup.GET("/packages/export", dashboard.RequirePackageDashboardRole(), dashboardHandler.ExportDashboardPackages)
 		dashboardGroup.GET("/package/:id", dashboard.RequirePackageDashboardRole(), dashboardHandler.GetDashboardPackageDetail)
 	}
 
