@@ -44,6 +44,7 @@
     { "source": "/management/dashboard-support", "destination": "/management/dashboard-support.html" },
     { "source": "/management/dashboard-operational", "destination": "/management/dashboard-operational.html" },
     { "source": "/management/customer-detail", "destination": "/management/customer-detail.html" },
+    { "source": "/dashboard/customer/:id", "destination": "/management/customer-detail.html" },
     { "source": "/management/package-detail", "destination": "/management/package-detail.html" },
     { "source": "/market-insight", "destination": "/market-insight.html" },
     { "source": "/assets/:path*", "destination": "/assets/:path*" },
