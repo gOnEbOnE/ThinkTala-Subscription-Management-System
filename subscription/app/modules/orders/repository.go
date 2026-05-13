@@ -23,13 +23,17 @@ type Repository interface {
 	CreateOrder(ctx context.Context, userID string, dto CreateOrderDTO, totalPrice float64) (*Order, error)
 	GetOrderByID(ctx context.Context, orderID string) (*OrderRecord, error)
 	ListOrdersByUser(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error)
+	CountOrdersByUser(ctx context.Context, userID string, filter ClientOrderFilter) (int, error)
 	ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error)
+	CountOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) (int, error)
 	UpdateOrderStatus(ctx context.Context, orderID, newStatus, verificationNote, adminID string) error
+	CancelOrder(ctx context.Context, orderID, userID string) error
 	SavePaymentProof(ctx context.Context, orderID string, file PaymentProofFile) (*UploadPaymentProofResult, error)
 	GetPaymentProof(ctx context.Context, orderID string) (*PaymentProofFile, error)
 	CreateSubscriptionFromOrder(ctx context.Context, orderID string) (*ActivationResult, error)
 	ListActiveSubscriptionsByUser(ctx context.Context, userID string) ([]SubscriptionStatus, error)
 	GetActiveSubscriptionByUser(ctx context.Context, userID string) (*SubscriptionStatus, error)
+	GetLatestSubscriptionByUser(ctx context.Context, userID string) (*SubscriptionStatus, error)
 }
 
 // ==========================================
@@ -255,7 +259,7 @@ func (r *orderRepo) ListOrdersByUser(ctx context.Context, userID string, filter 
 		idx++
 	}
 	if filter.EndDate != "" {
-		where = append(where, fmt.Sprintf("o.created_at <= $%d", idx))
+		where = append(where, fmt.Sprintf("o.created_at < $%d::date + INTERVAL '1 day'", idx))
 		args = append(args, filter.EndDate)
 		idx++
 	}
@@ -338,7 +342,7 @@ func (r *orderRepo) ListOrdersForAdmin(ctx context.Context, filter AdminOrderFil
 		idx++
 	}
 	if filter.EndDate != "" {
-		where = append(where, fmt.Sprintf("o.created_at <= $%d", idx))
+		where = append(where, fmt.Sprintf("o.created_at < $%d::date + INTERVAL '1 day'", idx))
 		args = append(args, filter.EndDate)
 		idx++
 	}
@@ -468,6 +472,140 @@ func (r *orderRepo) UpdateOrderStatus(ctx context.Context, orderID, newStatus, v
 		return fmt.Errorf("pesanan tidak ditemukan")
 	}
 	return nil
+}
+
+// CountOrdersByUser menghitung total pesanan milik user dengan filter yang sama
+func (r *orderRepo) CountOrdersByUser(ctx context.Context, userID string, filter ClientOrderFilter) (int, error) {
+	args := []interface{}{userID}
+	where := []string{"o.user_id = $1"}
+	idx := 2
+
+	if filter.Status != "" {
+		where = append(where, fmt.Sprintf("o.status = $%d", idx))
+		args = append(args, strings.ToUpper(filter.Status))
+		idx++
+	}
+	if filter.StartDate != "" {
+		where = append(where, fmt.Sprintf("o.created_at >= $%d", idx))
+		args = append(args, filter.StartDate)
+		idx++
+	}
+	if filter.EndDate != "" {
+		where = append(where, fmt.Sprintf("o.created_at < $%d::date + INTERVAL '1 day'", idx))
+		args = append(args, filter.EndDate)
+		idx++
+	}
+	_ = idx
+
+	query := fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM subscription.orders o
+		WHERE %s`, strings.Join(where, " AND "))
+
+	var total int
+	if err := r.db.Pool.QueryRow(ctx, query, args...).Scan(&total); err != nil {
+		return 0, fmt.Errorf("gagal menghitung riwayat order client: %w", err)
+	}
+	return total, nil
+}
+
+// CountOrdersForAdmin menghitung total pesanan untuk admin dengan filter yang sama
+func (r *orderRepo) CountOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) (int, error) {
+	args := []interface{}{}
+	where := []string{"1=1"}
+	idx := 1
+
+	if filter.Status != "" {
+		where = append(where, fmt.Sprintf("o.status = $%d", idx))
+		args = append(args, strings.ToUpper(filter.Status))
+		idx++
+	}
+	if filter.StartDate != "" {
+		where = append(where, fmt.Sprintf("o.created_at >= $%d", idx))
+		args = append(args, filter.StartDate)
+		idx++
+	}
+	if filter.EndDate != "" {
+		where = append(where, fmt.Sprintf("o.created_at < $%d::date + INTERVAL '1 day'", idx))
+		args = append(args, filter.EndDate)
+		idx++
+	}
+
+	whereSQL := strings.Join(where, " AND ")
+
+	var query string
+	var queryArgs []interface{}
+
+	if filter.Search != "" {
+		pat := "%" + filter.Search + "%"
+		searchWhere := whereSQL + fmt.Sprintf(" AND (u.name ILIKE $%d OR u.email ILIKE $%d)", idx, idx+1)
+		query = fmt.Sprintf(`
+			SELECT COUNT(*)
+			FROM subscription.orders o
+			LEFT JOIN users u ON u.id = o.user_id
+			WHERE %s`, searchWhere)
+		queryArgs = append(args, pat, pat)
+	} else {
+		query = fmt.Sprintf(`SELECT COUNT(*) FROM subscription.orders o WHERE %s`, whereSQL)
+		queryArgs = args
+	}
+
+	var total int
+	err := r.db.Pool.QueryRow(ctx, query, queryArgs...).Scan(&total)
+	if err != nil && strings.Contains(err.Error(), `relation "users" does not exist`) {
+		fallbackQuery := fmt.Sprintf(`SELECT COUNT(*) FROM subscription.orders o WHERE %s`, whereSQL)
+		err = r.db.Pool.QueryRow(ctx, fallbackQuery, args...).Scan(&total)
+	}
+	if err != nil {
+		return 0, fmt.Errorf("gagal menghitung daftar order admin: %w", err)
+	}
+	return total, nil
+}
+
+// CancelOrder membatalkan pesanan yang masih PENDING_PAYMENT milik user
+func (r *orderRepo) CancelOrder(ctx context.Context, orderID, userID string) error {
+	cmd, err := r.db.Pool.Exec(ctx,
+		`UPDATE subscription.orders
+		 SET status = 'CANCELLED',
+		     verification_note = 'Dibatalkan oleh klien',
+		     updated_at = NOW()
+		 WHERE id = $1 AND user_id = $2 AND status = 'PENDING_PAYMENT'`,
+		orderID, userID,
+	)
+	if err != nil {
+		return fmt.Errorf("gagal membatalkan pesanan: %w", err)
+	}
+	if cmd.RowsAffected() == 0 {
+		return fmt.Errorf("pesanan tidak ditemukan, bukan milik Anda, atau tidak dalam status PENDING_PAYMENT")
+	}
+	return nil
+}
+
+// GetLatestSubscriptionByUser mengambil subscription terbaru (aktif atau kadaluarsa) milik client.
+func (r *orderRepo) GetLatestSubscriptionByUser(ctx context.Context, userID string) (*SubscriptionStatus, error) {
+	var item SubscriptionStatus
+	err := r.db.Pool.QueryRow(ctx,
+		`SELECT
+			s.id,
+			s.package_id,
+			COALESCE(p.name, '-') AS package_name,
+			s.start_date,
+			s.end_date,
+			s.status
+		 FROM subscription.subscriptions s
+		 LEFT JOIN subscription.packages p ON p.id = s.package_id
+		 WHERE s.user_id = $1
+		 ORDER BY s.created_at DESC
+		 LIMIT 1`,
+		userID,
+	).Scan(&item.SubscriptionID, &item.PackageID, &item.PackageName, &item.StartDate, &item.EndDate, &item.Status)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("gagal mengambil subscription terbaru: %w", err)
+	}
+	return &item, nil
 }
 
 // SavePaymentProof menyimpan bukti transfer ke orders

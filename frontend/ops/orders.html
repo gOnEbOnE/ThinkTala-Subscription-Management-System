@@ -105,14 +105,16 @@
                     <small class="text-muted" id="tableSubtitle">Memuat data...</small>
                 </div>
                 <div class="d-flex gap-2 align-items-center flex-wrap">
-                    <select class="form-select form-select-sm" id="filterStatus" style="max-width:180px;" onchange="applyFilter()">
+                    <select class="form-select form-select-sm" id="filterStatus" style="max-width:160px;" onchange="applyFilter()">
                         <option value="">Semua Status</option>
                         <option value="PENDING_PAYMENT">Pending</option>
                         <option value="PAID">Paid</option>
                         <option value="CANCELLED">Cancelled</option>
                         <option value="EXPIRED">Expired</option>
                     </select>
-                    <input type="text" class="form-control form-control-sm" id="filterSearch" placeholder="Cari nama / invoice..." style="max-width:220px;" oninput="applyFilter()">
+                    <input type="text" class="form-control form-control-sm" id="filterSearch" placeholder="Cari nama / invoice..." style="max-width:200px;" oninput="applyFilter()">
+                    <input type="date" class="form-control form-control-sm" id="filterStartDate" style="max-width:145px;" onchange="applyFilter()" title="Dari Tanggal">
+                    <input type="date" class="form-control form-control-sm" id="filterEndDate" style="max-width:145px;" onchange="applyFilter()" title="Sampai Tanggal">
                     <button class="btn btn-sm btn-outline-secondary" onclick="loadOrders()" title="Refresh">
                         <i class="fa-solid fa-arrows-rotate"></i>
                     </button>
@@ -297,26 +299,15 @@
     <script src="/assets/js/za-theme.js"></script>
     <script src="/assets/js/ops-layout.js?v=cs-support-2"></script>
     <script>
-        let allOrders = [];
-        let filteredOrders = [];
         let currentPage = 1;
-        const perPage = 10;
+        let currentMeta = null;
         let selectedOrder = null;
         let pendingAction = '';
         let autoOpenOrderId = '';
 
         function applyFilter() {
             currentPage = 1;
-            var status = document.getElementById('filterStatus').value;
-            var search = (document.getElementById('filterSearch').value || '').toLowerCase().trim();
-            filteredOrders = allOrders.filter(function (o) {
-                var matchStatus = !status || normalizeStatus(o.status) === status;
-                var matchSearch = !search ||
-                    (o.invoice_number || '').toLowerCase().indexOf(search) >= 0 ||
-                    (o.client_name || '').toLowerCase().indexOf(search) >= 0;
-                return matchStatus && matchSearch;
-            });
-            renderTable(filteredOrders);
+            loadOrders();
         }
 
         function formatRp(val) {
@@ -358,11 +349,12 @@
             bootstrap.Toast.getOrCreateInstance(t).show();
         }
 
-        function renderTable(orders) {
+        function renderTable(orders, meta) {
             const tbody = document.getElementById('ordersTableBody');
             const subtitle = document.getElementById('tableSubtitle');
+            const total = meta ? meta.total : (orders ? orders.length : 0);
 
-            if (!orders.length) {
+            if (!orders || !orders.length) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="7" class="text-center py-5 text-muted">
@@ -376,14 +368,9 @@
                 return;
             }
 
-            const total = orders.length;
-            const totalPages = Math.ceil(total / perPage);
-            const start = (currentPage - 1) * perPage;
-            const pageData = orders.slice(start, start + perPage);
-
             subtitle.textContent = `${total} pesanan ditemukan`;
 
-            tbody.innerHTML = pageData.map(order => `
+            tbody.innerHTML = orders.map(order => `
                 <tr>
                     <td class="py-3 col-invoice">${order.invoice_number || '—'}</td>
                     <td class="py-3">${order.client_name || '—'}</td>
@@ -399,20 +386,28 @@
                 </tr>
             `).join('');
 
-            const end = Math.min(start + perPage, total);
-            document.getElementById('paginationInfo').textContent = `Menampilkan ${start + 1}–${end} dari ${total} pesanan`;
+            if (!meta || meta.total_pages <= 1) {
+                document.getElementById('paginationInfo').textContent = `Menampilkan ${orders.length} pesanan`;
+                document.getElementById('paginationControls').innerHTML = '';
+                return;
+            }
 
+            const start = (meta.page - 1) * meta.per_page + 1;
+            const end = Math.min(meta.page * meta.per_page, meta.total);
+            document.getElementById('paginationInfo').textContent = `Menampilkan ${start}–${end} dari ${meta.total} pesanan`;
+
+            const totalPages = meta.total_pages;
             const pages = document.getElementById('paginationControls');
-            let html = `<button class="btn btn-sm btn-outline-secondary" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})" style="font-size:0.8rem;">&langle; Prev</button>`;
+            let html = `<button class="btn btn-sm btn-outline-secondary" ${meta.page === 1 ? 'disabled' : ''} onclick="changePage(${meta.page - 1})" style="font-size:0.8rem;">&lsaquo; Prev</button>`;
             const maxShow = Math.min(totalPages, 5);
             for (let i = 1; i <= maxShow; i++) {
-                html += `<button class="btn btn-sm ${i === currentPage ? '' : 'btn-outline-secondary'}" onclick="changePage(${i})" style="min-width:36px;font-size:0.8rem;${i === currentPage ? 'background:var(--text-heading);color:#000;border-color:var(--text-heading);' : ''}">${i}</button>`;
+                html += `<button class="btn btn-sm ${i === meta.page ? '' : 'btn-outline-secondary'}" onclick="changePage(${i})" style="min-width:36px;font-size:0.8rem;${i === meta.page ? 'background:var(--text-heading);color:#000;border-color:var(--text-heading);' : ''}">${i}</button>`;
             }
             if (totalPages > 5) {
                 html += `<span class="btn btn-sm btn-outline-secondary disabled" style="font-size:0.8rem;">...</span>`;
                 html += `<button class="btn btn-sm btn-outline-secondary" onclick="changePage(${totalPages})" style="font-size:0.8rem;">${totalPages}</button>`;
             }
-            html += `<button class="btn btn-sm btn-outline-secondary" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})" style="font-size:0.8rem;">Next &rangle;</button>`;
+            html += `<button class="btn btn-sm btn-outline-secondary" ${meta.page === totalPages ? 'disabled' : ''} onclick="changePage(${meta.page + 1})" style="font-size:0.8rem;">Next &rsaquo;</button>`;
             pages.innerHTML = html;
         }
 
@@ -614,14 +609,8 @@
                 selectedOrder.status = newStatus;
                 selectedOrder.verification_note = verificationNote;
 
-                allOrders = allOrders.map(function (o) {
-                    if (o.order_id === selectedOrder.order_id) {
-                        return Object.assign({}, o, { status: newStatus });
-                    }
-                    return o;
-                });
-                applyFilter();
                 fillDetailModal(selectedOrder);
+                loadOrders();
 
                 bootstrap.Modal.getInstance(document.getElementById('confirmLayerModal')).hide();
                 bootstrap.Modal.getInstance(document.getElementById('detailVerifyModal')).hide();
@@ -639,24 +628,37 @@
 
         function changePage(page) {
             currentPage = page;
-            renderTable(filteredOrders.length || document.getElementById('filterStatus').value || (document.getElementById('filterSearch').value || '').trim() ? filteredOrders : allOrders);
+            loadOrders();
         }
 
         async function loadOrders() {
+            const params = new URLSearchParams();
+            const status = document.getElementById('filterStatus').value;
+            const search = (document.getElementById('filterSearch').value || '').trim();
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+            if (status) params.set('status', status);
+            if (search) params.set('search', search);
+            if (startDate) params.set('start_date', startDate);
+            if (endDate) params.set('end_date', endDate);
+            params.set('page', currentPage);
+            params.set('limit', 20);
+
             try {
-                const res = await fetch('/api/admin/orders', { credentials: 'include' });
+                const res = await fetch('/api/admin/orders?' + params.toString(), { credentials: 'include' });
                 if (res.redirected || res.status === 401 || res.status === 403 || res.status === 302) {
                     window.location.href = '/account/login';
                     return;
                 }
                 const json = await res.json();
-                allOrders = Array.isArray(json) ? json : (json.data || []);
-                filteredOrders = allOrders.slice();
-                currentPage = 1;
-                applyFilter();
+                const orders = Array.isArray(json) ? json : (json.data || []);
+                const meta = json.meta || null;
+                currentMeta = meta;
+                renderTable(orders, meta);
 
                 if (autoOpenOrderId) {
                     openOrderDetail(autoOpenOrderId);
+                    autoOpenOrderId = '';
                 }
             } catch (e) {
                 document.getElementById('ordersTableBody').innerHTML = `
