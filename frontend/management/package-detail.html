@@ -279,8 +279,8 @@
 
         .toast-lite {
             display: none;
-            border: 1px solid rgba(249, 62, 62, 0.35);
-            background: rgba(249, 62, 62, 0.95);
+            border: 1px solid rgba(53, 208, 127, 0.35);
+            background: rgba(53, 208, 127, 0.95);
             color: #fff;
             border-radius: 8px;
             padding: 0.7rem 0.85rem;
@@ -697,7 +697,17 @@
             let fetchError = null;
 
             try {
+                const user = getCurrentUser();
+                const userRole = (user?.role_code || user?.level_code || user?.level || '').toUpperCase();
+                
+                const headers = {};
+                if (userRole) {
+                    headers['X-User-Role'] = userRole;
+                }
+                
                 const res = await fetch(`/api/dashboard/package/${encodeURIComponent(state.packageId)}?${getQueryParams().toString()}`, {
+                    method: 'GET',
+                    headers: headers,
                     credentials: 'include',
                     signal: controller.signal,
                 });

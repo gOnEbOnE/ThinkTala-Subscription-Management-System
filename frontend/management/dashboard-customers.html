@@ -339,8 +339,8 @@
 
         .toast-lite {
             display: none;
-            border: 1px solid rgba(249, 62, 62, 0.35);
-            background: rgba(249, 62, 62, 0.95);
+            border: 1px solid rgba(53, 208, 127, 0.35);
+            background: rgba(53, 208, 127, 0.95);
             color: #fff;
             border-radius: 8px;
             padding: 0.7rem 0.85rem;
@@ -1209,13 +1209,31 @@
                 return;
             }
             try {
-                const res = await fetch(`/api/dashboard/customer/${encodeURIComponent(customerId)}`, { credentials: 'include' });
+                const user = getCurrentUser();
+                const userRole = (user?.role_code || user?.level_code || user?.level || '').toUpperCase();
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (userRole) {
+                    headers['X-User-Role'] = userRole;
+                }
+                
+                const res = await fetch(`/api/dashboard/customer/${encodeURIComponent(customerId)}`, {
+                    method: 'GET',
+                    headers: headers,
+                    credentials: 'include'
+                });
                 if (res.status === 404) {
                     showToast('Detail customer tidak tersedia.');
                     return;
                 }
+                if (res.status === 403) {
+                    showToast('Anda tidak memiliki akses untuk melihat detail customer ini.');
+                    return;
+                }
                 if (!res.ok) {
-                    showToast('Detail customer tidak tersedia.');
+                    showToast('Gagal memuat detail customer. Silakan coba lagi.');
                     return;
                 }
                 window.location.href = `/dashboard/customer/${encodeURIComponent(customerId)}`;
@@ -1303,7 +1321,7 @@
             }
         }
 
-        function performExport(type) {
+        async function performExport(type) {
             closeExportModal();
             
             if (!state.payload) {
@@ -1328,12 +1346,64 @@
             params.set('end_date', state.endDate);
 
             const url = `/api/dashboard/customers/export?${params.toString()}`;
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `customers-export-${type}-${Date.now()}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            
+            try {
+                const user = getCurrentUser();
+                const userRole = (user?.role_code || user?.level_code || user?.level || '').toUpperCase();
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (userRole) {
+                    headers['X-User-Role'] = userRole;
+                }
+                
+                const res = await fetch(url, {
+                    method: 'GET',
+                    headers: headers,
+                    credentials: 'include'
+                });
+
+                if (res.status === 401) {
+                    showToast('Sesi Anda telah berakhir. Silakan login kembali.');
+                    window.location.href = '/account/login';
+                    return;
+                }
+                if (res.status === 403) {
+                    showToast('Anda tidak memiliki akses untuk export data ini.');
+                    return;
+                }
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    showToast(`Export gagal: ${res.statusText}`);
+                    console.error('Export error:', errorText);
+                    return;
+                }
+
+                const blob = await res.blob();
+                const contentDisposition = res.headers.get('content-disposition');
+                let filename = `customers-export-${type}-${Date.now()}.csv`;
+                
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename="(.+?)"/i);
+                    if (match && match[1]) {
+                        filename = match[1];
+                    }
+                }
+
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                URL.revokeObjectURL(link.href);
+                link.remove();
+                
+                showToast('Export berhasil. File sudah diunduh.');
+            } catch (error) {
+                showToast(`Export gagal: ${error.message}`);
+                console.error('Export error:', error);
+            }
         }
 
         function escapeHtml(str) {
