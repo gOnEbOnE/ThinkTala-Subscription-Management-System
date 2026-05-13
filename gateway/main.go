@@ -85,7 +85,7 @@ func (p *ProxyPool) GetProxy(target string) *httputil.ReverseProxy {
 		IdleConnTimeout:     90 * time.Second,
 	}
 	proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
-		log.Printf("[PROXY ERROR] %s: %v", r.URL.Path, err)
+		log.Printf("[PROXY ERROR] target=%s path=%s error=%v", target, r.URL.Path, err)
 		http.Error(w, "Service temporarily unavailable", http.StatusBadGateway)
 	}
 
@@ -816,6 +816,7 @@ func main() {
 	if ticketsTarget == "" {
 		ticketsTarget = "http://localhost:2004"
 	}
+	log.Printf("[STARTUP] tickets proxy target: %s", ticketsTarget)
 	http.HandleFunc("/api/superadmin/dashboard/compliance", withRolesAuth([]string{"SUPERADMIN"},
 		createProxyHandler(usersTarget, true),
 	))
