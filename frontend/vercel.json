@@ -8,6 +8,7 @@
   ],
   "rewrites": [
     { "source": "/dashboard/customer/:id", "destination": "/management/customer-detail.html" },
+    { "source": "/dashboard/packages/:id", "destination": "/management/package-detail.html" },
     { "source": "/dashboard/package/:id", "destination": "/management/package-detail.html" },
     { "source": "/", "destination": "/landing.html" },
     { "source": "/account/login", "destination": "/account/login.html" },
