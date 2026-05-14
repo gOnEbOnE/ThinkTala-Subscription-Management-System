@@ -635,13 +635,21 @@ func main() {
 	// 5. Root redirect
 	// ========================================
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" || r.URL.Path == "" {
+		if r.URL.Path == "/" || r.URL.Path == "" || r.URL.Path == "/landing.html" || r.URL.Path == "/index.html" {
 			// If user has valid token, redirect to their dashboard
 			if user, err := auth.GetUserFromToken(r); err == nil {
 				redirect := redirectByRole(user.RoleCode)
 				http.Redirect(w, r, redirect, http.StatusFound)
 				return
 			}
+			
+			// Serve landing page if not authenticated
+			landingFile := filepath.Join(frontendDir, "landing.html")
+			if _, err := os.Stat(landingFile); err == nil {
+				http.ServeFile(w, r, landingFile)
+				return
+			}
+			
 			http.Redirect(w, r, "/account/login", http.StatusFound)
 			return
 		}

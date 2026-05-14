@@ -79,7 +79,9 @@ func main() {
 		adminOrders.GET("/orders", proxySubscriptionOrder)
 		adminOrders.GET("/orders/:id", proxySubscriptionOrder)
 		adminOrders.GET("/orders/:id/payment-proof", proxySubscriptionOrder)
+		adminOrders.GET("/orders/:id/invoice", proxySubscriptionOrder)
 		adminOrders.PATCH("/orders/:id/verify", proxySubscriptionOrder)
+		adminOrders.PATCH("/orders/:id/activate", proxySubscriptionOrder)
 	}
 
 	// KYC API (if exists)
