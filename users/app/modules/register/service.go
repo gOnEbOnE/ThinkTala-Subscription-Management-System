@@ -22,10 +22,10 @@ func NewService(repo Repository) *Service {
 
 // dispatchNotification mengirim event ke Notification Service untuk diproses berdasarkan template.
 // Jalur pengiriman email dipusatkan ke Notification Service (Brevo-only).
-func dispatchNotification(eventType, channel, to string, vars map[string]string) {
+func dispatchNotification(eventType, channel, to, userID, userName string, vars map[string]string) {
 
 	// TODO(queue): Aktifkan Redis queue setelah worker siap di-deploy
-	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
+	if err := utils.PublishNotificationEvent(eventType, channel, to, userID, userName, vars); err == nil {
 		log.Printf("[NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
 		return
 	}
@@ -36,6 +36,8 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 		"channel":    channel,
 		"to":         to,
 		"vars":       vars,
+		"user_id":    userID,
+		"user_name":  userName,
 	}
 	body, _ := json.Marshal(payload)
 
@@ -124,8 +126,12 @@ func (s *Service) ProcessRegisterJob(ctx context.Context, payload any) (any, err
 	}
 
 	// 8. Kirim OTP via Notification Service (async)
-	go dispatchNotification("otp_verification", "email", email, map[string]string{
-		"name": fullName,
+	displayName := fullName
+	if displayName == "" {
+		displayName = email
+	}
+	go dispatchNotification("otp_verification", "email", email, newUserID, displayName, map[string]string{
+		"name": displayName,
 		"otp":  otpCode,
 	})
 
@@ -188,7 +194,7 @@ func (s *Service) ProcessResendOTPJob(ctx context.Context, payload any) (any, er
 	email := data["email"].(string)
 
 	// 1. Cari user ID
-	userID, err := s.repo.GetUserIDByEmail(ctx, email)
+	userID, userName, err := s.repo.GetUserIdentityByEmail(ctx, email)
 	if err != nil || userID == "" {
 		return nil, fmt.Errorf("Email tidak ditemukan")
 	}
@@ -204,7 +210,10 @@ func (s *Service) ProcessResendOTPJob(ctx context.Context, payload any) (any, er
 	}
 
 	// 4. Kirim via Notification Service (async)
-	go dispatchNotification("otp_verification", "email", email, map[string]string{
+	if userName == "" {
+		userName = email
+	}
+	go dispatchNotification("otp_verification", "email", email, userID, userName, map[string]string{
 		"otp": otpCode,
 	})
 

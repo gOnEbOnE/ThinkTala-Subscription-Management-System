@@ -18,7 +18,7 @@ type Repository interface {
 	GetValidOTP(ctx context.Context, email, code string) (*OTPRecord, error)
 	MarkOTPUsed(ctx context.Context, otpID int) error
 	ActivateUser(ctx context.Context, email string) error
-	GetUserIDByEmail(ctx context.Context, email string) (string, error)
+	GetUserIdentityByEmail(ctx context.Context, email string) (string, string, error)
 }
 
 type registerRepo struct {
@@ -134,17 +134,17 @@ func (r *registerRepo) ActivateUser(ctx context.Context, email string) error {
 	return err
 }
 
-// GetUserIDByEmail mengambil user ID berdasarkan email
-func (r *registerRepo) GetUserIDByEmail(ctx context.Context, email string) (string, error) {
-	var id string
+// GetUserIdentityByEmail mengambil user ID dan nama berdasarkan email
+func (r *registerRepo) GetUserIdentityByEmail(ctx context.Context, email string) (string, string, error) {
+	var id, name string
 	err := r.db.Pool.QueryRow(ctx,
-		"SELECT id FROM users WHERE email = $1", email,
-	).Scan(&id)
+		"SELECT id, COALESCE(NULLIF(name, ''), '') FROM users WHERE email = $1", email,
+	).Scan(&id, &name)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", nil
+			return "", "", nil
 		}
-		return "", err
+		return "", "", err
 	}
-	return id, nil
+	return id, name, nil
 }

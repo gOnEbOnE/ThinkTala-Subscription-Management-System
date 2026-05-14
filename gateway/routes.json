@@ -79,6 +79,40 @@
       "cors": true
     },
     {
+      "path": "/api/notifications/recent",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "CLIENT",
+        "OPERASIONAL",
+        "COMPLIANCE",
+        "MANAGEMENT",
+        "ADMIN",
+        "ADMIN_SUPPORT",
+        "ADMIN_KYC",
+        "SUPERADMIN",
+        "CEO"
+      ]
+    },
+    {
+      "path": "/api/notifications/recent/",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "CLIENT",
+        "OPERASIONAL",
+        "COMPLIANCE",
+        "MANAGEMENT",
+        "ADMIN",
+        "ADMIN_SUPPORT",
+        "ADMIN_KYC",
+        "SUPERADMIN",
+        "CEO"
+      ]
+    },
+    {
       "path": "/api/notifications/public",
       "target": "http://notification-service.railway.internal:5003",
       "cors": true

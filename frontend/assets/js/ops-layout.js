@@ -66,6 +66,7 @@
         '/ops/tickets'                : { activeKey: 'tickets' },
         '/ops/notifications'          : { activeKey: 'notifications',          parentKey: 'notif' },
         '/ops/notification-templates' : { activeKey: 'notification-templates', parentKey: 'notif' },
+        '/ops/notification-monitoring': { activeKey: 'notification-monitoring', parentKey: 'notif' },
         '/ops/orders'                 : { activeKey: 'orders' },
         '/ops/orders-detail'          : { activeKey: 'orders' },
         '/ops/support-ticket-detail'  : { activeKey: 'tickets' },
@@ -200,6 +201,12 @@
                     <a class="nav-link${isActive('notification-templates')}" href="/ops/notification-templates">
                         <i class="fa-solid fa-file-alt me-2" style="font-size:.85rem"></i>
                         <span>Template Management</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link${isActive('notification-monitoring')}" href="/ops/notification-monitoring">
+                        <i class="fa-solid fa-eye me-2" style="font-size:.85rem"></i>
+                        <span>Monitoring Management</span>
                     </a>
                 </li>
             </ul>

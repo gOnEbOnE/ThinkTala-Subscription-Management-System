@@ -26,6 +26,22 @@ type Notification struct {
 	UpdatedBy   *string    `json:"updated_by,omitempty"`
 }
 
+// RecentNotification adalah ringkasan notifikasi untuk notification drawer.
+type RecentNotification struct {
+	ID        string     `json:"id"`
+	Source    string     `json:"source"` // news | event
+	Title     string     `json:"title"`
+	Body      string     `json:"body"`
+	Type      string     `json:"type,omitempty"`
+	EventType string     `json:"event_type,omitempty"`
+	Channel   string     `json:"channel,omitempty"`
+	CTAURL    *string    `json:"cta_url,omitempty"`
+	ImageURL  *string    `json:"image_url,omitempty"`
+	Status    string     `json:"status,omitempty"`
+	CreatedAt time.Time  `json:"created_at"`
+	IsRead    bool       `json:"is_read"`
+}
+
 // CreateNotificationRequest adalah payload untuk membuat notification baru.
 type CreateNotificationRequest struct {
 	Title       string `json:"title"`

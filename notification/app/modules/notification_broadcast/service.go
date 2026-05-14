@@ -2,6 +2,7 @@ package notification
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -32,6 +33,54 @@ func (s *Service) List(typeFilter, statusFilter string) ([]Notification, error) 
 // ListPublic mengambil notification aktif untuk role tertentu.
 func (s *Service) ListPublic(role, userID string) ([]map[string]any, error) {
 	return s.repo.ListPublic(role, userID)
+}
+
+// Recent mengembalikan ringkasan notifikasi terbaru (news + event) untuk drawer.
+func (s *Service) Recent(role, userID string, limit int) ([]RecentNotification, error) {
+	if limit <= 0 || limit > 5 {
+		limit = 5
+	}
+	role = strings.ToLower(strings.TrimSpace(role))
+	if role == "" {
+		role = "client"
+	}
+
+	items := make([]RecentNotification, 0)
+
+	events, err := s.repo.ListRecentEvents(userID, limit)
+	if err != nil {
+		// Log tapi jangan propagate — drawer tetap bisa tampil dengan news saja
+		fmt.Printf("[RECENT] ListRecentEvents error (non-fatal): %v\n", err)
+	} else {
+		items = append(items, events...)
+	}
+
+	news, err := s.repo.ListRecentNews(role, userID, limit)
+	if err != nil {
+		// Log tapi jangan propagate — drawer tetap bisa tampil dengan events saja
+		fmt.Printf("[RECENT] ListRecentNews error (non-fatal): %v\n", err)
+	} else {
+		items = append(items, news...)
+	}
+
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].CreatedAt.After(items[j].CreatedAt)
+	})
+
+	if len(items) > limit {
+		items = items[:limit]
+	}
+	return items, nil
+}
+
+// MarkRead menandai satu item sebagai read.
+func (s *Service) MarkRead(userID, sourceType, sourceID string) error {
+	return s.repo.MarkRead(userID, sourceType, sourceID)
+}
+
+// MarkAllRead menandai semua item sebagai read untuk user tertentu.
+func (s *Service) MarkAllRead(role, userID string) error {
+	return s.repo.MarkAllRead(userID, role)
 }
 
 // GetByID mengambil satu notification berdasarkan ID.

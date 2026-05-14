@@ -88,8 +88,8 @@ func resolveClientEmail(userID string) string {
 
 // dispatchNotification mengirim event notifikasi dengan pola yang sama seperti KYC/register.
 // Urutan: 1) Redis queue -> 2) HTTP langsung ke Notification Service.
-func dispatchNotification(eventType, channel, to string, vars map[string]string) {
-	if err := utils.PublishNotificationEvent(eventType, channel, to, vars); err == nil {
+func dispatchNotification(eventType, channel, to, userID, userName string, vars map[string]string) {
+	if err := utils.PublishNotificationEvent(eventType, channel, to, userID, userName, vars); err == nil {
 		log.Printf("[ORDER NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
 		return
 	} else {
@@ -102,6 +102,8 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 		"channel":    channel,
 		"to":         to,
 		"vars":       vars,
+		"user_id":    userID,
+		"user_name":  userName,
 	}
 	body, _ := json.Marshal(payload)
 
@@ -157,7 +159,7 @@ func (s *orderService) sendOrderNotification(order *OrderRecord, eventType, paym
 			"duration_months":   fmt.Sprintf("%d", order.DurationMonths),
 			"order_id":          order.OrderID,
 		}
-		dispatchNotification(eventType, "email", clientEmail, vars)
+		dispatchNotification(eventType, "email", clientEmail, userID, clientName, vars)
 	}()
 }
 

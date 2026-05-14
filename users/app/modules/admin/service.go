@@ -23,9 +23,9 @@ func NewService(repo Repository) *Service {
 
 // dispatchNotification mengirim event ke Notification Service untuk diproses.
 // Menggunakan pattern yang sama dengan register/service.go
-func dispatchNotification(eventType, channel, to string, vars map[string]string) {
+func dispatchNotification(eventType, channel, to, userID, userName string, vars map[string]string) {
 	// Coba kirim via Redis queue terlebih dahulu
-	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
+	if err := utils.PublishNotificationEvent(eventType, channel, to, userID, userName, vars); err == nil {
 		log.Printf("[ADMIN-NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
 		return
 	}
@@ -38,6 +38,8 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 		"channel":    channel,
 		"to":         to,
 		"vars":       vars,
+		"user_id":    userID,
+		"user_name":  userName,
 	}
 	body, _ := json.Marshal(payload)
 
@@ -147,7 +149,7 @@ func (s *Service) ProcessCreateUserJob(ctx context.Context, payload any) (any, e
 
 	// 9. Dispatch USER_CREATED event ke Notification Service (async)
 	plainPassword := password // simpan sebelum di-hash untuk dikirim via email
-	go dispatchNotification("USER_CREATED", "email", email, map[string]string{
+	go dispatchNotification("USER_CREATED", "email", email, newUserID, fullName, map[string]string{
 		"name":     fullName,
 		"email":    email,
 		"password": plainPassword,
@@ -334,7 +336,7 @@ func (s *Service) ProcessDeactivateUserJob(ctx context.Context, payload any) (an
 	log.Printf("[ADMIN] action=DEACTIVATE_USER admin=%s target=%s", performedByID, userID)
 
 	// Dispatch ACCOUNT_DEACTIVATED event to Notification Service (async)
-	go dispatchNotification("ACCOUNT_DEACTIVATED", "email", user.Email, map[string]string{
+	go dispatchNotification("ACCOUNT_DEACTIVATED", "email", user.Email, userID, user.FullName, map[string]string{
 		"name":  user.FullName,
 		"email": user.Email,
 	})
@@ -382,7 +384,7 @@ func (s *Service) ProcessReactivateUserJob(ctx context.Context, payload any) (an
 	log.Printf("[ADMIN] action=REACTIVATE_USER admin=%s target=%s", performedByID, userID)
 
 	// Dispatch ACCOUNT_REACTIVATED event to Notification Service (async)
-	go dispatchNotification("ACCOUNT_REACTIVATED", "email", user.Email, map[string]string{
+	go dispatchNotification("ACCOUNT_REACTIVATED", "email", user.Email, userID, user.FullName, map[string]string{
 		"name":  user.FullName,
 		"email": user.Email,
 	})

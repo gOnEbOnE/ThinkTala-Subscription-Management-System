@@ -3,6 +3,7 @@ package notification
 import (
 	"context"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -170,6 +171,187 @@ func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
 	return list, nil
 }
 
+// ListRecentNews mengambil ringkasan news terbaru untuk drawer.
+func (r *Repository) ListRecentNews(role, userID string, limit int) ([]RecentNotification, error) {
+	audienceKeys, err := r.buildAudienceKeys(role, userID)
+	if err != nil {
+		return nil, err
+	}
+	if len(audienceKeys) == 0 {
+		return []RecentNotification{}, nil
+	}
+	if limit <= 0 {
+		limit = 5
+	}
+
+	rows, err := r.db.Query(context.Background(), `
+		SELECT n.id,
+			   n.title,
+			   COALESCE(n.description, n.message, '') AS description,
+			   n.type,
+			   n.cta_url,
+			   n.image_url,
+			   n.created_at,
+			   EXISTS (
+				   SELECT 1 FROM notification_reads nr
+				   WHERE nr.user_id = $2
+					 AND nr.source_type = 'news'
+					 AND nr.source_id = n.id::text
+			   ) AS is_read
+		FROM notifications n
+		WHERE n.is_active = TRUE
+		  AND (n.expiry_date IS NULL OR n.expiry_date > NOW())
+		  AND LOWER(n.target_role) = ANY($1)
+		ORDER BY n.created_at DESC
+		LIMIT $3
+	`, audienceKeys, userID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := make([]RecentNotification, 0)
+	for rows.Next() {
+		var id, title, desc, typ string
+		var ctaURL, imageURL *string
+		var createdAt time.Time
+		var isRead bool
+		if err := rows.Scan(&id, &title, &desc, &typ, &ctaURL, &imageURL, &createdAt, &isRead); err != nil {
+			return nil, err
+		}
+		if strings.TrimSpace(title) == "" {
+			title = "Update Terbaru"
+		}
+		excerpt := buildExcerpt(normalizePlainText(desc))
+		list = append(list, RecentNotification{
+			ID:        id,
+			Source:    "news",
+			Title:     title,
+			Body:      excerpt,
+			Type:      typ,
+			CTAURL:    ctaURL,
+			ImageURL:  imageURL,
+			CreatedAt: createdAt,
+			IsRead:    isRead,
+		})
+	}
+	return list, nil
+}
+
+// ListRecentEvents mengambil ringkasan log event terbaru untuk drawer.
+func (r *Repository) ListRecentEvents(userID string, limit int) ([]RecentNotification, error) {
+	if strings.TrimSpace(userID) == "" {
+		return []RecentNotification{}, nil
+	}
+	if limit <= 0 {
+		limit = 5
+	}
+
+	rows, err := r.db.Query(context.Background(), `
+		SELECT l.id,
+			   l.event_type,
+			   l.channel,
+			   COALESCE(l.subject, '') AS subject,
+			   COALESCE(l.content, '') AS content,
+			   l.status,
+			   COALESCE(l.sent_at, l.created_at) AS created_at,
+			   EXISTS (
+				   SELECT 1 FROM notification_reads nr
+				   WHERE nr.user_id = $1
+					 AND nr.source_type = 'event'
+					 AND nr.source_id = l.id
+			   ) AS is_read
+		FROM notification_logs l
+		WHERE l.user_id = $1
+		ORDER BY COALESCE(l.sent_at, l.created_at) DESC
+		LIMIT $2
+	`, userID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := make([]RecentNotification, 0)
+	for rows.Next() {
+		var id, eventType, channel, subject, content, status string
+		var createdAt time.Time
+		var isRead bool
+		if err := rows.Scan(&id, &eventType, &channel, &subject, &content, &status, &createdAt, &isRead); err != nil {
+			return nil, err
+		}
+		title := strings.TrimSpace(subject)
+		if title == "" {
+			title = strings.ReplaceAll(eventType, "_", " ")
+		}
+		excerpt := buildExcerpt(normalizePlainText(content))
+		if strings.TrimSpace(excerpt) == "" {
+			excerpt = strings.ToUpper(strings.ReplaceAll(eventType, "_", " "))
+		}
+		list = append(list, RecentNotification{
+			ID:        id,
+			Source:    "event",
+			Title:     title,
+			Body:      excerpt,
+			EventType: eventType,
+			Channel:   channel,
+			Type:      "event",
+			Status:    status,
+			CreatedAt: createdAt,
+			IsRead:    isRead,
+		})
+	}
+	return list, nil
+}
+
+// MarkRead menandai satu item (news/event) sebagai read untuk user tertentu.
+func (r *Repository) MarkRead(userID, sourceType, sourceID string) error {
+	_, err := r.db.Exec(context.Background(), `
+		INSERT INTO notification_reads (user_id, source_type, source_id, read_at)
+		VALUES ($1, $2, $3, NOW())
+		ON CONFLICT (user_id, source_type, source_id) DO NOTHING
+	`, userID, sourceType, sourceID)
+	return err
+}
+
+// MarkAllRead menandai semua item (news/event) sebagai read untuk user tertentu.
+func (r *Repository) MarkAllRead(userID, role string) error {
+	if strings.TrimSpace(userID) == "" {
+		return fmt.Errorf("user_id wajib diisi")
+	}
+
+	// Event notifications (per user)
+	_, err := r.db.Exec(context.Background(), `
+		INSERT INTO notification_reads (user_id, source_type, source_id, read_at)
+		SELECT $1, 'event', id, NOW()
+		FROM notification_logs
+		WHERE user_id = $1
+		ON CONFLICT (user_id, source_type, source_id) DO NOTHING
+	`, userID)
+	if err != nil {
+		return err
+	}
+
+	// News notifications (per audience)
+	audienceKeys, err := r.buildAudienceKeys(role, userID)
+	if err != nil {
+		return err
+	}
+	if len(audienceKeys) == 0 {
+		return nil
+	}
+
+	_, err = r.db.Exec(context.Background(), `
+		INSERT INTO notification_reads (user_id, source_type, source_id, read_at)
+		SELECT $1, 'news', n.id, NOW()
+		FROM notifications n
+		WHERE n.is_active = TRUE
+		  AND (n.expiry_date IS NULL OR n.expiry_date > NOW())
+		  AND LOWER(n.target_role) = ANY($2)
+		ON CONFLICT (user_id, source_type, source_id) DO NOTHING
+	`, userID, audienceKeys)
+	return err
+}
+
 func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, error) {
 	if strings.TrimSpace(userID) == "" {
 		return nil, nil
@@ -191,8 +373,10 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 		}
 		return []string{"client_paid_active"}, nil
 	}
-	if err != nil && err != pgx.ErrNoRows {
-		return nil, err
+	// If not pgx.ErrNoRows, log but DO NOT propagate — fall through to next check.
+	// This makes the function resilient to cross-DB/schema access errors.
+	if err != pgx.ErrNoRows {
+		log.Printf("[NOTIF AUDIENCE] subscription query error for user %s (non-fatal): %v", userID, err)
 	}
 
 	var orderStatus string
@@ -204,7 +388,9 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 		LIMIT 1
 	`, userID).Scan(&orderStatus)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, err
+		// Cross-schema query unavailable — return nil (caller will use default ["client","all"])
+		log.Printf("[NOTIF AUDIENCE] orders query error for user %s (non-fatal): %v", userID, err)
+		return nil, nil
 	}
 	orderStatus = strings.ToUpper(strings.TrimSpace(orderStatus))
 	if orderStatus == "PENDING_PAYMENT" || orderStatus == "CANCELLED" {
@@ -221,7 +407,7 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 	`, userID).Scan(&latestSubscriptionExpired)
 	if err != nil {
 		if err != pgx.ErrNoRows {
-			return nil, err
+			log.Printf("[NOTIF AUDIENCE] expiry query error for user %s (non-fatal): %v", userID, err)
 		}
 	} else if latestSubscriptionExpired {
 		return []string{"client_lapsed"}, nil
@@ -238,11 +424,15 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 
 func (r *Repository) buildAudienceKeys(role, userID string) ([]string, error) {
 	role = strings.ToLower(strings.TrimSpace(role))
+	log.Printf("[AUDIENCE] input role=%q userID=%q", role, userID)
 	if role != "" && role != "client" {
+		log.Printf("[AUDIENCE] role=%q is not 'client' → returning empty keys", role)
 		return []string{}, nil
 	}
 
-	audiences := map[string]struct{}{"client": {}}
+	// Include 'all' so legacy notifications with target_role='all' are delivered
+	// to client audiences as well.
+	audiences := map[string]struct{}{"client": {}, "all": {}}
 	if segments, err := r.resolveClientAudienceSegments(strings.TrimSpace(userID)); err == nil {
 		for _, segment := range segments {
 			segment = strings.ToLower(strings.TrimSpace(segment))
@@ -259,6 +449,7 @@ func (r *Repository) buildAudienceKeys(role, userID string) ([]string, error) {
 	for key := range audiences {
 		audienceKeys = append(audienceKeys, key)
 	}
+	log.Printf("[AUDIENCE] resolved keys=%v", audienceKeys)
 	return audienceKeys, nil
 }
 

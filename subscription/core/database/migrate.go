@@ -66,6 +66,8 @@ func MigrateAndSeed(db interface{}) {
 		package_id UUID,
 		duration_months INT NOT NULL DEFAULT 1,
 		payment_method VARCHAR(100) NOT NULL DEFAULT '',
+		client_name VARCHAR(255) DEFAULT '',
+		client_email VARCHAR(255) DEFAULT '',
 		payment_proof BYTEA,
 		payment_proof_filename VARCHAR(255) DEFAULT '',
 		payment_proof_content_type VARCHAR(100) DEFAULT '',
@@ -80,6 +82,8 @@ func MigrateAndSeed(db interface{}) {
 	-- Safe migration untuk tabel orders yang sudah ada
 	DO $$ BEGIN
 		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS payment_method VARCHAR(100) NOT NULL DEFAULT '';
+		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS client_name VARCHAR(255) DEFAULT '';
+		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS client_email VARCHAR(255) DEFAULT '';
 		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS duration_months INT NOT NULL DEFAULT 1;
 		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS payment_proof BYTEA;
 		ALTER TABLE subscription.orders ADD COLUMN IF NOT EXISTS payment_proof_filename VARCHAR(255) DEFAULT '';

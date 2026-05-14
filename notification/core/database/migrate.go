@@ -106,6 +106,8 @@ func Migrate() {
 	_, err = db().Exec(context.Background(), `
 		CREATE TABLE IF NOT EXISTS notification_logs (
 			id            VARCHAR(36) PRIMARY KEY,
+			user_id       VARCHAR(36),
+			user_name     TEXT,
 			event_type    VARCHAR(100) NOT NULL,
 			channel       VARCHAR(50) NOT NULL,
 			to_address    TEXT NOT NULL,
@@ -117,15 +119,40 @@ func Migrate() {
 			next_retry_at TIMESTAMPTZ,
 			sent_at       TIMESTAMPTZ,
 			error_msg     TEXT,
+			provider_response TEXT,
 			created_at    TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 		);
+		ALTER TABLE notification_logs ADD COLUMN IF NOT EXISTS user_id VARCHAR(36);
+		ALTER TABLE notification_logs ADD COLUMN IF NOT EXISTS user_name TEXT;
+		ALTER TABLE notification_logs ADD COLUMN IF NOT EXISTS provider_response TEXT;
 		CREATE INDEX IF NOT EXISTS idx_notif_logs_status ON notification_logs(status);
 		CREATE INDEX IF NOT EXISTS idx_notif_logs_retry  ON notification_logs(status, next_retry_at);
+		CREATE INDEX IF NOT EXISTS idx_notif_logs_sent_at ON notification_logs(sent_at);
+		CREATE INDEX IF NOT EXISTS idx_notif_logs_user_id ON notification_logs(user_id);
+		CREATE INDEX IF NOT EXISTS idx_notif_logs_channel ON notification_logs(channel);
 	`)
 	if err != nil {
 		log.Printf("[WARN] migrate notification_logs: %v", err)
 	} else {
 		log.Println("[NOTIFICATION] Table notification_logs ready")
+	}
+
+	// Table untuk tracking read status di notification drawer.
+	_, err = db().Exec(context.Background(), `
+		CREATE TABLE IF NOT EXISTS notification_reads (
+			user_id     VARCHAR(36) NOT NULL,
+			source_type VARCHAR(20) NOT NULL,
+			source_id   VARCHAR(36) NOT NULL,
+			read_at     TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY (user_id, source_type, source_id)
+		);
+		CREATE INDEX IF NOT EXISTS idx_notif_reads_user ON notification_reads(user_id);
+		CREATE INDEX IF NOT EXISTS idx_notif_reads_source ON notification_reads(source_type, source_id);
+	`)
+	if err != nil {
+		log.Printf("[WARN] migrate notification_reads: %v", err)
+	} else {
+		log.Println("[NOTIFICATION] Table notification_reads ready")
 	}
 }
 
@@ -226,6 +253,225 @@ func Seed() {
 	} else {
 		log.Println("[NOTIFICATION] password_reset template seed OK (or already exists)")
 	}
+
+	// Seed template for otp_verification
+	otpHTML := `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f6fb;margin:0;padding:40px 20px;">
+  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:36px;box-shadow:0 4px 24px rgba(78,115,223,0.10);border:1px solid #eaecf0;">
+    <div style="margin-bottom:24px;">
+      <span style="font-size:1.2rem;font-weight:700;color:#1a1c23;">Think<span style="color:#4e73df;">Nalyze</span></span>
+    </div>
+    <h2 style="font-size:1.2rem;font-weight:700;color:#1a1c23;margin:0 0 8px;">Kode Verifikasi Anda</h2>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 20px;">Halo, {{user_name}}. Gunakan kode berikut untuk menyelesaikan verifikasi akun Anda.</p>
+    <div style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:10px;padding:20px;text-align:center;margin-bottom:20px;">
+      <p style="font-size:2rem;font-weight:800;letter-spacing:0.5rem;color:#4e73df;margin:0;">{{otp_code}}</p>
+    </div>
+    <p style="color:#6c757d;font-size:0.85rem;line-height:1.6;margin:0 0 8px;">Kode ini berlaku selama <strong>10 menit</strong>. Jangan bagikan kepada siapapun.</p>
+    <p style="color:#9ca3af;font-size:0.78rem;line-height:1.6;margin:0;border-top:1px solid #f0f0f0;padding-top:16px;">
+      Jika Anda tidak meminta kode ini, abaikan email ini.
+    </p>
+  </div>
+</body>
+</html>`
+
+	_, seedErr = db().Exec(context.Background(),
+		`INSERT INTO notification_templates (id, name, event_type, channel, subject, content, created_by)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		 ON CONFLICT (event_type, channel) DO NOTHING`,
+		uuid.New().String(),
+		"Kode OTP Verifikasi",
+		"otp_verification",
+		"email",
+		"Kode Verifikasi Akun ThinkNalyze Anda",
+		otpHTML,
+		"system",
+	)
+	if seedErr != nil {
+		log.Printf("[NOTIFICATION] WARN: failed to seed otp_verification template: %v", seedErr)
+	} else {
+		log.Println("[NOTIFICATION] otp_verification template seed OK (or already exists)")
+	}
+
+	// Seed template for kyc_approved
+	kycApprovedHTML := `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f6fb;margin:0;padding:40px 20px;">
+  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:36px;box-shadow:0 4px 24px rgba(78,115,223,0.10);border:1px solid #eaecf0;">
+    <div style="margin-bottom:24px;">
+      <span style="font-size:1.2rem;font-weight:700;color:#1a1c23;">Think<span style="color:#4e73df;">Nalyze</span></span>
+    </div>
+    <h2 style="font-size:1.2rem;font-weight:700;color:#1a1c23;margin:0 0 8px;">Verifikasi KYC Berhasil ✓</h2>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 8px;">Halo, {{user_name}}.</p>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 20px;">
+      Selamat! Verifikasi identitas (KYC) Anda telah disetujui. Anda sekarang dapat menikmati layanan ThinkNalyze secara penuh.
+    </p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:20px;">
+      <p style="margin:0;color:#166534;font-size:0.9rem;font-weight:600;">Status: KYC Disetujui</p>
+    </div>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 16px;">Langkah selanjutnya: pilih paket investasi yang sesuai dengan kebutuhan Anda.</p>
+    <p style="color:#9ca3af;font-size:0.78rem;line-height:1.6;margin:0;border-top:1px solid #f0f0f0;padding-top:16px;">
+      Terima kasih telah bergabung dengan ThinkNalyze.
+    </p>
+  </div>
+</body>
+</html>`
+
+	_, seedErr = db().Exec(context.Background(),
+		`INSERT INTO notification_templates (id, name, event_type, channel, subject, content, created_by)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		 ON CONFLICT (event_type, channel) DO NOTHING`,
+		uuid.New().String(),
+		"KYC Disetujui",
+		"kyc_approved",
+		"email",
+		"Verifikasi KYC Anda Telah Disetujui - ThinkNalyze",
+		kycApprovedHTML,
+		"system",
+	)
+	if seedErr != nil {
+		log.Printf("[NOTIFICATION] WARN: failed to seed kyc_approved template: %v", seedErr)
+	} else {
+		log.Println("[NOTIFICATION] kyc_approved template seed OK (or already exists)")
+	}
+
+	// Seed template for kyc_rejected
+	kycRejectedHTML := `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f6fb;margin:0;padding:40px 20px;">
+  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:36px;box-shadow:0 4px 24px rgba(78,115,223,0.10);border:1px solid #eaecf0;">
+    <div style="margin-bottom:24px;">
+      <span style="font-size:1.2rem;font-weight:700;color:#1a1c23;">Think<span style="color:#4e73df;">Nalyze</span></span>
+    </div>
+    <h2 style="font-size:1.2rem;font-weight:700;color:#1a1c23;margin:0 0 8px;">Verifikasi KYC Ditolak</h2>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 8px;">Halo, {{user_name}}.</p>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 20px;">
+      Kami mohon maaf, verifikasi identitas (KYC) Anda belum dapat kami setujui saat ini.
+    </p>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px;margin-bottom:20px;">
+      <p style="margin:0 0 4px;color:#991b1b;font-size:0.9rem;font-weight:600;">Alasan Penolakan:</p>
+      <p style="margin:0;color:#7f1d1d;font-size:0.9rem;">{{reject_reason}}</p>
+    </div>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 16px;">
+      Silakan perbaiki data dan dokumen Anda, lalu ajukan ulang verifikasi KYC melalui portal ThinkNalyze.
+    </p>
+    <p style="color:#9ca3af;font-size:0.78rem;line-height:1.6;margin:0;border-top:1px solid #f0f0f0;padding-top:16px;">
+      Jika Anda membutuhkan bantuan, hubungi kami melalui menu Support Ticket.
+    </p>
+  </div>
+</body>
+</html>`
+
+	_, seedErr = db().Exec(context.Background(),
+		`INSERT INTO notification_templates (id, name, event_type, channel, subject, content, created_by)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		 ON CONFLICT (event_type, channel) DO NOTHING`,
+		uuid.New().String(),
+		"KYC Ditolak",
+		"kyc_rejected",
+		"email",
+		"Verifikasi KYC Ditolak - ThinkNalyze",
+		kycRejectedHTML,
+		"system",
+	)
+	if seedErr != nil {
+		log.Printf("[NOTIFICATION] WARN: failed to seed kyc_rejected template: %v", seedErr)
+	} else {
+		log.Println("[NOTIFICATION] kyc_rejected template seed OK (or already exists)")
+	}
+
+	// Seed template for payment_verified
+	paymentVerifiedHTML := `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f6fb;margin:0;padding:40px 20px;">
+  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:36px;box-shadow:0 4px 24px rgba(78,115,223,0.10);border:1px solid #eaecf0;">
+    <div style="margin-bottom:24px;">
+      <span style="font-size:1.2rem;font-weight:700;color:#1a1c23;">Think<span style="color:#4e73df;">Nalyze</span></span>
+    </div>
+    <h2 style="font-size:1.2rem;font-weight:700;color:#1a1c23;margin:0 0 8px;">Pembayaran Berhasil Diverifikasi ✓</h2>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 8px;">Halo, {{client_name}}.</p>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 20px;">
+      Pembayaran Anda untuk paket <strong>{{package_name}}</strong> dengan nomor invoice <strong>{{invoice_number}}</strong> telah berhasil diverifikasi.
+      Langganan Anda kini aktif selama <strong>{{duration_months}} bulan</strong>.
+    </p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px;margin-bottom:20px;">
+      <p style="margin:0;color:#166534;font-size:0.9rem;font-weight:600;">Status: Pembayaran Terverifikasi</p>
+    </div>
+    <p style="color:#9ca3af;font-size:0.78rem;line-height:1.6;margin:0;border-top:1px solid #f0f0f0;padding-top:16px;">
+      Terima kasih telah mempercayakan investasi Anda kepada ThinkNalyze.
+    </p>
+  </div>
+</body>
+</html>`
+
+	_, seedErr = db().Exec(context.Background(),
+		`INSERT INTO notification_templates (id, name, event_type, channel, subject, content, created_by)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		 ON CONFLICT (event_type, channel) DO NOTHING`,
+		uuid.New().String(),
+		"Pembayaran Terverifikasi",
+		"payment_verified",
+		"email",
+		"Pembayaran Anda Telah Diverifikasi - ThinkNalyze",
+		paymentVerifiedHTML,
+		"system",
+	)
+	if seedErr != nil {
+		log.Printf("[NOTIFICATION] WARN: failed to seed payment_verified template: %v", seedErr)
+	} else {
+		log.Println("[NOTIFICATION] payment_verified template seed OK (or already exists)")
+	}
+
+	// Seed template for payment_rejected
+	paymentRejectedHTML := `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body style="font-family:Arial,sans-serif;background:#f4f6fb;margin:0;padding:40px 20px;">
+  <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:16px;padding:36px;box-shadow:0 4px 24px rgba(78,115,223,0.10);border:1px solid #eaecf0;">
+    <div style="margin-bottom:24px;">
+      <span style="font-size:1.2rem;font-weight:700;color:#1a1c23;">Think<span style="color:#4e73df;">Nalyze</span></span>
+    </div>
+    <h2 style="font-size:1.2rem;font-weight:700;color:#1a1c23;margin:0 0 8px;">Pembayaran Ditolak</h2>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 8px;">Halo, {{client_name}}.</p>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 20px;">
+      Pembayaran Anda untuk paket <strong>{{package_name}}</strong> dengan nomor invoice <strong>{{invoice_number}}</strong> tidak dapat diverifikasi.
+    </p>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:16px;margin-bottom:20px;">
+      <p style="margin:0 0 4px;color:#991b1b;font-size:0.9rem;font-weight:600;">Alasan Penolakan:</p>
+      <p style="margin:0;color:#7f1d1d;font-size:0.9rem;">{{verification_note}}</p>
+    </div>
+    <p style="color:#6c757d;font-size:0.9rem;line-height:1.6;margin:0 0 16px;">
+      Silakan unggah ulang bukti transfer yang benar atau hubungi tim support kami untuk bantuan lebih lanjut.
+    </p>
+    <p style="color:#9ca3af;font-size:0.78rem;line-height:1.6;margin:0;border-top:1px solid #f0f0f0;padding-top:16px;">
+      Jika Anda merasa ini adalah kesalahan, silakan hubungi kami melalui menu Support Ticket.
+    </p>
+  </div>
+</body>
+</html>`
+
+	_, seedErr = db().Exec(context.Background(),
+		`INSERT INTO notification_templates (id, name, event_type, channel, subject, content, created_by)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7)
+		 ON CONFLICT (event_type, channel) DO NOTHING`,
+		uuid.New().String(),
+		"Pembayaran Ditolak",
+		"payment_rejected",
+		"email",
+		"Pembayaran Ditolak - ThinkNalyze",
+		paymentRejectedHTML,
+		"system",
+	)
+	if seedErr != nil {
+		log.Printf("[NOTIFICATION] WARN: failed to seed payment_rejected template: %v", seedErr)
+	} else {
+		log.Println("[NOTIFICATION] payment_rejected template seed OK (or already exists)")
+	}
+
 	// Remove obsolete event types that were inserted by mistake
 	obsolete := []string{"account_deactivated", "account_reactivated", "user_created"}
 	for _, et := range obsolete {

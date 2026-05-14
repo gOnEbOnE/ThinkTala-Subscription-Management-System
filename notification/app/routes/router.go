@@ -19,10 +19,20 @@ func Register(r *gin.Engine) *tplmod.Service {
 	// ── Broadcast Notifications ───────────────────────────────────
 	// Digunakan oleh ops dashboard untuk membuat announcement/banner.
 	notifCtrl := notifmod.NewController()
+	tplCtrl := tplmod.NewController(tplSvc)
 	api := r.Group("/api/notifications")
 	{
 		api.GET("", notifCtrl.List)
 		api.GET("/public", notifCtrl.ListPublic) // harus sebelum /:id agar tidak collision
+		api.GET("/recent", notifCtrl.Recent)
+		api.POST("/recent/read", notifCtrl.MarkRead)
+		api.POST("/recent/read-all", notifCtrl.MarkAllRead)
+
+		// GET /api/notifications/logs — monitoring log pengiriman (dengan filter)
+		api.GET("/logs", tplCtrl.Logs)
+		// GET /api/notifications/logs/:id — detail log pengiriman
+		api.GET("/logs/:id", tplCtrl.LogDetail)
+
 		api.GET("/:id", notifCtrl.Get)
 		api.POST("", notifCtrl.Create)
 		api.PUT("/:id", notifCtrl.Update)
@@ -31,7 +41,6 @@ func Register(r *gin.Engine) *tplmod.Service {
 
 	// ── Notification Templates ────────────────────────────────────
 	// Digunakan untuk mendefinisikan template pesan per event_type & channel.
-	tplCtrl := tplmod.NewController(tplSvc)
 	tpl := r.Group("/api/help/notification-templates")
 	{
 		tpl.GET("", tplCtrl.List)
@@ -45,9 +54,6 @@ func Register(r *gin.Engine) *tplmod.Service {
 
 	// GET /api/help/notification-templates/event-types — daftar event_type yang sudah terdaftar
 	tpl.GET("/event-types", tplCtrl.EventTypes)
-
-	// GET /api/notifications/logs — monitoring log pengiriman (dengan filter status opsional)
-	api.GET("/logs", tplCtrl.Logs)
 
 	return tplSvc
 }

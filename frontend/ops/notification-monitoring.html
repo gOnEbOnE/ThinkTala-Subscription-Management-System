@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Management | ThinkTala Ops</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
+    <style>
+        :root {
+            --audit-cyan: #00e2ff;
+            --audit-amber: #fbbf24;
+            --audit-rose: #f87171;
+            --audit-emerald: #34d399;
+            --audit-ink: #0b1120;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(1200px 600px at 20% -10%, rgba(0, 226, 255, 0.08), transparent 60%),
+                        radial-gradient(900px 500px at 95% 10%, rgba(251, 191, 36, 0.08), transparent 55%),
+                        var(--bg-dark);
+        }
+
+        .page-hero {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .page-title i {
+            color: var(--audit-cyan);
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .filter-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.1rem 1.2rem;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.9rem;
+            align-items: end;
+        }
+
+        .filter-grid label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-actions .btn {
+            border-radius: 999px;
+            font-size: 0.8rem;
+            padding: 0.5rem 1.2rem;
+        }
+
+        .btn-apply {
+            background: linear-gradient(135deg, var(--audit-cyan), #3b82f6);
+            color: #041018;
+            font-weight: 700;
+            border: none;
+        }
+
+        .btn-reset {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .search-input {
+            position: relative;
+        }
+
+        .search-input i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-input input {
+            padding-left: 36px;
+        }
+
+        .table-card {
+            margin-top: 1.3rem;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 22px 40px rgba(0, 0, 0, 0.32);
+        }
+
+        .table-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(90deg, rgba(0, 226, 255, 0.08), transparent 70%);
+        }
+
+        .table-card-header h6 {
+            margin: 0;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .meta-text {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .log-table thead th {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.18);
+            padding: 12px 16px;
+        }
+
+        .log-table tbody td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            background: var(--bg-panel);
+            vertical-align: middle;
+        }
+
+        .log-table tbody tr:hover td {
+            background: rgba(0, 226, 255, 0.05);
+        }
+
+        .user-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .user-meta {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .status-sent {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--audit-emerald);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+        }
+
+        .status-failed {
+            background: rgba(248, 113, 113, 0.15);
+            color: var(--audit-rose);
+            border: 1px solid rgba(248, 113, 113, 0.35);
+        }
+
+        .status-pending {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--audit-amber);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+        }
+
+        .channel-pill {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 226, 255, 0.25);
+            color: var(--audit-cyan);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-detail {
+            border: 1px solid rgba(0, 226, 255, 0.35);
+            color: var(--audit-cyan);
+            background: transparent;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .table-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.9rem 1.2rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .pagination-controls .btn {
+            font-size: 0.78rem;
+            border-radius: 999px;
+        }
+
+        .detail-section {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .detail-value {
+            font-size: 0.88rem;
+            color: var(--text-main);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .log-detail-dialog {
+            max-width: 760px;
+        }
+
+        .log-detail-content {
+            background: linear-gradient(160deg, rgba(12, 18, 32, 0.98), rgba(8, 12, 20, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            color: var(--text-main);
+        }
+
+        .log-detail-header {
+            padding: 20px 24px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .log-detail-title {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin: 0;
+        }
+
+        .log-detail-sub {
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .log-detail-close {
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(200, 220, 255, 0.8);
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .log-detail-close:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #f8fbff;
+        }
+
+        .log-detail-body {
+            padding: 18px 24px 6px;
+            max-height: 68vh;
+            overflow-y: auto;
+        }
+
+        .log-section {
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+
+        .log-section-title {
+            font-size: 0.7rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(168, 186, 214, 0.7);
+            margin-bottom: 12px;
+        }
+
+        .log-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px 16px;
+        }
+
+        .log-field {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+
+        .log-field-wide {
+            grid-column: 1 / -1;
+        }
+
+        .log-label {
+            font-size: 0.68rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(163, 183, 210, 0.7);
+            margin-bottom: 8px;
+        }
+
+        .log-label-danger {
+            color: rgba(248, 113, 113, 0.9);
+        }
+
+        .log-value {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .log-user-name {
+            font-weight: 600;
+            color: #f1f5ff;
+        }
+
+        .log-user-id {
+            font-size: 0.78rem;
+            color: rgba(181, 201, 227, 0.75);
+            margin-top: 4px;
+        }
+
+        .log-message {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.85rem;
+            color: rgba(220, 234, 255, 0.8);
+            white-space: pre-wrap;
+        }
+
+        .log-code {
+            background: rgba(6, 10, 16, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 0.82rem;
+            color: #7ee787;
+            font-family: 'JetBrains Mono', monospace;
+            white-space: pre-wrap;
+            margin: 0;
+        }
+
+        .log-error {
+            background: rgba(248, 113, 113, 0.08);
+            border: 1px solid rgba(248, 113, 113, 0.28);
+            border-radius: 12px;
+            padding: 12px;
+            color: #fca5a5;
+            font-size: 0.85rem;
+        }
+
+        .channel-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--audit-cyan);
+            border: 1px solid rgba(0, 226, 255, 0.35);
+            background: rgba(0, 226, 255, 0.12);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .status-pill.success {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--audit-emerald);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+        }
+
+        .status-pill.failed {
+            background: rgba(248, 113, 113, 0.15);
+            color: var(--audit-rose);
+            border: 1px solid rgba(248, 113, 113, 0.35);
+        }
+
+        .status-pill.pending {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--audit-amber);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+        }
+
+        .log-detail-footer {
+            padding: 12px 24px 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .log-detail-footer .btn {
+            border-radius: 999px;
+            padding: 8px 18px;
+        }
+
+        .empty-state {
+            padding: 2rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 768px) {
+            .table-footer {
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: flex-start;
+            }
+
+            .log-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="ops-sidebar-placeholder"></div>
+    <div id="ops-navbar-placeholder"></div>
+
+    <div class="main-content">
+        <div class="page-hero">
+            <div>
+                <div class="page-title"><i class="fa-solid fa-eye"></i>Monitoring Management</div>
+                <div class="page-subtitle">Audit trail pengiriman notifikasi multi-channel untuk troubleshooting operasional.</div>
+            </div>
+            <div class="meta-text" id="lastRefresh">Last refresh: -</div>
+        </div>
+
+        <div class="filter-card">
+            <div class="filter-grid">
+                <div>
+                    <label for="filterStatus">Status</label>
+                    <select id="filterStatus" class="form-select form-select-sm">
+                        <option value="">All Status</option>
+                        <option value="sent">Sent</option>
+                        <option value="failed">Failed</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="filterChannel">Channel</label>
+                    <select id="filterChannel" class="form-select form-select-sm">
+                        <option value="">All Channel</option>
+                        <option value="email">Email</option>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="telegram">Telegram</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Tanggal</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <input id="startDate" type="date" class="form-control form-control-sm">
+                        <span class="text-muted">-</span>
+                        <input id="endDate" type="date" class="form-control form-control-sm">
+                    </div>
+                </div>
+                <div class="search-input">
+                    <label for="searchInput">Search</label>
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="searchInput" type="text" class="form-control form-control-sm" placeholder="Email, User ID, atau Event Type">
+                </div>
+                <div class="filter-actions">
+                    <button id="applyFilter" class="btn btn-apply">Apply Filter</button>
+                    <button id="resetFilter" class="btn btn-reset">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-card-header">
+                <h6>Log Pengiriman</h6>
+                <div class="meta-text" id="resultMeta">0 results</div>
+            </div>
+            <div class="table-responsive">
+                <table class="table log-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Event Type</th>
+                            <th>Channel</th>
+                            <th>Status</th>
+                            <th>Sent At</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody">
+                        <tr><td colspan="6" class="empty-state">Loading data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-footer">
+                <span class="meta-text" id="pageMeta">Page 1</span>
+                <div class="pagination-controls">
+                    <button id="prevBtn" class="btn btn-sm btn-outline-light">Prev</button>
+                    <button id="nextBtn" class="btn btn-sm btn-outline-light">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="logDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered log-detail-dialog">
+            <div class="modal-content log-detail-content">
+                <div class="log-detail-header">
+                    <div>
+                        <h5 class="log-detail-title">Notification Detail</h5>
+                        <div class="log-detail-sub">Log ID: <span id="detailLogId">-</span></div>
+                    </div>
+                    <button type="button" class="log-detail-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="log-detail-body">
+                    <div class="log-section">
+                        <div class="log-section-title">Delivery Summary</div>
+                        <div class="log-grid">
+                            <div class="log-field">
+                                <div class="log-label">Timestamp</div>
+                                <div class="log-value" id="detailTimestamp">-</div>
+                            </div>
+                            <div class="log-field">
+                                <div class="log-label">Channel</div>
+                                <div class="log-value" id="detailChannel">-</div>
+                            </div>
+                            <div class="log-field">
+                                <div class="log-label">Status</div>
+                                <div class="log-value" id="detailStatus">-</div>
+                            </div>
+                            <div class="log-field">
+                                <div class="log-label">Retry Count</div>
+                                <div class="log-value" id="detailRetry">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="log-section">
+                        <div class="log-section-title">User Details</div>
+                        <div class="log-grid">
+                            <div class="log-field">
+                                <div class="log-label">User Identifier</div>
+                                <div class="log-value" id="detailUser">-</div>
+                            </div>
+                            <div class="log-field log-field-wide">
+                                <div class="log-label">Destination</div>
+                                <div class="log-value" id="detailDestination">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="log-section">
+                        <div class="log-section-title">Content Details</div>
+                        <div class="log-grid">
+                            <div class="log-field">
+                                <div class="log-label">Subject</div>
+                                <div class="log-value" id="detailSubject">-</div>
+                            </div>
+                            <div class="log-field">
+                                <div class="log-label">Event Type</div>
+                                <div class="log-value" id="detailEventType">-</div>
+                            </div>
+                            <div class="log-field log-field-wide">
+                                <div class="log-label">Message Body (Preview)</div>
+                                <div class="log-value log-message" id="detailPayload">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="log-section">
+                        <div class="log-section-title">Technical Details</div>
+                        <div class="log-grid">
+                            <div class="log-field log-field-wide">
+                                <div class="log-label">Provider Name</div>
+                                <div class="log-value" id="detailProvider">-</div>
+                            </div>
+                            <div class="log-field log-field-wide">
+                                <div class="log-label">Provider Response</div>
+                                <pre class="log-code" id="detailResponse">-</pre>
+                            </div>
+                            <div class="log-field log-field-wide">
+                                <div class="log-label log-label-danger">Error Message</div>
+                                <div class="log-error" id="detailError">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="log-detail-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/ops-layout.js?v=notif-monitoring-1"></script>
+    <script>
+        const state = {
+            status: '',
+            channel: '',
+            startDate: '',
+            endDate: '',
+            search: '',
+            limit: 50,
+            offset: 0,
+            total: 0
+        };
+
+        const elements = {
+            tableBody: document.getElementById('logTableBody'),
+            resultMeta: document.getElementById('resultMeta'),
+            pageMeta: document.getElementById('pageMeta'),
+            prevBtn: document.getElementById('prevBtn'),
+            nextBtn: document.getElementById('nextBtn'),
+            lastRefresh: document.getElementById('lastRefresh'),
+            status: document.getElementById('filterStatus'),
+            channel: document.getElementById('filterChannel'),
+            startDate: document.getElementById('startDate'),
+            endDate: document.getElementById('endDate'),
+            search: document.getElementById('searchInput'),
+            apply: document.getElementById('applyFilter'),
+            reset: document.getElementById('resetFilter')
+        };
+
+        function formatChannel(value) {
+            const map = { email: 'Email', whatsapp: 'WhatsApp', telegram: 'Telegram' };
+            return map[value] || value || '-';
+        }
+
+        function formatDateTime(value) {
+            if (!value) return '-';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleString('id-ID', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDateTimeFull(value) {
+            if (!value) return '-';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '-';
+            const pad = function (num) {
+                return String(num).padStart(2, '0');
+            };
+            return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) +
+                ' ' + pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
+        }
+
+        function statusBadge(status) {
+            const normalized = (status || '').toLowerCase();
+            const label = normalized || 'pending';
+            const cls = normalized === 'sent' ? 'status-sent' : normalized === 'failed' ? 'status-failed' : 'status-pending';
+            return '<span class="badge-status ' + cls + '">' + label + '</span>';
+        }
+
+        function statusLabel(status) {
+            const normalized = (status || '').toLowerCase();
+            const map = { sent: 'Terkirim', failed: 'Gagal', pending: 'Menunggu' };
+            return map[normalized] || (status || '-');
+        }
+
+        function statusPill(status) {
+            const normalized = (status || '').toLowerCase();
+            const label = statusLabel(normalized);
+            const cls = normalized === 'sent' ? 'success' : normalized === 'failed' ? 'failed' : 'pending';
+            return '<span class="status-pill ' + cls + '">' + escapeHtml(label) + '</span>';
+        }
+
+        function channelBadge(channel) {
+            const normalized = (channel || '').toLowerCase();
+            const iconMap = { email: 'fa-envelope', whatsapp: 'fa-whatsapp', telegram: 'fa-paper-plane' };
+            const icon = iconMap[normalized] || 'fa-bell';
+            return '<span class="channel-badge"><i class="fa-solid ' + icon + '"></i>' + escapeHtml(formatChannel(normalized)) + '</span>';
+        }
+
+        function formatRetryCount(value) {
+            if (value == null || value === '') return '-';
+            const num = Number(value);
+            if (Number.isNaN(num)) return String(value);
+            return num + 'x';
+        }
+
+        function formatLogId(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return '-';
+            const upper = raw.toUpperCase();
+            if (upper.indexOf('LOG-') === 0) return '#' + upper;
+            if (/^\d+$/.test(upper)) return '#LOG-' + upper;
+            return '#' + raw;
+        }
+
+        function formatProviderResponse(value) {
+            if (value == null || value === '') return '-';
+            if (typeof value === 'object') {
+                try {
+                    return JSON.stringify(value, null, 2);
+                } catch (err) {
+                    return String(value);
+                }
+            }
+            const text = String(value);
+            const trimmed = text.trim();
+            if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+                try {
+                    return JSON.stringify(JSON.parse(trimmed), null, 2);
+                } catch (err) {
+                    return text;
+                }
+            }
+            return text;
+        }
+
+        function renderRows(list) {
+            if (!list || list.length === 0) {
+                elements.tableBody.innerHTML = '<tr><td colspan="6" class="empty-state">Tidak ada log sesuai filter.</td></tr>';
+                return;
+            }
+            elements.tableBody.innerHTML = list.map(function (row) {
+                const userName = row.user_name || row.to || '-';
+                const userMeta = row.user_id || row.to || '-';
+                const sentAt = row.sent_at || row.created_at;
+                return '' +
+                    '<tr>' +
+                    '  <td><div class="user-cell"><span class="user-name">' + escapeHtml(userName) + '</span>' +
+                    '      <span class="user-meta">' + escapeHtml(userMeta) + '</span></div></td>' +
+                    '  <td>' + escapeHtml(row.event_type || '-') + '</td>' +
+                    '  <td><span class="channel-pill">' + escapeHtml(formatChannel(row.channel)) + '</span></td>' +
+                    '  <td>' + statusBadge(row.status) + '</td>' +
+                    '  <td>' + escapeHtml(formatDateTime(sentAt)) + '</td>' +
+                    '  <td><button class="btn btn-detail" data-id="' + escapeHtml(row.id) + '">Detail</button></td>' +
+                    '</tr>';
+            }).join('');
+
+            elements.tableBody.querySelectorAll('.btn-detail').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    loadDetail(btn.getAttribute('data-id'));
+                });
+            });
+        }
+
+        function updateMeta() {
+            const start = state.offset + 1;
+            const end = Math.min(state.offset + state.limit, state.total);
+            const total = state.total || 0;
+            elements.resultMeta.textContent = total ? (start + '-' + end + ' of ' + total + ' results') : '0 results';
+            const page = Math.floor(state.offset / state.limit) + 1;
+            elements.pageMeta.textContent = 'Page ' + page;
+            elements.prevBtn.disabled = state.offset === 0;
+            elements.nextBtn.disabled = state.offset + state.limit >= total;
+        }
+
+        function buildQuery() {
+            const params = new URLSearchParams();
+            if (state.status) params.set('status', state.status);
+            if (state.channel) params.set('channel', state.channel);
+            if (state.startDate) params.set('start_date', state.startDate);
+            if (state.endDate) params.set('end_date', state.endDate);
+            if (state.search) params.set('search', state.search);
+            params.set('limit', state.limit);
+            params.set('offset', state.offset);
+            return params.toString();
+        }
+
+        function setLastRefresh() {
+            const now = new Date();
+            elements.lastRefresh.textContent = 'Last refresh: ' + now.toLocaleTimeString('id-ID');
+        }
+
+        async function loadLogs(resetOffset) {
+            if (resetOffset) state.offset = 0;
+            elements.tableBody.innerHTML = '<tr><td colspan="6" class="empty-state">Loading data...</td></tr>';
+            try {
+                const res = await fetch('/api/notifications/logs?' + buildQuery(), { credentials: 'include' });
+                if (res.status === 401) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.error || 'Gagal memuat log');
+                state.total = json.total || 0;
+                renderRows(json.data || []);
+                updateMeta();
+                setLastRefresh();
+            } catch (err) {
+                elements.tableBody.innerHTML = '<tr><td colspan="6" class="empty-state">' + escapeHtml(err.message || 'Gagal memuat log') + '</td></tr>';
+                state.total = 0;
+                updateMeta();
+            }
+        }
+
+        async function loadDetail(id) {
+            if (!id) return;
+            try {
+                const res = await fetch('/api/notifications/logs/' + encodeURIComponent(id), { credentials: 'include' });
+                if (res.status === 401) {
+                    window.location.href = '/account/login';
+                    return;
+                }
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.error || 'Gagal memuat detail');
+                const data = json.data || {};
+                const destination = data.to || data.destination || data.email || data.phone || '-';
+                const logIdValue = data.log_id || data.logId || data.id;
+                const userName = data.user_name || data.userName || '-';
+                const userId = data.user_id || data.userId || '-';
+                const userHtml = '<div class="log-user-name">' + escapeHtml(userName) + '</div>' +
+                    '<div class="log-user-id">ID: ' + escapeHtml(userId) + '</div>';
+
+                setText('detailLogId', formatLogId(logIdValue));
+                setText('detailTimestamp', formatDateTimeFull(data.sent_at || data.created_at));
+                setHtml('detailChannel', channelBadge(data.channel));
+                setHtml('detailStatus', statusPill(data.status));
+                setText('detailRetry', formatRetryCount(data.retry_count || data.retryCount || data.attempt_count || data.attempts));
+                setHtml('detailUser', userHtml);
+                setText('detailDestination', destination);
+                setText('detailSubject', data.subject || '-');
+                setText('detailEventType', data.event_type || data.eventType || '-');
+                setText('detailPayload', data.content || data.message || data.payload || '-');
+                setText('detailProvider', data.provider_name || data.provider || data.provider_service || '-');
+                setText('detailResponse', formatProviderResponse(data.provider_response || data.providerResponse || data.response || data.provider_payload));
+                setText('detailError', data.error_msg || data.error_message || data.error || '-');
+                const modal = new bootstrap.Modal(document.getElementById('logDetailModal'));
+                modal.show();
+            } catch (err) {
+                alert(err.message || 'Gagal memuat detail');
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function setText(id, value) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = value || '-';
+        }
+
+        function setHtml(id, value) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = value || '-';
+        }
+
+        function applyFilters() {
+            state.status = elements.status.value.trim();
+            state.channel = elements.channel.value.trim();
+            state.startDate = elements.startDate.value;
+            state.endDate = elements.endDate.value;
+            state.search = elements.search.value.trim();
+            loadLogs(true);
+        }
+
+        function resetFilters() {
+            elements.status.value = '';
+            elements.channel.value = '';
+            elements.startDate.value = '';
+            elements.endDate.value = '';
+            elements.search.value = '';
+            applyFilters();
+        }
+
+        elements.apply.addEventListener('click', applyFilters);
+        elements.reset.addEventListener('click', resetFilters);
+        elements.prevBtn.addEventListener('click', function () {
+            state.offset = Math.max(0, state.offset - state.limit);
+            loadLogs(false);
+        });
+        elements.nextBtn.addEventListener('click', function () {
+            state.offset = state.offset + state.limit;
+            loadLogs(false);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadLogs(true);
+        });
+    </script>
+</body>
+</html>

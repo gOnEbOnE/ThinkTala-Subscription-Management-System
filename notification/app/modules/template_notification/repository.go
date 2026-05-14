@@ -3,6 +3,7 @@ package template
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"notification/core/database"
@@ -123,27 +124,29 @@ func (r *Repository) Exists(id string) bool {
 // ── Notification Logs ─────────────────────────────────────────────────────────
 
 // SaveLog menyimpan record log baru dengan status 'pending'.
-func (r *Repository) SaveLog(id, eventType, channel, to, subject, content string) {
+func (r *Repository) SaveLog(id, eventType, channel, to, subject, content, userID, userName string) {
 	r.db.Exec(context.Background(), `
-		INSERT INTO notification_logs (id, event_type, channel, to_address, subject, content, status)
-		VALUES ($1, $2, $3, $4, $5, $6, 'pending')
-	`, id, eventType, channel, to, subject, content)
+		INSERT INTO notification_logs (id, user_id, user_name, event_type, channel, to_address, subject, content, status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')
+	`, id, userID, userName, eventType, channel, to, subject, content)
 }
 
 // MarkLogSent menandai log sebagai berhasil dikirim.
-func (r *Repository) MarkLogSent(id string) {
+func (r *Repository) MarkLogSent(id, providerResponse string) {
 	r.db.Exec(context.Background(), `
-		UPDATE notification_logs SET status='sent', sent_at=NOW(), error_msg=NULL WHERE id=$1
-	`, id)
+		UPDATE notification_logs
+		SET status='sent', sent_at=NOW(), error_msg=NULL, provider_response=$2
+		WHERE id=$1
+	`, id, providerResponse)
 }
 
 // MarkLogFailed menandai log gagal dan menjadwalkan retry dengan exponential backoff.
-func (r *Repository) MarkLogFailed(id, errMsg string, retryCount int, nextRetryAt *time.Time) {
+func (r *Repository) MarkLogFailed(id, errMsg, providerResponse string, retryCount int, nextRetryAt *time.Time) {
 	r.db.Exec(context.Background(), `
 		UPDATE notification_logs
-		SET status='failed', error_msg=$1, retry_count=$2, next_retry_at=$3
-		WHERE id=$4
-	`, errMsg, retryCount, nextRetryAt, id)
+		SET status='failed', error_msg=$1, provider_response=$2, retry_count=$3, next_retry_at=$4
+		WHERE id=$5
+	`, errMsg, providerResponse, retryCount, nextRetryAt, id)
 }
 
 // GetRetryableLogs mengambil log yang gagal dan siap di-retry.
@@ -179,7 +182,7 @@ func (r *Repository) GetRetryableLogs() ([]NotificationLog, error) {
 }
 
 // ListLogs mengambil log notifikasi untuk monitoring, dengan filter status opsional.
-func (r *Repository) ListLogs(status string, limit, offset int) ([]NotificationLog, int, error) {
+func (r *Repository) ListLogs(status, channel, search string, startDate, endDate *time.Time, limit, offset int) ([]NotificationLog, int, error) {
 	where := "WHERE 1=1"
 	args := []any{}
 	i := 1
@@ -188,14 +191,34 @@ func (r *Repository) ListLogs(status string, limit, offset int) ([]NotificationL
 		args = append(args, status)
 		i++
 	}
+	if channel != "" {
+		where += fmt.Sprintf(" AND channel=$%d", i)
+		args = append(args, channel)
+		i++
+	}
+	if search != "" {
+		where += fmt.Sprintf(" AND (to_address ILIKE $%d OR event_type ILIKE $%d OR user_id ILIKE $%d OR user_name ILIKE $%d)", i, i, i, i)
+		args = append(args, search)
+		i++
+	}
+	if startDate != nil {
+		where += fmt.Sprintf(" AND COALESCE(sent_at, created_at) >= $%d", i)
+		args = append(args, *startDate)
+		i++
+	}
+	if endDate != nil {
+		where += fmt.Sprintf(" AND COALESCE(sent_at, created_at) < $%d", i)
+		args = append(args, *endDate)
+		i++
+	}
 
 	var total int
 	r.db.QueryRow(context.Background(), "SELECT COUNT(*) FROM notification_logs "+where, args...).Scan(&total)
 
 	args = append(args, limit, offset)
 	rows, err := r.db.Query(context.Background(), `
-		SELECT id, event_type, channel, to_address, status, retry_count, max_retries,
-		       next_retry_at, sent_at, error_msg, created_at
+		SELECT id, user_id, user_name, event_type, channel, to_address, status, retry_count, max_retries,
+		       next_retry_at, sent_at, error_msg, provider_response, created_at
 		FROM notification_logs `+where+fmt.Sprintf(` ORDER BY created_at DESC LIMIT $%d OFFSET $%d`, i, i+1),
 		args...,
 	)
@@ -207,14 +230,52 @@ func (r *Repository) ListLogs(status string, limit, offset int) ([]NotificationL
 	var list []NotificationLog
 	for rows.Next() {
 		var l NotificationLog
-		rows.Scan(&l.ID, &l.EventType, &l.Channel, &l.ToAddress, &l.Status,
-			&l.RetryCount, &l.MaxRetries, &l.NextRetryAt, &l.SentAt, &l.ErrorMsg, &l.CreatedAt)
+		var userID, userName *string
+		rows.Scan(&l.ID, &userID, &userName, &l.EventType, &l.Channel, &l.ToAddress, &l.Status,
+			&l.RetryCount, &l.MaxRetries, &l.NextRetryAt, &l.SentAt, &l.ErrorMsg, &l.ProviderResponse, &l.CreatedAt)
+		if userID != nil {
+			l.UserID = *userID
+		}
+		if userName != nil {
+			l.UserName = *userName
+		}
 		list = append(list, l)
 	}
 	if list == nil {
 		list = []NotificationLog{}
 	}
 	return list, total, nil
+}
+
+// GetLogByID mengambil detail log notifikasi untuk audit.
+func (r *Repository) GetLogByID(id string) (*NotificationLog, error) {
+	var l NotificationLog
+	var userID, userName, subject, content *string
+	err := r.db.QueryRow(context.Background(), `
+		SELECT id, user_id, user_name, event_type, channel, to_address, subject, content,
+		       status, retry_count, max_retries, next_retry_at, sent_at, error_msg, provider_response, created_at
+		FROM notification_logs
+		WHERE id = $1
+	`, id).Scan(&l.ID, &userID, &userName, &l.EventType, &l.Channel, &l.ToAddress,
+		&subject, &content, &l.Status, &l.RetryCount, &l.MaxRetries, &l.NextRetryAt,
+		&l.SentAt, &l.ErrorMsg, &l.ProviderResponse, &l.CreatedAt)
+	if err != nil {
+		log.Printf("[DB] GetLogByID error (id=%s): %v", id, err)
+		return nil, err
+	}
+	if userID != nil {
+		l.UserID = *userID
+	}
+	if userName != nil {
+		l.UserName = *userName
+	}
+	if subject != nil {
+		l.Subject = *subject
+	}
+	if content != nil {
+		l.Content = *content
+	}
+	return &l, nil
 }
 
 // Create menyimpan template baru ke database.

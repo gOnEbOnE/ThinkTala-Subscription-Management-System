@@ -699,6 +699,9 @@ func main() {
 	}
 	if notifRouteOk {
 		notifHandler := createProxyHandler(notifRoute.Target, notifRoute.CORS)
+		recentRoles := []string{"CLIENT", "OPERASIONAL", "COMPLIANCE", "MANAGEMENT", "ADMIN", "ADMIN_SUPPORT", "ADMIN_KYC", "SUPERADMIN", "CEO"}
+		http.HandleFunc("/api/notifications/recent", withRolesAuth(recentRoles, notifHandler))
+		http.HandleFunc("/api/notifications/recent/", withRolesAuth(recentRoles, notifHandler))
 		isUUIDLike := func(value string) bool {
 			if len(value) != 36 {
 				return false
@@ -723,6 +726,13 @@ func main() {
 		} else {
 			http.HandleFunc("/api/notifications", notifHandler)
 		}
+
+		// /api/notifications/logs — monitoring log (OPERASIONAL+) dan event drawer (semua role terautentikasi)
+		logsRoles := []string{"CLIENT", "OPERASIONAL", "COMPLIANCE", "MANAGEMENT", "ADMIN", "ADMIN_SUPPORT", "ADMIN_KYC", "SUPERADMIN", "CEO"}
+		http.HandleFunc("/api/notifications/logs", withRolesAuth(logsRoles, notifHandler))
+		http.HandleFunc("/api/notifications/logs/", withRolesAuth(logsRoles, notifHandler))
+		log.Printf("[GW] API: /api/notifications/logs -> %s (CLIENT+OPERASIONAL+)", notifRoute.Target)
+
 		http.HandleFunc("/api/notifications/", func(w http.ResponseWriter, r *http.Request) {
 			suffix := strings.TrimPrefix(r.URL.Path, "/api/notifications/")
 			if r.Method == http.MethodGet && suffix != "" && !strings.Contains(suffix, "/") && isUUIDLike(suffix) {
@@ -897,6 +907,9 @@ func main() {
 				continue
 			}
 			if route.Path == "/api/notifications" || route.Path == "/api/notifications/" {
+				continue
+			}
+			if route.Path == "/api/notifications/recent" || route.Path == "/api/notifications/recent/" {
 				continue
 			}
 			if strings.HasPrefix(route.Path, "/api/admin/") ||

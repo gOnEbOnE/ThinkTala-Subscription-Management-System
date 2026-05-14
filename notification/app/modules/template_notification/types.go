@@ -20,6 +20,8 @@ type NotificationTemplate struct {
 // NotificationLog adalah record setiap percobaan pengiriman notifikasi.
 type NotificationLog struct {
 	ID          string     `json:"id"`
+	UserID      string     `json:"user_id,omitempty"`
+	UserName    string     `json:"user_name,omitempty"`
 	EventType   string     `json:"event_type"`
 	Channel     string     `json:"channel"`
 	ToAddress   string     `json:"to"`
@@ -31,6 +33,7 @@ type NotificationLog struct {
 	NextRetryAt *time.Time `json:"next_retry_at,omitempty"`
 	SentAt      *time.Time `json:"sent_at,omitempty"`
 	ErrorMsg    *string    `json:"error_msg,omitempty"`
+	ProviderResponse *string `json:"provider_response,omitempty"`
 	CreatedAt   time.Time  `json:"created_at"`
 }
 
@@ -48,9 +51,11 @@ type CreateTemplateRequest struct {
 // Notification Service akan mencari template, render placeholder, lalu kirim via channel.
 type SendRequest struct {
 	EventType string            `json:"event_type" binding:"required"` // otp_verification, user_kyc_approved, ...
-	Channel   string            `json:"channel"    binding:"required"` // email | telegram
+	Channel   string            `json:"channel"    binding:"required"` // email | whatsapp | telegram
 	To        string            `json:"to"         binding:"required"` // alamat tujuan (email address, dll.)
 	Vars      map[string]string `json:"vars"`                          // placeholder values: {"name": "Rifqi", "otp": "123456"}
+	UserID    string            `json:"user_id,omitempty"`
+	UserName  string            `json:"user_name,omitempty"`
 }
 
 // UpdateTemplateRequest adalah payload untuk update template.

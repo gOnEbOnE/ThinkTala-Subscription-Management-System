@@ -2,7 +2,9 @@ package notification
 
 import (
 	"errors"
+	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -51,6 +53,93 @@ func (ctrl *Controller) ListPublic(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": list})
+}
+
+// Recent mengembalikan ringkasan notifikasi terbaru untuk drawer.
+func (ctrl *Controller) Recent(c *gin.Context) {
+	role := strings.TrimSpace(c.GetHeader("X-User-Role"))
+	if role == "" {
+		role = strings.TrimSpace(c.Query("role"))
+	}
+	userID := strings.TrimSpace(c.GetHeader("X-User-ID"))
+	if userID == "" {
+		userID = strings.TrimSpace(c.Query("user_id"))
+	}
+
+	log.Printf("[RECENT] role=%q userID=%q", role, userID)
+
+	limit, _ := strconv.Atoi(strings.TrimSpace(c.DefaultQuery("limit", "5")))
+	if limit <= 0 || limit > 5 {
+		limit = 5
+	}
+
+	list, err := ctrl.svc.Recent(role, userID, limit)
+	if err != nil {
+		log.Printf("[RECENT] ERROR: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": list})
+}
+
+
+// MarkRead menandai satu notifikasi sebagai read.
+func (ctrl *Controller) MarkRead(c *gin.Context) {
+	userID := strings.TrimSpace(c.GetHeader("X-User-ID"))
+	if userID == "" {
+		userID = strings.TrimSpace(c.Query("user_id"))
+	}
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id wajib diisi"})
+		return
+	}
+
+	var req struct {
+		ID         string `json:"id"`
+		SourceType string `json:"source_type"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "payload tidak valid"})
+		return
+	}
+
+	sourceType := strings.ToLower(strings.TrimSpace(req.SourceType))
+	if sourceType != "news" && sourceType != "event" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "source_type tidak valid"})
+		return
+	}
+	if strings.TrimSpace(req.ID) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id wajib diisi"})
+		return
+	}
+
+	if err := ctrl.svc.MarkRead(userID, sourceType, strings.TrimSpace(req.ID)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Notifikasi ditandai read"})
+}
+
+// MarkAllRead menandai semua notifikasi sebagai read.
+func (ctrl *Controller) MarkAllRead(c *gin.Context) {
+	role := strings.TrimSpace(c.GetHeader("X-User-Role"))
+	if role == "" {
+		role = strings.TrimSpace(c.Query("role"))
+	}
+	userID := strings.TrimSpace(c.GetHeader("X-User-ID"))
+	if userID == "" {
+		userID = strings.TrimSpace(c.Query("user_id"))
+	}
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id wajib diisi"})
+		return
+	}
+
+	if err := ctrl.svc.MarkAllRead(role, userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Semua notifikasi ditandai read"})
 }
 
 // Get mengembalikan satu notification berdasarkan ID.

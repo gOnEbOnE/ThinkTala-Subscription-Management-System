@@ -7,6 +7,8 @@ type CreateOrderDTO struct {
 	PackageID      string `json:"package_id"`
 	DurationMonths int    `json:"duration_months"` // opsional, default 1 bulan
 	PaymentMethod  string `json:"payment_method"`
+	ClientName     string `json:"client_name"`
+	ClientEmail    string `json:"client_email"`
 }
 
 // VerifyOrderDTO - request body untuk PATCH /api/admin/orders/{id}/verify

@@ -110,11 +110,11 @@ func (r *orderRepo) CreateOrder(ctx context.Context, userID string, dto CreateOr
 	var o Order
 	err := r.db.Pool.QueryRow(ctx,
 		`INSERT INTO subscription.orders
-		   (id, invoice_number, user_id, package_id, duration_months, payment_method, total_price, status, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, 'PENDING_PAYMENT', NOW(), NOW())
+		   (id, invoice_number, user_id, package_id, duration_months, payment_method, client_name, client_email, total_price, status, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'PENDING_PAYMENT', NOW(), NOW())
 		 RETURNING id, invoice_number, package_id, duration_months, payment_method, total_price, status,
 		          FALSE AS has_payment_proof, NULL::timestamp AS payment_proof_uploaded_at, created_at`,
-		id, invoice, userID, dto.PackageID, durationMonths, dto.PaymentMethod, totalPrice,
+		id, invoice, userID, dto.PackageID, durationMonths, dto.PaymentMethod, dto.ClientName, dto.ClientEmail, totalPrice,
 	).Scan(&o.ID, &o.InvoiceNumber, &o.PackageID, &o.DurationMonths, &o.PaymentMethod, &o.TotalPrice, &o.Status, &o.HasPaymentProof, &o.PaymentProofUploadedAt, &o.CreatedAt)
 
 	if err != nil {
@@ -123,11 +123,11 @@ func (r *orderRepo) CreateOrder(ctx context.Context, userID string, dto CreateOr
 			invoice = generateInvoiceNumber()
 			err = r.db.Pool.QueryRow(ctx,
 				`INSERT INTO subscription.orders
-				   (id, invoice_number, user_id, package_id, duration_months, payment_method, total_price, status, created_at, updated_at)
-				 VALUES ($1, $2, $3, $4, $5, $6, $7, 'PENDING_PAYMENT', NOW(), NOW())
+				   (id, invoice_number, user_id, package_id, duration_months, payment_method, client_name, client_email, total_price, status, created_at, updated_at)
+				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'PENDING_PAYMENT', NOW(), NOW())
 				 RETURNING id, invoice_number, package_id, duration_months, payment_method, total_price, status,
 				          FALSE AS has_payment_proof, NULL::timestamp AS payment_proof_uploaded_at, created_at`,
-				uuid.New().String(), invoice, userID, dto.PackageID, durationMonths, dto.PaymentMethod, totalPrice,
+				uuid.New().String(), invoice, userID, dto.PackageID, durationMonths, dto.PaymentMethod, dto.ClientName, dto.ClientEmail, totalPrice,
 			).Scan(&o.ID, &o.InvoiceNumber, &o.PackageID, &o.DurationMonths, &o.PaymentMethod, &o.TotalPrice, &o.Status, &o.HasPaymentProof, &o.PaymentProofUploadedAt, &o.CreatedAt)
 			if err != nil {
 				return nil, fmt.Errorf("gagal membuat order setelah retry: %w", err)
@@ -146,8 +146,8 @@ func (r *orderRepo) getOrderByIDWithFallback(ctx context.Context, orderID string
 		o.user_id,
 		o.package_id,
 		COALESCE(p.name, '-') AS package_name,
-		COALESCE(u.name, 'Unknown') AS client_name,
-		COALESCE(u.email, '-') AS client_email,
+		COALESCE(NULLIF(o.client_name, ''), u.name, 'Unknown') AS client_name,
+		COALESCE(NULLIF(o.client_email, ''), u.email, '-') AS client_email,
 		o.duration_months,
 		o.total_price,
 		o.payment_method,
@@ -170,8 +170,8 @@ func (r *orderRepo) getOrderByIDWithFallback(ctx context.Context, orderID string
 		o.user_id,
 		o.package_id,
 		COALESCE(p.name, '-') AS package_name,
-		'Unknown' AS client_name,
-		'-' AS client_email,
+		COALESCE(NULLIF(o.client_name, ''), 'Unknown') AS client_name,
+		COALESCE(NULLIF(o.client_email, ''), '-') AS client_email,
 		o.duration_months,
 		o.total_price,
 		o.payment_method,
@@ -370,10 +370,10 @@ func (r *orderRepo) ListOrdersForAdmin(ctx context.Context, filter AdminOrderFil
 
 	buildQuery := func(withUsers bool, w string) string {
 		join := ""
-		clientName := "'Unknown' AS client_name"
+		clientName := "COALESCE(NULLIF(o.client_name, ''), 'Unknown') AS client_name"
 		if withUsers {
 			join = "LEFT JOIN users u ON u.id = o.user_id"
-			clientName = "COALESCE(u.name, 'Unknown') AS client_name"
+			clientName = "COALESCE(NULLIF(o.client_name, ''), u.name, 'Unknown') AS client_name"
 		}
 		return fmt.Sprintf(`
 			SELECT
