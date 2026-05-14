@@ -1,9 +1,14 @@
 package support
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"sync"
 	"time"
 )
 
@@ -16,10 +21,11 @@ type ticketStats struct {
 }
 
 type adminSupportStat struct {
-	AdminID         string  `json:"admin_id"`
-	TicketsHandled  int     `json:"tickets_handled"`
-	CompletionRate  float64 `json:"completion_rate"`
-	TotalReplies    int     `json:"total_replies"`
+	AdminID        string  `json:"admin_id"`
+	AdminName      string  `json:"admin_name"`
+	TicketsHandled int     `json:"tickets_handled"`
+	CompletionRate float64 `json:"completion_rate"`
+	TotalReplies   int     `json:"total_replies"`
 }
 
 type recentTicket struct {
@@ -115,6 +121,50 @@ func HandleSupportDashboard(db *sql.DB) http.HandlerFunc {
 					adminStats = append(adminStats, s)
 				}
 			}
+		}
+
+		// Resolve admin UUIDs to names via users service internal endpoint.
+		if len(adminStats) > 0 {
+			usersBase := os.Getenv("USERS_SERVICE_URL")
+			if usersBase == "" {
+				usersBase = "http://users.railway.internal:8080"
+			}
+			var wg sync.WaitGroup
+			for i := range adminStats {
+				wg.Add(1)
+				go func(idx int) {
+					defer wg.Done()
+					id := adminStats[idx].AdminID
+					reqCtx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+					defer cancel()
+					req, err := http.NewRequestWithContext(reqCtx, http.MethodGet,
+						fmt.Sprintf("%s/internal/users/%s/email", usersBase, id), nil)
+					if err != nil {
+						return
+					}
+					resp, err := http.DefaultClient.Do(req)
+					if err != nil || resp.StatusCode != http.StatusOK {
+						return
+					}
+					defer resp.Body.Close()
+					body, err := io.ReadAll(resp.Body)
+					if err != nil {
+						return
+					}
+					var parsed struct {
+						Data struct {
+							Name string `json:"name"`
+						} `json:"data"`
+					}
+					if err := json.Unmarshal(body, &parsed); err != nil {
+						return
+					}
+					if parsed.Data.Name != "" {
+						adminStats[idx].AdminName = parsed.Data.Name
+					}
+				}(i)
+			}
+			wg.Wait()
 		}
 
 		writeDashJSON(w, http.StatusOK, map[string]any{

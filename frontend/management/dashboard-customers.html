@@ -339,8 +339,8 @@
 
         .toast-lite {
             display: none;
-            border: 1px solid rgba(249, 62, 62, 0.35);
-            background: rgba(249, 62, 62, 0.95);
+            border: 1px solid rgba(53, 208, 127, 0.35);
+            background: rgba(53, 208, 127, 0.95);
             color: #fff;
             border-radius: 8px;
             padding: 0.7rem 0.85rem;
@@ -424,6 +424,27 @@
 
     <div class="toast-zone">
         <div id="errorToast" class="toast-lite"></div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1050; display: flex; align-items: center; justify-content: center;">
+        <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; max-width: 360px; width: 90%;">
+            <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-heading); margin-bottom: 1rem;">Export Data</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Pilih format export yang anda inginkan:</div>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button onclick="performExport('summary')" style="padding: 0.75rem; background: var(--accent-cyan); color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-align: left;">
+                    <i class="fa-solid fa-file-csv me-2"></i> Export Summary
+                    <div style="font-size: 0.8rem; color: rgba(0,0,0,0.6); margin-top: 0.25rem;">Ringkasan data retention & churn</div>
+                </button>
+                <button onclick="performExport('raw')" style="padding: 0.75rem; background: transparent; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 600; cursor: pointer; text-align: left;">
+                    <i class="fa-solid fa-database me-2"></i> Export Raw Data
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Detail customer loyal & churned</div>
+                </button>
+            </div>
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                <button onclick="closeExportModal()" style="flex: 1; padding: 0.5rem; background: transparent; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 600; cursor: pointer;">Batal</button>
+            </div>
+        </div>
     </div>
 
     <div class="main-content">
@@ -1188,13 +1209,31 @@
                 return;
             }
             try {
-                const res = await fetch(`/api/dashboard/customer/${encodeURIComponent(customerId)}`, { credentials: 'include' });
+                const user = getCurrentUser();
+                const userRole = (user?.role_code || user?.level_code || user?.level || '').toUpperCase();
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (userRole) {
+                    headers['X-User-Role'] = userRole;
+                }
+                
+                const res = await fetch(`/api/dashboard/customer/${encodeURIComponent(customerId)}`, {
+                    method: 'GET',
+                    headers: headers,
+                    credentials: 'include'
+                });
                 if (res.status === 404) {
                     showToast('Detail customer tidak tersedia.');
                     return;
                 }
+                if (res.status === 403) {
+                    showToast('Anda tidak memiliki akses untuk melihat detail customer ini.');
+                    return;
+                }
                 if (!res.ok) {
-                    showToast('Detail customer tidak tersedia.');
+                    showToast('Gagal memuat detail customer. Silakan coba lagi.');
                     return;
                 }
                 window.location.href = `/dashboard/customer/${encodeURIComponent(customerId)}`;
@@ -1269,24 +1308,101 @@
         }
 
         function exportReport() {
+            const modal = document.getElementById('exportModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeExportModal() {
+            const modal = document.getElementById('exportModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        async function performExport(type) {
+            closeExportModal();
+            
+            if (!state.payload) {
+                showToast('Tidak ada data pada periode ini.');
+                return;
+            }
+
+            const params = new URLSearchParams();
+            params.set('type', type);
+            const dateAnchor = new Date(`${state.startDate}T00:00:00`);
+            const year = dateAnchor.getFullYear();
+            const month = dateAnchor.getMonth() + 1;
+
+            if (state.period === 'monthly') {
+                params.set('month', String(month));
+                params.set('year', String(year));
+            } else {
+                params.set('year', String(year));
+            }
+            params.set('period', state.period);
+            params.set('start_date', state.startDate);
+            params.set('end_date', state.endDate);
+
+            const url = `/api/dashboard/customers/export?${params.toString()}`;
+            
             try {
-                if (!state.payload) {
-                    showToast('Tidak ada data pada periode ini.');
+                const user = getCurrentUser();
+                const userRole = (user?.role_code || user?.level_code || user?.level || '').toUpperCase();
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (userRole) {
+                    headers['X-User-Role'] = userRole;
+                }
+                
+                const res = await fetch(url, {
+                    method: 'GET',
+                    headers: headers,
+                    credentials: 'include'
+                });
+
+                if (res.status === 401) {
+                    showToast('Sesi Anda telah berakhir. Silakan login kembali.');
+                    window.location.href = '/account/login';
+                    return;
+                }
+                if (res.status === 403) {
+                    showToast('Anda tidak memiliki akses untuk export data ini.');
+                    return;
+                }
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    showToast(`Export gagal: ${res.statusText}`);
+                    console.error('Export error:', errorText);
                     return;
                 }
 
-                const csvContent = buildCsvReport(state.payload);
-                const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' });
-                const href = URL.createObjectURL(blob);
+                const blob = await res.blob();
+                const contentDisposition = res.headers.get('content-disposition');
+                let filename = `customers-export-${type}-${Date.now()}.csv`;
+                
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename="(.+?)"/i);
+                    if (match && match[1]) {
+                        filename = match[1];
+                    }
+                }
+
                 const link = document.createElement('a');
-                link.href = href;
-                link.download = `customer-dashboard-${Date.now()}.csv`;
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
                 document.body.appendChild(link);
                 link.click();
+                URL.revokeObjectURL(link.href);
                 link.remove();
-                URL.revokeObjectURL(href);
-            } catch (_e) {
-                showToast('Gagal mengunduh laporan.');
+                
+                showToast('Export berhasil. File sudah diunduh.');
+            } catch (error) {
+                showToast(`Export gagal: ${error.message}`);
+                console.error('Export error:', error);
             }
         }
 
@@ -1343,6 +1459,13 @@
             initDefaultDateRange();
             bindEvents();
             fetchDashboard();
+
+            // Close modal when clicking outside
+            document.getElementById('exportModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeExportModal();
+                }
+            });
         });
     </script>
 </body>

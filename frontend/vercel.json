@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "cleanUrls": true,
   "trailingSlash": false,
   "redirects": [
     { "source": "/login", "destination": "/account/login", "permanent": false },
@@ -8,6 +7,9 @@
     { "source": "/reset-password", "destination": "/account/reset", "permanent": false }
   ],
   "rewrites": [
+    { "source": "/dashboard/customer/:id", "destination": "/management/customer-detail.html" },
+    { "source": "/dashboard/packages/:id", "destination": "/management/package-detail.html" },
+    { "source": "/dashboard/package/:id", "destination": "/management/package-detail.html" },
     { "source": "/", "destination": "/landing.html" },
     { "source": "/account/login", "destination": "/account/login.html" },
     { "source": "/account/register", "destination": "/account/register.html" },

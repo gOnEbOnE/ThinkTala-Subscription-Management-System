@@ -185,3 +185,26 @@ type PackageInfo struct {
 	Status string  `json:"status"`
 	Price  float64 `json:"price"` // harga dasar / fallback
 }
+
+// PaginationMeta - informasi paginasi untuk response list endpoint
+type PaginationMeta struct {
+	Total      int `json:"total"`
+	Page       int `json:"page"`
+	PerPage    int `json:"per_page"`
+	TotalPages int `json:"total_pages"`
+}
+
+// RenewOrderDTO - request body untuk POST /api/orders/renew (PBI-66)
+type RenewOrderDTO struct {
+	DurationMonths int    `json:"duration_months"`
+	PaymentMethod  string `json:"payment_method"`
+}
+
+// RenewOrderResult - response untuk endpoint perpanjangan subscription
+type RenewOrderResult struct {
+	Message       string  `json:"message"`
+	OrderID       string  `json:"order_id"`
+	InvoiceNumber string  `json:"invoice_number"`
+	PackageName   string  `json:"package_name"`
+	TotalPrice    float64 `json:"total_price"`
+}

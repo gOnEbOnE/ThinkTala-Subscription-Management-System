@@ -166,12 +166,27 @@ func (c *Controller) ListOrdersClientHandler(w http.ResponseWriter, r *http.Requ
 	q := r.URL.Query()
 	pageVal, _ := strconv.Atoi(q.Get("page"))
 	limitVal, _ := strconv.Atoi(q.Get("limit"))
+	if pageVal < 1 {
+		pageVal = 1
+	}
+	if limitVal < 1 {
+		limitVal = 10
+	}
 	filter := ClientOrderFilter{
 		Status:    strings.TrimSpace(q.Get("status")),
 		StartDate: strings.TrimSpace(q.Get("start_date")),
 		EndDate:   strings.TrimSpace(q.Get("end_date")),
 		Page:      pageVal,
 		Limit:     limitVal,
+	}
+
+	if filter.StartDate != "" && filter.EndDate != "" && filter.StartDate > filter.EndDate {
+		w.WriteHeader(http.StatusBadRequest)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "start_date tidak boleh setelah end_date",
+		})
+		return
 	}
 
 	list, err := c.service.ListOrdersForClient(r.Context(), userID, filter)
@@ -188,9 +203,24 @@ func (c *Controller) ListOrdersClientHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	total, err := c.service.CountOrdersForClient(r.Context(), userID, filter)
+	if err != nil {
+		total = len(list)
+	}
+	totalPages := (total + limitVal - 1) / limitVal
+	if totalPages < 1 {
+		totalPages = 1
+	}
+
 	c.response.JSON(w, r, map[string]interface{}{
 		"success": true,
 		"data":    list,
+		"meta": PaginationMeta{
+			Total:      total,
+			Page:       pageVal,
+			PerPage:    limitVal,
+			TotalPages: totalPages,
+		},
 	})
 }
 
@@ -455,6 +485,12 @@ func (c *Controller) ListOrdersAdminHandler(w http.ResponseWriter, r *http.Reque
 	q := r.URL.Query()
 	pageVal, _ := strconv.Atoi(q.Get("page"))
 	limitVal, _ := strconv.Atoi(q.Get("limit"))
+	if pageVal < 1 {
+		pageVal = 1
+	}
+	if limitVal < 1 {
+		limitVal = 20
+	}
 	adminFilter := AdminOrderFilter{
 		Status:    strings.TrimSpace(q.Get("status")),
 		Search:    strings.TrimSpace(q.Get("search")),
@@ -462,6 +498,15 @@ func (c *Controller) ListOrdersAdminHandler(w http.ResponseWriter, r *http.Reque
 		EndDate:   strings.TrimSpace(q.Get("end_date")),
 		Page:      pageVal,
 		Limit:     limitVal,
+	}
+
+	if adminFilter.StartDate != "" && adminFilter.EndDate != "" && adminFilter.StartDate > adminFilter.EndDate {
+		w.WriteHeader(http.StatusBadRequest)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "start_date tidak boleh setelah end_date",
+		})
+		return
 	}
 
 	list, err := c.service.ListOrdersForAdmin(r.Context(), adminFilter)
@@ -478,9 +523,24 @@ func (c *Controller) ListOrdersAdminHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	total, err := c.service.CountOrdersForAdmin(r.Context(), adminFilter)
+	if err != nil {
+		total = len(list)
+	}
+	totalPages := (total + limitVal - 1) / limitVal
+	if totalPages < 1 {
+		totalPages = 1
+	}
+
 	c.response.JSON(w, r, map[string]interface{}{
 		"success": true,
 		"data":    list,
+		"meta": PaginationMeta{
+			Total:      total,
+			Page:       pageVal,
+			PerPage:    limitVal,
+			TotalPages: totalPages,
+		},
 	})
 }
 
@@ -726,6 +786,230 @@ func (c *Controller) ActivateOrderHandler(w http.ResponseWriter, r *http.Request
 		"status":          activation.Status,
 		"data":            activation,
 	})
+}
+
+// CancelOrderHandler — PATCH /api/orders/{id}/cancel (PBI-67)
+func (c *Controller) CancelOrderHandler(w http.ResponseWriter, r *http.Request) {
+	if roleCode(r) != "CLIENT" {
+		w.WriteHeader(http.StatusForbidden)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "endpoint ini hanya dapat diakses oleh role CLIENT",
+		})
+		return
+	}
+
+	userID := strings.TrimSpace(r.Header.Get("X-User-ID"))
+	if userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "Anda harus login terlebih dahulu",
+		})
+		return
+	}
+
+	orderID := r.PathValue("id")
+	if orderID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "ID pesanan harus disertakan pada URL",
+		})
+		return
+	}
+
+	if err := c.service.CancelOrder(r.Context(), userID, orderID); err != nil {
+		switch {
+		case errors.Is(err, ErrOrderNotFound):
+			w.WriteHeader(http.StatusNotFound)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": "Data pesanan tidak ditemukan",
+			})
+		case errors.Is(err, ErrOrderForbidden):
+			w.WriteHeader(http.StatusForbidden)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": "Anda tidak memiliki akses ke pesanan ini",
+			})
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": err.Error(),
+			})
+		}
+		return
+	}
+
+	c.response.JSON(w, r, map[string]interface{}{
+		"success": true,
+		"message": "Pesanan berhasil dibatalkan",
+	})
+}
+
+// RenewOrderHandler — POST /api/orders/renew (PBI-66)
+func (c *Controller) RenewOrderHandler(w http.ResponseWriter, r *http.Request) {
+	if roleCode(r) != "CLIENT" {
+		w.WriteHeader(http.StatusForbidden)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "endpoint ini hanya dapat diakses oleh role CLIENT",
+		})
+		return
+	}
+
+	userID := strings.TrimSpace(r.Header.Get("X-User-ID"))
+	if userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "Anda harus login terlebih dahulu",
+		})
+		return
+	}
+
+	var dto RenewOrderDTO
+	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "Format request tidak valid",
+		})
+		return
+	}
+	if dto.DurationMonths <= 0 {
+		dto.DurationMonths = 1
+	}
+
+	result, err := c.service.RenewSubscription(r.Context(), userID, dto)
+	if err != nil {
+		statusCode := http.StatusBadRequest
+		if strings.Contains(strings.ToLower(err.Error()), "gagal") {
+			statusCode = http.StatusInternalServerError
+		}
+		w.WriteHeader(statusCode)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": err.Error(),
+		})
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	c.response.JSON(w, r, map[string]interface{}{
+		"success": true,
+		"message": result.Message,
+		"data":    result,
+	})
+}
+
+// GetInvoiceHandler — GET /api/orders/{id}/invoice (PBI-64)
+func (c *Controller) GetInvoiceHandler(w http.ResponseWriter, r *http.Request) {
+	if roleCode(r) != "CLIENT" {
+		w.WriteHeader(http.StatusForbidden)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "endpoint ini hanya dapat diakses oleh role CLIENT",
+		})
+		return
+	}
+
+	userID := strings.TrimSpace(r.Header.Get("X-User-ID"))
+	if userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "Anda harus login terlebih dahulu",
+		})
+		return
+	}
+
+	orderID := r.PathValue("id")
+	if orderID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "ID pesanan harus disertakan pada URL",
+		})
+		return
+	}
+
+	pdfBytes, invoiceNum, err := c.service.GetInvoice(r.Context(), userID, orderID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrOrderNotFound):
+			w.WriteHeader(http.StatusNotFound)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": "Data pesanan tidak ditemukan",
+			})
+		case errors.Is(err, ErrOrderForbidden):
+			w.WriteHeader(http.StatusForbidden)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": "Anda tidak memiliki akses ke pesanan ini",
+			})
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": err.Error(),
+			})
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", `attachment; filename="`+invoiceNum+`.pdf"`)
+	_, _ = w.Write(pdfBytes)
+}
+
+// GetInvoiceAdminHandler — GET /api/admin/orders/{id}/invoice (PBI-64, admin view)
+func (c *Controller) GetInvoiceAdminHandler(w http.ResponseWriter, r *http.Request) {
+	role := roleCode(r)
+	if role != "OPERASIONAL" && role != "SUPERADMIN" && role != "CEO" {
+		w.WriteHeader(http.StatusForbidden)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "endpoint ini hanya dapat diakses oleh role OPERASIONAL",
+		})
+		return
+	}
+
+	orderID := r.PathValue("id")
+	if orderID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "ID pesanan harus disertakan pada URL",
+		})
+		return
+	}
+
+	pdfBytes, invoiceNum, err := c.service.GetInvoiceForAdmin(r.Context(), orderID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrOrderNotFound):
+			w.WriteHeader(http.StatusNotFound)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": "Data pesanan tidak ditemukan",
+			})
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+			c.response.JSON(w, r, map[string]interface{}{
+				"success":       false,
+				"error_message": err.Error(),
+			})
+		}
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/pdf")
+	w.Header().Set("Content-Disposition", `attachment; filename="`+invoiceNum+`.pdf"`)
+	_, _ = w.Write(pdfBytes)
 }
 
 // GetMySubscriptionHandler — GET /api/subscriptions/me

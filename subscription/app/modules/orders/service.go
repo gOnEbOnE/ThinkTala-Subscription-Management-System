@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jung-kurt/gofpdf"
 	"github.com/master-abror/zaframework/core/utils"
 )
 
@@ -21,16 +22,22 @@ import (
 type Service interface {
 	CreateOrder(ctx context.Context, userID string, dto CreateOrderDTO) (*Order, error)
 	ListOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error)
+	CountOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) (int, error)
 	GetOrderDetailForClient(ctx context.Context, userID, orderID string) (*ClientOrderDetail, error)
 	UploadPaymentProof(ctx context.Context, userID, orderID string, file PaymentProofFile) (*UploadPaymentProofResult, error)
 	GetPaymentProofForClient(ctx context.Context, userID, orderID string) (*PaymentProofFile, error)
+	CancelOrder(ctx context.Context, userID, orderID string) error
 	ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error)
+	CountOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) (int, error)
 	GetOrderDetailForAdmin(ctx context.Context, orderID string) (*AdminOrderDetail, error)
 	GetPaymentProofForAdmin(ctx context.Context, orderID string) (*PaymentProofFile, error)
 	VerifyOrder(ctx context.Context, orderID, action, rejectReason, adminID string) (*VerifyResult, error)
 	ActivateOrderSystem(ctx context.Context, orderID string) (*ActivationResult, error)
 	GetActiveSubscriptions(ctx context.Context, userID string) ([]SubscriptionStatus, error)
 	GetActiveSubscription(ctx context.Context, userID string) (*SubscriptionStatus, error)
+	RenewSubscription(ctx context.Context, userID string, dto RenewOrderDTO) (*RenewOrderResult, error)
+	GetInvoice(ctx context.Context, userID, orderID string) ([]byte, string, error)
+	GetInvoiceForAdmin(ctx context.Context, orderID string) ([]byte, string, error)
 	ProcessCreateOrderJob(ctx context.Context, payload interface{}) (interface{}, error)
 }
 
@@ -541,6 +548,239 @@ func (s *orderService) GetActiveSubscription(ctx context.Context, userID string)
 		return nil, nil
 	}
 	return &list[0], nil
+}
+
+func (s *orderService) CountOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) (int, error) {
+	if strings.TrimSpace(userID) == "" {
+		return 0, errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	return s.repo.CountOrdersByUser(ctx, userID, filter)
+}
+
+func (s *orderService) CountOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) (int, error) {
+	return s.repo.CountOrdersForAdmin(ctx, filter)
+}
+
+// CancelOrder — membatalkan pesanan PENDING_PAYMENT milik client (PBI-67)
+func (s *orderService) CancelOrder(ctx context.Context, userID, orderID string) error {
+	if strings.TrimSpace(userID) == "" {
+		return errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	if strings.TrimSpace(orderID) == "" {
+		return errors.New("id pesanan wajib diisi")
+	}
+
+	rec, err := s.repo.GetOrderByID(ctx, orderID)
+	if err != nil {
+		return err
+	}
+	if rec == nil {
+		return ErrOrderNotFound
+	}
+	if rec.UserID != userID {
+		return ErrOrderForbidden
+	}
+	if rec.Status != "PENDING_PAYMENT" {
+		return errors.New("hanya pesanan dengan status PENDING_PAYMENT yang dapat dibatalkan")
+	}
+
+	return s.repo.CancelOrder(ctx, orderID, userID)
+}
+
+// RenewSubscription — membuat order perpanjangan langganan (PBI-66)
+func (s *orderService) RenewSubscription(ctx context.Context, userID string, dto RenewOrderDTO) (*RenewOrderResult, error) {
+	if strings.TrimSpace(userID) == "" {
+		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	dto.PaymentMethod = strings.TrimSpace(dto.PaymentMethod)
+	if dto.PaymentMethod == "" {
+		return nil, errors.New("payment_method wajib diisi")
+	}
+	if strings.ToUpper(dto.PaymentMethod) != "TRANSFER BANK" {
+		return nil, errors.New("metode pembayaran yang didukung saat ini hanya Transfer Bank")
+	}
+	dto.PaymentMethod = "Transfer Bank"
+	if dto.DurationMonths <= 0 {
+		dto.DurationMonths = 1
+	}
+
+	sub, err := s.repo.GetLatestSubscriptionByUser(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("gagal memeriksa langganan: %w", err)
+	}
+	if sub == nil {
+		return nil, errors.New("tidak ada langganan aktif atau kadaluarsa yang dapat diperpanjang")
+	}
+
+	pkg, err := s.repo.GetPackageByID(ctx, sub.PackageID)
+	if err != nil {
+		return nil, fmt.Errorf("gagal memvalidasi paket: %w", err)
+	}
+	if pkg == nil {
+		return nil, errors.New("paket langganan tidak lagi tersedia")
+	}
+	if pkg.Status != "ACTIVE" {
+		return nil, errors.New("paket langganan tidak lagi aktif")
+	}
+
+	price := pkg.Price * float64(dto.DurationMonths)
+	if dto.DurationMonths > 1 {
+		if tierPrice, err := s.repo.GetPricingTier(ctx, sub.PackageID, dto.DurationMonths); err == nil && tierPrice > 0 {
+			price = tierPrice
+		}
+	}
+
+	createDTO := CreateOrderDTO{
+		PackageID:      sub.PackageID,
+		DurationMonths: dto.DurationMonths,
+		PaymentMethod:  dto.PaymentMethod,
+	}
+	order, err := s.repo.CreateOrder(ctx, userID, createDTO, price)
+	if err != nil {
+		return nil, fmt.Errorf("gagal membuat order perpanjangan: %w", err)
+	}
+
+	return &RenewOrderResult{
+		Message:       "Perpanjangan langganan berhasil diajukan",
+		OrderID:       order.ID,
+		InvoiceNumber: order.InvoiceNumber,
+		PackageName:   pkg.Name,
+		TotalPrice:    order.TotalPrice,
+	}, nil
+}
+
+// GetInvoice — generate PDF invoice untuk pesanan PAID (PBI-64)
+func (s *orderService) GetInvoice(ctx context.Context, userID, orderID string) ([]byte, string, error) {
+	if strings.TrimSpace(userID) == "" {
+		return nil, "", errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	if strings.TrimSpace(orderID) == "" {
+		return nil, "", errors.New("id pesanan wajib diisi")
+	}
+
+	rec, err := s.repo.GetOrderByID(ctx, orderID)
+	if err != nil {
+		return nil, "", err
+	}
+	if rec == nil {
+		return nil, "", ErrOrderNotFound
+	}
+	if rec.UserID != userID {
+		return nil, "", ErrOrderForbidden
+	}
+	if rec.Status != "PAID" {
+		return nil, "", errors.New("invoice hanya tersedia untuk pesanan dengan status PAID")
+	}
+
+	return generateInvoicePDF(rec)
+}
+
+// GetInvoiceForAdmin — generate PDF invoice tanpa cek kepemilikan (untuk OPERASIONAL)
+func (s *orderService) GetInvoiceForAdmin(ctx context.Context, orderID string) ([]byte, string, error) {
+	if strings.TrimSpace(orderID) == "" {
+		return nil, "", errors.New("id pesanan wajib diisi")
+	}
+
+	rec, err := s.repo.GetOrderByID(ctx, orderID)
+	if err != nil {
+		return nil, "", err
+	}
+	if rec == nil {
+		return nil, "", ErrOrderNotFound
+	}
+	if rec.Status != "PAID" {
+		return nil, "", errors.New("invoice hanya tersedia untuk pesanan dengan status PAID")
+	}
+
+	return generateInvoicePDF(rec)
+}
+
+func generateInvoicePDF(rec *OrderRecord) ([]byte, string, error) {
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	pdf.SetMargins(20, 20, 20)
+
+	pdf.SetFont("Helvetica", "B", 22)
+	pdf.SetTextColor(30, 30, 30)
+	pdf.CellFormat(0, 12, "ThinkNalyze", "", 1, "L", false, 0, "")
+
+	pdf.SetFont("Helvetica", "", 10)
+	pdf.SetTextColor(100, 100, 100)
+	pdf.CellFormat(0, 6, "Platform Analitik & Langganan", "", 1, "L", false, 0, "")
+
+	pdf.Ln(4)
+	pdf.SetDrawColor(200, 200, 200)
+	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
+	pdf.Ln(6)
+
+	pdf.SetFont("Helvetica", "B", 16)
+	pdf.SetTextColor(30, 30, 30)
+	pdf.CellFormat(0, 10, "INVOICE", "", 1, "R", false, 0, "")
+
+	pdf.SetFont("Helvetica", "", 10)
+	pdf.SetTextColor(80, 80, 80)
+	pdf.CellFormat(0, 6, "No: "+rec.InvoiceNumber, "", 1, "R", false, 0, "")
+	pdf.CellFormat(0, 6, "Tanggal: "+rec.CreatedAt.Format("02 January 2006"), "", 1, "R", false, 0, "")
+
+	pdf.Ln(8)
+
+	printRow := func(label, value string) {
+		pdf.SetFont("Helvetica", "B", 10)
+		pdf.SetTextColor(80, 80, 80)
+		pdf.CellFormat(55, 7, label, "", 0, "L", false, 0, "")
+		pdf.SetFont("Helvetica", "", 10)
+		pdf.SetTextColor(30, 30, 30)
+		pdf.CellFormat(0, 7, value, "", 1, "L", false, 0, "")
+	}
+
+	clientName := rec.ClientName
+	if clientName == "" || clientName == "Unknown" {
+		clientName = "-"
+	}
+	printRow("Nama Klien", clientName)
+	printRow("Email", rec.ClientEmail)
+	printRow("Paket", rec.PackageName)
+	printRow("Durasi", fmt.Sprintf("%d bulan", rec.DurationMonths))
+	printRow("Metode Pembayaran", rec.PaymentMethod)
+	printRow("Status", "PAID")
+
+	pdf.Ln(6)
+	pdf.SetDrawColor(200, 200, 200)
+	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
+	pdf.Ln(6)
+
+	pdf.SetFont("Helvetica", "B", 12)
+	pdf.SetTextColor(30, 30, 30)
+	pdf.CellFormat(55, 8, "Total Pembayaran", "", 0, "L", false, 0, "")
+	pdf.SetFont("Helvetica", "B", 14)
+	pdf.CellFormat(0, 8, fmt.Sprintf("Rp %s", formatRupiah(rec.TotalPrice)), "", 1, "L", false, 0, "")
+
+	pdf.Ln(12)
+	pdf.SetFont("Helvetica", "I", 8)
+	pdf.SetTextColor(150, 150, 150)
+	pdf.CellFormat(0, 5, "Dokumen ini dibuat secara otomatis oleh sistem ThinkNalyze dan sah tanpa tanda tangan.", "", 1, "C", false, 0, "")
+
+	var buf bytes.Buffer
+	if err := pdf.Output(&buf); err != nil {
+		return nil, "", fmt.Errorf("gagal generate PDF: %w", err)
+	}
+	return buf.Bytes(), rec.InvoiceNumber, nil
+}
+
+func formatRupiah(amount float64) string {
+	s := fmt.Sprintf("%.0f", amount)
+	n := len(s)
+	if n <= 3 {
+		return s
+	}
+	var result []byte
+	for i, c := range s {
+		if i > 0 && (n-i)%3 == 0 {
+			result = append(result, '.')
+		}
+		result = append(result, byte(c))
+	}
+	return string(result)
 }
 
 // ProcessCreateOrderJob — ZaFramework concurrency worker processor
