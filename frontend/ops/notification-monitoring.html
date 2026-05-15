@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoring Management | ThinkTala Ops</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/styles.css?v=2">
     <link rel="stylesheet" href="/assets/css/ops-sidebar.css">
@@ -22,8 +25,8 @@
         body {
             font-family: 'Inter', sans-serif;
             background: radial-gradient(1200px 600px at 20% -10%, rgba(0, 226, 255, 0.08), transparent 60%),
-                        radial-gradient(900px 500px at 95% 10%, rgba(251, 191, 36, 0.08), transparent 55%),
-                        var(--bg-dark);
+                radial-gradient(900px 500px at 95% 10%, rgba(251, 191, 36, 0.08), transparent 55%),
+                var(--bg-dark);
         }
 
         .page-hero {
@@ -62,10 +65,22 @@
         }
 
         .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 0.9rem;
-            align-items: end;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .filter-grid>div {
+            flex: 1 1 160px;
+        }
+
+        .filter-grid>.search-input {
+            flex: 2 1 250px;
+        }
+
+        .filter-grid>.filter-actions {
+            flex: 0 0 auto;
         }
 
         .filter-grid label {
@@ -101,20 +116,21 @@
             color: var(--text-main);
         }
 
-        .search-input {
+        .search-wrapper {
             position: relative;
         }
 
-        .search-input i {
+        .search-wrapper i {
             position: absolute;
             left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-muted);
+            font-size: 0.85rem;
         }
 
-        .search-input input {
-            padding-left: 36px;
+        .search-wrapper input {
+            padding-left: 34px;
         }
 
         .table-card {
@@ -161,6 +177,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             background: var(--bg-panel);
             vertical-align: middle;
+            color: var(--text-main);
         }
 
         .log-table tbody tr:hover td {
@@ -502,6 +519,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="ops-sidebar-placeholder"></div>
     <div id="ops-navbar-placeholder"></div>
@@ -510,7 +528,8 @@
         <div class="page-hero">
             <div>
                 <div class="page-title"><i class="fa-solid fa-eye"></i>Monitoring Management</div>
-                <div class="page-subtitle">Audit trail pengiriman notifikasi multi-channel untuk troubleshooting operasional.</div>
+                <div class="page-subtitle">Audit trail pengiriman notifikasi multi-channel untuk troubleshooting
+                    operasional.</div>
             </div>
             <div class="meta-text" id="lastRefresh">Last refresh: -</div>
         </div>
@@ -545,8 +564,11 @@
                 </div>
                 <div class="search-input">
                     <label for="searchInput">Search</label>
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <input id="searchInput" type="text" class="form-control form-control-sm" placeholder="Email, User ID, atau Event Type">
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input id="searchInput" type="text" class="form-control form-control-sm"
+                            placeholder="Email, User ID, atau Event Type">
+                    </div>
                 </div>
                 <div class="filter-actions">
                     <button id="applyFilter" class="btn btn-apply">Apply Filter</button>
@@ -573,7 +595,9 @@
                         </tr>
                     </thead>
                     <tbody id="logTableBody">
-                        <tr><td colspan="6" class="empty-state">Loading data...</td></tr>
+                        <tr>
+                            <td colspan="6" class="empty-state">Loading data...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -623,14 +647,9 @@
                     </div>
 
                     <div class="log-section">
-                        <div class="log-section-title">User Details</div>
+                        <div class="log-section-title">Destination</div>
                         <div class="log-grid">
-                            <div class="log-field">
-                                <div class="log-label">User Identifier</div>
-                                <div class="log-value" id="detailUser">-</div>
-                            </div>
                             <div class="log-field log-field-wide">
-                                <div class="log-label">Destination</div>
                                 <div class="log-value" id="detailDestination">-</div>
                             </div>
                         </div>
@@ -884,21 +903,15 @@
                     return;
                 }
                 const json = await res.json();
-                if (!res.ok) throw new Error(json.error || 'Gagal memuat detail');
                 const data = json.data || {};
                 const destination = data.to || data.destination || data.email || data.phone || '-';
                 const logIdValue = data.log_id || data.logId || data.id;
-                const userName = data.user_name || data.userName || '-';
-                const userId = data.user_id || data.userId || '-';
-                const userHtml = '<div class="log-user-name">' + escapeHtml(userName) + '</div>' +
-                    '<div class="log-user-id">ID: ' + escapeHtml(userId) + '</div>';
 
                 setText('detailLogId', formatLogId(logIdValue));
                 setText('detailTimestamp', formatDateTimeFull(data.sent_at || data.created_at));
                 setHtml('detailChannel', channelBadge(data.channel));
                 setHtml('detailStatus', statusPill(data.status));
                 setText('detailRetry', formatRetryCount(data.retry_count || data.retryCount || data.attempt_count || data.attempts));
-                setHtml('detailUser', userHtml);
                 setText('detailDestination', destination);
                 setText('detailSubject', data.subject || '-');
                 setText('detailEventType', data.event_type || data.eventType || '-');
@@ -968,4 +981,5 @@
         });
     </script>
 </body>
+
 </html>
