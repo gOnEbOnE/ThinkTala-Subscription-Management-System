@@ -1,6 +1,9 @@
 {
   "version": 2,
   "trailingSlash": false,
+  "errors": [
+    { "statusCode": 404, "destination": "/404.html" }
+  ],
   "redirects": [
     { "source": "/login", "destination": "/account/login", "permanent": false },
     { "source": "/register", "destination": "/account/register", "permanent": false },

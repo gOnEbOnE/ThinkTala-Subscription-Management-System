@@ -434,6 +434,19 @@ func createProxyHandler(target string, enableCORS bool) http.HandlerFunc {
 // ========================================
 // Frontend page server
 // ========================================
+func serve404Page(frontendDir string, w http.ResponseWriter, r *http.Request) {
+	page404 := filepath.Join(frontendDir, "404.html")
+	f, err := os.Open(page404)
+	if err == nil {
+		defer f.Close()
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		http.ServeContent(w, r, "404.html", time.Time{}, f)
+		return
+	}
+	http.Error(w, "404 Page Not Found", http.StatusNotFound)
+}
+
 func serveFrontendPage(frontendDir, section, defaultPage string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
@@ -459,7 +472,7 @@ func serveFrontendPage(frontendDir, section, defaultPage string) http.HandlerFun
 			return
 		}
 
-		http.Error(w, "Page not found", http.StatusNotFound)
+		serve404Page(frontendDir, w, r)
 	}
 }
 
@@ -555,7 +568,7 @@ func main() {
 			http.ServeFile(w, r, detailFile)
 			return
 		}
-		http.Error(w, "Page not found", http.StatusNotFound)
+		serve404Page(frontendDir, w, r)
 	}))
 
 	// /dashboard/packages/{id} → package detail page for management
@@ -569,7 +582,7 @@ func main() {
 			http.ServeFile(w, r, detailFile)
 			return
 		}
-		http.Error(w, "Page not found", http.StatusNotFound)
+		serve404Page(frontendDir, w, r)
 	}))
 
 	// ========================================
@@ -662,7 +675,8 @@ func main() {
 			}
 		}
 
-		http.Error(w, "Not found", http.StatusNotFound)
+		// Serve branded 404 page for unmatched routes
+		serve404Page(frontendDir, w, r)
 	})
 
 	// ========================================
