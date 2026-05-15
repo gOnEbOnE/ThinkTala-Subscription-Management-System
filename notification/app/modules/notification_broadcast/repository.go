@@ -322,9 +322,9 @@ func (r *Repository) MarkAllRead(userID, role string) error {
 	// Event notifications (per user)
 	_, err := r.db.Exec(context.Background(), `
 		INSERT INTO notification_reads (user_id, source_type, source_id, read_at)
-		SELECT $1, 'event', id, NOW()
+		SELECT $1::varchar, 'event', id::varchar, NOW()
 		FROM notification_logs
-		WHERE user_id = $1
+		WHERE user_id = $1::varchar
 		ON CONFLICT (user_id, source_type, source_id) DO NOTHING
 	`, userID)
 	if err != nil {
@@ -342,11 +342,11 @@ func (r *Repository) MarkAllRead(userID, role string) error {
 
 	_, err = r.db.Exec(context.Background(), `
 		INSERT INTO notification_reads (user_id, source_type, source_id, read_at)
-		SELECT $1, 'news', n.id, NOW()
+		SELECT $1::varchar, 'news', n.id::varchar, NOW()
 		FROM notifications n
 		WHERE n.is_active = TRUE
 		  AND (n.expiry_date IS NULL OR n.expiry_date > NOW())
-		  AND LOWER(n.target_role) = ANY($2)
+		  AND LOWER(n.target_role) = ANY($2::varchar[])
 		ON CONFLICT (user_id, source_type, source_id) DO NOTHING
 	`, userID, audienceKeys)
 	return err

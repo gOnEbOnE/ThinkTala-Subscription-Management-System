@@ -345,13 +345,16 @@
                 'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({ id: item.id, source_type: item.source })
-        }).then(function () {
+        }).then(function (res) {
+            if (!res.ok) throw new Error('Failed to mark notification as read');
             item.is_read = true;
             notifState.unread = notifState.items.filter(function (row) {
                 return !row.is_read;
             }).length;
             updateNotifBadge(notifState.unread);
             renderNotificationList(notifState.items);
+        }).catch(function (err) {
+            console.error('Error marking notification read:', err);
         });
     }
 
@@ -363,7 +366,8 @@
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             }
-        }).then(function () {
+        }).then(function (res) {
+            if (!res.ok) throw new Error('Failed to mark all as read');
             notifState.items = notifState.items.map(function (item) {
                 item.is_read = true;
                 return item;
@@ -371,6 +375,8 @@
             notifState.unread = 0;
             updateNotifBadge(0);
             renderNotificationList(notifState.items);
+        }).catch(function (err) {
+            console.error('Error marking all notifications read:', err);
         });
     }
 
