@@ -4,19 +4,28 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	tpl "notification/app/modules/template_notification"
+	"notification/core/utils"
 )
 
 // Service berisi business logic untuk broadcast notifications.
 // Service hanya bicara dengan Repository, tidak boleh langsung ke database.
 type Service struct {
-	repo *Repository
+	repo    *Repository
+	tplSvc  *tpl.Service // digunakan untuk dispatch Telegram saat Create
 }
 
 const maxPinnedNotifications = 2
 
 // NewService membuat instance Service baru.
-func NewService() *Service {
-	return &Service{repo: NewRepository()}
+// tplService boleh nil — Telegram dispatch akan di-skip jika nil.
+func NewService(tplService ...*tpl.Service) *Service {
+	svc := &Service{repo: NewRepository()}
+	if len(tplService) > 0 && tplService[0] != nil {
+		svc.tplSvc = tplService[0]
+	}
+	return svc
 }
 
 // List mengambil semua notification dengan filter opsional.
@@ -138,8 +147,119 @@ func (s *Service) Create(req CreateNotificationRequest, id string) error {
 		}
 	}
 
-	return s.repo.Create(req, id)
+	if err := s.repo.Create(req, id); err != nil {
+		return err
+	}
+
+	// Dispatch Telegram secara async (non-blocking) ke semua user yang sudah
+	// menghubungkan akun Telegram mereka dan cocok dengan target_role.
+	// Hanya dispatch jika notification aktif (is_active = true, default).
+	isActive := req.IsActive == nil || *req.IsActive
+	if isActive {
+		go s.dispatchTelegramBroadcast(title, desc, targetRole)
+	}
+
+	return nil
 }
+
+
+// dispatchTelegramBroadcast mengirim notifikasi Telegram secara personal
+// ke semua user yang punya telegram_chat_id terdaftar.
+// Dijalankan di goroutine terpisah — kegagalan tidak menghentikan alur utama.
+// Strategy: coba via template engine (agar tercatat di notification_logs).
+// Jika template tidak ditemukan, kirim langsung via TelegramSender (fallback).
+func (s *Service) dispatchTelegramBroadcast(title, description, targetRole string) {
+	recipients, err := s.repo.GetTelegramRecipients(targetRole)
+	if err != nil {
+		fmt.Printf("[TELEGRAM DISPATCH] Gagal ambil penerima: %v\n", err)
+		return
+	}
+	if len(recipients) == 0 {
+		fmt.Printf("[TELEGRAM DISPATCH] Tidak ada penerima dengan telegram_chat_id (target_role=%s)\n", targetRole)
+		return
+	}
+
+	fmt.Printf("[TELEGRAM DISPATCH] Mengirim ke %d penerima (target_role=%s)\n", len(recipients), targetRole)
+
+	// Coba inisialisasi TelegramSender untuk fallback (bisa nil jika token tidak diset)
+	utils := getTelegramSenderOnce()
+
+	for _, rec := range recipients {
+		name := strings.TrimSpace(rec.Name)
+		if name == "" {
+			name = "Pengguna"
+		}
+
+		sent := false
+
+		// 1. Coba via template engine (akan tercatat di notification_logs)
+		if s.tplSvc != nil {
+			sendReq := tpl.SendRequest{
+				EventType: "news_broadcast",
+				Channel:   "telegram",
+				To:        rec.ChatID,
+				Vars: map[string]string{
+					"name":    name,
+					"title":   title,
+					"content": description,
+				},
+				UserID:   rec.UserID,
+				UserName: name,
+			}
+			if err := s.tplSvc.Send(sendReq); err == nil {
+				sent = true
+			} else {
+				fmt.Printf("[TELEGRAM DISPATCH] Template send gagal ke %s: %v — mencoba fallback\n", rec.ChatID, err)
+			}
+		}
+
+		// 2. Fallback: kirim langsung jika template gagal
+		if !sent && utils != nil {
+			text := fmt.Sprintf("*%s*\n\n%s", title, description)
+			respStr, err := utils.Send(rec.ChatID, text)
+			
+			// Siapkan log request
+			logReq := tpl.SendRequest{
+				EventType: "news_broadcast",
+				Channel:   "telegram",
+				To:        rec.ChatID,
+				Vars: map[string]string{
+					"title":   title,
+					"content": description,
+				},
+				UserID:   rec.UserID,
+				UserName: name,
+			}
+			
+			if err != nil {
+				fmt.Printf("[TELEGRAM DISPATCH] Fallback gagal ke chatID=%s user=%s: %v\n", rec.ChatID, rec.UserID, err)
+				if s.tplSvc != nil {
+					s.tplSvc.LogDirectSend(logReq, false, err.Error(), respStr)
+				}
+			} else {
+				fmt.Printf("[TELEGRAM DISPATCH] Fallback berhasil ke chatID=%s\n", rec.ChatID)
+				if s.tplSvc != nil {
+					s.tplSvc.LogDirectSend(logReq, true, "", respStr)
+				}
+			}
+		}
+	}
+}
+
+// getTelegramSenderOnce membuat TelegramSender jika TELEGRAM_BOT_TOKEN tersedia.
+// Mengembalikan nil jika token tidak dikonfigurasi (aman untuk dipakai di fallback).
+func getTelegramSenderOnce() interface {
+	Send(chatID, text string) (string, error)
+} {
+	tg, err := utils.NewTelegramSender()
+	if err != nil {
+		// Token tidak dikonfigurasi — fallback tidak akan berjalan, tapi tidak error
+		fmt.Printf("[TELEGRAM DISPATCH] Bot token tidak tersedia, fallback dinonaktifkan: %v\n", err)
+		return nil
+	}
+	return tg
+}
+
 
 // Update memperbarui notification berdasarkan ID.
 func (s *Service) Update(id string, req UpdateNotificationRequest) error {

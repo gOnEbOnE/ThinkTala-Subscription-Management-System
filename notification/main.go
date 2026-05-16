@@ -9,6 +9,7 @@ import (
 	"notification/app/routes"
 	"notification/core/database"
 	"notification/core/queue"
+	"notification/core/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -32,6 +33,9 @@ func main() {
 	defer stop()
 	go svc.StartRetryWorker(ctx)
 	go queue.StartWorker(ctx, svc)
+
+	// Mulai Telegram Bot Listener
+	utils.StartTelegramListener(ctx)
 
 	port := database.GetEnv("PORT", "5003")
 	log.Printf("[NOTIFICATION] Service running on :%s", port)

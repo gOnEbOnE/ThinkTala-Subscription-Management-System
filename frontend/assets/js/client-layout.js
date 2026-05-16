@@ -38,6 +38,7 @@
         return (path === '/client/billing-history' || path === '/client/order-detail' || path === '/client/checkout') ? ' active' : '';
     }
     function isTicketActive() { return (path === '/client/support-tickets' || path === '/support/create' || path === '/client/support-create') ? ' active' : ''; }
+    function isSettingsActive() { return path === '/client/settings' ? ' active' : ''; }
 
     // ── Sidebar HTML ──────────────────────────────────────────────
     var sidebarHTML =
@@ -66,7 +67,7 @@
             '<ul class="nav flex-column mb-5">' +
                 '<li class="nav-item"><a class="nav-link' + isMembershipActive() + '" href="/client/packages-catalog"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isBillingActive() + '" href="/client/billing-history"><i class="fa-solid fa-receipt icon-left"></i><span class="link-text">Billing History</span></a></li>' +
-                '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isSettingsActive() + '" href="/client/settings"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Pengaturan</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>' +
             '</ul>' +
         '</nav>';
@@ -472,6 +473,16 @@
                 var uEmail = document.getElementById('userEmail');
                 if (uEmail) uEmail.textContent = user.email;
             }
+        } catch (e) { /* ignore */ }
+
+        // Simpan user_id ke localStorage agar halaman lain (settings, dll.) bisa pakai
+        try {
+            var _u = JSON.parse(localStorage.getItem('user') || '{}');
+            if (_u.id && !localStorage.getItem('user_id')) {
+                localStorage.setItem('user_id', _u.id);
+            }
+            // Expose ke window untuk getUserID() di settings.html
+            window.__currentUserID = _u.id || '';
         } catch (e) { /* ignore */ }
 
         setupNotificationDrawer();

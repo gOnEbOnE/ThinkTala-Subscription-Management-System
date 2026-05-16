@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	tpl "notification/app/modules/template_notification"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -19,8 +21,9 @@ type Controller struct {
 }
 
 // NewController membuat instance Controller baru.
-func NewController() *Controller {
-	return &Controller{svc: NewService()}
+// tplSvc digunakan untuk dispatch Telegram saat notification baru dibuat.
+func NewController(tplSvc *tpl.Service) *Controller {
+	return &Controller{svc: NewService(tplSvc)}
 }
 
 // List mengembalikan semua notification (admin/ops).

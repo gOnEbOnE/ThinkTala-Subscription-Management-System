@@ -3,6 +3,7 @@ package routes
 import (
 	notifmod "notification/app/modules/notification_broadcast"
 	tplmod "notification/app/modules/template_notification"
+	telegrammod "notification/app/modules/telegram_link"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,8 @@ func Register(r *gin.Engine) *tplmod.Service {
 
 	// ── Broadcast Notifications ───────────────────────────────────
 	// Digunakan oleh ops dashboard untuk membuat announcement/banner.
-	notifCtrl := notifmod.NewController()
+	// tplSvc diteruskan ke notifCtrl agar bisa dispatch Telegram saat Create.
+	notifCtrl := notifmod.NewController(tplSvc)
 	tplCtrl := tplmod.NewController(tplSvc)
 	api := r.Group("/api/notifications")
 	{
@@ -54,6 +56,13 @@ func Register(r *gin.Engine) *tplmod.Service {
 
 	// GET /api/help/notification-templates/event-types — daftar event_type yang sudah terdaftar
 	tpl.GET("/event-types", tplCtrl.EventTypes)
+
+	// ── Telegram Link ─────────────────────────────────────────────
+	// User menghubungkan akun Telegram mereka agar bisa menerima notifikasi personal.
+	tgCtrl := telegrammod.NewController()
+	r.POST("/api/telegram/link", tgCtrl.LinkChatID)
+	r.DELETE("/api/telegram/unlink", tgCtrl.UnlinkChatID)
+	r.GET("/api/telegram/status", tgCtrl.Status)
 
 	return tplSvc
 }

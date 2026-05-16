@@ -106,7 +106,25 @@ func (s *Service) Send(req SendRequest) error {
 	return sendErr
 }
 
+// LogDirectSend mencatat pengiriman langsung (seperti fallback Telegram) ke database monitoring.
+func (s *Service) LogDirectSend(req SendRequest, success bool, errMessage string, providerResp string) {
+	logID := uuid.New().String()
+	// Gunakan var "title" sebagai subject
+	subject := req.Vars["title"]
+	content := req.Vars["content"]
+	
+	s.repo.SaveLog(logID, req.EventType, req.Channel, req.To, subject, content, req.UserID, req.UserName)
+	s.repo.RegisterEventType(req.EventType)
+	if success {
+		s.repo.MarkLogSent(logID, providerResp)
+	} else {
+		nextRetry := time.Now().Add(backoffDuration(0))
+		s.repo.MarkLogFailed(logID, errMessage, providerResp, 0, &nextRetry)
+	}
+}
+
 // doSend melakukan pengiriman aktual tanpa menyentuh log.
+
 func (s *Service) doSend(channel, to, subject, content string) (string, error) {
 	switch channel {
 	case "email":
@@ -117,10 +135,24 @@ func (s *Service) doSend(channel, to, subject, content string) (string, error) {
 			return sender.SendHTMLEmail(to, subject, content)
 		}
 		return sender.SendEmail(to, subject, content)
+
+	case "telegram":
+		tg, err := utils.NewTelegramSender()
+		if err != nil {
+			return "", err
+		}
+		// Tambahkan subject sebagai header bold Markdown jika ada
+		text := strings.TrimSpace(content)
+		if subj := strings.TrimSpace(subject); subj != "" {
+			text = "*" + subj + "*\n\n" + text
+		}
+		return tg.Send(to, text)
+
 	default:
 		return "", fmt.Errorf("channel '%s' belum didukung", channel)
 	}
 }
+
 
 // backoffDuration mengembalikan durasi tunggu sebelum retry ke-n.
 // Skema: retry 0→1m, 1→5m, 2→30m

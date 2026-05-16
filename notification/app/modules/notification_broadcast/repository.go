@@ -15,6 +15,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// TelegramRecipient menyimpan data user yang akan menerima notifikasi Telegram.
+type TelegramRecipient struct {
+	UserID     string
+	Name       string
+	ChatID     string
+}
+
 // Repository menyediakan akses query langsung ke table notifications.
 type Repository struct {
 	db *pgxpool.Pool
@@ -677,6 +684,56 @@ func (r *Repository) Delete(id string) error {
 		return pgx.ErrNoRows
 	}
 	return err
+}
+
+// GetTelegramRecipients mengambil semua user yang punya telegram_chat_id
+// dan cocok dengan audience yang dibangun dari targetRole.
+// Dipanggil saat notification baru di-publish agar bisa dispatch ke Telegram personal.
+func (r *Repository) GetTelegramRecipients(targetRole string) ([]TelegramRecipient, error) {
+	ctx := context.Background()
+
+	// Bangun klausa filter role sesuai target_role yang dipilih ops.
+	// Mapping target_role → kriteria di tabel users (join roles).
+	// Untuk broadcast, 'client' berarti semua user dengan role CLIENT.
+	var roleFilter string
+	switch strings.ToLower(strings.TrimSpace(targetRole)) {
+	case "client", "client_never_bought", "client_paid_active", "client_lapsed", "client_expiring_soon":
+		// Semua client — sub-segmentasi sudah dilakukan saat delivery real-time.
+		// Untuk Telegram broadcast, kirim ke semua client dengan chat_id terdaftar.
+		roleFilter = "UPPER(r.code) = 'CLIENT'"
+	case "all":
+		roleFilter = "1=1" // semua role
+	default:
+		roleFilter = "UPPER(r.code) = 'CLIENT'"
+	}
+
+	query := fmt.Sprintf(`
+		SELECT u.id, u.name, u.telegram_chat_id
+		FROM users u
+		JOIN roles r ON u.role_id = r.id
+		WHERE u.telegram_chat_id IS NOT NULL
+		  AND u.telegram_chat_id <> ''
+		  AND u.status = 'active'
+		  AND %s
+		ORDER BY u.id ASC
+	`, roleFilter)
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("GetTelegramRecipients query error: %w", err)
+	}
+	defer rows.Close()
+
+	var result []TelegramRecipient
+	for rows.Next() {
+		var rec TelegramRecipient
+		if err := rows.Scan(&rec.UserID, &rec.Name, &rec.ChatID); err != nil {
+			log.Printf("[TELEGRAM DISPATCH] scan error: %v", err)
+			continue
+		}
+		result = append(result, rec)
+	}
+	return result, nil
 }
 
 func (r *Repository) countPinned(excludeID string) (int, error) {

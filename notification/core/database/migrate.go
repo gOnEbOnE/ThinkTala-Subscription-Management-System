@@ -62,6 +62,17 @@ func Migrate() {
 		log.Println("[NOTIFICATION] Table notifications ready")
 	}
 
+	// Tambahkan kolom telegram_chat_id ke tabel users (karena tabel users ada di database yang sama)
+	_, err = db().Exec(context.Background(), `
+		ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_chat_id VARCHAR(50) DEFAULT NULL;
+		CREATE INDEX IF NOT EXISTS idx_users_telegram_chat_id ON users (telegram_chat_id) WHERE telegram_chat_id IS NOT NULL;
+	`)
+	if err != nil {
+		log.Printf("[WARN] migrate users (telegram_chat_id): %v", err)
+	} else {
+		log.Println("[NOTIFICATION] Users table updated with telegram_chat_id")
+	}
+
 	// Table untuk notification templates (mapping event_type → template konten)
 	_, err = db().Exec(context.Background(), `
 		CREATE TABLE IF NOT EXISTS notification_templates (
