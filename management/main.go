@@ -13,14 +13,33 @@ import (
 )
 
 func main() {
-	for _, envPath := range []string{".env", "../users/.env", "../.env"} {
+	// Load shared DB creds from users/.env first, then local management/.env (service port must not inherit users' port=).
+	for _, envPath := range []string{"../users/.env", ".env", "../.env"} {
 		_ = godotenv.Load(envPath)
 	}
 
-	pool, err := database.NewPoolFromEnv(context.Background())
+	pool, err := database.NewPoolFromEnvAllowNil(context.Background())
 	if err != nil {
 		log.Fatalf("[MANAGEMENT] gagal koneksi database: %v", err)
 	}
+
+	if pool == nil {
+		r := gin.Default()
+		r.GET("/health", func(c *gin.Context) {
+			c.JSON(503, gin.H{
+				"status":  "degraded",
+				"service": "management",
+				"detail":  "PostgreSQL tidak tersedia. Jalankan `docker compose up -d postgres` atau set kredensial di users/.env; mode ini aktif jika POSTGRES_OPTIONAL=true.",
+			})
+		})
+		port := database.GetServicePort("MANAGEMENT_PORT", "5006")
+		log.Printf("[MANAGEMENT] degraded mode (no DB) on :%s", port)
+		if err := r.Run(":" + port); err != nil {
+			log.Fatalf("[MANAGEMENT] gagal menjalankan service: %v", err)
+		}
+		return
+	}
+
 	defer pool.Close()
 
 	if err := dashboard.EnsureAuditSchema(context.Background(), pool); err != nil {

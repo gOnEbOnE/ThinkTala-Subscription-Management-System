@@ -156,6 +156,22 @@ func autoFreePort(serviceName, port string) bool {
 	}
 
 	fmt.Printf("[!] Port %s bentrok untuk %s. Auto-kill PID: %s\n", port, serviceName, strings.Join(pids, ", "))
+
+	if runtime.GOOS == "windows" {
+		for _, pidStr := range pids {
+			pidInt, convErr := strconv.Atoi(pidStr)
+			if convErr != nil {
+				continue
+			}
+			_ = killPIDWindows(pidInt)
+		}
+		if waitUntilPortFree(port, 3*time.Second) {
+			return true
+		}
+		log.Printf("[-] Port %s tetap tidak bisa dibebaskan untuk service %s", port, serviceName)
+		return false
+	}
+
 	for _, pid := range pids {
 		_ = exec.Command("kill", "-TERM", pid).Run()
 	}
@@ -456,6 +472,7 @@ func getProcessNameWindows(pid int) (string, error) {
 }
 
 func killPIDWindows(pid int) error {
-	cmd := exec.Command("taskkill", "/PID", strconv.Itoa(pid), "/F")
+	// /T terminates the process tree (needed when stale `go run` / child owns the listener).
+	cmd := exec.Command("taskkill", "/PID", strconv.Itoa(pid), "/T", "/F")
 	return cmd.Run()
 }

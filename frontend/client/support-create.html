@@ -23,6 +23,15 @@
             color: var(--text-heading);
             letter-spacing: 0.01em;
         }
+        .btn-back-history {
+            border-color: var(--border-color);
+            color: var(--text-main);
+        }
+        .btn-back-history:hover {
+            border-color: var(--accent-cyan);
+            color: var(--text-heading);
+            background: rgba(255, 255, 255, 0.04);
+        }
 
         .support-header small {
             color: var(--text-muted);
@@ -159,9 +168,14 @@
 
     <div class="main-content">
         <div class="support-form-card">
-            <div class="support-header mb-4">
-                <h4 class="fw-bold mb-0">Buat Laporan Kendala Baru</h4>
-                <small>Sampaikan kendala Anda agar tim support segera menindaklanjuti.</small>
+            <div class="support-header mb-4 d-flex justify-content-between align-items-start gap-2 flex-wrap">
+                <div>
+                    <h4 class="fw-bold mb-0">Buat Laporan Kendala Baru</h4>
+                    <small>Sampaikan kendala Anda agar tim support segera menindaklanjuti.</small>
+                </div>
+                <a href="/client/support-tickets" class="btn btn-sm btn-outline-secondary btn-back-history">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Riwayat
+                </a>
             </div>
 
             <div class="ai-card shadow-lg support-form-shell">

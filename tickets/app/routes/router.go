@@ -15,6 +15,9 @@ func Init(app *core.App) {
 	app.Router.HandleFunc("/api/admin/support/tickets/attachment/", support.HandleAdminSupportTicketAttachment(app.DB))
 	app.Router.HandleFunc("/api/user/support/tickets", support.HandleCreateUserSupportTicket(app.DB))
 	app.Router.HandleFunc("/api/user/support/tickets/", support.HandleCreateUserSupportTicket(app.DB))
+	app.Router.HandleFunc("/api/support/tickets/me", support.HandleGetMySupportTickets(app.DB))
+	app.Router.HandleFunc("/api/support/tickets/me/", support.HandleGetMySupportTickets(app.DB))
+	app.Router.HandleFunc("/api/support/tickets/", support.HandleGetMySupportTicketDetail(app.DB))
 
 	app.Router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

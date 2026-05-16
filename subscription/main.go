@@ -92,7 +92,11 @@ func main() {
 	app := core.New(cfg)
 
 	// 2. MIGRATION & SEEDING
-	database.MigrateAndSeed(app.DB)
+	if app.DB != nil && app.DB.Pool != nil {
+		database.MigrateAndSeed(app.DB)
+	} else {
+		log.Println("[DB] Skipping migration: database connection is not initialized")
+	}
 
 	// 3. WIRING
 	packagesRepo := packages.NewRepository(app.DB)

@@ -9,6 +9,9 @@ import (
 	"github.com/master-abror/zaframework/core/database"
 )
 
+// ErrDatabaseUnavailable is returned when the users service starts without Postgres (postgres_optional=true) or DB is down.
+var ErrDatabaseUnavailable = errors.New("PostgreSQL belum aktif — login tidak tersedia. Jalankan PostgreSQL misalnya: docker compose up -d postgres (port host 5433, database thinknalyze), pastikan credentials di users/.env sesuai, lalu restart layanan.")
+
 type Repository interface {
 	FindUser(ctx context.Context, key, value string) (*User, error)
 	FindRoleByCode(ctx context.Context, code string) (*RoleInfo, error)
@@ -21,7 +24,7 @@ type userRepo struct {
 
 func (r *userRepo) ensureDBReady() error {
 	if r == nil || r.db == nil || r.db.Pool == nil {
-		return fmt.Errorf("database connection is not initialized")
+		return ErrDatabaseUnavailable
 	}
 	return nil
 }
