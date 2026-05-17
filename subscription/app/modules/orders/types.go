@@ -50,6 +50,7 @@ type ClientOrderDetail struct {
 	OrderID                string     `json:"order_id"`
 	InvoiceNumber          string     `json:"invoice_number"`
 	PackageName            string     `json:"package_name"`
+	DurationMonths         int        `json:"duration_months"`
 	TotalPrice             float64    `json:"total_price"`
 	PaymentMethod          string     `json:"payment_method"`
 	Status                 string     `json:"status"`
@@ -196,15 +197,17 @@ type PaginationMeta struct {
 
 // RenewOrderDTO - request body untuk POST /api/orders/renew (PBI-66)
 type RenewOrderDTO struct {
+	PackageID      string `json:"package_id"`
 	DurationMonths int    `json:"duration_months"`
 	PaymentMethod  string `json:"payment_method"`
 }
 
 // RenewOrderResult - response untuk endpoint perpanjangan subscription
 type RenewOrderResult struct {
-	Message       string  `json:"message"`
-	OrderID       string  `json:"order_id"`
-	InvoiceNumber string  `json:"invoice_number"`
-	PackageName   string  `json:"package_name"`
-	TotalPrice    float64 `json:"total_price"`
+	Message           string    `json:"message"`
+	OrderID           string    `json:"order_id"`
+	InvoiceNumber     string    `json:"invoice_number"`
+	PackageName       string    `json:"package_name"`
+	TotalPrice        float64   `json:"total_price"`
+	RenewalStartDate  time.Time `json:"renewal_start_date"`
 }

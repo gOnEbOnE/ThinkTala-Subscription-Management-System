@@ -37,7 +37,10 @@
     function isBillingActive() {
         return (path === '/client/billing-history' || path === '/client/order-detail' || path === '/client/checkout') ? ' active' : '';
     }
-    function isTicketActive() { return (path === '/client/support-tickets' || path === '/support/create' || path === '/client/support-create') ? ' active' : ''; }
+    function isSubscriptionActive() {
+        return path === '/client/subscription-me' ? ' active' : '';
+    }
+    function isTicketActive() { return (path === '/support/create' || path === '/client/support-create') ? ' active' : ''; }
     function isSettingsActive() { return path === '/client/settings' ? ' active' : ''; }
 
     // ── Sidebar HTML ──────────────────────────────────────────────
@@ -66,6 +69,7 @@
             '</ul>' +
             '<ul class="nav flex-column mb-5">' +
                 '<li class="nav-item"><a class="nav-link' + isMembershipActive() + '" href="/client/packages-catalog"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isSubscriptionActive() + '" href="/client/subscription-me"><i class="fa-solid fa-repeat icon-left"></i><span class="link-text">Langganan</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isBillingActive() + '" href="/client/billing-history"><i class="fa-solid fa-receipt icon-left"></i><span class="link-text">Billing History</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isSettingsActive() + '" href="/client/settings"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Pengaturan</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>' +

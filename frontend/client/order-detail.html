@@ -48,11 +48,60 @@
             }
         }
 
+        .summary-card {
+            background: linear-gradient(135deg, rgba(33, 44, 79, 0.46), rgba(20, 26, 46, 0.92));
+        }
+
         .invoice-code {
             font-family: 'JetBrains Mono', monospace;
             font-weight: 700;
             font-size: 1.15rem;
             color: var(--text-heading);
+        }
+
+        .invoice-download-btn {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 12px rgba(0, 242, 255, 0.3);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+        }
+
+        .invoice-download-btn:hover {
+            filter: brightness(1.12);
+            box-shadow: 0 0 18px rgba(0, 242, 255, 0.45);
+            color: #000;
+        }
+
+        .info-items {
+            display: grid;
+            gap: 0.7rem;
+        }
+
+        .info-item {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem 0.85rem;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .info-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .info-value {
+            color: var(--text-heading);
+            font-weight: 600;
         }
 
         .status-pill {
@@ -319,16 +368,26 @@
         </div>
 
         <div id="detailState" class="d-none">
-            <div class="ai-card mb-4">
+            <div class="ai-card summary-card mb-3">
                 <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
                     <div>
-                        <div class="label-small">Nomor Invoice</div>
+                        <div class="info-label">Nomor Invoice</div>
                         <div class="invoice-code" id="invoiceNumber">-</div>
-                        <div class="text-muted small mt-1" id="createdAt">-</div>
+                        <small class="text-muted" id="createdAt">-</small>
                     </div>
-                    <div>
-                        <div class="label-small mb-2">Status Pembayaran</div>
-                        <span id="statusBadge" class="status-pill">-</span>
+                    <div class="text-end">
+                        <div class="info-label">Status Pembayaran</div>
+                        <div id="statusBadgeWrap"><span id="statusBadge" class="status-pill">-</span></div>
+                        <div id="invoiceDownloadZone" class="mt-3 d-none">
+                            <button type="button" id="invoiceDownloadBtn" class="btn btn-sm invoice-download-btn">
+                                <i class="fa-solid fa-file-pdf me-1"></i>Unduh Invoice PDF
+                            </button>
+                        </div>
+                        <div id="cancelOrderZone" class="mt-2 d-none">
+                            <button type="button" id="cancelOrderBtn" class="btn btn-sm btn-outline-danger">
+                                <i class="fa-solid fa-xmark me-1"></i>Batalkan Pesanan
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -336,22 +395,22 @@
             <div class="detail-grid">
                 <div class="ai-card">
                     <h6 class="fw-bold mb-3" style="color:var(--text-heading)">Rincian Transaksi</h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="label-small">Paket</div>
-                            <div class="value-main" id="packageName">-</div>
+                    <div class="info-items">
+                        <div class="info-item">
+                            <div class="info-label">Paket</div>
+                            <div class="info-value" id="packageName">-</div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="label-small">Metode Pembayaran</div>
-                            <div class="value-main" id="paymentMethod">-</div>
+                        <div class="info-item">
+                            <div class="info-label">Harga</div>
+                            <div class="info-value" id="totalPrice">-</div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="label-small">Harga</div>
-                            <div class="value-main" id="totalPrice">-</div>
+                        <div class="info-item">
+                            <div class="info-label">Tanggal</div>
+                            <div class="info-value" id="invoiceDate">-</div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="label-small">Tanggal</div>
-                            <div class="value-main" id="invoiceDate">-</div>
+                        <div class="info-item">
+                            <div class="info-label">Metode Pembayaran</div>
+                            <div class="info-value" id="paymentMethod">-</div>
                         </div>
                     </div>
                 </div>
@@ -425,6 +484,22 @@
                             </a>
                         </div>
                         <img id="proofPreviewImage" class="proof-preview-img d-none" alt="Bukti transfer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-triangle-exclamation fa-3x mb-3" style="color:#ffd54a;"></i>
+                    <h6 class="fw-bold mb-2" style="color: var(--text-heading);">Batalkan Pesanan?</h6>
+                    <p class="text-muted small mb-3">Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-sm btn-danger" id="confirmCancelBtn">Konfirmasi</button>
                     </div>
                 </div>
             </div>
@@ -516,6 +591,90 @@
             }
             if (draftWrap) draftWrap.classList.add('d-none');
             if (draftImg) draftImg.removeAttribute('src');
+        }
+
+        async function downloadInvoice() {
+            if (!currentOrder || !currentOrder.order_id) {
+                showToast('Detail pesanan belum siap.', 'warning');
+                return;
+            }
+            var status = String(currentOrder.status || '').toUpperCase();
+            if (status !== 'PAID') {
+                showToast('Invoice tersedia setelah pembayaran disetujui.', 'warning');
+                return;
+            }
+
+            var btn = document.getElementById('invoiceDownloadBtn');
+            var originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Mengunduh...';
+            }
+
+            try {
+                var res = await fetch('/api/orders/' + encodeURIComponent(currentOrder.order_id) + '/invoice', {
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
+                if (!res.ok) {
+                    showToast('Gagal mengunduh invoice. Coba lagi beberapa saat.', 'danger');
+                    return;
+                }
+                var blob = await res.blob();
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                var invoiceName = (currentOrder.invoice_number || '').trim();
+                a.href = url;
+                a.download = invoiceName ? 'invoice-' + invoiceName + '.pdf' : 'invoice-' + currentOrder.order_id + '.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                showToast('Gagal mengunduh invoice. Coba lagi beberapa saat.', 'danger');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            }
+        }
+
+        function openCancelModal() {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('cancelModal')).show();
+        }
+
+        async function confirmCancelOrder() {
+            if (!currentOrder || !currentOrder.order_id) return;
+            var btn = document.getElementById('confirmCancelBtn');
+            btn.disabled = true;
+            btn.textContent = 'Membatalkan...';
+            try {
+                var res = await fetch('/api/orders/' + encodeURIComponent(currentOrder.order_id) + '/cancel', {
+                    method: 'PATCH',
+                    credentials: 'include'
+                });
+                var json = await res.json();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('cancelModal')).hide();
+                if (res.ok && json.success) {
+                    currentOrder.status = 'CANCELLED';
+                    var status = renderStatus('CANCELLED', false);
+                    var badge = document.getElementById('statusBadge');
+                    badge.className = status.className;
+                    badge.textContent = status.text;
+                    document.getElementById('cancelOrderZone').classList.add('d-none');
+                    document.getElementById('invoiceDownloadZone').classList.add('d-none');
+                    renderProofSection(currentOrder);
+                    showToast('Pesanan berhasil dibatalkan.', 'success');
+                } else {
+                    showToast((json && json.error_message) ? json.error_message : 'Gagal membatalkan pesanan', 'danger');
+                }
+            } catch (e) {
+                showToast('Gagal membatalkan pesanan', 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Konfirmasi';
+            }
         }
 
         function handleProofFileSelection(file) {
@@ -772,6 +931,16 @@
                 badge.className = status.className;
                 badge.textContent = status.text;
 
+                var orderStatus = String(d.status || '').toUpperCase();
+                var invoiceZone = document.getElementById('invoiceDownloadZone');
+                if (invoiceZone) {
+                    invoiceZone.classList.toggle('d-none', orderStatus !== 'PAID');
+                }
+                var cancelZone = document.getElementById('cancelOrderZone');
+                if (cancelZone) {
+                    cancelZone.classList.toggle('d-none', orderStatus !== 'PENDING_PAYMENT' || !!d.has_payment_proof);
+                }
+
                 renderProofSection(d);
 
                 showState('detailState');
@@ -784,6 +953,12 @@
         document.addEventListener('DOMContentLoaded', function () {
             setupProofUploadUX();
             loadOrderDetail();
+            var invoiceBtn = document.getElementById('invoiceDownloadBtn');
+            if (invoiceBtn) invoiceBtn.addEventListener('click', downloadInvoice);
+            var cancelBtn = document.getElementById('cancelOrderBtn');
+            if (cancelBtn) cancelBtn.addEventListener('click', openCancelModal);
+            var confirmCancelBtn = document.getElementById('confirmCancelBtn');
+            if (confirmCancelBtn) confirmCancelBtn.addEventListener('click', confirmCancelOrder);
         });
     </script>
 </body>

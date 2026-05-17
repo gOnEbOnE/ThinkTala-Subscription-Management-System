@@ -476,6 +476,21 @@ func serveFrontendPage(frontendDir, section, defaultPage string) http.HandlerFun
 	}
 }
 
+func serveLandingPage(frontendDir string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+
+		landingFile := filepath.Join(frontendDir, "landing.html")
+		if _, err := os.Stat(landingFile); err == nil {
+			http.ServeFile(w, r, landingFile)
+			return
+		}
+		http.Redirect(w, r, "/account/login", http.StatusFound)
+	}
+}
+
 // ========================================
 // MAIN
 // ========================================
@@ -547,6 +562,20 @@ func main() {
 
 	// /client/* → Only CLIENT, SUPERADMIN
 	http.HandleFunc("/client/", withRoleAuth(serveFrontendPage(frontendDir, "client", "dashboard")))
+
+	// Public landing + legacy pages
+	http.HandleFunc("/landing", serveLandingPage(frontendDir))
+	http.HandleFunc("/landing.html", serveLandingPage(frontendDir))
+	http.HandleFunc("/market-insight", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/client/discover", http.StatusFound)
+	})
+	http.HandleFunc("/orders/history", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/client/billing-history", http.StatusFound)
+	}))
+	http.HandleFunc("/subscription/me", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/client/subscription-me", http.StatusFound)
+	}))
+
 	http.HandleFunc("/support/create", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/client/support-create", http.StatusFound)
 	}))
@@ -648,7 +677,7 @@ func main() {
 	// 5. Root redirect
 	// ========================================
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" || r.URL.Path == "" || r.URL.Path == "/landing.html" || r.URL.Path == "/index.html" {
+		if r.URL.Path == "/" || r.URL.Path == "" || r.URL.Path == "/landing.html" || r.URL.Path == "/landing" || r.URL.Path == "/index.html" {
 			// If user has valid token, redirect to their dashboard
 			if user, err := auth.GetUserFromToken(r); err == nil {
 				redirect := redirectByRole(user.RoleCode)

@@ -559,7 +559,7 @@
             var raw = sessionStorage.getItem('orderSuccess');
             if (!raw) {
                 // Redirect if no session data
-                window.location.href = 'packages-catalog.html';
+                window.location.href = '/client/packages-catalog';
                 return;
             }
             sessionStorage.removeItem('orderSuccess');

@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jung-kurt/gofpdf"
 	"github.com/master-abror/zaframework/core/utils"
 )
 
@@ -35,6 +34,7 @@ type Service interface {
 	ActivateOrderSystem(ctx context.Context, orderID string) (*ActivationResult, error)
 	GetActiveSubscriptions(ctx context.Context, userID string) ([]SubscriptionStatus, error)
 	GetActiveSubscription(ctx context.Context, userID string) (*SubscriptionStatus, error)
+	GetLatestSubscriptionForUser(ctx context.Context, userID string) (*SubscriptionStatus, error)
 	RenewSubscription(ctx context.Context, userID string, dto RenewOrderDTO) (*RenewOrderResult, error)
 	GetInvoice(ctx context.Context, userID, orderID string) ([]byte, string, error)
 	GetInvoiceForAdmin(ctx context.Context, orderID string) ([]byte, string, error)
@@ -271,6 +271,7 @@ func (s *orderService) GetOrderDetailForClient(ctx context.Context, userID, orde
 		OrderID:                rec.OrderID,
 		InvoiceNumber:          rec.InvoiceNumber,
 		PackageName:            rec.PackageName,
+		DurationMonths:         rec.DurationMonths,
 		TotalPrice:             rec.TotalPrice,
 		PaymentMethod:          rec.PaymentMethod,
 		Status:                 rec.Status,
@@ -550,6 +551,13 @@ func (s *orderService) GetActiveSubscription(ctx context.Context, userID string)
 	return &list[0], nil
 }
 
+func (s *orderService) GetLatestSubscriptionForUser(ctx context.Context, userID string) (*SubscriptionStatus, error) {
+	if strings.TrimSpace(userID) == "" {
+		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	return s.repo.GetLatestSubscriptionByUser(ctx, userID)
+}
+
 func (s *orderService) CountOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) (int, error) {
 	if strings.TrimSpace(userID) == "" {
 		return 0, errors.New("user tidak teridentifikasi, silakan login ulang")
@@ -581,7 +589,7 @@ func (s *orderService) CancelOrder(ctx context.Context, userID, orderID string) 
 		return ErrOrderForbidden
 	}
 	if rec.Status != "PENDING_PAYMENT" {
-		return errors.New("hanya pesanan dengan status PENDING_PAYMENT yang dapat dibatalkan")
+		return errors.New("Pesanan dengan status ini tidak dapat dibatalkan.")
 	}
 
 	return s.repo.CancelOrder(ctx, orderID, userID)
@@ -592,6 +600,7 @@ func (s *orderService) RenewSubscription(ctx context.Context, userID string, dto
 	if strings.TrimSpace(userID) == "" {
 		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
 	}
+	dto.PackageID = strings.TrimSpace(dto.PackageID)
 	dto.PaymentMethod = strings.TrimSpace(dto.PaymentMethod)
 	if dto.PaymentMethod == "" {
 		return nil, errors.New("payment_method wajib diisi")
@@ -604,15 +613,29 @@ func (s *orderService) RenewSubscription(ctx context.Context, userID string, dto
 		dto.DurationMonths = 1
 	}
 
-	sub, err := s.repo.GetLatestSubscriptionByUser(ctx, userID)
+	if dto.PackageID == "" {
+		return nil, errors.New("package_id wajib diisi")
+	}
+
+	anySub, errHist := s.repo.GetLatestSubscriptionByUser(ctx, userID)
+	if errHist != nil {
+		return nil, fmt.Errorf("gagal memeriksa riwayat langganan: %w", errHist)
+	}
+	if anySub == nil {
+		return nil, errors.New("Anda belum memiliki riwayat langganan untuk diajukan perpanjangan")
+	}
+	anyStatus := strings.ToUpper(strings.TrimSpace(anySub.Status))
+	if anyStatus != "ACTIVE" && anyStatus != "EXPIRED" {
+		return nil, errors.New("Anda belum memiliki riwayat langganan untuk diajukan perpanjangan")
+	}
+
+	sub, err := s.repo.GetLatestSubscriptionByUserAndPackage(ctx, userID, dto.PackageID)
 	if err != nil {
 		return nil, fmt.Errorf("gagal memeriksa langganan: %w", err)
 	}
-	if sub == nil {
-		return nil, errors.New("tidak ada langganan aktif atau kadaluarsa yang dapat diperpanjang")
-	}
+	renewalStart := computeRenewalStartDate(sub)
 
-	pkg, err := s.repo.GetPackageByID(ctx, sub.PackageID)
+	pkg, err := s.repo.GetPackageByID(ctx, dto.PackageID)
 	if err != nil {
 		return nil, fmt.Errorf("gagal memvalidasi paket: %w", err)
 	}
@@ -625,13 +648,13 @@ func (s *orderService) RenewSubscription(ctx context.Context, userID string, dto
 
 	price := pkg.Price * float64(dto.DurationMonths)
 	if dto.DurationMonths > 1 {
-		if tierPrice, err := s.repo.GetPricingTier(ctx, sub.PackageID, dto.DurationMonths); err == nil && tierPrice > 0 {
+		if tierPrice, err := s.repo.GetPricingTier(ctx, dto.PackageID, dto.DurationMonths); err == nil && tierPrice > 0 {
 			price = tierPrice
 		}
 	}
 
 	createDTO := CreateOrderDTO{
-		PackageID:      sub.PackageID,
+		PackageID:      dto.PackageID,
 		DurationMonths: dto.DurationMonths,
 		PaymentMethod:  dto.PaymentMethod,
 	}
@@ -641,12 +664,30 @@ func (s *orderService) RenewSubscription(ctx context.Context, userID string, dto
 	}
 
 	return &RenewOrderResult{
-		Message:       "Perpanjangan langganan berhasil diajukan",
-		OrderID:       order.ID,
-		InvoiceNumber: order.InvoiceNumber,
-		PackageName:   pkg.Name,
-		TotalPrice:    order.TotalPrice,
+		Message:          "Pesanan perpanjangan berhasil dibuat. Menunggu verifikasi pembayaran.",
+		OrderID:          order.ID,
+		InvoiceNumber:    order.InvoiceNumber,
+		PackageName:      pkg.Name,
+		TotalPrice:       order.TotalPrice,
+		RenewalStartDate: renewalStart,
 	}, nil
+}
+
+func computeRenewalStartDate(sub *SubscriptionStatus) time.Time {
+	loc := time.FixedZone("WIB", 7*3600)
+	now := time.Now().In(loc)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+	if sub == nil {
+		return today
+	}
+	if strings.ToUpper(strings.TrimSpace(sub.Status)) == "ACTIVE" {
+		end := sub.EndDate.In(loc)
+		endDay := time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, loc)
+		if !endDay.Before(today) {
+			return endDay
+		}
+	}
+	return today
 }
 
 // GetInvoice — generate PDF invoice untuk pesanan PAID (PBI-64)
@@ -672,7 +713,12 @@ func (s *orderService) GetInvoice(ctx context.Context, userID, orderID string) (
 		return nil, "", errors.New("invoice hanya tersedia untuk pesanan dengan status PAID")
 	}
 
-	return generateInvoicePDF(rec)
+	pdfBytes, invoiceNum, err := generateInvoicePDF(rec)
+	if err != nil {
+		return nil, "", err
+	}
+	_ = s.repo.LogInvoiceDownload(ctx, userID, orderID)
+	return pdfBytes, invoiceNum, nil
 }
 
 // GetInvoiceForAdmin — generate PDF invoice tanpa cek kepemilikan (untuk OPERASIONAL)
@@ -692,79 +738,11 @@ func (s *orderService) GetInvoiceForAdmin(ctx context.Context, orderID string) (
 		return nil, "", errors.New("invoice hanya tersedia untuk pesanan dengan status PAID")
 	}
 
-	return generateInvoicePDF(rec)
-}
-
-func generateInvoicePDF(rec *OrderRecord) ([]byte, string, error) {
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.AddPage()
-	pdf.SetMargins(20, 20, 20)
-
-	pdf.SetFont("Helvetica", "B", 22)
-	pdf.SetTextColor(30, 30, 30)
-	pdf.CellFormat(0, 12, "ThinkNalyze", "", 1, "L", false, 0, "")
-
-	pdf.SetFont("Helvetica", "", 10)
-	pdf.SetTextColor(100, 100, 100)
-	pdf.CellFormat(0, 6, "Platform Analitik & Langganan", "", 1, "L", false, 0, "")
-
-	pdf.Ln(4)
-	pdf.SetDrawColor(200, 200, 200)
-	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
-	pdf.Ln(6)
-
-	pdf.SetFont("Helvetica", "B", 16)
-	pdf.SetTextColor(30, 30, 30)
-	pdf.CellFormat(0, 10, "INVOICE", "", 1, "R", false, 0, "")
-
-	pdf.SetFont("Helvetica", "", 10)
-	pdf.SetTextColor(80, 80, 80)
-	pdf.CellFormat(0, 6, "No: "+rec.InvoiceNumber, "", 1, "R", false, 0, "")
-	pdf.CellFormat(0, 6, "Tanggal: "+rec.CreatedAt.Format("02 January 2006"), "", 1, "R", false, 0, "")
-
-	pdf.Ln(8)
-
-	printRow := func(label, value string) {
-		pdf.SetFont("Helvetica", "B", 10)
-		pdf.SetTextColor(80, 80, 80)
-		pdf.CellFormat(55, 7, label, "", 0, "L", false, 0, "")
-		pdf.SetFont("Helvetica", "", 10)
-		pdf.SetTextColor(30, 30, 30)
-		pdf.CellFormat(0, 7, value, "", 1, "L", false, 0, "")
+	pdfBytes, invoiceNum, err := generateInvoicePDF(rec)
+	if err != nil {
+		return nil, "", err
 	}
-
-	clientName := rec.ClientName
-	if clientName == "" || clientName == "Unknown" {
-		clientName = "-"
-	}
-	printRow("Nama Klien", clientName)
-	printRow("Email", rec.ClientEmail)
-	printRow("Paket", rec.PackageName)
-	printRow("Durasi", fmt.Sprintf("%d bulan", rec.DurationMonths))
-	printRow("Metode Pembayaran", rec.PaymentMethod)
-	printRow("Status", "PAID")
-
-	pdf.Ln(6)
-	pdf.SetDrawColor(200, 200, 200)
-	pdf.Line(20, pdf.GetY(), 190, pdf.GetY())
-	pdf.Ln(6)
-
-	pdf.SetFont("Helvetica", "B", 12)
-	pdf.SetTextColor(30, 30, 30)
-	pdf.CellFormat(55, 8, "Total Pembayaran", "", 0, "L", false, 0, "")
-	pdf.SetFont("Helvetica", "B", 14)
-	pdf.CellFormat(0, 8, fmt.Sprintf("Rp %s", formatRupiah(rec.TotalPrice)), "", 1, "L", false, 0, "")
-
-	pdf.Ln(12)
-	pdf.SetFont("Helvetica", "I", 8)
-	pdf.SetTextColor(150, 150, 150)
-	pdf.CellFormat(0, 5, "Dokumen ini dibuat secara otomatis oleh sistem ThinkNalyze dan sah tanpa tanda tangan.", "", 1, "C", false, 0, "")
-
-	var buf bytes.Buffer
-	if err := pdf.Output(&buf); err != nil {
-		return nil, "", fmt.Errorf("gagal generate PDF: %w", err)
-	}
-	return buf.Bytes(), rec.InvoiceNumber, nil
+	return pdfBytes, invoiceNum, nil
 }
 
 func formatRupiah(amount float64) string {
