@@ -44,6 +44,7 @@
     { "source": "/client/kyc-status", "destination": "/client/kyc-status.html" },
     { "source": "/client/kyc-resubmit", "destination": "/client/kyc-resubmit.html" },
     { "source": "/client/support-tickets", "destination": "/client/support-tickets.html" },
+    { "source": "/client/support-ticket-detail", "destination": "/client/support-ticket-detail.html" },
     { "source": "/client/support-create", "destination": "/client/support-create.html" },
     { "source": "/client/settings", "destination": "/client/settings.html" },
     { "source": "/ops/manage-users", "destination": "/ops/manage-users.html" },
