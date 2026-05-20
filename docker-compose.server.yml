@@ -46,27 +46,7 @@ services:
       postgres:
         condition: service_healthy
 
-  operational:
-    env_file:
-      - ./deploy/server-yovan/operational.env
-    environment:
-      - PORT=8080
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  subscription:
-    env_file:
-      - ./deploy/server-yovan/subscription.env
-    environment:
-      - PORT=5004
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+  # operational and subscription with ports defined below
 
   operational:
     env_file:
