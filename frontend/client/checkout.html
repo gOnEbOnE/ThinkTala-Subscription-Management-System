@@ -992,7 +992,9 @@
                     body: JSON.stringify({
                         package_id: selectedPackage.id,
                         duration_months: durationMonths,
-                        payment_method: selectedPaymentMethod
+                        payment_method: selectedPaymentMethod,
+                        client_name: nama,
+                        client_email: email
                     })
                 });
                 var json = await res.json();

@@ -66,6 +66,7 @@
         '/ops/tickets'                : { activeKey: 'tickets' },
         '/ops/notifications'          : { activeKey: 'notifications',          parentKey: 'notif' },
         '/ops/notification-templates' : { activeKey: 'notification-templates', parentKey: 'notif' },
+        '/ops/notification-monitoring': { activeKey: 'notification-monitoring', parentKey: 'notif' },
         '/ops/orders'                 : { activeKey: 'orders' },
         '/ops/orders-detail'          : { activeKey: 'orders' },
         '/ops/support-ticket-detail'  : { activeKey: 'tickets' },
@@ -76,8 +77,12 @@
         '/ops/create-user'            : { activeKey: 'manage-users' },
         '/ops/user-detail'            : { activeKey: 'manage-users' },
         '/ops/edit-user'              : { activeKey: 'manage-users' },
-        '/management/dashboard-customers': { activeKey: 'management-dashboard' },
-        '/management/dashboard-packages': { activeKey: 'management-packages' },
+        '/management/dashboard-customers'  : { activeKey: 'management-dashboard' },
+        '/management/dashboard-packages'  : { activeKey: 'management-packages' },
+        '/management/dashboard-overview'    : { activeKey: 'management-overview' },
+        '/management/dashboard-compliance'  : { activeKey: 'management-compliance' },
+        '/management/dashboard-support'    : { activeKey: 'management-support' },
+        '/management/dashboard-operational': { activeKey: 'management-operational' },
     };
 
     const currentPath = window.location.pathname;
@@ -88,6 +93,7 @@
     const parentKey  = route.parentKey  || '';
     const canOpenManagement = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'SUPERADMIN' || _opsRole === 'ADMIN';
     const canOpenPackageSales = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'ADMIN' || _opsRole === 'SUPERADMIN';
+    const canOpenDivisionDash = !hasLocalUser || _opsRole === 'SUPERADMIN' || _opsRole === 'CEO' || _opsRole === 'MANAGEMENT';
     const canCreateUser = _opsRole === 'SUPERADMIN' || (guardUser && guardUser.level_code && guardUser.level_code.toUpperCase() === 'SUPERADMIN');
 
     // Helper: mark a link active
@@ -141,6 +147,34 @@
             </a>
         </li>` : ''}
 
+        ${canOpenDivisionDash ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-overview')}" href="/management/dashboard-overview">
+                <i class="fa-solid fa-chart-pie icon-left"></i>
+                <span class="link-text">Overview Kinerja</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenDivisionDash ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-compliance')}" href="/management/dashboard-compliance">
+                <i class="fa-solid fa-shield-halved icon-left"></i>
+                <span class="link-text">Kinerja Compliance</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenDivisionDash ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-support')}" href="/management/dashboard-support">
+                <i class="fa-solid fa-headset icon-left"></i>
+                <span class="link-text">Kinerja Support</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenDivisionDash ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-operational')}" href="/management/dashboard-operational">
+                <i class="fa-solid fa-boxes-stacked icon-left"></i>
+                <span class="link-text">Kinerja Operasional</span>
+            </a>
+        </li>` : ''}
+
         ${canCreateUser ? `<li class="nav-item">
             <a class="nav-link${isActive('manage-users')}" href="/ops/manage-users">
                 <i class="fa-solid fa-users icon-left"></i>
@@ -167,6 +201,12 @@
                     <a class="nav-link${isActive('notification-templates')}" href="/ops/notification-templates">
                         <i class="fa-solid fa-file-alt me-2" style="font-size:.85rem"></i>
                         <span>Template Management</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link${isActive('notification-monitoring')}" href="/ops/notification-monitoring">
+                        <i class="fa-solid fa-eye me-2" style="font-size:.85rem"></i>
+                        <span>Monitoring Management</span>
                     </a>
                 </li>
             </ul>
@@ -199,9 +239,10 @@
 
     <ul class="nav flex-column mb-5">
         <li class="nav-item">
-            <a class="nav-link" href="/ops/settings">
+            <a class="nav-link disabled" href="#" title="Segera hadir">
                 <i class="fa-solid fa-gear icon-left"></i>
                 <span class="link-text">Settings</span>
+                <span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span>
             </a>
         </li>
         <li class="nav-item">

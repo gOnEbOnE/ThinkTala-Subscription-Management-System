@@ -3,14 +3,24 @@ package notification
 import (
 	"context"
 	"fmt"
+	"log"
+	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"notification/core/database"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+// TelegramRecipient menyimpan data user yang akan menerima notifikasi Telegram.
+type TelegramRecipient struct {
+	UserID     string
+	Name       string
+	ChatID     string
+}
 
 // Repository menyediakan akses query langsung ke table notifications.
 type Repository struct {
@@ -38,6 +48,7 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 			expiry_date,
 			is_active,
 			is_pinned,
+			view_count,
 			created_at,
 			created_by,
 			updated_at,
@@ -87,6 +98,7 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 			&n.ExpiryDate,
 			&n.IsActive,
 			&n.IsPinned,
+			&n.ViewCount,
 			&n.CreatedAt,
 			&n.CreatedBy,
 			&n.UpdatedAt,
@@ -96,6 +108,7 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 			return nil, err
 		}
 		n.Status = deriveStatus(n.IsActive, n.ExpiryDate)
+		applyDetailFlags(&n)
 		list = append(list, n)
 	}
 	if list == nil {
@@ -106,25 +119,12 @@ func (r *Repository) List(typeFilter, statusFilter string) ([]Notification, erro
 
 // ListPublic mengambil notification aktif sesuai audience, max 20 data.
 func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
-	role = strings.ToLower(strings.TrimSpace(role))
-	if role != "" && role != "client" {
+	audienceKeys, err := r.buildAudienceKeys(role, userID)
+	if err != nil {
+		return nil, err
+	}
+	if len(audienceKeys) == 0 {
 		return []map[string]any{}, nil
-	}
-
-	audiences := map[string]struct{}{"client": {}}
-	if segments, err := r.resolveClientAudienceSegments(strings.TrimSpace(userID)); err == nil {
-		for _, segment := range segments {
-			segment = strings.ToLower(strings.TrimSpace(segment))
-			if segment == "" {
-				continue
-			}
-			audiences[segment] = struct{}{}
-		}
-	}
-
-	audienceKeys := make([]string, 0, len(audiences))
-	for key := range audiences {
-		audienceKeys = append(audienceKeys, key)
 	}
 
 	rows, err := r.db.Query(context.Background(), `
@@ -152,16 +152,22 @@ func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
 		if err != nil {
 			return nil, err
 		}
+		plainDesc := normalizePlainText(desc)
+		isLong := isLongContent(plainDesc)
+		excerpt := buildExcerpt(plainDesc)
 		list = append(list, map[string]any{
 			"id":          id,
 			"title":       title,
-			"description": desc,
-			"message":     desc,
+			"description": excerpt,
+			"message":     excerpt,
+			"excerpt":     excerpt,
 			"type":        typ,
 			"target_role": target,
 			"cta_url":     ctaURL,
 			"image_url":   imageURL,
 			"is_pinned":   isPinned,
+			"has_detail":  isLong,
+			"is_long_content": isLong,
 			"expiry_date": expiryDate,
 			"created_at":  createdAt,
 		})
@@ -170,6 +176,187 @@ func (r *Repository) ListPublic(role, userID string) ([]map[string]any, error) {
 		list = []map[string]any{}
 	}
 	return list, nil
+}
+
+// ListRecentNews mengambil ringkasan news terbaru untuk drawer.
+func (r *Repository) ListRecentNews(role, userID string, limit int) ([]RecentNotification, error) {
+	audienceKeys, err := r.buildAudienceKeys(role, userID)
+	if err != nil {
+		return nil, err
+	}
+	if len(audienceKeys) == 0 {
+		return []RecentNotification{}, nil
+	}
+	if limit <= 0 {
+		limit = 5
+	}
+
+	rows, err := r.db.Query(context.Background(), `
+		SELECT n.id,
+			   n.title,
+			   COALESCE(n.description, n.message, '') AS description,
+			   n.type,
+			   n.cta_url,
+			   n.image_url,
+			   n.created_at,
+			   EXISTS (
+				   SELECT 1 FROM notification_reads nr
+				   WHERE nr.user_id = $2
+					 AND nr.source_type = 'news'
+					 AND nr.source_id = n.id::text
+			   ) AS is_read
+		FROM notifications n
+		WHERE n.is_active = TRUE
+		  AND (n.expiry_date IS NULL OR n.expiry_date > NOW())
+		  AND LOWER(n.target_role) = ANY($1)
+		ORDER BY n.created_at DESC
+		LIMIT $3
+	`, audienceKeys, userID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := make([]RecentNotification, 0)
+	for rows.Next() {
+		var id, title, desc, typ string
+		var ctaURL, imageURL *string
+		var createdAt time.Time
+		var isRead bool
+		if err := rows.Scan(&id, &title, &desc, &typ, &ctaURL, &imageURL, &createdAt, &isRead); err != nil {
+			return nil, err
+		}
+		if strings.TrimSpace(title) == "" {
+			title = "Update Terbaru"
+		}
+		excerpt := buildExcerpt(normalizePlainText(desc))
+		list = append(list, RecentNotification{
+			ID:        id,
+			Source:    "news",
+			Title:     title,
+			Body:      excerpt,
+			Type:      typ,
+			CTAURL:    ctaURL,
+			ImageURL:  imageURL,
+			CreatedAt: createdAt,
+			IsRead:    isRead,
+		})
+	}
+	return list, nil
+}
+
+// ListRecentEvents mengambil ringkasan log event terbaru untuk drawer.
+func (r *Repository) ListRecentEvents(userID string, limit int) ([]RecentNotification, error) {
+	if strings.TrimSpace(userID) == "" {
+		return []RecentNotification{}, nil
+	}
+	if limit <= 0 {
+		limit = 5
+	}
+
+	rows, err := r.db.Query(context.Background(), `
+		SELECT l.id,
+			   l.event_type,
+			   l.channel,
+			   COALESCE(l.subject, '') AS subject,
+			   COALESCE(l.content, '') AS content,
+			   l.status,
+			   COALESCE(l.sent_at, l.created_at) AS created_at,
+			   EXISTS (
+				   SELECT 1 FROM notification_reads nr
+				   WHERE nr.user_id = $1
+					 AND nr.source_type = 'event'
+					 AND nr.source_id = l.id
+			   ) AS is_read
+		FROM notification_logs l
+		WHERE l.user_id = $1
+		ORDER BY COALESCE(l.sent_at, l.created_at) DESC
+		LIMIT $2
+	`, userID, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	list := make([]RecentNotification, 0)
+	for rows.Next() {
+		var id, eventType, channel, subject, content, status string
+		var createdAt time.Time
+		var isRead bool
+		if err := rows.Scan(&id, &eventType, &channel, &subject, &content, &status, &createdAt, &isRead); err != nil {
+			return nil, err
+		}
+		title := strings.TrimSpace(subject)
+		if title == "" {
+			title = strings.ReplaceAll(eventType, "_", " ")
+		}
+		excerpt := buildExcerpt(normalizePlainText(content))
+		if strings.TrimSpace(excerpt) == "" {
+			excerpt = strings.ToUpper(strings.ReplaceAll(eventType, "_", " "))
+		}
+		list = append(list, RecentNotification{
+			ID:        id,
+			Source:    "event",
+			Title:     title,
+			Body:      excerpt,
+			EventType: eventType,
+			Channel:   channel,
+			Type:      "event",
+			Status:    status,
+			CreatedAt: createdAt,
+			IsRead:    isRead,
+		})
+	}
+	return list, nil
+}
+
+// MarkRead menandai satu item (news/event) sebagai read untuk user tertentu.
+func (r *Repository) MarkRead(userID, sourceType, sourceID string) error {
+	_, err := r.db.Exec(context.Background(), `
+		INSERT INTO notification_reads (user_id, source_type, source_id, read_at)
+		VALUES ($1, $2, $3, NOW())
+		ON CONFLICT (user_id, source_type, source_id) DO NOTHING
+	`, userID, sourceType, sourceID)
+	return err
+}
+
+// MarkAllRead menandai semua item (news/event) sebagai read untuk user tertentu.
+func (r *Repository) MarkAllRead(userID, role string) error {
+	if strings.TrimSpace(userID) == "" {
+		return fmt.Errorf("user_id wajib diisi")
+	}
+
+	// Event notifications (per user)
+	_, err := r.db.Exec(context.Background(), `
+		INSERT INTO notification_reads (user_id, source_type, source_id, read_at)
+		SELECT $1::varchar, 'event', id::varchar, NOW()
+		FROM notification_logs
+		WHERE user_id = $1::varchar
+		ON CONFLICT (user_id, source_type, source_id) DO NOTHING
+	`, userID)
+	if err != nil {
+		return err
+	}
+
+	// News notifications (per audience)
+	audienceKeys, err := r.buildAudienceKeys(role, userID)
+	if err != nil {
+		return err
+	}
+	if len(audienceKeys) == 0 {
+		return nil
+	}
+
+	_, err = r.db.Exec(context.Background(), `
+		INSERT INTO notification_reads (user_id, source_type, source_id, read_at)
+		SELECT $1::varchar, 'news', n.id::varchar, NOW()
+		FROM notifications n
+		WHERE n.is_active = TRUE
+		  AND (n.expiry_date IS NULL OR n.expiry_date > NOW())
+		  AND LOWER(n.target_role) = ANY($2::varchar[])
+		ON CONFLICT (user_id, source_type, source_id) DO NOTHING
+	`, userID, audienceKeys)
+	return err
 }
 
 func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, error) {
@@ -193,8 +380,10 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 		}
 		return []string{"client_paid_active"}, nil
 	}
-	if err != nil && err != pgx.ErrNoRows {
-		return nil, err
+	// If not pgx.ErrNoRows, log but DO NOT propagate — fall through to next check.
+	// This makes the function resilient to cross-DB/schema access errors.
+	if err != pgx.ErrNoRows {
+		log.Printf("[NOTIF AUDIENCE] subscription query error for user %s (non-fatal): %v", userID, err)
 	}
 
 	var orderStatus string
@@ -206,7 +395,9 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 		LIMIT 1
 	`, userID).Scan(&orderStatus)
 	if err != nil && err != pgx.ErrNoRows {
-		return nil, err
+		// Cross-schema query unavailable — return nil (caller will use default ["client","all"])
+		log.Printf("[NOTIF AUDIENCE] orders query error for user %s (non-fatal): %v", userID, err)
+		return nil, nil
 	}
 	orderStatus = strings.ToUpper(strings.TrimSpace(orderStatus))
 	if orderStatus == "PENDING_PAYMENT" || orderStatus == "CANCELLED" {
@@ -223,7 +414,7 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 	`, userID).Scan(&latestSubscriptionExpired)
 	if err != nil {
 		if err != pgx.ErrNoRows {
-			return nil, err
+			log.Printf("[NOTIF AUDIENCE] expiry query error for user %s (non-fatal): %v", userID, err)
 		}
 	} else if latestSubscriptionExpired {
 		return []string{"client_lapsed"}, nil
@@ -236,6 +427,37 @@ func (r *Repository) resolveClientAudienceSegments(userID string) ([]string, err
 		return []string{"client_never_bought"}, nil
 	}
 	return []string{"client_never_bought"}, nil
+}
+
+func (r *Repository) buildAudienceKeys(role, userID string) ([]string, error) {
+	role = strings.ToLower(strings.TrimSpace(role))
+	log.Printf("[AUDIENCE] input role=%q userID=%q", role, userID)
+	if role != "" && role != "client" {
+		log.Printf("[AUDIENCE] role=%q is not 'client' → returning empty keys", role)
+		return []string{}, nil
+	}
+
+	// Include 'all' so legacy notifications with target_role='all' are delivered
+	// to client audiences as well.
+	audiences := map[string]struct{}{"client": {}, "all": {}}
+	if segments, err := r.resolveClientAudienceSegments(strings.TrimSpace(userID)); err == nil {
+		for _, segment := range segments {
+			segment = strings.ToLower(strings.TrimSpace(segment))
+			if segment == "" {
+				continue
+			}
+			audiences[segment] = struct{}{}
+		}
+	} else if err != nil {
+		return nil, err
+	}
+
+	audienceKeys := make([]string, 0, len(audiences))
+	for key := range audiences {
+		audienceKeys = append(audienceKeys, key)
+	}
+	log.Printf("[AUDIENCE] resolved keys=%v", audienceKeys)
+	return audienceKeys, nil
 }
 
 // GetByID mengambil satu notification berdasarkan ID.
@@ -254,6 +476,7 @@ func (r *Repository) GetByID(id string) (Notification, error) {
 			expiry_date,
 			is_active,
 			is_pinned,
+			view_count,
 			created_at,
 			created_by,
 			updated_at,
@@ -271,6 +494,7 @@ func (r *Repository) GetByID(id string) (Notification, error) {
 		&n.ExpiryDate,
 		&n.IsActive,
 		&n.IsPinned,
+		&n.ViewCount,
 		&n.CreatedAt,
 		&n.CreatedBy,
 		&n.UpdatedAt,
@@ -278,6 +502,67 @@ func (r *Repository) GetByID(id string) (Notification, error) {
 	)
 	if err == nil {
 		n.Status = deriveStatus(n.IsActive, n.ExpiryDate)
+		applyDetailFlags(&n)
+	}
+	return n, err
+}
+
+// GetPublicByID mengambil notification untuk client dan menambah view_count.
+func (r *Repository) GetPublicByID(id, role, userID string) (Notification, error) {
+	audienceKeys, err := r.buildAudienceKeys(role, userID)
+	if err != nil {
+		return Notification{}, err
+	}
+	if len(audienceKeys) == 0 {
+		return Notification{}, pgx.ErrNoRows
+	}
+
+	var n Notification
+	err = r.db.QueryRow(context.Background(), `
+		UPDATE notifications
+		SET view_count = view_count + 1
+		WHERE id = $1
+		  AND is_active = TRUE
+		  AND (expiry_date IS NULL OR expiry_date > NOW())
+		  AND LOWER(target_role) = ANY($2)
+		RETURNING
+			id,
+			title,
+			COALESCE(description, message, '') AS description,
+			COALESCE(message, description, '') AS message,
+			type,
+			target_role,
+			cta_url,
+			image_url,
+			expiry_date,
+			is_active,
+			is_pinned,
+			view_count,
+			created_at,
+			created_by,
+			updated_at,
+			updated_by
+	`, id, audienceKeys).Scan(
+		&n.ID,
+		&n.Title,
+		&n.Description,
+		&n.Message,
+		&n.Type,
+		&n.TargetRole,
+		&n.CTAURL,
+		&n.ImageURL,
+		&n.ExpiryDate,
+		&n.IsActive,
+		&n.IsPinned,
+		&n.ViewCount,
+		&n.CreatedAt,
+		&n.CreatedBy,
+		&n.UpdatedAt,
+		&n.UpdatedBy,
+	)
+	if err == nil {
+		n.Status = deriveStatus(n.IsActive, n.ExpiryDate)
+		applyDetailFlags(&n)
 	}
 	return n, err
 }
@@ -401,6 +686,56 @@ func (r *Repository) Delete(id string) error {
 	return err
 }
 
+// GetTelegramRecipients mengambil semua user yang punya telegram_chat_id
+// dan cocok dengan audience yang dibangun dari targetRole.
+// Dipanggil saat notification baru di-publish agar bisa dispatch ke Telegram personal.
+func (r *Repository) GetTelegramRecipients(targetRole string) ([]TelegramRecipient, error) {
+	ctx := context.Background()
+
+	// Bangun klausa filter role sesuai target_role yang dipilih ops.
+	// Mapping target_role → kriteria di tabel users (join roles).
+	// Untuk broadcast, 'client' berarti semua user dengan role CLIENT.
+	var roleFilter string
+	switch strings.ToLower(strings.TrimSpace(targetRole)) {
+	case "client", "client_never_bought", "client_paid_active", "client_lapsed", "client_expiring_soon":
+		// Semua client — sub-segmentasi sudah dilakukan saat delivery real-time.
+		// Untuk Telegram broadcast, kirim ke semua client dengan chat_id terdaftar.
+		roleFilter = "UPPER(r.code) = 'CLIENT'"
+	case "all":
+		roleFilter = "1=1" // semua role
+	default:
+		roleFilter = "UPPER(r.code) = 'CLIENT'"
+	}
+
+	query := fmt.Sprintf(`
+		SELECT u.id, u.name, u.telegram_chat_id
+		FROM users u
+		JOIN roles r ON u.role_id = r.id
+		WHERE u.telegram_chat_id IS NOT NULL
+		  AND u.telegram_chat_id <> ''
+		  AND u.status = 'active'
+		  AND %s
+		ORDER BY u.id ASC
+	`, roleFilter)
+
+	rows, err := r.db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("GetTelegramRecipients query error: %w", err)
+	}
+	defer rows.Close()
+
+	var result []TelegramRecipient
+	for rows.Next() {
+		var rec TelegramRecipient
+		if err := rows.Scan(&rec.UserID, &rec.Name, &rec.ChatID); err != nil {
+			log.Printf("[TELEGRAM DISPATCH] scan error: %v", err)
+			continue
+		}
+		result = append(result, rec)
+	}
+	return result, nil
+}
+
 func (r *Repository) countPinned(excludeID string) (int, error) {
 	ctx := context.Background()
 	var count int
@@ -422,6 +757,48 @@ func deriveStatus(isActive bool, expiryDate *time.Time) string {
 		return "active"
 	}
 	return "inactive"
+}
+
+const (
+	excerptMaxRunes = 180
+)
+
+var htmlTagRe = regexp.MustCompile(`<[^>]*>`)
+
+func normalizePlainText(value string) string {
+	clean := htmlTagRe.ReplaceAllString(value, "")
+	clean = strings.ReplaceAll(clean, "\u00a0", " ")
+	clean = strings.TrimSpace(clean)
+	if clean == "" {
+		return ""
+	}
+	return strings.Join(strings.Fields(clean), " ")
+}
+
+func buildExcerpt(value string) string {
+	plain := normalizePlainText(value)
+	if plain == "" {
+		return ""
+	}
+	if utf8.RuneCountInString(plain) <= excerptMaxRunes {
+		return plain
+	}
+	runes := []rune(plain)
+	trimmed := strings.TrimSpace(string(runes[:excerptMaxRunes]))
+	return strings.TrimRight(trimmed, " .,") + "..."
+}
+
+func isLongContent(value string) bool {
+	plain := normalizePlainText(value)
+	return utf8.RuneCountInString(plain) > excerptMaxRunes
+}
+
+func applyDetailFlags(n *Notification) {
+	plain := normalizePlainText(n.Description)
+	isLong := isLongContent(plain)
+	n.IsLong = isLong
+	n.HasDetail = isLong
+	n.Excerpt = buildExcerpt(plain)
 }
 
 func parseFlexibleTime(raw string) (time.Time, error) {

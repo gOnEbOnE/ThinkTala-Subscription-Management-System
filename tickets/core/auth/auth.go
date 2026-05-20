@@ -18,6 +18,7 @@ var (
 	publicKeyOnce sync.Once
 	jwtPublicKey  any
 	jwtKeyErr     error
+	
 )
 
 func parseClaimsFromAuthorization(authHeader string) (jwt.MapClaims, error) {

@@ -112,7 +112,7 @@ func IsRedisEnabled() bool {
 
 // PublishNotificationEvent mempublish event notifikasi ke Redis queue (RPUSH).
 // Notification worker akan BLPOP payload ini dan memprosesnya secara async.
-func PublishNotificationEvent(eventType, channel, to string, vars map[string]string) error {
+func PublishNotificationEvent(eventType, channel, to, userID, userName string, vars map[string]string) error {
 	if !redisEnabled || redisClient == nil {
 		return fmt.Errorf("redis tidak aktif")
 	}
@@ -122,6 +122,8 @@ func PublishNotificationEvent(eventType, channel, to string, vars map[string]str
 		"channel":    channel,
 		"to":         to,
 		"vars":       vars,
+		"user_id":    userID,
+		"user_name":  userName,
 	})
 	if err != nil {
 		return fmt.Errorf("marshal payload gagal: %w", err)

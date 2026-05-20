@@ -63,17 +63,46 @@
 
         .history-table th:nth-child(4),
         .history-table td:nth-child(4) {
-            width: 16%;
+            width: 14%;
         }
 
         .history-table th:nth-child(5),
         .history-table td:nth-child(5) {
-            width: 16%;
+            width: 14%;
         }
 
         .history-table th:nth-child(6),
         .history-table td:nth-child(6) {
-            width: 20%;
+            width: 22%;
+        }
+
+        .skeleton-line {
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.2s ease-in-out infinite;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-line.short { width: 55%; }
+        .skeleton-line.mid { width: 75%; }
+
+        @keyframes skeleton-shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .invoice-download-btn {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            border: none;
+        }
+
+        .invoice-download-btn:hover {
+            filter: brightness(1.1);
+            color: #000;
         }
 
         .history-action-btn {
@@ -213,6 +242,32 @@
             </a>
         </div>
 
+        <!-- Filter Bar -->
+        <div class="ai-card mb-3">
+            <div class="d-flex gap-2 flex-wrap align-items-end">
+                <div>
+                    <label class="form-label small fw-semibold mb-1" style="color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Status</label>
+                    <select class="form-select form-select-sm" id="filterStatus" style="min-width:160px;">
+                        <option value="">Semua Status</option>
+                        <option value="PENDING_PAYMENT">Pending</option>
+                        <option value="PAID">Paid</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label small fw-semibold mb-1" style="color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Dari Tanggal</label>
+                    <input type="date" class="form-control form-control-sm" id="filterStartDate" style="min-width:140px;">
+                </div>
+                <div>
+                    <label class="form-label small fw-semibold mb-1" style="color:var(--text-muted);font-size:0.72rem;text-transform:uppercase;">Sampai Tanggal</label>
+                    <input type="date" class="form-control form-control-sm" id="filterEndDate" style="min-width:140px;">
+                </div>
+                <button class="btn btn-sm btn-outline-secondary" onclick="resetFilter()">
+                    <i class="fa-solid fa-rotate-left me-1"></i>Reset Filter
+                </button>
+            </div>
+        </div>
+
         <div class="ai-card">
             <div class="mb-3">
                 <h6 class="fw-bold mb-0" style="color: var(--text-heading)">Daftar Pesanan</h6>
@@ -225,9 +280,9 @@
                         <tr>
                             <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Invoice</th>
                             <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Paket</th>
-                            <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Total</th>
-                            <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Pembayaran</th>
+                            <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Total Tagihan</th>
                             <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Status</th>
+                            <th class="small fw-semibold py-3" style="text-transform: uppercase; font-size: 0.72rem;">Tanggal Dibuat</th>
                             <th class="small fw-semibold py-3 text-end" style="text-transform: uppercase; font-size: 0.72rem;">Aksi</th>
                         </tr>
                     </thead>
@@ -244,6 +299,29 @@
             <div id="historyMobileList" class="history-mobile-list">
                 <div class="text-center py-4 text-muted">
                     <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top: 1px solid var(--border-color);" id="paginationWrap">
+                <small class="text-muted" id="paginationInfo"></small>
+                <div id="paginationControls" class="d-flex gap-1"></div>
+            </div>
+        </div>
+
+        <!-- Cancel Confirmation Modal -->
+        <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-sm modal-dialog-centered">
+                <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                    <div class="modal-body text-center py-4">
+                        <i class="fa-solid fa-triangle-exclamation fa-3x mb-3" style="color:#ffd54a;"></i>
+                        <h6 class="fw-bold mb-2" style="color: var(--text-heading);">Batalkan Pesanan?</h6>
+                        <p class="text-muted small mb-3">Apakah Anda yakin ingin membatalkan pesanan ini? Tindakan ini tidak dapat dibatalkan.</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="button" class="btn btn-sm btn-danger" id="confirmCancelBtn">Konfirmasi</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -334,66 +412,182 @@
             bootstrap.Toast.getOrCreateInstance(t, { delay: 3000 }).show();
         }
 
-        function renderHistory(list) {
+        var currentPage = 1;
+        var currentMeta = null;
+        var pendingCancelId = null;
+        var cachedOrders = [];
+
+        function hasActiveFilters() {
+            return !!(document.getElementById('filterStatus').value ||
+                document.getElementById('filterStartDate').value ||
+                document.getElementById('filterEndDate').value);
+        }
+
+        function showHistorySkeleton() {
+            var skeletonRow = '<tr><td colspan="6" class="py-3"><div class="skeleton-line mid"></div><div class="skeleton-line short"></div></td>' +
+                '<td class="py-3"><div class="skeleton-line mid"></div></td>' +
+                '<td class="py-3"><div class="skeleton-line short"></div></td>' +
+                '<td class="py-3"><div class="skeleton-line short"></div></td>' +
+                '<td class="py-3"><div class="skeleton-line mid"></div></td>' +
+                '<td class="py-3"><div class="skeleton-line mid"></div></td></tr>';
+            document.getElementById('historyTableBody').innerHTML = skeletonRow + skeletonRow + skeletonRow;
+            document.getElementById('historyMobileList').innerHTML =
+                '<div class="history-mobile-item"><div class="skeleton-line mid"></div><div class="skeleton-line short"></div></div>';
+            document.getElementById('tableSubtitle').textContent = 'Memuat data...';
+        }
+
+        function buildActionButtons(o) {
+            var status = (o.status || 'PENDING_PAYMENT').toUpperCase();
+            var hasProof = !!o.has_payment_proof;
+            var id = encodeURIComponent(o.order_id);
+            var btns = '';
+
+            if (status === 'PAID') {
+                btns += '<button type="button" class="btn btn-sm invoice-download-btn history-action-btn me-1 btn-download-invoice" data-order-id="' + o.order_id + '" data-invoice="' + (o.invoice_number || '') + '"><i class="fa-solid fa-file-pdf me-1"></i>Unduh Invoice</button>';
+            }
+            if (status === 'PENDING_PAYMENT' && !hasProof) {
+                btns += '<button type="button" onclick="openCancelModal(\'' + o.order_id + '\')" class="btn btn-sm btn-outline-danger history-action-btn me-1"><i class="fa-solid fa-xmark me-1"></i>Batalkan Pesanan</button>';
+            }
+            var detailLabel = (status === 'PENDING_PAYMENT' && !hasProof) ? 'Upload Bukti' : 'Detail';
+            btns += '<a href="/client/order-detail?id=' + id + '" class="btn btn-sm btn-outline-secondary history-action-btn"><i class="fa-solid fa-eye me-1"></i>' + detailLabel + '</a>';
+            return btns;
+        }
+
+        function renderHistory(list, meta) {
             var tbody = document.getElementById('historyTableBody');
             var subtitle = document.getElementById('tableSubtitle');
             var mobileList = document.getElementById('historyMobileList');
 
+            var total = meta ? meta.total : (list ? list.length : 0);
+            subtitle.textContent = total + ' pesanan ditemukan';
+
             if (!Array.isArray(list) || list.length === 0) {
-                subtitle.textContent = 'Belum ada pesanan';
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa-solid fa-receipt fa-2x d-block mb-2"></i>Belum ada data pesanan</td></tr>';
-                mobileList.innerHTML = '<div class="text-center py-4 text-muted"><i class="fa-solid fa-receipt fa-2x d-block mb-2"></i>Belum ada data pesanan</div>';
+                var emptyMsg = hasActiveFilters()
+                    ? 'Tidak ada tagihan yang sesuai dengan filter yang dipilih.'
+                    : 'Belum ada data pesanan';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted"><i class="fa-solid fa-receipt fa-2x d-block mb-2"></i>' + emptyMsg + '</td></tr>';
+                mobileList.innerHTML = '<div class="text-center py-4 text-muted"><i class="fa-solid fa-receipt fa-2x d-block mb-2"></i>' + emptyMsg + '</div>';
+                renderPagination(meta);
                 return;
             }
 
-            subtitle.textContent = list.length + ' pesanan ditemukan';
             tbody.innerHTML = list.map(function (o) {
-                var status = o.status || 'PENDING_PAYMENT';
+                var status = (o.status || 'PENDING_PAYMENT').toUpperCase();
                 var normalized = status === 'PENDING_PAYMENT' ? 'PENDING' : status;
                 var hasProof = !!o.has_payment_proof;
-                var actionLabel = (normalized === 'PENDING' && !hasProof) ? 'Upload Bukti' : 'Detail';
-                return '<tr>' +
-                    '<td class="py-3"><span class="invoice-code">' + (o.invoice_number || '-') + '</span><div class="text-muted small mt-1">' + formatDateID(o.created_at) + '</div></td>' +
+                return '<tr data-order-id="' + o.order_id + '">' +
+                    '<td class="py-3"><span class="invoice-code">' + (o.invoice_number || '-') + '</span></td>' +
                     '<td class="py-3">' + (o.package_name || '-') + '</td>' +
                     '<td class="py-3">' + formatRp(o.total_price) + '</td>' +
-                    '<td class="py-3">' + (o.payment_method || '-') + '</td>' +
-                    '<td class="py-3">' + statusBadge(normalized, hasProof) + '</td>' +
-                    '<td class="py-3 text-end"><a href="/client/order-detail?id=' + encodeURIComponent(o.order_id) + '" class="btn btn-sm btn-outline-secondary history-action-btn"><i class="fa-solid fa-eye me-1"></i>' + actionLabel + '</a></td>' +
+                    '<td class="py-3 order-status-cell">' + statusBadge(normalized, hasProof) + '</td>' +
+                    '<td class="py-3">' + formatDateID(o.created_at) + '</td>' +
+                    '<td class="py-3 text-end order-action-cell">' + buildActionButtons(o) + '</td>' +
                     '</tr>';
             }).join('');
 
             mobileList.innerHTML = list.map(function (o) {
-                var status = o.status || 'PENDING_PAYMENT';
+                var status = (o.status || 'PENDING_PAYMENT').toUpperCase();
                 var normalized = status === 'PENDING_PAYMENT' ? 'PENDING' : status;
                 var hasProof = !!o.has_payment_proof;
-                var actionLabel = (normalized === 'PENDING' && !hasProof) ? 'Upload Bukti' : 'Detail';
-                return '<div class="history-mobile-item">' +
+                return '<div class="history-mobile-item" data-order-id="' + o.order_id + '">' +
                     '<div class="mobile-item-top">' +
-                        '<div>' +
-                            '<div class="invoice-code">' + (o.invoice_number || '-') + '</div>' +
-                            '<div class="mobile-item-date">' + formatDateID(o.created_at) + '</div>' +
-                        '</div>' +
-                        '<div>' + statusBadge(normalized, hasProof) + '</div>' +
+                        '<div><div class="invoice-code">' + (o.invoice_number || '-') + '</div>' +
+                        '<div class="mobile-item-date">' + formatDateID(o.created_at) + '</div></div>' +
+                        '<div class="order-status-cell">' + statusBadge(normalized, hasProof) + '</div>' +
                     '</div>' +
                     '<div class="mobile-item-row"><span class="mobile-item-label">Paket</span><span class="mobile-item-value">' + (o.package_name || '-') + '</span></div>' +
                     '<div class="mobile-item-row"><span class="mobile-item-label">Total</span><span class="mobile-item-value">' + formatRp(o.total_price) + '</span></div>' +
-                    '<div class="mobile-item-row"><span class="mobile-item-label">Pembayaran</span><span class="mobile-item-value">' + (o.payment_method || '-') + '</span></div>' +
-                    '<div class="mobile-action-wrap"><a href="/client/order-detail?id=' + encodeURIComponent(o.order_id) + '" class="btn btn-sm btn-outline-secondary history-action-btn"><i class="fa-solid fa-eye me-1"></i>' + actionLabel + '</a></div>' +
+                    '<div class="mobile-action-wrap order-action-cell">' + buildActionButtons(o) + '</div>' +
                     '</div>';
             }).join('');
+
+            renderPagination(meta);
+        }
+
+        function renderPagination(meta) {
+            var wrap = document.getElementById('paginationWrap');
+            var info = document.getElementById('paginationInfo');
+            var ctrl = document.getElementById('paginationControls');
+            if (!meta || meta.total_pages <= 1) {
+                info.textContent = '';
+                ctrl.innerHTML = '';
+                return;
+            }
+            var start = (meta.page - 1) * meta.per_page + 1;
+            var end = Math.min(meta.page * meta.per_page, meta.total);
+            info.textContent = 'Menampilkan ' + start + '–' + end + ' dari ' + meta.total + ' pesanan';
+            var html = '<button class="btn btn-sm btn-outline-secondary" ' + (meta.page === 1 ? 'disabled' : '') + ' onclick="changePage(' + (meta.page - 1) + ')" style="font-size:0.8rem;">&lsaquo; Prev</button>';
+            var maxShow = Math.min(meta.total_pages, 5);
+            for (var i = 1; i <= maxShow; i++) {
+                var active = i === meta.page;
+                html += '<button class="btn btn-sm ' + (active ? '' : 'btn-outline-secondary') + '" onclick="changePage(' + i + ')" style="min-width:36px;font-size:0.8rem;' + (active ? 'background:var(--text-heading);color:#000;border-color:var(--text-heading);' : '') + '">' + i + '</button>';
+            }
+            if (meta.total_pages > 5) {
+                html += '<span class="btn btn-sm btn-outline-secondary disabled" style="font-size:0.8rem;">...</span>';
+                html += '<button class="btn btn-sm btn-outline-secondary" onclick="changePage(' + meta.total_pages + ')" style="font-size:0.8rem;">' + meta.total_pages + '</button>';
+            }
+            html += '<button class="btn btn-sm btn-outline-secondary" ' + (meta.page === meta.total_pages ? 'disabled' : '') + ' onclick="changePage(' + (meta.page + 1) + ')" style="font-size:0.8rem;">Next &rsaquo;</button>';
+            ctrl.innerHTML = html;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            loadHistory();
+        }
+
+        function applyFilter() {
+            currentPage = 1;
+            var start = document.getElementById('filterStartDate').value;
+            var end = document.getElementById('filterEndDate').value;
+            if (start && end && start > end) {
+                showToast('Rentang tanggal tidak valid.', 'warning');
+                return;
+            }
+            loadHistory();
+        }
+
+        function resetFilter() {
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+            currentPage = 1;
+            loadHistory();
+        }
+
+        function updateCancelledRow(orderId) {
+            cachedOrders = cachedOrders.map(function (o) {
+                if (o.order_id === orderId) {
+                    o.status = 'CANCELLED';
+                }
+                return o;
+            });
+            renderHistory(cachedOrders, currentMeta);
         }
 
         async function loadHistory() {
+            showHistorySkeleton();
+            var params = new URLSearchParams();
+            var status = document.getElementById('filterStatus').value;
+            var startDate = document.getElementById('filterStartDate').value;
+            var endDate = document.getElementById('filterEndDate').value;
+            if (status) params.set('status', status);
+            if (startDate) params.set('start_date', startDate);
+            if (endDate) params.set('end_date', endDate);
+            params.set('page', currentPage);
+            params.set('limit', 10);
+
             try {
-                var res = await fetch('/api/orders', { credentials: 'include' });
+                var res = await fetch('/api/orders?' + params.toString(), { credentials: 'include' });
                 if (res.status === 401 || res.status === 403) {
                     window.location.href = '/account/login';
                     return;
                 }
-
                 var json = await res.json();
                 var list = Array.isArray(json) ? json : (json.data || []);
-                renderHistory(list);
+                var meta = json.meta || null;
+                currentMeta = meta;
+                cachedOrders = list;
+                renderHistory(list, meta);
             } catch (e) {
                 document.getElementById('tableSubtitle').textContent = 'Gagal memuat data';
                 document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" class="text-center py-5 text-danger"><i class="fa-solid fa-circle-exclamation fa-2x d-block mb-2"></i>Gagal memuat data riwayat</td></tr>';
@@ -401,9 +595,99 @@
             }
         }
 
+        async function downloadInvoice(orderId, invoiceNumber, btn) {
+            var originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Mengunduh...';
+            }
+            try {
+                var res = await fetch('/api/orders/' + encodeURIComponent(orderId) + '/invoice', {
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
+                if (!res.ok) {
+                    showToast('Gagal mengunduh invoice. Coba lagi beberapa saat.', 'danger');
+                    return;
+                }
+                var blob = await res.blob();
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                var fileName = invoiceNumber ? ('invoice-' + invoiceNumber + '.pdf') : ('invoice-' + orderId + '.pdf');
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                showToast('Gagal mengunduh invoice. Coba lagi beberapa saat.', 'danger');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            }
+        }
+
+        function openCancelModal(orderId) {
+            pendingCancelId = orderId;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('cancelModal')).show();
+        }
+
+        async function confirmCancel() {
+            if (!pendingCancelId) return;
+            var btn = document.getElementById('confirmCancelBtn');
+            btn.disabled = true;
+            btn.textContent = 'Membatalkan...';
+            try {
+                var res = await fetch('/api/orders/' + encodeURIComponent(pendingCancelId) + '/cancel', {
+                    method: 'PATCH',
+                    credentials: 'include'
+                });
+                var json = await res.json();
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('cancelModal')).hide();
+                if (res.ok && json.success) {
+                    showToast('Pesanan berhasil dibatalkan.', 'success');
+                    updateCancelledRow(pendingCancelId);
+                } else {
+                    showToast(json.error_message || 'Gagal membatalkan pesanan', 'danger');
+                }
+            } catch (e) {
+                showToast('Gagal membatalkan pesanan', 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Konfirmasi';
+                pendingCancelId = null;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             setupHistoryResponsiveWatcher();
             loadHistory();
+            document.getElementById('confirmCancelBtn').addEventListener('click', confirmCancel);
+            ['filterStatus', 'filterStartDate', 'filterEndDate'].forEach(function (id) {
+                document.getElementById(id).addEventListener('change', function () {
+                    currentPage = 1;
+                    var start = document.getElementById('filterStartDate').value;
+                    var end = document.getElementById('filterEndDate').value;
+                    if (start && end && start > end) {
+                        showToast('Rentang tanggal tidak valid.', 'warning');
+                        return;
+                    }
+                    loadHistory();
+                });
+            });
+            document.getElementById('historyTableBody').addEventListener('click', function (e) {
+                var btn = e.target.closest('.btn-download-invoice');
+                if (!btn) return;
+                downloadInvoice(btn.getAttribute('data-order-id'), btn.getAttribute('data-invoice'), btn);
+            });
+            document.getElementById('historyMobileList').addEventListener('click', function (e) {
+                var btn = e.target.closest('.btn-download-invoice');
+                if (!btn) return;
+                downloadInvoice(btn.getAttribute('data-order-id'), btn.getAttribute('data-invoice'), btn);
+            });
             var toastMsg = sessionStorage.getItem('billingToast');
             if (toastMsg) {
                 sessionStorage.removeItem('billingToast');

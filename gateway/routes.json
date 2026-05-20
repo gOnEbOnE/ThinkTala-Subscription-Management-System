@@ -79,6 +79,40 @@
       "cors": true
     },
     {
+      "path": "/api/notifications/recent",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "CLIENT",
+        "OPERASIONAL",
+        "COMPLIANCE",
+        "MANAGEMENT",
+        "ADMIN",
+        "ADMIN_SUPPORT",
+        "ADMIN_KYC",
+        "SUPERADMIN",
+        "CEO"
+      ]
+    },
+    {
+      "path": "/api/notifications/recent/",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "CLIENT",
+        "OPERASIONAL",
+        "COMPLIANCE",
+        "MANAGEMENT",
+        "ADMIN",
+        "ADMIN_SUPPORT",
+        "ADMIN_KYC",
+        "SUPERADMIN",
+        "CEO"
+      ]
+    },
+    {
       "path": "/api/notifications/public",
       "target": "http://notification-service.railway.internal:5003",
       "cors": true
@@ -169,14 +203,14 @@
     },
     {
       "path": "/api/user/support/tickets",
-      "target": "http://tickets-service.railway.internal:2004",
+      "target": "http://tickets.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["CLIENT", "SUPERADMIN", "CEO"]
     },
     {
       "path": "/api/user/support/tickets/",
-      "target": "http://tickets-service.railway.internal:2004",
+      "target": "http://tickets.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["CLIENT", "SUPERADMIN", "CEO"]
@@ -231,7 +265,7 @@
     },
     {
       "path": "/api/admin/support/tickets",
-      "target": "http://tickets-service.railway.internal:2004",
+      "target": "http://tickets.railway.internal:8080",
       "cors": true,
       "auth": true,
       "roles": ["ADMIN_SUPPORT", "SUPERADMIN", "CEO"]
@@ -269,7 +303,18 @@
     },
     {
       "path": "/api/dashboard/customers",
-      "target": "http://management-service.railway.internal:5006",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "MANAGEMENT",
+        "SUPERADMIN",
+        "ADMIN"
+      ]
+    },
+    {
+      "path": "/api/dashboard/customers/export",
+      "target": "http://localhost:5006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -280,7 +325,7 @@
     },
     {
       "path": "/api/dashboard/customer/",
-      "target": "http://management-service.railway.internal:5006",
+      "target": "http://localhost:5006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -291,7 +336,18 @@
     },
     {
       "path": "/api/dashboard/packages",
-      "target": "http://management-service.railway.internal:5006",
+      "target": "http://localhost:5006",
+      "cors": true,
+      "auth": true,
+      "roles": [
+        "MANAGEMENT",
+        "ADMIN",
+        "SUPERADMIN"
+      ]
+    },
+    {
+      "path": "/api/dashboard/packages/export",
+      "target": "http://localhost:5006",
       "cors": true,
       "auth": true,
       "roles": [
@@ -302,7 +358,7 @@
     },
     {
       "path": "/api/dashboard/package/",
-      "target": "http://management-service.railway.internal:5006",
+      "target": "http://localhost:5006",
       "cors": true,
       "auth": true,
       "roles": ["MANAGEMENT", "ADMIN", "SUPERADMIN"]
@@ -320,6 +376,30 @@
       "cors": true,
       "auth": true,
       "roles": ["SUPERADMIN"]
+    },
+    {
+      "path": "/api/telegram/link",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"],
+      "description": "User menghubungkan akun Telegram mereka untuk menerima notifikasi personal"
+    },
+    {
+      "path": "/api/telegram/unlink",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"],
+      "description": "User melepas hubungan Telegram dari akun"
+    },
+    {
+      "path": "/api/telegram/status",
+      "target": "http://notification-service.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"],
+      "description": "Cek apakah user sudah menghubungkan Telegram"
     }
   ]
 }

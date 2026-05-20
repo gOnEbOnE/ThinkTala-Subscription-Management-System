@@ -142,6 +142,18 @@ func MigrateAndSeed(db interface{}) {
 
 	-- Add rejected_fields column if not exists (TEXT[] for storing field names)
 	ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS rejected_fields TEXT[];
+
+	CREATE TABLE IF NOT EXISTS password_reset_tokens (
+		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+		user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		token UUID NOT NULL UNIQUE,
+		expires_at TIMESTAMP NOT NULL,
+		used_at TIMESTAMP,
+		created_at TIMESTAMP NOT NULL DEFAULT NOW()
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token ON password_reset_tokens(token);
+	CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id);
 	`
 
 	log.Println("Menjalankan Migrasi PostgreSQL...")

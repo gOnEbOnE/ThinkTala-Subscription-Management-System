@@ -4,13 +4,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/master-abror/zaframework/app/modules/dashboard"
 	"github.com/master-abror/zaframework/app/modules/orders"
 	"github.com/master-abror/zaframework/app/modules/packages"
 	"github.com/master-abror/zaframework/core"
 )
 
 // Init mendaftarkan semua route subscription service
-func Init(app *core.App, packagesController *packages.Controller, ordersController *orders.Controller) {
+func Init(app *core.App, packagesController *packages.Controller, ordersController *orders.Controller, dashboardHandler *dashboard.Handler) {
 
 	// Static assets
 	fs := http.FileServer(http.Dir("./public/assets"))
@@ -47,6 +48,9 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	// PBI-37: Get Active Catalog for Client
 	app.Router.HandleFunc("GET /api/subscription/catalog", packagesController.GetCatalogHandler)
 
+	// Sprint 3 public alias
+	app.Router.HandleFunc("GET /api/packages", packagesController.GetCatalogHandler)
+
 	// Legacy alias sesuai routes.json gateway
 	app.Router.HandleFunc("GET /api/subscriptions", packagesController.GetPackagesAdminHandler)
 
@@ -55,7 +59,11 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	// ===================================================
 	app.Router.HandleFunc("POST /api/orders", ordersController.CreateOrderHandler)
 	app.Router.HandleFunc("GET /api/orders", ordersController.ListOrdersClientHandler)
+	app.Router.HandleFunc("GET /api/orders/me", ordersController.ListOrdersClientHandler)
+	app.Router.HandleFunc("POST /api/orders/renew", ordersController.RenewOrderHandler)
 	app.Router.HandleFunc("GET /api/orders/{id}", ordersController.GetOrderDetailClientHandler)
+	app.Router.HandleFunc("GET /api/orders/{id}/invoice", ordersController.GetInvoiceHandler)
+	app.Router.HandleFunc("PATCH /api/orders/{id}/cancel", ordersController.CancelOrderHandler)
 	app.Router.HandleFunc("POST /api/orders/{id}/payment-proof", ordersController.UploadPaymentProofClientHandler)
 	app.Router.HandleFunc("GET /api/orders/{id}/payment-proof", ordersController.GetPaymentProofClientHandler)
 
@@ -65,6 +73,7 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	app.Router.HandleFunc("GET /api/admin/orders", ordersController.ListOrdersAdminHandler)
 	app.Router.HandleFunc("GET /api/admin/orders/{id}", ordersController.GetOrderDetailAdminHandler)
 	app.Router.HandleFunc("GET /api/admin/orders/{id}/payment-proof", ordersController.GetPaymentProofAdminHandler)
+	app.Router.HandleFunc("GET /api/admin/orders/{id}/invoice", ordersController.GetInvoiceAdminHandler)
 	app.Router.HandleFunc("PATCH /api/admin/orders/{id}/verify", ordersController.VerifyOrderHandler)
 
 	// ===================================================
@@ -72,4 +81,11 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	// ===================================================
 	app.Router.HandleFunc("PATCH /api/admin/orders/{id}/activate", ordersController.ActivateOrderHandler)
 	app.Router.HandleFunc("GET /api/subscriptions/me", ordersController.GetMySubscriptionHandler)
+	app.Router.HandleFunc("GET /api/subscriptions/latest", ordersController.GetLatestSubscriptionHandler)
+
+	// ===================================================
+	// Sprint 3 B7: Operational Dashboard
+	// ===================================================
+	app.Router.HandleFunc("GET /api/superadmin/dashboard/operational", dashboardHandler.GetOperationalDashboard)
+	app.Router.HandleFunc("GET /internal/dashboard/ops-summary", dashboardHandler.GetInternalOpsSummary)
 }

@@ -7,6 +7,8 @@ type CreateOrderDTO struct {
 	PackageID      string `json:"package_id"`
 	DurationMonths int    `json:"duration_months"` // opsional, default 1 bulan
 	PaymentMethod  string `json:"payment_method"`
+	ClientName     string `json:"client_name"`
+	ClientEmail    string `json:"client_email"`
 }
 
 // VerifyOrderDTO - request body untuk PATCH /api/admin/orders/{id}/verify
@@ -48,6 +50,7 @@ type ClientOrderDetail struct {
 	OrderID                string     `json:"order_id"`
 	InvoiceNumber          string     `json:"invoice_number"`
 	PackageName            string     `json:"package_name"`
+	DurationMonths         int        `json:"duration_months"`
 	TotalPrice             float64    `json:"total_price"`
 	PaymentMethod          string     `json:"payment_method"`
 	Status                 string     `json:"status"`
@@ -78,7 +81,7 @@ type AdminOrderDetail struct {
 	InvoiceNumber          string     `json:"invoice_number"`
 	UserID                 string     `json:"user_id"`
 	ClientName             string     `json:"client_name"`
-	ClientEmail            string     `json:"client_email"`
+		ClientEmail            string     `json:"client_email"`
 	PackageID              string     `json:"package_id"`
 	PackageName            string     `json:"package_name"`
 	DurationMonths         int        `json:"duration_months"`
@@ -117,6 +120,26 @@ type SubscriptionStatus struct {
 	StartDate      time.Time `json:"start_date"`
 	EndDate        time.Time `json:"end_date"`
 	Status         string    `json:"status"`
+	DaysRemaining  int       `json:"days_remaining"`
+}
+
+// ClientOrderFilter - filter parameter untuk GET /api/orders (client)
+type ClientOrderFilter struct {
+	Status    string
+	StartDate string
+	EndDate   string
+	Page      int
+	Limit     int
+}
+
+// AdminOrderFilter - filter parameter untuk GET /api/admin/orders
+type AdminOrderFilter struct {
+	Status    string
+	Search    string
+	StartDate string
+	EndDate   string
+	Page      int
+	Limit     int
 }
 
 // UploadPaymentProofResult - response upload bukti transfer
@@ -162,4 +185,29 @@ type PackageInfo struct {
 	Name   string  `json:"name"`
 	Status string  `json:"status"`
 	Price  float64 `json:"price"` // harga dasar / fallback
+}
+
+// PaginationMeta - informasi paginasi untuk response list endpoint
+type PaginationMeta struct {
+	Total      int `json:"total"`
+	Page       int `json:"page"`
+	PerPage    int `json:"per_page"`
+	TotalPages int `json:"total_pages"`
+}
+
+// RenewOrderDTO - request body untuk POST /api/orders/renew (PBI-66)
+type RenewOrderDTO struct {
+	PackageID      string `json:"package_id"`
+	DurationMonths int    `json:"duration_months"`
+	PaymentMethod  string `json:"payment_method"`
+}
+
+// RenewOrderResult - response untuk endpoint perpanjangan subscription
+type RenewOrderResult struct {
+	Message           string    `json:"message"`
+	OrderID           string    `json:"order_id"`
+	InvoiceNumber     string    `json:"invoice_number"`
+	PackageName       string    `json:"package_name"`
+	TotalPrice        float64   `json:"total_price"`
+	RenewalStartDate  time.Time `json:"renewal_start_date"`
 }

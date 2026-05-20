@@ -16,10 +16,30 @@ type Notification struct {
 	TargetRole  string     `json:"target_role,omitempty"`
 	IsActive    bool       `json:"is_active"`
 	IsPinned    bool       `json:"is_pinned"`
+	ViewCount   int        `json:"view_count"`
+	HasDetail   bool       `json:"has_detail"`
+	IsLong      bool       `json:"is_long_content"`
+	Excerpt     string     `json:"excerpt,omitempty"`
 	CreatedAt   time.Time  `json:"created_at"`
 	CreatedBy   *string    `json:"created_by,omitempty"`
 	UpdatedAt   time.Time  `json:"updated_at"`
 	UpdatedBy   *string    `json:"updated_by,omitempty"`
+}
+
+// RecentNotification adalah ringkasan notifikasi untuk notification drawer.
+type RecentNotification struct {
+	ID        string     `json:"id"`
+	Source    string     `json:"source"` // news | event
+	Title     string     `json:"title"`
+	Body      string     `json:"body"`
+	Type      string     `json:"type,omitempty"`
+	EventType string     `json:"event_type,omitempty"`
+	Channel   string     `json:"channel,omitempty"`
+	CTAURL    *string    `json:"cta_url,omitempty"`
+	ImageURL  *string    `json:"image_url,omitempty"`
+	Status    string     `json:"status,omitempty"`
+	CreatedAt time.Time  `json:"created_at"`
+	IsRead    bool       `json:"is_read"`
 }
 
 // CreateNotificationRequest adalah payload untuk membuat notification baru.

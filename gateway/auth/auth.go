@@ -88,6 +88,8 @@ func isPublicPath(path string) bool {
 		"/account/login",
 		"/account/register",
 		"/account/verify-otp",
+		"/account/reset",
+		"/reset-password",
 		"/api/auth",
 		"/api/auth/",
 		"/assets/",
@@ -172,6 +174,11 @@ func isRoleAllowed(path string, role string) bool {
 	}
 
 	if strings.HasPrefix(path, "/client/") && role == "CLIENT" {
+		return true
+	}
+
+	// Legacy client aliases (redirect to /client/*)
+	if role == "CLIENT" && (strings.HasPrefix(path, "/orders/") || strings.HasPrefix(path, "/subscription/")) {
 		return true
 	}
 

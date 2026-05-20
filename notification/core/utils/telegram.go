@@ -1,0 +1,75 @@
+package utils
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"time"
+)
+
+// TelegramSender mengirim pesan teks ke user via Telegram Bot API.
+// "to" adalah Chat ID Telegram (disimpan di kolom telegram_chat_id tabel users).
+type TelegramSender struct {
+	BotToken string
+}
+
+// NewTelegramSender membuat instance TelegramSender dari env TELEGRAM_BOT_TOKEN.
+// Mengembalikan error jika token tidak dikonfigurasi.
+func NewTelegramSender() (*TelegramSender, error) {
+	token := GetEnv("TELEGRAM_BOT_TOKEN")
+	if token == "" {
+		return nil, fmt.Errorf("TELEGRAM_BOT_TOKEN tidak dikonfigurasi")
+	}
+	return &TelegramSender{BotToken: token}, nil
+}
+
+type telegramPayload struct {
+	ChatID    string `json:"chat_id"`
+	Text      string `json:"text"`
+	ParseMode string `json:"parse_mode"`
+}
+
+// Send mengirim pesan ke Chat ID tertentu.
+// Mendukung Markdown (bold **text**, italic _text_, link [teks](url)).
+// Mengembalikan response string dari Telegram API dan error jika gagal.
+func (t *TelegramSender) Send(chatID, text string) (string, error) {
+	if chatID == "" {
+		return "", fmt.Errorf("telegram chat_id kosong")
+	}
+	if text == "" {
+		return "", fmt.Errorf("pesan telegram kosong")
+	}
+
+	apiURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", t.BotToken)
+
+	payload := telegramPayload{
+		ChatID:    chatID,
+		Text:      text,
+		ParseMode: "Markdown",
+	}
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return "", fmt.Errorf("telegram marshal payload: %w", err)
+	}
+
+	client := &http.Client{Timeout: 15 * time.Second}
+	resp, err := client.Post(apiURL, "application/json", bytes.NewReader(body))
+	if err != nil {
+		return "", fmt.Errorf("telegram HTTP send error: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	respText := string(respBody)
+
+	if resp.StatusCode >= 400 {
+		log.Printf("[TELEGRAM] Error %d: %s", resp.StatusCode, respText)
+		return respText, fmt.Errorf("telegram API error %d: %s", resp.StatusCode, respText)
+	}
+
+	log.Printf("[TELEGRAM] Sent to chatID=%s status=%d", chatID, resp.StatusCode)
+	return fmt.Sprintf("telegram:ok:%d", resp.StatusCode), nil
+}

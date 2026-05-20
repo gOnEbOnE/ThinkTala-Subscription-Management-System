@@ -1,8 +1,11 @@
 package template
 
 import (
+	"log"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -106,16 +109,48 @@ func (ctrl *Controller) EventTypes(c *gin.Context) {
 }
 
 // Logs mengembalikan log pengiriman notifikasi untuk monitoring.
-// Query params: ?status=sent|failed|pending&limit=50&offset=0
+// Query params: ?status=sent|failed|pending&channel=email|whatsapp|telegram&start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&search=...&limit=50&offset=0
 func (ctrl *Controller) Logs(c *gin.Context) {
-	status := c.Query("status")
+	status := strings.ToLower(strings.TrimSpace(c.Query("status")))
+	if status == "all" {
+		status = ""
+	}
+	channel := strings.ToLower(strings.TrimSpace(c.Query("channel")))
+	if channel == "all" {
+		channel = ""
+	}
+	search := strings.TrimSpace(c.Query("search"))
+	if search != "" {
+		search = "%" + search + "%"
+	}
+
+	var startDate *time.Time
+	var endDate *time.Time
+	if raw := strings.TrimSpace(c.Query("start_date")); raw != "" {
+		parsed, err := time.Parse("2006-01-02", raw)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "start_date tidak valid (YYYY-MM-DD)"})
+			return
+		}
+		startDate = &parsed
+	}
+	if raw := strings.TrimSpace(c.Query("end_date")); raw != "" {
+		parsed, err := time.Parse("2006-01-02", raw)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "end_date tidak valid (YYYY-MM-DD)"})
+			return
+		}
+		parsed = parsed.AddDate(0, 0, 1)
+		endDate = &parsed
+	}
+
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
 	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
 	if limit <= 0 || limit > 200 {
 		limit = 50
 	}
 
-	list, total, err := ctrl.svc.GetLogs(status, limit, offset)
+	list, total, err := ctrl.svc.GetLogs(status, channel, search, startDate, endDate, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -126,4 +161,20 @@ func (ctrl *Controller) Logs(c *gin.Context) {
 		"limit":  limit,
 		"offset": offset,
 	})
+}
+
+// LogDetail mengembalikan detail log pengiriman notifikasi.
+func (ctrl *Controller) LogDetail(c *gin.Context) {
+	id := strings.TrimSpace(c.Param("id"))
+	if id == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "id wajib diisi"})
+		return
+	}
+	logItem, err := ctrl.svc.GetLogDetail(id)
+	if err != nil {
+		log.Printf("[NOTIF LOG DETAIL] Error fetching log %s: %v", id, err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Log tidak ditemukan"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": logItem})
 }

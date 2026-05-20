@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/master-abror/zaframework/core/utils"
 )
@@ -19,17 +20,24 @@ import (
 
 type Service interface {
 	CreateOrder(ctx context.Context, userID string, dto CreateOrderDTO) (*Order, error)
-	ListOrdersForClient(ctx context.Context, userID string) ([]ClientOrderListItem, error)
+	ListOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error)
+	CountOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) (int, error)
 	GetOrderDetailForClient(ctx context.Context, userID, orderID string) (*ClientOrderDetail, error)
 	UploadPaymentProof(ctx context.Context, userID, orderID string, file PaymentProofFile) (*UploadPaymentProofResult, error)
 	GetPaymentProofForClient(ctx context.Context, userID, orderID string) (*PaymentProofFile, error)
-	ListOrdersForAdmin(ctx context.Context) ([]AdminOrderListItem, error)
+	CancelOrder(ctx context.Context, userID, orderID string) error
+	ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error)
+	CountOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) (int, error)
 	GetOrderDetailForAdmin(ctx context.Context, orderID string) (*AdminOrderDetail, error)
 	GetPaymentProofForAdmin(ctx context.Context, orderID string) (*PaymentProofFile, error)
-	VerifyOrder(ctx context.Context, orderID, action, rejectReason string) (*VerifyResult, error)
+	VerifyOrder(ctx context.Context, orderID, action, rejectReason, adminID string) (*VerifyResult, error)
 	ActivateOrderSystem(ctx context.Context, orderID string) (*ActivationResult, error)
 	GetActiveSubscriptions(ctx context.Context, userID string) ([]SubscriptionStatus, error)
 	GetActiveSubscription(ctx context.Context, userID string) (*SubscriptionStatus, error)
+	GetLatestSubscriptionForUser(ctx context.Context, userID string) (*SubscriptionStatus, error)
+	RenewSubscription(ctx context.Context, userID string, dto RenewOrderDTO) (*RenewOrderResult, error)
+	GetInvoice(ctx context.Context, userID, orderID string) ([]byte, string, error)
+	GetInvoiceForAdmin(ctx context.Context, orderID string) ([]byte, string, error)
 	ProcessCreateOrderJob(ctx context.Context, payload interface{}) (interface{}, error)
 }
 
@@ -87,10 +95,12 @@ func resolveClientEmail(userID string) string {
 
 // dispatchNotification mengirim event notifikasi dengan pola yang sama seperti KYC/register.
 // Urutan: 1) Redis queue -> 2) HTTP langsung ke Notification Service.
-func dispatchNotification(eventType, channel, to string, vars map[string]string) {
-	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
+func dispatchNotification(eventType, channel, to, userID, userName string, vars map[string]string) {
+	if err := utils.PublishNotificationEvent(eventType, channel, to, userID, userName, vars); err == nil {
 		log.Printf("[ORDER NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
 		return
+	} else {
+		log.Printf("[ORDER NOTIF] Publish queue gagal, fallback HTTP: event=%s to=%s err=%v", eventType, to, err)
 	}
 
 	baseURL := notifBaseURL()
@@ -99,6 +109,8 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 		"channel":    channel,
 		"to":         to,
 		"vars":       vars,
+		"user_id":    userID,
+		"user_name":  userName,
 	}
 	body, _ := json.Marshal(payload)
 
@@ -117,9 +129,11 @@ func dispatchNotification(eventType, channel, to string, vars map[string]string)
 	} else {
 		log.Printf("[ORDER NOTIF] Berhasil kirim event=%s to=%s", eventType, to)
 	}
+
+	log.Printf("[ORDER NOTIF] Event dikirim via HTTP fallback: event=%s to=%s", eventType, to)
 }
 
-// sendOrderNotification mengirim email verifikasi pembayaran ke client secara async.
+// sendOrderNotification mengirim email verifikasi pembayaran ke client.
 func (s *orderService) sendOrderNotification(order *OrderRecord, eventType, paymentStatus, verificationNote string) {
 	if order == nil {
 		return
@@ -152,7 +166,7 @@ func (s *orderService) sendOrderNotification(order *OrderRecord, eventType, paym
 			"duration_months":   fmt.Sprintf("%d", order.DurationMonths),
 			"order_id":          order.OrderID,
 		}
-		dispatchNotification(eventType, "email", clientEmail, vars)
+		dispatchNotification(eventType, "email", clientEmail, userID, clientName, vars)
 	}()
 }
 
@@ -227,11 +241,11 @@ func (s *orderService) CreateOrder(ctx context.Context, userID string, dto Creat
 	return s.repo.CreateOrder(ctx, userID, dto, price)
 }
 
-func (s *orderService) ListOrdersForClient(ctx context.Context, userID string) ([]ClientOrderListItem, error) {
+func (s *orderService) ListOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) ([]ClientOrderListItem, error) {
 	if strings.TrimSpace(userID) == "" {
 		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
 	}
-	return s.repo.ListOrdersByUser(ctx, userID)
+	return s.repo.ListOrdersByUser(ctx, userID, filter)
 }
 
 func (s *orderService) GetOrderDetailForClient(ctx context.Context, userID, orderID string) (*ClientOrderDetail, error) {
@@ -257,6 +271,7 @@ func (s *orderService) GetOrderDetailForClient(ctx context.Context, userID, orde
 		OrderID:                rec.OrderID,
 		InvoiceNumber:          rec.InvoiceNumber,
 		PackageName:            rec.PackageName,
+		DurationMonths:         rec.DurationMonths,
 		TotalPrice:             rec.TotalPrice,
 		PaymentMethod:          rec.PaymentMethod,
 		Status:                 rec.Status,
@@ -356,8 +371,8 @@ func (s *orderService) GetPaymentProofForClient(ctx context.Context, userID, ord
 	return proof, nil
 }
 
-func (s *orderService) ListOrdersForAdmin(ctx context.Context) ([]AdminOrderListItem, error) {
-	return s.repo.ListOrdersForAdmin(ctx)
+func (s *orderService) ListOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) ([]AdminOrderListItem, error) {
+	return s.repo.ListOrdersForAdmin(ctx, filter)
 }
 
 func (s *orderService) GetOrderDetailForAdmin(ctx context.Context, orderID string) (*AdminOrderDetail, error) {
@@ -425,7 +440,7 @@ func (s *orderService) GetPaymentProofForAdmin(ctx context.Context, orderID stri
 	return proof, nil
 }
 
-func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectReason string) (*VerifyResult, error) {
+func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectReason, adminID string) (*VerifyResult, error) {
 	if strings.TrimSpace(orderID) == "" {
 		return nil, errors.New("id pesanan wajib diisi")
 	}
@@ -464,14 +479,14 @@ func (s *orderService) VerifyOrder(ctx context.Context, orderID, action, rejectR
 		verificationNote = rejectReason
 	}
 
-	if err := s.repo.UpdateOrderStatus(ctx, orderID, newStatus, verificationNote); err != nil {
+	if err := s.repo.UpdateOrderStatus(ctx, orderID, newStatus, verificationNote, adminID); err != nil {
 		return nil, err
 	}
 
 	if action == "APPROVE" {
 		if _, err := s.repo.CreateSubscriptionFromOrder(ctx, orderID); err != nil {
 			// Best-effort rollback supaya status order konsisten jika auto-activate gagal.
-			_ = s.repo.UpdateOrderStatus(ctx, orderID, "PENDING_PAYMENT", "")
+			_ = s.repo.UpdateOrderStatus(ctx, orderID, "PENDING_PAYMENT", "", "")
 			return nil, fmt.Errorf("gagal aktivasi subscription otomatis: %w", err)
 		}
 	}
@@ -511,7 +526,18 @@ func (s *orderService) GetActiveSubscriptions(ctx context.Context, userID string
 	if strings.TrimSpace(userID) == "" {
 		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
 	}
-	return s.repo.ListActiveSubscriptionsByUser(ctx, userID)
+	list, err := s.repo.ListActiveSubscriptionsByUser(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	for i := range list {
+		days := int(time.Until(list[i].EndDate).Hours() / 24)
+		if days < 0 {
+			days = 0
+		}
+		list[i].DaysRemaining = days
+	}
+	return list, nil
 }
 
 func (s *orderService) GetActiveSubscription(ctx context.Context, userID string) (*SubscriptionStatus, error) {
@@ -523,6 +549,216 @@ func (s *orderService) GetActiveSubscription(ctx context.Context, userID string)
 		return nil, nil
 	}
 	return &list[0], nil
+}
+
+func (s *orderService) GetLatestSubscriptionForUser(ctx context.Context, userID string) (*SubscriptionStatus, error) {
+	if strings.TrimSpace(userID) == "" {
+		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	return s.repo.GetLatestSubscriptionByUser(ctx, userID)
+}
+
+func (s *orderService) CountOrdersForClient(ctx context.Context, userID string, filter ClientOrderFilter) (int, error) {
+	if strings.TrimSpace(userID) == "" {
+		return 0, errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	return s.repo.CountOrdersByUser(ctx, userID, filter)
+}
+
+func (s *orderService) CountOrdersForAdmin(ctx context.Context, filter AdminOrderFilter) (int, error) {
+	return s.repo.CountOrdersForAdmin(ctx, filter)
+}
+
+// CancelOrder — membatalkan pesanan PENDING_PAYMENT milik client (PBI-67)
+func (s *orderService) CancelOrder(ctx context.Context, userID, orderID string) error {
+	if strings.TrimSpace(userID) == "" {
+		return errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	if strings.TrimSpace(orderID) == "" {
+		return errors.New("id pesanan wajib diisi")
+	}
+
+	rec, err := s.repo.GetOrderByID(ctx, orderID)
+	if err != nil {
+		return err
+	}
+	if rec == nil {
+		return ErrOrderNotFound
+	}
+	if rec.UserID != userID {
+		return ErrOrderForbidden
+	}
+	if rec.Status != "PENDING_PAYMENT" {
+		return errors.New("Pesanan dengan status ini tidak dapat dibatalkan.")
+	}
+
+	return s.repo.CancelOrder(ctx, orderID, userID)
+}
+
+// RenewSubscription — membuat order perpanjangan langganan (PBI-66)
+func (s *orderService) RenewSubscription(ctx context.Context, userID string, dto RenewOrderDTO) (*RenewOrderResult, error) {
+	if strings.TrimSpace(userID) == "" {
+		return nil, errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	dto.PackageID = strings.TrimSpace(dto.PackageID)
+	dto.PaymentMethod = strings.TrimSpace(dto.PaymentMethod)
+	if dto.PaymentMethod == "" {
+		return nil, errors.New("payment_method wajib diisi")
+	}
+	if strings.ToUpper(dto.PaymentMethod) != "TRANSFER BANK" {
+		return nil, errors.New("metode pembayaran yang didukung saat ini hanya Transfer Bank")
+	}
+	dto.PaymentMethod = "Transfer Bank"
+	if dto.DurationMonths <= 0 {
+		dto.DurationMonths = 1
+	}
+
+	if dto.PackageID == "" {
+		return nil, errors.New("package_id wajib diisi")
+	}
+
+	anySub, errHist := s.repo.GetLatestSubscriptionByUser(ctx, userID)
+	if errHist != nil {
+		return nil, fmt.Errorf("gagal memeriksa riwayat langganan: %w", errHist)
+	}
+	if anySub == nil {
+		return nil, errors.New("Anda belum memiliki riwayat langganan untuk diajukan perpanjangan")
+	}
+	anyStatus := strings.ToUpper(strings.TrimSpace(anySub.Status))
+	if anyStatus != "ACTIVE" && anyStatus != "EXPIRED" {
+		return nil, errors.New("Anda belum memiliki riwayat langganan untuk diajukan perpanjangan")
+	}
+
+	sub, err := s.repo.GetLatestSubscriptionByUserAndPackage(ctx, userID, dto.PackageID)
+	if err != nil {
+		return nil, fmt.Errorf("gagal memeriksa langganan: %w", err)
+	}
+	renewalStart := computeRenewalStartDate(sub)
+
+	pkg, err := s.repo.GetPackageByID(ctx, dto.PackageID)
+	if err != nil {
+		return nil, fmt.Errorf("gagal memvalidasi paket: %w", err)
+	}
+	if pkg == nil {
+		return nil, errors.New("paket langganan tidak lagi tersedia")
+	}
+	if pkg.Status != "ACTIVE" {
+		return nil, errors.New("paket langganan tidak lagi aktif")
+	}
+
+	price := pkg.Price * float64(dto.DurationMonths)
+	if dto.DurationMonths > 1 {
+		if tierPrice, err := s.repo.GetPricingTier(ctx, dto.PackageID, dto.DurationMonths); err == nil && tierPrice > 0 {
+			price = tierPrice
+		}
+	}
+
+	createDTO := CreateOrderDTO{
+		PackageID:      dto.PackageID,
+		DurationMonths: dto.DurationMonths,
+		PaymentMethod:  dto.PaymentMethod,
+	}
+	order, err := s.repo.CreateOrder(ctx, userID, createDTO, price)
+	if err != nil {
+		return nil, fmt.Errorf("gagal membuat order perpanjangan: %w", err)
+	}
+
+	return &RenewOrderResult{
+		Message:          "Pesanan perpanjangan berhasil dibuat. Menunggu verifikasi pembayaran.",
+		OrderID:          order.ID,
+		InvoiceNumber:    order.InvoiceNumber,
+		PackageName:      pkg.Name,
+		TotalPrice:       order.TotalPrice,
+		RenewalStartDate: renewalStart,
+	}, nil
+}
+
+func computeRenewalStartDate(sub *SubscriptionStatus) time.Time {
+	loc := time.FixedZone("WIB", 7*3600)
+	now := time.Now().In(loc)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, loc)
+	if sub == nil {
+		return today
+	}
+	if strings.ToUpper(strings.TrimSpace(sub.Status)) == "ACTIVE" {
+		end := sub.EndDate.In(loc)
+		endDay := time.Date(end.Year(), end.Month(), end.Day(), 0, 0, 0, 0, loc)
+		if !endDay.Before(today) {
+			return endDay
+		}
+	}
+	return today
+}
+
+// GetInvoice — generate PDF invoice untuk pesanan PAID (PBI-64)
+func (s *orderService) GetInvoice(ctx context.Context, userID, orderID string) ([]byte, string, error) {
+	if strings.TrimSpace(userID) == "" {
+		return nil, "", errors.New("user tidak teridentifikasi, silakan login ulang")
+	}
+	if strings.TrimSpace(orderID) == "" {
+		return nil, "", errors.New("id pesanan wajib diisi")
+	}
+
+	rec, err := s.repo.GetOrderByID(ctx, orderID)
+	if err != nil {
+		return nil, "", err
+	}
+	if rec == nil {
+		return nil, "", ErrOrderNotFound
+	}
+	if rec.UserID != userID {
+		return nil, "", ErrOrderForbidden
+	}
+	if rec.Status != "PAID" {
+		return nil, "", errors.New("invoice hanya tersedia untuk pesanan dengan status PAID")
+	}
+
+	pdfBytes, invoiceNum, err := generateInvoicePDF(rec)
+	if err != nil {
+		return nil, "", err
+	}
+	_ = s.repo.LogInvoiceDownload(ctx, userID, orderID)
+	return pdfBytes, invoiceNum, nil
+}
+
+// GetInvoiceForAdmin — generate PDF invoice tanpa cek kepemilikan (untuk OPERASIONAL)
+func (s *orderService) GetInvoiceForAdmin(ctx context.Context, orderID string) ([]byte, string, error) {
+	if strings.TrimSpace(orderID) == "" {
+		return nil, "", errors.New("id pesanan wajib diisi")
+	}
+
+	rec, err := s.repo.GetOrderByID(ctx, orderID)
+	if err != nil {
+		return nil, "", err
+	}
+	if rec == nil {
+		return nil, "", ErrOrderNotFound
+	}
+	if rec.Status != "PAID" {
+		return nil, "", errors.New("invoice hanya tersedia untuk pesanan dengan status PAID")
+	}
+
+	pdfBytes, invoiceNum, err := generateInvoicePDF(rec)
+	if err != nil {
+		return nil, "", err
+	}
+	return pdfBytes, invoiceNum, nil
+}
+
+func formatRupiah(amount float64) string {
+	s := fmt.Sprintf("%.0f", amount)
+	n := len(s)
+	if n <= 3 {
+		return s
+	}
+	var result []byte
+	for i, c := range s {
+		if i > 0 && (n-i)%3 == 0 {
+			result = append(result, '.')
+		}
+		result = append(result, byte(c))
+	}
+	return string(result)
 }
 
 // ProcessCreateOrderJob — ZaFramework concurrency worker processor

@@ -60,13 +60,17 @@ func (s *Service) Delete(id string) error {
 
 // Send mencari template berdasarkan event_type+channel, render placeholder, simpan log, lalu kirim.
 func (s *Service) Send(req SendRequest) error {
+	log.Printf("[NOTIF SEND] Received event_type=%s channel=%s to=%s", req.EventType, req.Channel, req.To)
+
 	// Catat event_type ke registry agar muncul di dropdown
 	s.repo.RegisterEventType(req.EventType)
 
 	tpl, err := s.repo.GetByEventType(req.EventType, req.Channel)
 	if err != nil {
+		log.Printf("[NOTIF SEND] Template NOT found for event_type=%s channel=%s: %v", req.EventType, req.Channel, err)
 		return fmt.Errorf("template tidak ditemukan untuk event_type=%s channel=%s", req.EventType, req.Channel)
 	}
+	log.Printf("[NOTIF SEND] Template found for event_type=%s, sending to %s", req.EventType, req.To)
 
 	subject := ""
 	if tpl.Subject != nil {
@@ -81,25 +85,47 @@ func (s *Service) Send(req SendRequest) error {
 	}
 
 	// Simpan log sebelum kirim (status pending → akan diupdate setelah send)
+	userName := strings.TrimSpace(req.UserName)
+	if userName == "" {
+		userName = req.To
+	}
 	logID := uuid.New().String()
-	s.repo.SaveLog(logID, req.EventType, req.Channel, req.To, subject, content)
+	s.repo.SaveLog(logID, req.EventType, req.Channel, req.To, subject, content, req.UserID, userName)
 
-	sendErr := s.doSend(req.Channel, req.To, subject, content)
+	providerResp, sendErr := s.doSend(req.Channel, req.To, subject, content)
 
 	if sendErr == nil {
-		s.repo.MarkLogSent(logID)
+		s.repo.MarkLogSent(logID, providerResp)
 		log.Printf("[NOTIF] Terkirim ke %s (event: %s)", req.To, req.EventType)
 	} else {
 		nextRetry := time.Now().Add(backoffDuration(0))
-		s.repo.MarkLogFailed(logID, sendErr.Error(), 0, &nextRetry)
+		s.repo.MarkLogFailed(logID, sendErr.Error(), providerResp, 0, &nextRetry)
 		log.Printf("[NOTIF] Gagal kirim ke %s: %v — dijadwalkan retry", req.To, sendErr)
 	}
 
 	return sendErr
 }
 
+// LogDirectSend mencatat pengiriman langsung (seperti fallback Telegram) ke database monitoring.
+func (s *Service) LogDirectSend(req SendRequest, success bool, errMessage string, providerResp string) {
+	logID := uuid.New().String()
+	// Gunakan var "title" sebagai subject
+	subject := req.Vars["title"]
+	content := req.Vars["content"]
+	
+	s.repo.SaveLog(logID, req.EventType, req.Channel, req.To, subject, content, req.UserID, req.UserName)
+	s.repo.RegisterEventType(req.EventType)
+	if success {
+		s.repo.MarkLogSent(logID, providerResp)
+	} else {
+		nextRetry := time.Now().Add(backoffDuration(0))
+		s.repo.MarkLogFailed(logID, errMessage, providerResp, 0, &nextRetry)
+	}
+}
+
 // doSend melakukan pengiriman aktual tanpa menyentuh log.
-func (s *Service) doSend(channel, to, subject, content string) error {
+
+func (s *Service) doSend(channel, to, subject, content string) (string, error) {
 	switch channel {
 	case "email":
 		sender := utils.NewEmailSender()
@@ -109,10 +135,24 @@ func (s *Service) doSend(channel, to, subject, content string) error {
 			return sender.SendHTMLEmail(to, subject, content)
 		}
 		return sender.SendEmail(to, subject, content)
+
+	case "telegram":
+		tg, err := utils.NewTelegramSender()
+		if err != nil {
+			return "", err
+		}
+		// Tambahkan subject sebagai header bold Markdown jika ada
+		text := strings.TrimSpace(content)
+		if subj := strings.TrimSpace(subject); subj != "" {
+			text = "*" + subj + "*\n\n" + text
+		}
+		return tg.Send(to, text)
+
 	default:
-		return fmt.Errorf("channel '%s' belum didukung", channel)
+		return "", fmt.Errorf("channel '%s' belum didukung", channel)
 	}
 }
+
 
 // backoffDuration mengembalikan durasi tunggu sebelum retry ke-n.
 // Skema: retry 0→1m, 1→5m, 2→30m
@@ -154,19 +194,19 @@ func (s *Service) processRetries() {
 	}
 	log.Printf("[RETRY WORKER] Processing %d retryable notification(s)", len(retryable))
 	for _, l := range retryable {
-		sendErr := s.doSend(l.Channel, l.ToAddress, l.Subject, l.Content)
+		providerResp, sendErr := s.doSend(l.Channel, l.ToAddress, l.Subject, l.Content)
 		if sendErr == nil {
-			s.repo.MarkLogSent(l.ID)
+			s.repo.MarkLogSent(l.ID, providerResp)
 			log.Printf("[RETRY WORKER] Berhasil retry ke %s (event: %s, attempt: %d)", l.ToAddress, l.EventType, l.RetryCount+1)
 		} else {
 			newCount := l.RetryCount + 1
 			if newCount >= l.MaxRetries {
 				// Tandai permanently failed (retry_count = max_retries)
-				s.repo.MarkLogFailed(l.ID, sendErr.Error(), newCount, nil)
+				s.repo.MarkLogFailed(l.ID, sendErr.Error(), providerResp, newCount, nil)
 				log.Printf("[RETRY WORKER] Permanently failed ke %s setelah %d percobaan", l.ToAddress, newCount)
 			} else {
 				nextRetry := time.Now().Add(backoffDuration(newCount))
-				s.repo.MarkLogFailed(l.ID, sendErr.Error(), newCount, &nextRetry)
+				s.repo.MarkLogFailed(l.ID, sendErr.Error(), providerResp, newCount, &nextRetry)
 				log.Printf("[RETRY WORKER] Retry %d/%d gagal ke %s, jadwal ulang %v", newCount, l.MaxRetries, l.ToAddress, nextRetry.Format(time.RFC3339))
 			}
 		}
@@ -174,8 +214,13 @@ func (s *Service) processRetries() {
 }
 
 // GetLogs mengambil log untuk monitoring.
-func (s *Service) GetLogs(status string, limit, offset int) ([]NotificationLog, int, error) {
-	return s.repo.ListLogs(status, limit, offset)
+func (s *Service) GetLogs(status, channel, search string, startDate, endDate *time.Time, limit, offset int) ([]NotificationLog, int, error) {
+	return s.repo.ListLogs(status, channel, search, startDate, endDate, limit, offset)
+}
+
+// GetLogDetail mengambil detail log tertentu untuk audit.
+func (s *Service) GetLogDetail(id string) (*NotificationLog, error) {
+	return s.repo.GetLogByID(id)
 }
 
 // ListEventTypes mengembalikan daftar event_type yang sudah terdaftar.
