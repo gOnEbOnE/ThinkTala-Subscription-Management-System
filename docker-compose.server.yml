@@ -47,6 +47,13 @@ services:
       - redis_port=6379
       - redis_pass=
       - redis_db=0
+      # Email provider placeholders (fill in in deploy/server-yovan/notification.env or here)
+      - BREVO_API_KEY=
+      - SMTP_HOST=
+      - SMTP_PORT=587
+      - SMTP_USER=
+      - SMTP_PASS=
+      - SMTP_FROM="no-reply@your-domain.com"
     depends_on:
       postgres:
         condition: service_healthy
