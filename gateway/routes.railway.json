@@ -152,6 +152,13 @@
       "roles": ["CLIENT", "SUPERADMIN", "CEO"]
     },
     {
+      "path": "/api/support/tickets/",
+      "target": "http://tickets.railway.internal:8080",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"]
+    },
+    {
       "path": "/api/admin/support/tickets",
       "target": "http://tickets.railway.internal:8080",
       "cors": true,
