@@ -593,6 +593,18 @@
             if (draftImg) draftImg.removeAttribute('src');
         }
 
+        function focusProofSectionIfRequested() {
+            var focus = new URLSearchParams(window.location.search).get('focus');
+            if (focus !== 'proof') return;
+
+            var proofSection = document.getElementById('proofSection');
+            if (!proofSection) return;
+
+            setTimeout(function () {
+                proofSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 250);
+        }
+
         async function downloadInvoice() {
             if (!currentOrder || !currentOrder.order_id) {
                 showToast('Detail pesanan belum siap.', 'warning');
@@ -944,6 +956,7 @@
                 renderProofSection(d);
 
                 showState('detailState');
+                focusProofSectionIfRequested();
             } catch (e) {
                 showState('errorState');
                 document.getElementById('errorText').textContent = 'Gagal memuat detail pesanan.';

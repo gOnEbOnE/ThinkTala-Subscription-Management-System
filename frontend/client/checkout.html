@@ -595,6 +595,9 @@
                                 <div class="sum-label">Paket</div>
                                 <div class="sum-value" id="sumPkgName">—</div>
 
+                                <div class="sum-label">Harga 1 Bulan</div>
+                                <div class="sum-value" id="sumMonthlyPrice">—</div>
+
                                 <div class="sum-label">Periode</div>
                                 <div class="sum-value" id="sumPeriod">—</div>
 
@@ -860,11 +863,14 @@
             if (!selectedPackage) return;
 
             selectedTier = getCalculatedTier(selectedPackage, months);
+            var monthlyPrice = Number(selectedPackage.price) || 0;
 
             document.querySelectorAll('.dur-card').forEach(function (c) { c.classList.remove('selected'); });
             var active = document.querySelector('.dur-card[data-dur="' + months + '"]');
             if (active) active.classList.add('selected');
 
+            var monthlyPriceEl = document.getElementById('sumMonthlyPrice');
+            if (monthlyPriceEl) monthlyPriceEl.textContent = '1x ' + formatRp(monthlyPrice);
             document.getElementById('priceSubtotal').textContent = formatRp(selectedTier.price);
             document.getElementById('priceTotal').textContent = formatRp(selectedTier.price);
             document.getElementById('sumPeriod').textContent = months + ' bulan';
@@ -943,6 +949,7 @@
                 document.getElementById('invoiceInput').value = inv;
                 document.getElementById('dateInput').value = todayStr();
                 document.getElementById('sumPkgName').textContent = pkg.name;
+                document.getElementById('sumMonthlyPrice').textContent = '1x ' + formatRp(Number(pkg.price) || 0);
 
                 // Render special durations only and default to 1 month manual input
                 renderSpecialTierCards(pkg);
@@ -1018,8 +1025,13 @@
                 if (res.status === 201 && json.success) {
                     showToast('Pesanan berhasil dibuat, silakan upload bukti transfer.', 'success');
                     sessionStorage.setItem('billingToast', 'Pesanan berhasil dibuat, silakan upload bukti transfer.');
+                    var createdOrderId = (json && (json.order_id || (json.data && (json.data.order_id || json.data.id)))) || '';
                     setTimeout(function () {
-                        window.location.href = '/client/billing-history';
+                        if (createdOrderId) {
+                            window.location.href = '/client/order-detail?id=' + encodeURIComponent(createdOrderId) + '&focus=proof';
+                        } else {
+                            window.location.href = '/client/billing-history';
+                        }
                     }, 700);
                     return;
                 }
