@@ -51,7 +51,10 @@ func InitRedis() error {
 
 	if _, err := redisClient.Ping(ctx).Result(); err != nil {
 		redisEnabled = false
-		return fmt.Errorf("failed to connect to redis: %w", err)
+		_ = redisClient.Close()
+		redisClient = nil
+		log.Printf("[Redis] Connection FAILED: %v (Switching to No-Cache mode)", err)
+		return nil
 	}
 
 	redisEnabled = true

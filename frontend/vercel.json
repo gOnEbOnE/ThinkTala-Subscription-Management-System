@@ -4,13 +4,16 @@
   "redirects": [
     { "source": "/login", "destination": "/account/login", "permanent": false },
     { "source": "/register", "destination": "/account/register", "permanent": false },
-    { "source": "/reset-password", "destination": "/account/reset", "permanent": false }
+    { "source": "/reset-password", "destination": "/account/reset", "permanent": false },
+    { "source": "/orders/history", "destination": "/client/billing-history", "permanent": false },
+    { "source": "/subscription/me", "destination": "/client/subscription-me", "permanent": false }
   ],
   "rewrites": [
     { "source": "/dashboard/customer/:id", "destination": "/management/customer-detail.html" },
     { "source": "/dashboard/packages/:id", "destination": "/management/package-detail.html" },
     { "source": "/dashboard/package/:id", "destination": "/management/package-detail.html" },
     { "source": "/", "destination": "/landing.html" },
+    { "source": "/landing", "destination": "/landing.html" },
     { "source": "/account/login", "destination": "/account/login.html" },
     { "source": "/account/register", "destination": "/account/register.html" },
     { "source": "/account/verify-otp", "destination": "/account/verify-otp.html" },
@@ -33,6 +36,7 @@
     { "source": "/client/discover", "destination": "/client/discover.html" },
     { "source": "/client/billing", "destination": "/client/billing.html" },
     { "source": "/client/billing-history", "destination": "/client/billing-history.html" },
+    { "source": "/client/subscription-me", "destination": "/client/subscription-me.html" },
     { "source": "/client/checkout", "destination": "/client/checkout.html" },
     { "source": "/client/order-detail", "destination": "/client/order-detail.html" },
     { "source": "/client/packages-catalog", "destination": "/client/packages-catalog.html" },
@@ -40,6 +44,7 @@
     { "source": "/client/kyc-status", "destination": "/client/kyc-status.html" },
     { "source": "/client/kyc-resubmit", "destination": "/client/kyc-resubmit.html" },
     { "source": "/client/support-tickets", "destination": "/client/support-tickets.html" },
+    { "source": "/client/support-ticket-detail", "destination": "/client/support-ticket-detail.html" },
     { "source": "/client/support-create", "destination": "/client/support-create.html" },
     { "source": "/client/settings", "destination": "/client/settings.html" },
     { "source": "/ops/manage-users", "destination": "/ops/manage-users.html" },

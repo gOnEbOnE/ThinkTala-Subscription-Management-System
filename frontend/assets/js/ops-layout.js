@@ -239,9 +239,10 @@
 
     <ul class="nav flex-column mb-5">
         <li class="nav-item">
-            <a class="nav-link" href="/ops/settings">
+            <a class="nav-link disabled" href="#" title="Segera hadir">
                 <i class="fa-solid fa-gear icon-left"></i>
                 <span class="link-text">Settings</span>
+                <span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span>
             </a>
         </li>
         <li class="nav-item">

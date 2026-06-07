@@ -59,6 +59,7 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	// ===================================================
 	app.Router.HandleFunc("POST /api/orders", ordersController.CreateOrderHandler)
 	app.Router.HandleFunc("GET /api/orders", ordersController.ListOrdersClientHandler)
+	app.Router.HandleFunc("GET /api/orders/me", ordersController.ListOrdersClientHandler)
 	app.Router.HandleFunc("POST /api/orders/renew", ordersController.RenewOrderHandler)
 	app.Router.HandleFunc("GET /api/orders/{id}", ordersController.GetOrderDetailClientHandler)
 	app.Router.HandleFunc("GET /api/orders/{id}/invoice", ordersController.GetInvoiceHandler)
@@ -80,6 +81,7 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	// ===================================================
 	app.Router.HandleFunc("PATCH /api/admin/orders/{id}/activate", ordersController.ActivateOrderHandler)
 	app.Router.HandleFunc("GET /api/subscriptions/me", ordersController.GetMySubscriptionHandler)
+	app.Router.HandleFunc("GET /api/subscriptions/latest", ordersController.GetLatestSubscriptionHandler)
 
 	// ===================================================
 	// Sprint 3 B7: Operational Dashboard

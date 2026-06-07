@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Kendala | ThinkTala Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .detail-card { border: 1px solid var(--border-color); }
+        .big-status {
+            display: inline-flex;
+            align-items: center;
+            font-size: .85rem;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: .45rem .9rem;
+            letter-spacing: .03em;
+        }
+        .st-onprocess { background: #ffc107; color: #111; }
+        .st-done { background: #22c55e; color: #061108; }
+        .info-banner {
+            border: 1px solid var(--border-color);
+            border-left: 3px solid #ffc107;
+            background: rgba(255, 193, 7, .08);
+            color: var(--text-main);
+            border-radius: .6rem;
+            padding: .9rem 1rem;
+        }
+        .reply-box {
+            border: 1px solid var(--border-color);
+            border-radius: .6rem;
+            padding: .9rem 1rem;
+        }
+        .reply-box-onprocess {
+            background: rgba(255, 193, 7, .08);
+        }
+        .reply-box-done {
+            background: rgba(34, 197, 94, .07);
+        }
+        .kv-label { font-size: .74rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; }
+        .thumb-wrap img {
+            width: 320px;
+            max-width: 100%;
+            height: auto;
+            border-radius: .55rem;
+            border: 1px solid var(--border-color);
+            cursor: zoom-in;
+        }
+        .reply-item {
+            border: 1px solid var(--border-color);
+            border-radius: .55rem;
+            padding: .75rem .9rem;
+            background: rgba(255, 255, 255, .03);
+        }
+    </style>
+</head>
+<body>
+<div id="client-sidebar-placeholder"></div>
+<div id="client-navbar-placeholder"></div>
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0" style="color: var(--text-heading)">Detail Laporan Kendala</h4>
+        <a href="/client/support-tickets" class="btn btn-sm btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i> Kembali ke Riwayat
+        </a>
+    </div>
+
+    <div class="ai-card shadow-lg detail-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="kv-label">Status Laporan</div>
+            <span id="dStatusBadge" class="big-status st-onprocess">ON PROCESS</span>
+        </div>
+
+        <div id="infoOnProcess" class="info-banner mb-3 d-none">
+            Laporan Anda telah kami terima dan sedang dalam antrean penanganan oleh tim support. Mohon ditunggu.
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6"><div class="kv-label">ID Ticket</div><div id="dId">-</div></div>
+            <div class="col-md-6"><div class="kv-label">Tanggal Laporan</div><div id="dCreatedAt">-</div></div>
+            <div class="col-md-12"><div class="kv-label">Judul</div><div id="dTitle">-</div></div>
+            <div class="col-md-6"><div class="kv-label">Kategori</div><div id="dCategory">-</div></div>
+            <div class="col-md-12"><div class="kv-label">Deskripsi</div><div id="dDescription" style="white-space:pre-wrap">-</div></div>
+            <div class="col-md-12">
+                <div class="kv-label mb-2">Bukti Gambar</div>
+                <div id="attachmentWrap" class="thumb-wrap text-muted">Tidak ada lampiran</div>
+            </div>
+        </div>
+
+        <div id="replySection" class="reply-box d-none">
+            <div class="fw-semibold mb-2">Jawaban dari Tim Support</div>
+            <div class="text-muted mt-2 small">Waktu jawaban: <span id="dCompletedAt">-</span></div>
+            <div id="dReplyList" class="d-grid gap-2 mt-3"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="attachmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+            <div class="modal-header border-0">
+                <h6 class="modal-title">Bukti Gambar</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pt-0">
+                <img id="attachmentFullImage" alt="Attachment Full" style="max-width:100%;height:auto;border-radius:.5rem;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/client-layout.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const p = new URLSearchParams(window.location.search);
+    const ticketId = (p.get("id") || "").trim();
+
+    const dId = document.getElementById("dId");
+    const dCreatedAt = document.getElementById("dCreatedAt");
+    const dTitle = document.getElementById("dTitle");
+    const dCategory = document.getElementById("dCategory");
+    const dDescription = document.getElementById("dDescription");
+    const dStatusBadge = document.getElementById("dStatusBadge");
+    const infoOnProcess = document.getElementById("infoOnProcess");
+    const replySection = document.getElementById("replySection");
+    const dCompletedAt = document.getElementById("dCompletedAt");
+    const dReplyList = document.getElementById("dReplyList");
+    const attachmentWrap = document.getElementById("attachmentWrap");
+    const attachmentFullImage = document.getElementById("attachmentFullImage");
+
+    function fmtDate(dateStr) {
+        const d = new Date(String(dateStr || ""));
+        if (Number.isNaN(d.getTime())) return "-";
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        const hh = String(d.getHours()).padStart(2, "0");
+        const min = String(d.getMinutes()).padStart(2, "0");
+        return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+    }
+
+    function applyStatus(statusRaw, hasReplies) {
+        const status = String(statusRaw || "").toUpperCase();
+        dStatusBadge.textContent = status || "-";
+        dStatusBadge.classList.remove("st-onprocess", "st-done");
+        infoOnProcess.classList.add("d-none");
+        replySection.classList.add("d-none");
+        replySection.classList.remove("reply-box-onprocess", "reply-box-done");
+
+        if (status === "DONE") {
+            dStatusBadge.classList.add("st-done");
+            replySection.classList.add("reply-box-done");
+            replySection.classList.remove("d-none");
+            return;
+        }
+
+        dStatusBadge.classList.add("st-onprocess");
+        infoOnProcess.classList.remove("d-none");
+        if (hasReplies) {
+            replySection.classList.add("reply-box-onprocess");
+            replySection.classList.remove("d-none");
+        }
+    }
+
+    function renderAttachment(url) {
+        if (!url) {
+            attachmentWrap.textContent = "Tidak ada lampiran";
+            return;
+        }
+        attachmentWrap.innerHTML = `<img id="attachmentThumb" src="${url}" alt="Lampiran Tiket">`;
+        const thumb = document.getElementById("attachmentThumb");
+        thumb.addEventListener("click", () => {
+            attachmentFullImage.src = url;
+            const modal = new bootstrap.Modal(document.getElementById("attachmentModal"));
+            modal.show();
+        });
+    }
+
+    function renderReplies(replies) {
+        if (!Array.isArray(replies) || replies.length === 0) {
+            dReplyList.innerHTML = `<div class="text-muted">Belum ada jawaban dari customer support.</div>`;
+            return;
+        }
+        dReplyList.innerHTML = replies.map((r, idx) => `
+            <div class="reply-item">
+                <div class="small text-muted mb-1">Jawaban #${idx + 1} • ${fmtDate(r.created_at)}</div>
+                <div style="white-space:pre-wrap">${r.message || "-"}</div>
+            </div>
+        `).join("");
+    }
+
+    async function loadDetail() {
+        if (!ticketId) {
+            dTitle.textContent = "ID ticket tidak ditemukan";
+            return;
+        }
+
+        const res = await fetch(`/api/support/tickets/${encodeURIComponent(ticketId)}`, {
+            credentials: "include",
+            headers: { Accept: "application/json" }
+        });
+
+        if (res.status === 401) {
+            window.location.href = "/account/login";
+            return;
+        }
+        if (res.status === 403) {
+            dTitle.textContent = "Akses ditolak";
+            return;
+        }
+        if (res.status === 404) {
+            dTitle.textContent = "Laporan tidak ditemukan";
+            return;
+        }
+
+        const json = await res.json().catch(() => ({}));
+        const data = (json && json.data) || {};
+
+        dId.textContent = data.id || "-";
+        dCreatedAt.textContent = fmtDate(data.created_at);
+        dTitle.textContent = data.title || "-";
+        dCategory.textContent = data.category || "-";
+        dDescription.textContent = data.description || "-";
+        dCompletedAt.textContent = fmtDate(data.completed_at);
+
+        const replies = Array.isArray(data.replies) ? data.replies : [];
+        applyStatus(data.status, replies.length > 0);
+        renderAttachment(data.attachment_url || "");
+        renderReplies(replies);
+    }
+
+    loadDetail();
+</script>
+</body>
+</html>

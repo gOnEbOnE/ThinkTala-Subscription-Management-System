@@ -75,6 +75,31 @@ func ParseAdminSupportTicketPath(path string) (ticketID, action string, ok bool)
 	return "", "", false
 }
 
+func ParseClientSupportTicketPath(path string) (ticketID, action string, ok bool) {
+	const prefix = "/api/support/tickets/"
+	if !strings.HasPrefix(path, prefix) {
+		return "", "", false
+	}
+
+	suffix := strings.Trim(strings.TrimPrefix(path, prefix), "/")
+	if suffix == "" || strings.EqualFold(suffix, "me") {
+		return "", "", false
+	}
+
+	parts := strings.Split(suffix, "/")
+	if len(parts) == 1 {
+		id := strings.TrimSpace(parts[0])
+		return id, "", id != ""
+	}
+
+	if len(parts) == 2 && strings.EqualFold(strings.TrimSpace(parts[1]), "attachment") {
+		id := strings.TrimSpace(parts[0])
+		return id, "attachment", id != ""
+	}
+
+	return "", "", false
+}
+
 func IsAllowedImageMIME(contentType string) bool {
 	switch strings.ToLower(strings.TrimSpace(contentType)) {
 	case "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif":
@@ -100,4 +125,11 @@ func BuildAdminAttachmentURL(ticketID string, hasAttachment bool) string {
 		return ""
 	}
 	return fmt.Sprintf("/api/admin/support/tickets/attachment?ticket_id=%s", ticketID)
+}
+
+func BuildClientAttachmentURL(ticketID string, hasAttachment bool) string {
+	if !hasAttachment || strings.TrimSpace(ticketID) == "" {
+		return ""
+	}
+	return fmt.Sprintf("/api/support/tickets/%s/attachment", ticketID)
 }

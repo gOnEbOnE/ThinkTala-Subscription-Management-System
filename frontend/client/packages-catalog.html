@@ -211,11 +211,11 @@
         // ============================
         function buildPackageCard(pkg, index) {
             var style = CARD_STYLES[index % CARD_STYLES.length];
-            // Ambil harga dari tier terkecil, fallback ke pkg.price
             var tiers = pkg.pricing_tiers || [];
             var minTier = tiers.length > 0 ? tiers.reduce(function (a, b) { return a.price < b.price ? a : b; }) : null;
-            var displayPrice = minTier ? formatRupiah(minTier.price) : formatRupiah(pkg.price);
-            var priceLabel = tiers.length > 1 ? 'Mulai dari ' + displayPrice : displayPrice;
+            var monthlyPrice = Number(pkg.price) || (minTier ? Number(minTier.price) : 0);
+            var displayPrice = formatRupiah(monthlyPrice);
+            var priceLabel = '1x ' + displayPrice;
             var quota = (pkg.quota || 0).toLocaleString('id-ID') + ' permintaan';
             var durasiOptions = tiers.length > 0
                 ? tiers.map(function (t) { return t.duration_months + ' bln'; }).join(' / ')
@@ -233,7 +233,7 @@
                 '    <div class="p-4 d-flex flex-column flex-grow-1">',
                 '      <div class="mb-4">',
                 '        <div class="pkg-detail-row">',
-                '          <span class="label"><i class="fa-solid fa-tag me-2"></i>Harga</span>',
+                '          <span class="label"><i class="fa-solid fa-tag me-2"></i>Harga 1 Bulan</span>',
                 '          <span class="value text-cyan">' + priceLabel + '</span>',
                 '        </div>',
                 '        <div class="pkg-detail-row">',

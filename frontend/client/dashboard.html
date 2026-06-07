@@ -178,9 +178,9 @@
                         </div>
                     </div>
                     <div class="mt-3 pt-3 d-flex gap-2 flex-wrap" style="border-top:1px solid var(--border-color);">
-                        <button class="btn btn-sm btn-outline-secondary" onclick="openRenewModal()">
-                            <i class="fa-solid fa-rotate me-1"></i>Perpanjang Langganan
-                        </button>
+                        <a href="/client/subscription-me" class="btn btn-sm btn-outline-info">
+                            <i class="fa-solid fa-crown me-1"></i>Status Langganan
+                        </a>
                         <a href="/client/billing-history" class="btn btn-sm btn-outline-secondary">
                             <i class="fa-solid fa-receipt me-1"></i>Riwayat Pesanan
                         </a>
@@ -198,6 +198,10 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" style="color:var(--text-heading);">Paket yang Diperpanjang</label>
+                            <input type="text" class="form-control" id="renewPackageName" readonly value="-" style="background: rgba(255,255,255,0.04); color: var(--text-main); border-color: var(--border-color);">
+                        </div>
                         <div class="mb-3">
                             <label class="form-label small fw-semibold" style="color:var(--text-heading);">Durasi Perpanjangan</label>
                             <select class="form-select" id="renewDuration">
@@ -282,6 +286,7 @@
     <script src="/assets/js/za-theme.js"></script>
     <script src="/assets/js/client-layout.js?v=20260419"></script>
     <script>
+    let selectedRenewPackage = { id: '', name: '' };
         let subPolling = null;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -530,6 +535,9 @@
                 endEl.textContent = '-';
                 currentPlanEl.textContent = 'Free';
                 subListEl.innerHTML = '<div class="text-muted small">Belum ada paket aktif saat ini.</div>';
+                selectedRenewPackage = { id: '', name: '' };
+                const renewNameEl = document.getElementById('renewPackageName');
+                if (renewNameEl) renewNameEl.value = '-';
                 return;
             }
 
@@ -564,16 +572,26 @@
             endEl.textContent = formatIdDate(sortedByEndDate[0].end_date);
 
             subListEl.innerHTML = list.map(item => {
+                const packageId = escapeHTML(item.package_id || '');
                 const packageName = escapeHTML(item.package_name || '-');
                 const periodText = escapeHTML(formatIdDate(item.start_date) + ' - ' + formatIdDate(item.end_date));
+                const renewBtn = packageId
+                    ? '<a href="/client/subscription-me" class="btn btn-sm btn-outline-info">' +
+                        '<i class="fa-solid fa-rotate me-1"></i>Perpanjang Sekarang</a>'
+                    : '<button type="button" class="btn btn-sm btn-outline-secondary" disabled><i class="fa-solid fa-rotate me-1"></i>Perpanjang Sekarang</button>';
                 return '<div class="subscription-item">'
                     + '<div class="d-flex justify-content-between align-items-center gap-2">'
                     + '<div class="subscription-item-name">' + packageName + '</div>'
+                    + '<div class="d-flex align-items-center gap-2">'
                     + '<span class="badge" style="background:rgba(16,185,129,0.18);color:#34d399;">ACTIVE</span>'
+                    + renewBtn
+                    + '</div>'
                     + '</div>'
                     + '<div class="subscription-item-meta">Periode: ' + periodText + '</div>'
                     + '</div>';
             }).join('');
+
+            bindRenewButtons(subListEl);
         }
 
         async function fetchSubscriptionStatus() {
@@ -628,7 +646,25 @@
             }
         }
 
-        function openRenewModal() {
+        function bindRenewButtons(container) {
+            const buttons = container.querySelectorAll('.renew-sub-btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const packageId = btn.getAttribute('data-package-id') || '';
+                    const packageName = btn.getAttribute('data-package-name') || '';
+                    openRenewModal(packageId, packageName);
+                });
+            });
+        }
+
+        function openRenewModal(packageId, packageName) {
+            if (!packageId) {
+                alert('Paket tidak valid untuk perpanjangan.');
+                return;
+            }
+            selectedRenewPackage = { id: packageId, name: packageName || '-' };
+            const renewNameEl = document.getElementById('renewPackageName');
+            if (renewNameEl) renewNameEl.value = selectedRenewPackage.name;
             bootstrap.Modal.getOrCreateInstance(document.getElementById('renewModal')).show();
         }
 
@@ -636,6 +672,11 @@
             var btn = document.getElementById('submitRenewBtn');
             var duration = parseInt(document.getElementById('renewDuration').value, 10) || 1;
             var paymentMethod = document.getElementById('renewPaymentMethod').value;
+
+            if (!selectedRenewPackage.id) {
+                alert('Pilih paket yang ingin diperpanjang terlebih dahulu.');
+                return;
+            }
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Memproses...';
@@ -645,13 +686,13 @@
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ duration_months: duration, payment_method: paymentMethod })
+                    body: JSON.stringify({ package_id: selectedRenewPackage.id, duration_months: duration, payment_method: paymentMethod })
                 });
                 var json = await res.json();
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('renewModal')).hide();
 
                 if (res.ok && json.success) {
-                    sessionStorage.setItem('billingToast', 'Perpanjangan berhasil diajukan. Silakan upload bukti transfer.');
+                    sessionStorage.setItem('billingToast', 'Pesanan perpanjangan berhasil dibuat. Menunggu verifikasi pembayaran.');
                     window.location.href = '/client/billing-history';
                 } else {
                     alert(json.error_message || 'Gagal mengajukan perpanjangan. Silakan coba lagi.');

@@ -37,7 +37,10 @@
     function isBillingActive() {
         return (path === '/client/billing-history' || path === '/client/order-detail' || path === '/client/checkout') ? ' active' : '';
     }
-    function isTicketActive() { return (path === '/client/support-tickets' || path === '/support/create' || path === '/client/support-create') ? ' active' : ''; }
+    function isSubscriptionActive() {
+        return path === '/client/subscription-me' ? ' active' : '';
+    }
+    function isTicketActive() { return (path === '/client/support-tickets' || path === '/client/support-ticket-detail' || path === '/support/create' || path === '/client/support-create') ? ' active' : ''; }
     function isSettingsActive() { return path === '/client/settings' ? ' active' : ''; }
 
     // ── Sidebar HTML ──────────────────────────────────────────────
@@ -62,10 +65,11 @@
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-wand-magic-sparkles icon-left"></i><span class="link-text">Ask Nizza</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="sidebar-section-label"><span class="link-text"></span></li>' +
                 '<li class="nav-item"><a class="nav-link' + isKycActive() + '" href="/client/kyc-status"><i class="fa-solid fa-id-card icon-left"></i><span class="link-text">KYC Verification</span></a></li>' +
-                '<li class="nav-item"><a class="nav-link' + isTicketActive() + '" href="/client/support-create"><i class="fa-solid fa-ticket icon-left"></i><span class="link-text">Ticket</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isTicketActive() + '" href="/client/support-tickets"><i class="fa-solid fa-ticket icon-left"></i><span class="link-text">Ticket</span></a></li>' +
             '</ul>' +
             '<ul class="nav flex-column mb-5">' +
                 '<li class="nav-item"><a class="nav-link' + isMembershipActive() + '" href="/client/packages-catalog"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isSubscriptionActive() + '" href="/client/subscription-me"><i class="fa-solid fa-repeat icon-left"></i><span class="link-text">Langganan</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isBillingActive() + '" href="/client/billing-history"><i class="fa-solid fa-receipt icon-left"></i><span class="link-text">Billing History</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isSettingsActive() + '" href="/client/settings"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Pengaturan</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>' +

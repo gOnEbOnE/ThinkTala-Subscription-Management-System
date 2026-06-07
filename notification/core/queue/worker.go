@@ -20,6 +20,11 @@ const QueueKey = "notification:events"
 // StartWorker membaca event dari Redis queue (RPUSH/BLPOP) dan memprosesnya via service.
 // Berjalan selamanya sampai ctx dibatalkan (graceful shutdown).
 func StartWorker(ctx context.Context, svc *template.Service) {
+	if !strings.EqualFold(strings.TrimSpace(getEnv("redis", "")), "true") {
+		log.Println("[QUEUE WORKER] Skipped — set redis=true in .env to consume Redis notification queues locally")
+		return
+	}
+
 	addr := getEnv("REDIS_ADDR", "")
 	if addr == "" {
 		// Build REDIS_ADDR from redis_host + redis_port if not set directly
@@ -35,10 +40,14 @@ func StartWorker(ctx context.Context, svc *template.Service) {
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:        addr,
-		Password:    pass,
-		DB:          dbNum,
-		DialTimeout: 5 * time.Second,
+		Addr:           addr,
+		Password:       pass,
+		DB:             dbNum,
+		DialTimeout:    5 * time.Second,
+		DialerRetries:  1,
+		MaxRetries:     1,
+		MinIdleConns:   0,
+		PoolSize:       2,
 	})
 	defer rdb.Close()
 
