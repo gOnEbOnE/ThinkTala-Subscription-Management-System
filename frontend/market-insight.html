@@ -16,133 +16,115 @@
 
     <div class="mobile-overlay" id="mobileOverlay"></div>
 
-    <nav class="sidebar">
-        <div class="sidebar-brand mb-3">
-            <div class="brand-wrapper">
-                <i class="fa-solid fa-layer-group text-cyan brand-icon"></i>
-                <div class="brand-text-content">
-                    <h4 class="fw-bold tracking-wider mb-0" style="color: var(--text-heading)">Think<span class="text-cyan">Tala</span></h4>
-                    <p class="small mb-0 text-muted" style="font-size: 0.7rem;">Institutional AI</p>
-                </div>
-            </div>
-        </div>
-        <ul class="nav flex-column flex-grow-1">
-            <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>
-            <li class="nav-item"><a class="nav-link active" href="market-insight.html"><i class="fa-solid fa-globe icon-left"></i><span class="link-text">Market Insight</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="deep-scanner.html"><i class="fa-solid fa-satellite-dish icon-left"></i><span class="link-text">Deep Scanner</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="ask_nizza.html"><i class="fa-solid fa-wand-magic-sparkles icon-left"></i><span class="link-text">Ask Nizza</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="algo-studio.html"><i class="fa-solid fa-flask icon-left"></i><span class="link-text">Algo Studio</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="auto-trade.html"><i class="fa-solid fa-bolt icon-left"></i><span class="link-text">Auto Trade</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="ecosystem.html"><i class="fa-solid fa-circle-nodes icon-left"></i><span class="link-text">Ecosystem</span></a></li>
-        </ul>
-        <ul class="nav flex-column mb-5">
-            <li class="nav-item"><a class="nav-link" href="membership.html"><i class="fa-solid fa-id-card icon-left"></i><span class="link-text">Membership</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="settings.html"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span></a></li>
-        </ul>
-    </nav>
+    <div id="client-sidebar-placeholder"></div>
+    <div id="client-navbar-placeholder"></div>
+                    <!-- WebSocket integration: connect to Go redis->WS backend and update Market Insight UI -->
+                    <script>
+                        (function () {
+                            // Derive WebSocket URL from the current host:port so local setups (e.g. localhost:2000) work.
+                            var wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
+                            var hostPort = location.host || 'localhost:2000'; // includes port when present
+                            var WS_URL = wsProto + '://' + hostPort + '/ws';
 
-    <header class="top-navbar d-flex justify-content-between align-items-center">
-        
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn-header" id="sidebarToggle">
-                <i class="fa-solid fa-bars fa-lg"></i>
-            </button>
-            
-            <button class="btn-header d-md-none" onclick="toggleMobileSearch()">
-                <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
-        </div>
+                            // Determine user tier from localStorage (best-effort). Map to 'pro' or 'free'.
+                            function detectUserTier() {
+                                try {
+                                    var u = JSON.parse(localStorage.getItem('user') || '{}');
+                                    var candidate = (u.tier || u.level || u.level_code || u.role || u.role_code || '').toString().toLowerCase();
+                                    if (/pro|vip|premium/.test(candidate)) return 'pro';
+                                    return 'free';
+                                } catch (e) {
+                                    return 'pro';
+                                }
+                            }
 
-        <div class="nizza-wrapper mx-auto d-none d-md-block">
-            <div class="nizza-search">
-                <i class="fa-solid fa-wand-magic-sparkles magic-icon"></i>
-                <input type="text" class="form-control" placeholder="Ask Nizza AI about market trends...">
-                <button class="btn btn-sm text-muted"><i class="fa-solid fa-arrow-right"></i></button>
-            </div>
-        </div>
+                            var USER_TIER = detectUserTier();
+                            var socket = null;
+                            var reconnectTimeout = 3000;
 
-        <div class="d-flex align-items-center gap-2 gap-md-3">
-            
-            <div class="dropdown">
-                <button class="btn-header" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="https://flagcdn.com/w40/us.png" alt="EN" width="20" style="border-radius: 3px;">
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate">
-                    <li><h6 class="dropdown-header">Select Language</h6></li>
-                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="#">
-                        <img src="https://flagcdn.com/w40/us.png" width="20"> English <i class="fa-solid fa-check ms-auto text-cyan small"></i>
-                    </a></li>
-                    <li><a class="dropdown-item d-flex align-items-center gap-2" href="#">
-                        <img src="https://flagcdn.com/w40/id.png" width="20"> Indonesia
-                    </a></li>
-                </ul>
-            </div>
+                            function initSocket() {
+                                if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return;
+                                var url = WS_URL + '?tier=' + encodeURIComponent(USER_TIER);
+                                console.log('[WS] connecting to', url);
+                                socket = new WebSocket(url);
 
-            <div class="dropdown">
-                <button class="btn-header position-relative" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fa-regular fa-bell"></i>
-                    <span class="notif-badge">5</span>
-                </button>
-                
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate" style="min-width: 320px;">
-                    <li class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom border-secondary" style="border-opacity: 0.1;">
-                        <span class="fw-bold small">Notifications</span>
-                        <a href="#" class="small text-cyan text-decoration-none">Mark all read</a>
-                    </li>
-                    <div style="max-height: 280px; overflow-y: auto;">
-                        <li><a class="dropdown-item py-2" href="#">
-                            <div class="d-flex align-items-start">
-                                <div class="rounded-circle bg-success bg-opacity-10 text-success p-2 me-2"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                                <div><small class="fw-bold d-block text-main">Take Profit Hit!</small><small class="text-muted" style="font-size: 0.7rem;">XAUUSD reached 2045.50</small></div>
-                            </div>
-                        </a></li>
-                        <li><a class="dropdown-item py-2" href="#">
-                            <div class="d-flex align-items-start">
-                                <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-2 me-2"><i class="fa-solid fa-bolt"></i></div>
-                                <div><small class="fw-bold d-block text-main">High Impact News</small><small class="text-muted" style="font-size: 0.7rem;">CPI Data in 15 mins.</small></div>
-                            </div>
-                        </a></li>
-                        </div>
-                    <li class="p-2 text-center border-top border-secondary" style="border-opacity: 0.1;">
-                        <a href="#" class="small text-muted text-decoration-none">View All History</a>
-                    </li>
-                </ul>
-            </div>
+                                socket.addEventListener('open', function () {
+                    console.log('[WS] connected');
+                });
 
-            <button class="btn-header" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+                                socket.addEventListener('message', function (ev) {
+                                    try {
+                                        var msg = JSON.parse(ev.data);
 
-            <div class="dropdown ms-1">
-                <a href="#" class="d-flex align-items-center text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
-                    <div class="rounded-circle p-1 position-relative" style="border: 2px solid var(--accent-cyan);">
-                        <img src="https://ui-avatars.com/api/?name=Trader&background=0b0e17&color=fff" class="rounded-circle" width="34" height="34">
-                        <span class="position-absolute bottom-0 end-0 bg-success border border-dark rounded-circle" style="width: 10px; height: 10px;"></span>
-                    </div>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-3">
-                    <li class="px-3 py-2">
-                        <span class="d-block fw-bold text-main">Trader Pro</span>
-                        <small class="text-muted">trader@thinktala.com</small>
-                    </li>
-                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
-                    <li><a class="dropdown-item" href="profile.html"><i class="fa-regular fa-user me-2 text-muted"></i> Profile</a></li>
-                    <li><a class="dropdown-item" href="membership.html"><i class="fa-solid fa-crown me-2 text-warning"></i> Membership</a></li>
-                    <li><a class="dropdown-item" href="ewallet.html"><i class="fa-solid fa-wallet me-2 text-success"></i> eWallet</a></li>
-                    <li><a class="dropdown-item" href="settings.html"><i class="fa-solid fa-gear me-2 text-muted"></i> Settings</a></li>
-                    <li><hr class="dropdown-divider border-secondary opacity-25"></li>
-                    <li><a class="dropdown-item text-danger" href="login.html"><i class="fa-solid fa-right-from-bracket me-2"></i> Logout</a></li>
-                </ul>
-            </div>
+                                        // Support both "signal" single messages and "active_signals" bulk messages
+                                        if (msg.type === 'signal') {
+                                            // older format: { type: 'signal', pair: 'EURUSD', data: {...} }
+                                            updateSignalCard(msg.pair, msg.data || {});
+                                            updateLastTimestamp();
+                                        } else if (msg.type === 'active_signals' && Array.isArray(msg.payload)) {
+                                            msg.payload.forEach(function (item) {
+                                                // payload item may be full object or nested under 'data'
+                                                var pair = item.pair || item.id || (item.data && item.data.pair) || 'unknown';
+                                                var data = item.data || item;
+                                                updateSignalCard(pair, data || {});
+                                            });
+                                            updateLastTimestamp();
+                                        } else {
+                                            // unknown message shape — log for debugging
+                                            console.debug('[WS] unknown message', msg);
+                                        }
+                                    } catch (err) {
+                                        console.error('[WS] parse error', err, ev.data);
+                                    }
+                                });
 
-        </div>
-    </header>
+                                socket.addEventListener('close', function () {
+                    console.warn('[WS] closed — reconnect in', reconnectTimeout, 'ms');
+                    setTimeout(initSocket, reconnectTimeout);
+                });
 
-    <div id="mobileSearchBar" class="mobile-search-container">
-        <div class="nizza-search w-100">
-            <i class="fa-solid fa-wand-magic-sparkles magic-icon"></i>
-            <input type="text" class="form-control" placeholder="Ask Nizza AI..." autofocus>
-            <button class="btn btn-sm text-danger" onclick="toggleMobileSearch()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-    </div>
+                                socket.addEventListener('error', function (e) {
+                                    console.error('[WS] error', e);
+                                    try { socket.close(); } catch(e) {}
+                                });
+                            }
+
+                            function updateLastTimestamp() {
+                                var now = new Date();
+                                var el = document.getElementById('lastUpdate');
+                                if (el) el.textContent = now.toLocaleTimeString();
+                                var clock = document.getElementById('clockUTC');
+                                if (clock) clock.textContent = now.toUTCString().split(' ')[4] + ' UTC';
+                            }
+
+                            // Update / render functions — customize to your UI widgets
+                            function updateSignalCard(pair, data) {
+                                // Update main insight text when new high-level conclusion arrives
+                                var typeEl = document.getElementById('typewriterText');
+                                var aiTime = document.getElementById('aiTime');
+                                if (typeEl) {
+                                    var short = (data.stf_conclusion || data.mtf_conclusion || data.trend || data.stf_direction || 'Signal received');
+                                    var sentiment = (data.stf_sentiment || data.mtf_sentiment || '');
+                                    typeEl.textContent = pair + ': ' + short + (sentiment ? ' (' + sentiment + ')' : '');
+                                }
+                                if (aiTime) aiTime.textContent = new Date().toLocaleTimeString();
+
+                                // Example: if you have element IDs like price-EURUSD, update them
+                                try {
+                                    var priceEl = document.getElementById('price-' + pair);
+                                    if (priceEl && (data.bid_price || data.ask_price)) {
+                                        priceEl.textContent = data.ask_price || data.bid_price;
+                                    }
+                                } catch (e) {}
+                            }
+
+                            // Start socket when DOM ready
+                            document.addEventListener('DOMContentLoaded', function () {
+                                initSocket();
+                            });
+                        })();
+                    </script>
+
 
     <div class="main-content">
 
@@ -152,7 +134,7 @@
                 <small class="text-muted">AI-Powered Institutional Analysis</small>
             </div>
             <div class="text-end">
-                <span class="badge bg-dark border border-secondary text-white font-mono" id="lastUpdate">Updating...</span>
+                <span class="badge bg-dark border border-secondary text-white font-mono" id="lastUpdate">Loading...</span>
                 <div class="small text-muted mt-1 font-mono" id="clockUTC">--:-- UTC</div>
             </div>
         </div>
@@ -384,9 +366,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/za-theme.js"></script>
-<script src="assets/js/za-sidebar.js"></script>
-<script src="assets/js/za-drag-drop.js"></script>
-<script src="assets/js/za-market-insight.js"></script>
+    <script src="/assets/js/client-layout.js"></script>
+<script src="/assets/js/za-drag-drop.js"></script>
+<script src="/assets/js/za-market-insight.js"></script>
 <script>
     // --- COMPONENT HELPERS (Hanya untuk halaman ini) ---
     function updateTimelineWidget() {

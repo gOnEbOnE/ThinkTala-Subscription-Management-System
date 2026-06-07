@@ -1,0 +1,104 @@
+{
+    "last_updated_utc": "2026-02-11 09:18:09",
+    "events": [
+        {
+            "name": "Average Hourly Earnings m/m",
+            "country": "USD",
+            "impact": "High",
+            "date": "2026-02-11",
+            "time": "13:30",
+            "datetime_utc": "2026-02-11T13:30:00+00:00",
+            "forecast": "0.3%"
+        },
+        {
+            "name": "Non-Farm Employment Change",
+            "country": "USD",
+            "impact": "High",
+            "date": "2026-02-11",
+            "time": "13:30",
+            "datetime_utc": "2026-02-11T13:30:00+00:00",
+            "forecast": "66K"
+        },
+        {
+            "name": "Unemployment Rate",
+            "country": "USD",
+            "impact": "High",
+            "date": "2026-02-11",
+            "time": "13:30",
+            "datetime_utc": "2026-02-11T13:30:00+00:00",
+            "forecast": "4.4%"
+        },
+        {
+            "name": "GDP m/m",
+            "country": "GBP",
+            "impact": "High",
+            "date": "2026-02-12",
+            "time": "07:00",
+            "datetime_utc": "2026-02-12T07:00:00+00:00",
+            "forecast": "0.1%"
+        },
+        {
+            "name": "Prelim GDP q/q",
+            "country": "GBP",
+            "impact": "Medium",
+            "date": "2026-02-12",
+            "time": "07:00",
+            "datetime_utc": "2026-02-12T07:00:00+00:00",
+            "forecast": "0.2%"
+        },
+        {
+            "name": "Unemployment Claims",
+            "country": "USD",
+            "impact": "High",
+            "date": "2026-02-12",
+            "time": "13:30",
+            "datetime_utc": "2026-02-12T13:30:00+00:00",
+            "forecast": "222K"
+        },
+        {
+            "name": "CPI m/m",
+            "country": "CHF",
+            "impact": "High",
+            "date": "2026-02-13",
+            "time": "07:30",
+            "datetime_utc": "2026-02-13T07:30:00+00:00",
+            "forecast": "0.0%"
+        },
+        {
+            "name": "Core CPI m/m",
+            "country": "USD",
+            "impact": "High",
+            "date": "2026-02-13",
+            "time": "13:30",
+            "datetime_utc": "2026-02-13T13:30:00+00:00",
+            "forecast": "0.3%"
+        },
+        {
+            "name": "CPI m/m",
+            "country": "USD",
+            "impact": "High",
+            "date": "2026-02-13",
+            "time": "13:30",
+            "datetime_utc": "2026-02-13T13:30:00+00:00",
+            "forecast": "0.3%"
+        },
+        {
+            "name": "CPI y/y",
+            "country": "USD",
+            "impact": "High",
+            "date": "2026-02-13",
+            "time": "13:30",
+            "datetime_utc": "2026-02-13T13:30:00+00:00",
+            "forecast": "2.5%"
+        },
+        {
+            "name": "ECB President Lagarde Speaks",
+            "country": "EUR",
+            "impact": "Medium",
+            "date": "2026-02-14",
+            "time": "16:30",
+            "datetime_utc": "2026-02-14T16:30:00+00:00",
+            "forecast": ""
+        }
+    ]
+}

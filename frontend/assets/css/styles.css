@@ -152,6 +152,34 @@ body.sidebar-collapsed .top-navbar, body.sidebar-collapsed .fixed-footer { left:
 .main-content { margin-left: var(--sidebar-width); padding: calc(var(--header-height) + 20px) 30px calc(var(--footer-height) + 20px) 30px; transition: margin-left 0.3s; min-height: 100vh; display: flex; flex-direction: column; }
 body.sidebar-collapsed .main-content { margin-left: var(--sidebar-width-collapsed); }
 
+/* Ensure specific client pages account for fixed sidebar (prevent overlap/overflow) */
+.main-content.history-page,
+.main-content.sub-page {
+    /* force layout to reserve sidebar space even if page tries to use calc width */
+    margin-left: var(--sidebar-width) !important;
+    padding-top: calc(var(--header-height) + 20px) !important;
+    box-sizing: border-box;
+}
+
+/* When sidebar is collapsed, respect collapsed width */
+body.sidebar-collapsed .main-content.history-page,
+body.sidebar-collapsed .main-content.sub-page {
+    margin-left: var(--sidebar-width-collapsed) !important;
+}
+
+/* Mobile: remove left margin so content uses full width and sidebar becomes overlay */
+@media (max-width: 767.98px) {
+    .main-content.history-page,
+    .main-content.sub-page,
+    .main-content {
+        margin-left: 0 !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        padding-top: calc(var(--header-height) + 12px) !important;
+    }
+    .sidebar { top: 0; height: 100vh; }
+}
+
 .btn-icon { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
 .btn-icon:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
 .theme-toggle-btn { background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-main); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; }
@@ -486,7 +514,8 @@ body.notif-open {
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(8, 12, 20, 0.75);
     border-radius: 14px;
-    padding: 12px 14px 12px 16px;
+    /* add extra right padding to avoid overlap with absolute unread dot */
+    padding: 12px 42px 12px 16px;
     text-align: left;
     color: var(--text-main);
     display: flex;
@@ -509,13 +538,14 @@ body.notif-open {
 
 .notif-unread-dot {
     position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 8px;
-    height: 8px;
+    /* align the dot slightly inset from the right edge and vertically centered near title/time */
+    top: 16px;
+    right: 18px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: var(--accent-cyan);
-    box-shadow: 0 0 8px rgba(0, 242, 255, 0.6);
+    box-shadow: 0 0 10px rgba(0, 242, 255, 0.6);
 }
 
 .notif-item-top {

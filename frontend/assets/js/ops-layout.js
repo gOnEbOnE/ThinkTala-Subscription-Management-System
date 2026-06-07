@@ -83,6 +83,7 @@
         '/management/dashboard-compliance'  : { activeKey: 'management-compliance' },
         '/management/dashboard-support'    : { activeKey: 'management-support' },
         '/management/dashboard-operational': { activeKey: 'management-operational' },
+        '/management/market-insight'       : { activeKey: 'management-market-insight' },
     };
 
     const currentPath = window.location.pathname;
@@ -172,6 +173,13 @@
             <a class="nav-link${isActive('management-operational')}" href="/management/dashboard-operational">
                 <i class="fa-solid fa-boxes-stacked icon-left"></i>
                 <span class="link-text">Kinerja Operasional</span>
+            </a>
+        </li>` : ''}
+
+        ${canOpenDivisionDash ? `<li class="nav-item">
+            <a class="nav-link${isActive('management-market-insight')}" href="/management/market-insight">
+                <i class="fa-solid fa-globe icon-left"></i>
+                <span class="link-text">AI Market Insight</span>
             </a>
         </li>` : ''}
 

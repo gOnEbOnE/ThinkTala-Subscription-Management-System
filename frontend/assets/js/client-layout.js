@@ -60,7 +60,7 @@
                 '<li class="sidebar-section-label"><span class="link-text"></span></li>' +
                 '<li class="nav-item"><a class="nav-link' + isActive('/client/dashboard') + '" href="/client/dashboard"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isDiscoverActive() + '" href="/client/discover"><i class="fa-solid fa-newspaper icon-left"></i><span class="link-text">Discover</span></a></li>' +
-                '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-globe icon-left"></i><span class="link-text">Market Insight</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + ((path === '/market-insight' || path === '/client/market-insight') ? ' active' : '') + '" href="/client/market-insight"><i class="fa-solid fa-globe icon-left"></i><span class="link-text">Market Insight</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-satellite-dish icon-left"></i><span class="link-text">Deep Scanner</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-wand-magic-sparkles icon-left"></i><span class="link-text">Ask Nizza</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="sidebar-section-label"><span class="link-text"></span></li>' +
@@ -72,7 +72,6 @@
                 '<li class="nav-item"><a class="nav-link' + isSubscriptionActive() + '" href="/client/subscription-me"><i class="fa-solid fa-repeat icon-left"></i><span class="link-text">Langganan</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isBillingActive() + '" href="/client/billing-history"><i class="fa-solid fa-receipt icon-left"></i><span class="link-text">Billing History</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isSettingsActive() + '" href="/client/settings"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Pengaturan</span></a></li>' +
-                '<li class="nav-item"><a class="nav-link text-danger" href="#" onclick="logout()"><i class="fa-solid fa-right-from-bracket icon-left"></i><span class="link-text">Logout</span></a></li>' +
             '</ul>' +
         '</nav>';
 

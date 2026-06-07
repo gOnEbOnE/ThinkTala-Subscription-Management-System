@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gateway/auth"
 	"gateway/system"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -440,8 +441,11 @@ func serve404Page(frontendDir string, w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		defer f.Close()
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		// Write the 404 status and copy file contents directly to avoid
+		// calling WriteHeader multiple times (ServeContent may internally
+		// trigger header writes which caused "superfluous WriteHeader" logs).
 		w.WriteHeader(http.StatusNotFound)
-		http.ServeContent(w, r, "404.html", time.Time{}, f)
+		_, _ = io.Copy(w, f)
 		return
 	}
 	http.Error(w, "404 Page Not Found", http.StatusNotFound)
@@ -553,9 +557,38 @@ func main() {
 		assetsHandler.ServeHTTP(w, r)
 	})))
 
+	// Also serve assets under /client/assets/ so pages served at /client/* with
+	// relative asset paths (e.g. "assets/js/...") still resolve correctly.
+	http.Handle("/client/assets/", http.StripPrefix("/client/assets/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		assetsHandler.ServeHTTP(w, r)
+	})))
+
 	// ========================================
 	// 3. Protected Dashboard Pages (with Role Auth)
 	// ========================================
+
+	// Serve client-accessible Market Insight page from frontend/market-insight.html
+	// This route intentionally serves the top-level market-insight.html even though
+	// most client pages live under frontend/client/. Protect with role auth.
+	http.HandleFunc("/client/market-insight", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		file := filepath.Join(frontendDir, "market-insight.html")
+		if _, err := os.Stat(file); err == nil {
+			http.ServeFile(w, r, file)
+			return
+		}
+		serve404Page(frontendDir, w, r)
+	}))
+	http.HandleFunc("/client/market-insight/", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		// normalize to the same file
+		r.URL.Path = "/client/market-insight"
+		http.Redirect(w, r, "/client/market-insight", http.StatusFound)
+	}))
 
 	// /ops/* → Only OPERASIONAL, CEO, SUPERADMIN
 	http.HandleFunc("/ops/", withRoleAuth(serveFrontendPage(frontendDir, "ops", "dashboard")))
@@ -684,14 +717,14 @@ func main() {
 				http.Redirect(w, r, redirect, http.StatusFound)
 				return
 			}
-			
+
 			// Serve landing page if not authenticated
 			landingFile := filepath.Join(frontendDir, "landing.html")
 			if _, err := os.Stat(landingFile); err == nil {
 				http.ServeFile(w, r, landingFile)
 				return
 			}
-			
+
 			http.Redirect(w, r, "/account/login", http.StatusFound)
 			return
 		}

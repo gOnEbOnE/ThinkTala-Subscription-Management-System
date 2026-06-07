@@ -26,6 +26,7 @@
         window.location.pathname.startsWith('/dashboard/customer/');
     const isPackagePath = window.location.pathname === '/management/dashboard-packages' ||
         window.location.pathname.startsWith('/dashboard/packages/');
+    const isMarketInsightPath = window.location.pathname === '/management/market-insight';
 
     function isActive(flag) {
         return flag ? ' active' : '';
@@ -69,6 +70,12 @@
 '      <a class="nav-link' + isActive(isPackagePath) + '" href="/management/dashboard-packages">' +
 '        <i class="fa-solid fa-cubes icon-left"></i>' +
 '        <span class="link-text">Package Sales</span>' +
+'      </a>' +
+'    </li>' +
+'    <li class="nav-item">' +
+'      <a class="nav-link' + isActive(isMarketInsightPath) + '" href="/management/market-insight">' +
+'        <i class="fa-solid fa-globe icon-left"></i>' +
+'        <span class="link-text">AI Market Insight</span>' +
 '      </a>' +
 '    </li>' +
 '  </ul>' +

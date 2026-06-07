@@ -22,7 +22,7 @@ const marketNewsFallback = {
 // --- 1. CORE DATA UPDATER ---
 async function updateDashboard() {
     try {
-        const resMacro = await fetch('macro_history.json');
+        const resMacro = await fetch('/assets/data/macro_history.json');
         const dataMacro = await resMacro.json();
         const latest = dataMacro[dataMacro.length - 1];
         if (latest) {
@@ -47,7 +47,7 @@ async function updateDashboard() {
     } catch (e) { console.error("Macro Fetch Error:", e); }
 
     try {
-        const resCal = await fetch('calendar_data.json');
+        const resCal = await fetch('/assets/data/calendar_data.json');
         const dataCal = await resCal.json();
         renderCalendar(dataCal.events);
     } catch (e) { console.error("Calendar Fetch Error:", e); }
@@ -60,7 +60,7 @@ async function loadMarketNews() {
 
     try {
         // Mencoba fetch file asli
-        const response = await fetch('news_database.json').catch(() => null);
+        const response = await fetch('/assets/data/news_database.json').catch(() => null);
         
         let data;
         if (response && response.ok) {
