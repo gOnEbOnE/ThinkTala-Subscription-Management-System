@@ -590,6 +590,35 @@ func main() {
 		http.Redirect(w, r, "/client/market-insight", http.StatusFound)
 	}))
 
+	// Signal Room — Protected, serves frontend/client/signal-room.html
+	http.HandleFunc("/client/signal-room", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		file := filepath.Join(frontendDir, "client", "signal-room.html")
+		if _, err := os.Stat(file); err == nil {
+			http.ServeFile(w, r, file)
+			return
+		}
+		serve404Page(frontendDir, w, r)
+	}))
+	log.Printf("[GW] Protected Page: /client/signal-room -> frontend/client/signal-room.html")
+
+	// Signal Detail — Protected, serves frontend/client/signal-detail.html
+	// The pair is passed as a query param: /client/signal-detail?pair=EURUSD
+	http.HandleFunc("/client/signal-detail", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		file := filepath.Join(frontendDir, "client", "signal-detail.html")
+		if _, err := os.Stat(file); err == nil {
+			http.ServeFile(w, r, file)
+			return
+		}
+		serve404Page(frontendDir, w, r)
+	}))
+	log.Printf("[GW] Protected Page: /client/signal-detail -> frontend/client/signal-detail.html")
+
 	// /ops/* → Only OPERASIONAL, CEO, SUPERADMIN
 	http.HandleFunc("/ops/", withRoleAuth(serveFrontendPage(frontendDir, "ops", "dashboard")))
 
@@ -1018,6 +1047,15 @@ func main() {
 			}
 		}
 	}
+
+	// ========================================
+	// 6.5. Initialize AI WebSocket Engine
+	// ========================================
+	wsHub := InitWSEngine()
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		handleWebSocket(wsHub, w, r)
+	})
+	log.Printf("[GW] AI WebSocket Engine initialized at /ws")
 
 	// ========================================
 	// 7. Start HTTP server

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal Room | ThinkTala AI</title>
+    <meta name="description" content="ThinkNalyze Signal Room — Real-time AI-powered trading signals exclusively for premium subscribers.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        /* =====================================================
+           SIGNAL ROOM — PAGE-SPECIFIC STYLES
+        ===================================================== */
+
+        /* ── Page Header ─────────────────────────────────── */
+        .sr-header {
+            background: linear-gradient(135deg, rgba(11, 14, 23, 0.95) 0%, rgba(15, 18, 29, 0.9) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .sr-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-cyan));
+            background-size: 200%;
+            animation: shimmer-line 3s linear infinite;
+        }
+        @keyframes shimmer-line {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+        .sr-header-glow {
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(0, 242, 255, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .sr-title {
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: var(--text-heading) !important;
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+        .sr-title span {
+            background: linear-gradient(90deg, #00f2ff, #bd00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .sr-subtitle {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin: 4px 0 0;
+            letter-spacing: 0.04em;
+        }
+
+        /* ── Connection Badge ────────────────────────────── */
+        .conn-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid;
+            transition: all 0.4s ease;
+        }
+        .conn-status.connecting {
+            background: rgba(255, 153, 0, 0.12);
+            border-color: rgba(255, 153, 0, 0.4);
+            color: #ff9900;
+        }
+        .conn-status.connected {
+            background: rgba(0, 210, 106, 0.1);
+            border-color: rgba(0, 210, 106, 0.4);
+            color: #00d26a;
+        }
+        .conn-status.disconnected {
+            background: rgba(249, 62, 62, 0.1);
+            border-color: rgba(249, 62, 62, 0.35);
+            color: #f93e3e;
+        }
+        .conn-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+            flex-shrink: 0;
+        }
+        .conn-status.connecting .conn-dot {
+            animation: pulse-dot 1.1s ease-in-out infinite;
+        }
+        .conn-status.connected .conn-dot {
+            box-shadow: 0 0 8px #00d26a;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.7); }
+        }
+
+        /* ── Tier Badge ──────────────────────────────────── */
+        .tier-badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 1px solid;
+        }
+        .tier-badge.enterprise {
+            background: linear-gradient(135deg, rgba(189, 0, 255, 0.15), rgba(0, 242, 255, 0.08));
+            border-color: rgba(189, 0, 255, 0.45);
+            color: #d966ff;
+        }
+        .tier-badge.pro {
+            background: rgba(0, 242, 255, 0.08);
+            border-color: rgba(0, 242, 255, 0.35);
+            color: var(--accent-cyan);
+        }
+        .tier-badge.basic {
+            background: rgba(139, 155, 180, 0.08);
+            border-color: rgba(139, 155, 180, 0.3);
+            color: var(--text-muted);
+        }
+
+        /* ── Signals Table Card ───────────────────────────── */
+        .signals-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.25);
+        }
+        .signals-card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.01);
+        }
+        .signals-card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .signals-card-title i {
+            color: var(--accent-cyan);
+        }
+        .pairs-active-badge {
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            color: var(--accent-cyan);
+            transition: all 0.3s;
+        }
+        .pairs-active-badge.has-data {
+            background: rgba(0, 210, 106, 0.1);
+            border-color: rgba(0, 210, 106, 0.35);
+            color: #00d26a;
+        }
+
+        /* ── Table ───────────────────────────────────────── */
+        .sr-table-wrapper {
+            overflow-x: auto;
+        }
+        .sr-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        .sr-table thead th {
+            padding: 12px 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.09em;
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+            background: rgba(255,255,255,0.01);
+        }
+        .sr-table thead th:first-child { padding-left: 24px; }
+        .sr-table thead th:last-child { padding-right: 24px; text-align: center; }
+
+        .sr-table tbody tr {
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.2s ease, transform 0.15s ease;
+            animation: fadeInRow 0.4s ease both;
+        }
+        @keyframes fadeInRow {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sr-table tbody tr:hover {
+            background: rgba(0, 242, 255, 0.025);
+        }
+        .sr-table tbody tr:last-child { border-bottom: none; }
+        .sr-table tbody td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            color: var(--text-main);
+        }
+        .sr-table tbody td:first-child { padding-left: 24px; }
+        .sr-table tbody td:last-child { padding-right: 24px; text-align: center; }
+
+        /* Flash animation on data update */
+        .sr-table tbody tr.flash-update {
+            animation: flashRow 0.6s ease;
+        }
+        @keyframes flashRow {
+            0% { background: rgba(0, 242, 255, 0.12); }
+            100% { background: transparent; }
+        }
+
+        /* ── Cell Styles ─────────────────────────────────── */
+        .pair-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .pair-icon {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(0,242,255,0.15), rgba(189,0,255,0.1));
+            border: 1px solid rgba(0,242,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 800;
+            color: var(--accent-cyan);
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.5px;
+            flex-shrink: 0;
+        }
+        .pair-name {
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-heading);
+            font-size: 0.88rem;
+            letter-spacing: 0.04em;
+        }
+        .pair-full {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 1px;
+        }
+
+        .category-badge {
+            padding: 3px 9px;
+            border-radius: 5px;
+            font-size: 0.67rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+        }
+        .cat-forex   { background: rgba(0,242,255,0.1);  color: #00f2ff;  border: 1px solid rgba(0,242,255,0.2); }
+        .cat-crypto  { background: rgba(255,153,0,0.1);  color: #ff9900;  border: 1px solid rgba(255,153,0,0.2); }
+        .cat-metal   { background: rgba(189,0,255,0.1);  color: #bd00ff;  border: 1px solid rgba(189,0,255,0.2); }
+        .cat-commodity { background: rgba(0,210,106,0.1); color: #00d26a; border: 1px solid rgba(0,210,106,0.2); }
+
+        .trend-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+        .trend-bull { background: rgba(0,210,106,0.1); color: #00d26a; border: 1px solid rgba(0,210,106,0.25); }
+        .trend-bear { background: rgba(249,62,62,0.1);  color: #f93e3e; border: 1px solid rgba(249,62,62,0.25); }
+        .trend-side { background: rgba(139,155,180,0.1); color: #8b9bb4; border: 1px solid rgba(139,155,180,0.2); }
+
+        .bid-ask-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+        }
+        .bid-label { color: var(--accent-red); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; }
+        .ask-label { color: var(--accent-green); font-size: 0.62rem; font-weight: 700; text-transform: uppercase; }
+        .price-val { color: var(--text-heading); font-weight: 600; }
+
+        .stf-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .stf-buy    { background: rgba(0,210,106,0.12); color: #00d26a; border: 1px solid rgba(0,210,106,0.3); }
+        .stf-sell   { background: rgba(249,62,62,0.12);  color: #f93e3e; border: 1px solid rgba(249,62,62,0.3); }
+        .stf-hold   { background: rgba(255,153,0,0.1);  color: #ff9900; border: 1px solid rgba(255,153,0,0.25); }
+        .stf-neutral{ background: rgba(139,155,180,0.1); color: #8b9bb4; border: 1px solid rgba(139,155,180,0.2); }
+
+        .trigger-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+        .trig-active  { background: rgba(0,242,255,0.08);  color: #00f2ff; border: 1px solid rgba(0,242,255,0.25); }
+        .trig-pending { background: rgba(255,153,0,0.08);   color: #ff9900; border: 1px solid rgba(255,153,0,0.2); }
+        .trig-inactive{ background: rgba(249,62,62,0.08);   color: #f93e3e; border: 1px solid rgba(249,62,62,0.25); }
+
+        .trig-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink:0; }
+        .trig-active  .trig-dot { animation: pulse-dot 1.2s ease-in-out infinite; box-shadow: 0 0 6px currentColor; }
+        .trig-inactive .trig-dot { opacity: 0.7; }
+
+        .btn-detail {
+            padding: 5px 14px;
+            border-radius: 8px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid rgba(0,242,255,0.25);
+            background: rgba(0,242,255,0.06);
+            color: var(--accent-cyan);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-detail:hover {
+            background: rgba(0,242,255,0.15);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(0,242,255,0.2);
+            transform: translateY(-1px);
+        }
+
+        /* ── Empty / Loading State ───────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 64px 24px;
+        }
+        .empty-icon {
+            font-size: 2.5rem;
+            color: rgba(0,242,255,0.25);
+            margin-bottom: 16px;
+        }
+        .empty-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .empty-sub {
+            font-size: 0.82rem;
+            color: rgba(139,155,180,0.6);
+        }
+
+        /* ── Mini Stats Bar ──────────────────────────────── */
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .stat-pill {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 140px;
+        }
+        .stat-pill-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .stat-val { font-size: 1.3rem; font-weight: 700; color: var(--text-heading); line-height: 1; }
+        .stat-lbl { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+
+        /* ── Detail Modal ────────────────────────────────── */
+        .sr-modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(5, 8, 15, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .sr-modal-overlay.open { display: flex; }
+        .sr-modal {
+            background: linear-gradient(145deg, #0f121d, #0b0e17);
+            border: 1px solid rgba(0,242,255,0.2);
+            border-radius: 20px;
+            width: min(540px, 94vw);
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,242,255,0.05);
+            animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.93) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .sr-modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .sr-modal-body { padding: 20px 24px; }
+        .modal-pair-title { font-size: 1.2rem; font-weight: 700; color: var(--text-heading); font-family: 'JetBrains Mono', monospace; }
+        .modal-close { background: none; border: none; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .modal-close:hover { background: rgba(255,255,255,0.06); color: var(--text-main); }
+        .modal-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-data-item { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px; }
+        .modal-data-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 5px; }
+        .modal-data-val { font-size: 0.92rem; font-weight: 600; color: var(--text-heading); font-family: 'JetBrains Mono', monospace; }
+        .modal-raw-json { background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; margin-top: 12px; }
+
+        /* ── Scrollbar ───────────────────────────────────── */
+        .sr-table-wrapper::-webkit-scrollbar, .modal-raw-json::-webkit-scrollbar { height: 4px; width: 4px; }
+        .sr-table-wrapper::-webkit-scrollbar-thumb, .modal-raw-json::-webkit-scrollbar-thumb { background: rgba(0,242,255,0.25); border-radius: 4px; }
+
+        /* ── Responsive ──────────────────────────────────── */
+        @media (max-width: 767px) {
+            .sr-header { padding: 18px 18px; }
+            .sr-title { font-size: 1.2rem; }
+            .stats-bar { gap: 10px; }
+            .stat-pill { min-width: 120px; padding: 10px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Sidebar & Navbar via client-layout.js -->
+<div id="client-sidebar-placeholder"></div>
+<div id="client-navbar-placeholder"></div>
+
+<!-- =====================================================
+     MAIN CONTENT
+===================================================== -->
+<main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="sr-header">
+        <div class="sr-header-glow"></div>
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+                <h1 class="sr-title"><span>Signal Room</span></h1>
+                <p class="sr-subtitle"><i class="fa-solid fa-circle-nodes me-1"></i> Real-time Advanced Market Confluence Engine</p>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <div class="conn-status connecting" id="connStatus">
+                    <div class="conn-dot"></div>
+                    <span id="connLabel">CONNECTING...</span>
+                </div>
+                <div class="tier-badge basic" id="tierBadge">BASIC</div>
+                <span class="badge bg-dark border border-secondary text-white font-mono ms-1" id="lastUpdateBadge" style="font-size:0.68rem; display:none;">— Updated <span id="lastUpdateTime">—</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat-pill">
+            <div class="stat-pill-icon" style="background:rgba(0,242,255,0.1); color:var(--accent-cyan);"><i class="fa-solid fa-signal"></i></div>
+            <div>
+                <div class="stat-val" id="statActiveSignals">0</div>
+                <div class="stat-lbl">Active Signals</div>
+            </div>
+        </div>
+        <div class="stat-pill">
+            <div class="stat-pill-icon" style="background:rgba(0,210,106,0.1); color:#00d26a;"><i class="fa-solid fa-arrow-trend-up"></i></div>
+            <div>
+                <div class="stat-val" id="statBull">0</div>
+                <div class="stat-lbl">Bullish</div>
+            </div>
+        </div>
+        <div class="stat-pill">
+            <div class="stat-pill-icon" style="background:rgba(249,62,62,0.1); color:#f93e3e;"><i class="fa-solid fa-arrow-trend-down"></i></div>
+            <div>
+                <div class="stat-val" id="statBear">0</div>
+                <div class="stat-lbl">Bearish</div>
+            </div>
+        </div>
+        <div class="stat-pill">
+            <div class="stat-pill-icon" style="background:rgba(189,0,255,0.1); color:#bd00ff;"><i class="fa-solid fa-bolt"></i></div>
+            <div>
+                <div class="stat-val" id="statTriggered">0</div>
+                <div class="stat-lbl">Triggered</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signals Table -->
+    <div class="signals-card">
+        <div class="signals-card-header">
+            <div class="signals-card-title">
+                <i class="fa-solid fa-table-cells-large"></i>
+                Active Trading Signals
+            </div>
+            <div id="pairsActiveBadge" class="pairs-active-badge">0 Pairs Active</div>
+        </div>
+        <div class="sr-table-wrapper">
+            <table class="sr-table" id="signalTable">
+                <thead>
+                    <tr>
+                        <th>Pair</th>
+                        <th>Category</th>
+                        <th>Trend</th>
+                        <th>Bid / Ask</th>
+                        <th>STF Conclusion</th>
+                        <th>Trigger Status</th>
+                        <th>Last Update</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="signalTableBody">
+                    <!-- Rows injected by JS -->
+                </tbody>
+            </table>
+            <!-- Empty state shown until data arrives -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+                <div class="empty-title">Awaiting Signal Feed...</div>
+                <div class="empty-sub">Connecting to AI engine. Active signals will appear here momentarily.</div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<!-- =====================================================
+     DETAIL MODAL
+===================================================== -->
+<div class="sr-modal-overlay" id="detailModal">
+    <div class="sr-modal">
+        <div class="sr-modal-header">
+            <div>
+                <div class="modal-pair-title" id="modalPairTitle">—</div>
+                <div style="font-size:0.72rem; color:var(--text-muted); margin-top:3px;" id="modalPairSub">Signal Detail</div>
+            </div>
+            <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="sr-modal-body">
+            <div class="modal-data-grid" id="modalDataGrid"></div>
+            <details style="margin-top:14px;">
+                <summary style="font-size:0.72rem; color:var(--text-muted); cursor:pointer; user-select:none;">Raw Payload</summary>
+                <pre class="modal-raw-json" id="modalRawJson"></pre>
+            </details>
+        </div>
+    </div>
+</div>
+
+<!-- =====================================================
+     SCRIPTS
+===================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/client-layout.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    /* ── Config ──────────────────────────────────────── */
+    var wsProto   = location.protocol === 'https:' ? 'wss' : 'ws';
+    var WS_URL    = wsProto + '://' + (location.host || 'localhost:2000') + '/ws';
+    var RECONNECT_MS = 4000;
+
+    /* ── Tier Detection ──────────────────────────────── */
+    // Signal Room is an exclusive page — always connect as 'vip' to receive
+    // all available pairs. Access control is enforced at the Gateway level
+    // (only logged-in users with role CLIENT/CEO/SUPERADMIN can reach this page).
+    var USER_TIER = 'basic'; // Default
+    async function initSignalRoom() {
+        try {
+            var u = JSON.parse(localStorage.getItem('user') || '{}');
+            var c = (u.tier || u.level || u.level_code || u.role || u.role_code || '').toString().toLowerCase();
+            if (/enterprise|vip|superadmin|ceo/.test(c)) USER_TIER = 'enterprise';
+            else if (/pro|premium/.test(c)) USER_TIER = 'pro';
+        } catch (e) {}
+
+        try {
+            var res = await fetch('/api/subscriptions/me', { credentials: 'include' });
+            if (res.ok) {
+                var json = await res.json();
+                var subs = [];
+                if (Array.isArray(json.active_subscriptions)) subs = json.active_subscriptions;
+                else if (Array.isArray(json.data)) subs = json.data;
+                else if (json.data && typeof json.data === 'object') subs = [json.data];
+                
+                for (var i = 0; i < subs.length; i++) {
+                    var pName = (subs[i].package_name || '').toLowerCase();
+                    if (/enterprise|vip/.test(pName)) {
+                        USER_TIER = 'enterprise'; break;
+                    } else if (/pro|premium/.test(pName)) {
+                        USER_TIER = 'pro';
+                    }
+                }
+            }
+        } catch (e) {}
+
+        var tierBadgeEl = document.getElementById('tierBadge');
+        if (tierBadgeEl) {
+            tierBadgeEl.className = 'tier-badge ' + USER_TIER;
+            tierBadgeEl.textContent = USER_TIER.toUpperCase() + ' Paket';
+        }
+        
+        connect();
+    }
+
+    /* ── Signal Store ────────────────────────────────── */
+    var signals = {};   /* pair → data object */
+
+    /* ── Pair Metadata ───────────────────────────────── */
+    var PAIR_META = {
+        EURUSD: { full: 'Euro / US Dollar',       cat: 'forex',     catLabel: 'Forex',    tier: 'basic' },
+        GBPUSD: { full: 'British Pound / US Dollar', cat: 'forex',  catLabel: 'Forex',    tier: 'pro' },
+        AUDUSD: { full: 'Aussie Dollar / US Dollar', cat: 'forex',  catLabel: 'Forex',    tier: 'pro' },
+        USDCAD: { full: 'US Dollar / Cad Dollar',  cat: 'forex',    catLabel: 'Forex',    tier: 'pro' },
+        USDCHF: { full: 'US Dollar / Swiss Franc', cat: 'forex',    catLabel: 'Forex',    tier: 'pro' },
+        USDJPY: { full: 'US Dollar / Japanese Yen', cat: 'forex',   catLabel: 'Forex',    tier: 'pro' },
+        XAUUSD: { full: 'Gold / US Dollar',         cat: 'metal',   catLabel: 'Metal',    tier: 'enterprise' },
+        XAGUSD: { full: 'Silver / US Dollar',        cat: 'metal',  catLabel: 'Metal',    tier: 'enterprise' },
+        BTCUSD: { full: 'Bitcoin / US Dollar',       cat: 'crypto', catLabel: 'Crypto',   tier: 'enterprise' },
+        ETHUSD: { full: 'Ethereum / US Dollar',      cat: 'crypto', catLabel: 'Crypto',   tier: 'enterprise' },
+        WTIUSD: { full: 'Crude Oil / US Dollar',     cat: 'commodity', catLabel: 'Commodity', tier: 'enterprise' },
+    };
+
+    function getMeta(pair) {
+        return PAIR_META[pair] || { full: pair, cat: 'forex', catLabel: 'Forex' };
+    }
+
+    /* ── Helpers ─────────────────────────────────────── */
+    function fmtPrice(v) {
+        if (v === undefined || v === null || v === '') return '—';
+        var n = parseFloat(v);
+        if (isNaN(n)) return String(v);
+        return n.toFixed(n > 100 ? 2 : 5);
+    }
+
+    function timeAgo(ts) {
+        if (!ts) return '—';
+        // Handle unix epoch (seconds) vs milliseconds
+        var n = Number(ts);
+        var d = (!isNaN(n) && n < 1e12) ? new Date(n * 1000) : new Date(ts);
+        if (isNaN(d.getTime())) return String(ts);
+        var diff = Math.floor((Date.now() - d.getTime()) / 1000);
+        if (diff < 0)   return 'just now';
+        if (diff < 5)   return 'just now';
+        if (diff < 60)  return diff + 's ago';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+        return Math.floor(diff / 3600) + 'h ago';
+    }
+
+    function localTime(ts) {
+        if (!ts) return '—';
+        var n = Number(ts);
+        var d = (!isNaN(n) && n < 1e12) ? new Date(n * 1000) : new Date(ts);
+        if (isNaN(d.getTime())) return String(ts);
+        return d.toLocaleTimeString();
+    }
+
+    function classForTrend(trend) {
+        if (!trend) return 'trend-side';
+        var t = trend.toString().toLowerCase();
+        if (/bull|up|buy|long/.test(t)) return 'trend-bull';
+        if (/bear|down|sell|short/.test(t)) return 'trend-bear';
+        return 'trend-side';
+    }
+    function iconForTrend(trend) {
+        if (!trend) return '<i class="fa-solid fa-minus"></i>';
+        var t = trend.toString().toLowerCase();
+        if (/bull|up|buy|long/.test(t)) return '<i class="fa-solid fa-arrow-trend-up"></i>';
+        if (/bear|down|sell|short/.test(t)) return '<i class="fa-solid fa-arrow-trend-down"></i>';
+        return '<i class="fa-solid fa-arrows-left-right"></i>';
+    }
+
+    function classForSTF(conclusion) {
+        if (!conclusion) return 'stf-neutral';
+        var c = conclusion.toString().toLowerCase();
+        if (/buy|long/.test(c))  return 'stf-buy';
+        if (/sell|short/.test(c)) return 'stf-sell';
+        if (/hold/.test(c)) return 'stf-hold';
+        return 'stf-neutral';
+    }
+
+    function getTriggerStatus(d) {
+        if (!d) return 'Inactive';
+        // Priority 1: explicit trigger_status field
+        var status = d.trigger_status || d.trigger;
+        if (status) return status;
+
+        // Priority 2: stf_trigger_active (string "True"/"False" from Python AI engine)
+        // Check both top-level AND _orig (before Object.assign merge)
+        var activeStr = d.stf_trigger_active || d.trigger_active;
+        var note = d.stf_trigger_note || d.trigger_note || d.note || d.reason || '';
+
+        // activeStr could be boolean true/false or string "True"/"False"
+        if (activeStr !== null && activeStr !== undefined && activeStr !== '') {
+            var val = String(activeStr).toLowerCase().trim();
+            if (val === 'true' || val === '1' || val === 'yes') {
+                return 'Active';
+            } else {
+                // Check note to distinguish Watching vs Inactive
+                var noteL = note.toLowerCase();
+                if (noteL && !noteL.includes('neutral') && !noteL.includes('tunggu')) {
+                    return 'Watching';
+                }
+                return 'Inactive';
+            }
+        }
+        return 'Inactive';
+    }
+
+    function classForTrigger(status) {
+        if (!status) return 'trig-inactive';
+        var s = status.toString().toLowerCase();
+        if (/^active|^fired|^triggered/i.test(s)) return 'trig-active';
+        if (/pending|watch/.test(s)) return 'trig-pending';
+        return 'trig-inactive';
+    }
+
+    /* ── Render Table ────────────────────────────────── */
+    function renderTable() {
+        var tbody = document.getElementById('signalTableBody');
+        var emptyState = document.getElementById('emptyState');
+        var pairsEl = document.getElementById('pairsActiveBadge');
+        var keys = Object.keys(signals);
+
+        /* Stats */
+        var bullCount = 0, bearCount = 0, trigCount = 0;
+        keys.forEach(function (k) {
+            var d = signals[k];
+            var trend = (d.trend || d.signal_trend || '').toString().toLowerCase();
+            var trigger = getTriggerStatus(d).toLowerCase();
+            if (/bull|up|buy|long/.test(trend)) bullCount++;
+            if (/bear|down|sell|short/.test(trend)) bearCount++;
+            if (/active|fired|triggered/.test(trigger)) trigCount++;
+        });
+        document.getElementById('statActiveSignals').textContent = keys.length;
+        document.getElementById('statBull').textContent = bullCount;
+        document.getElementById('statBear').textContent = bearCount;
+        document.getElementById('statTriggered').textContent = trigCount;
+
+        if (pairsEl) {
+            pairsEl.textContent = keys.length + ' Pair' + (keys.length !== 1 ? 's' : '') + ' Active';
+            pairsEl.className = 'pairs-active-badge' + (keys.length > 0 ? ' has-data' : '');
+        }
+
+        if (keys.length === 0) {
+            emptyState.style.display = 'block';
+            tbody.innerHTML = '';
+            return;
+        }
+        emptyState.style.display = 'none';
+
+        /* Sort: triggered first, then bullish, then others */
+        keys.sort(function (a, b) {
+            var ta = getTriggerStatus(signals[a]).toLowerCase();
+            var tb = getTriggerStatus(signals[b]).toLowerCase();
+            var aa = /active|fired|triggered/.test(ta) ? 0 : /pending|watch/.test(ta) ? 1 : 2;
+            var ab = /active|fired|triggered/.test(tb) ? 0 : /pending|watch/.test(tb) ? 1 : 2;
+            return aa - ab || a.localeCompare(b);
+        });
+
+        /* Build rows */
+        var html = '';
+        keys.forEach(function (pair) {
+            var d = signals[pair];
+            var meta = getMeta(pair);
+
+            // Bid/Ask: try realtime price → bid_price field → stf_entry as last resort
+            var bidRaw = d.bid || d.bid_price || (d.data && d.data.bid) || d.stf_entry || d.htf_entry || '';
+            var askRaw = d.ask || d.ask_price || (d.data && d.data.ask) || d.stf_entry || d.htf_entry || '';
+            var bid = fmtPrice(bidRaw);
+            var ask = fmtPrice(askRaw);
+            var trend = d.trend || d.signal_trend || d.direction || '—';
+            var stf = d.stf_conclusion || d.conclusion || d.signal || d.action || '—';
+            var trigStatus = getTriggerStatus(d);
+            var updTs = d.updated_at || d.timestamp || d.time || null;
+
+            var trendClass   = classForTrend(trend);
+            var stfClass     = classForSTF(stf);
+            var trigClass    = classForTrigger(trigStatus);
+
+            var pairAbbr = pair.length > 4 ? pair.slice(0,4) : pair;
+
+            html += '<tr id="row-' + pair + '" data-pair="' + pair + '">' +
+                '<td><div class="pair-cell">' +
+                    '<div class="pair-icon">' + pairAbbr + '</div>' +
+                    '<div><div class="pair-name">' + pair + '</div><div class="pair-full">' + meta.full + '</div></div>' +
+                '</div></td>' +
+                '<td><span class="category-badge cat-' + meta.cat + '">' + meta.catLabel + '</span></td>' +
+                '<td><span class="trend-badge ' + trendClass + '">' + iconForTrend(trend) + ' ' + trend + '</span></td>' +
+                '<td class="bid-ask-cell">' +
+                    '<div><span class="bid-label">B</span> <span class="price-val">' + bid + '</span></div>' +
+                    '<div><span class="ask-label">A</span> <span class="price-val">' + ask + '</span></div>' +
+                '</td>' +
+                '<td><span class="stf-badge ' + stfClass + '">' + stf + '</span></td>' +
+                '<td><span class="trigger-badge ' + trigClass + '"><span class="trig-dot"></span>' + trigStatus + '</span></td>' +
+                '<td style="font-size:0.72rem; color:var(--text-muted); white-space:nowrap;">' + timeAgo(updTs) + '</td>' +
+                '<td><a class="btn-detail" href="/client/signal-detail?pair=' + pair + '"><i class="fa-solid fa-magnifying-glass me-1"></i>Detail</a></td>' +
+            '</tr>';
+        });
+
+        /* Render Locked Pairs (Teaser) */
+        var tierLevels = { 'basic': 1, 'pro': 2, 'enterprise': 3 };
+        var userLevel = tierLevels[USER_TIER] || 1;
+
+        Object.keys(PAIR_META).forEach(function(p) {
+            var m = PAIR_META[p];
+            var pLevel = tierLevels[m.tier] || 3;
+            // Jika level user tidak cukup untuk mengakses pair ini, render sebagai Terkunci
+            if (userLevel < pLevel) {
+                var lockTierName = m.tier === 'enterprise' ? 'ENTERPRISE' : 'PRO';
+                var lockColor = m.tier === 'enterprise' ? '#ff9900' : '#00f2ff';
+                var lockBg = m.tier === 'enterprise' ? 'rgba(255,153,0,0.1)' : 'rgba(0,242,255,0.1)';
+                
+                html += '<tr class="locked-row" onclick="alert(\\\'Sinyal ' + p + ' terkunci!\\\\n\\\\nSilakan upgrade ke paket ' + lockTierName + ' untuk membuka sinyal ini.\\\'); window.location.href=\\\'/client/discover\\\';" style="cursor:pointer; background: rgba(255,255,255,0.01);">';
+                
+                /* 1. Pair Name */
+                html += '<td>';
+                html += '<div class="fw-bold mb-1" style="color:var(--text-muted);"><i class="fa-solid fa-lock me-2" style="font-size:0.8rem; color:'+lockColor+'; opacity:0.8;"></i>' + p + '</div>';
+                html += '<div class="small" style="color:rgba(139,155,180,0.5);">' + m.full + '</div>';
+                html += '</td>';
+                
+                /* 2. Category */
+                html += '<td>';
+                html += '<span class="badge" style="background:transparent; color:rgba(139,155,180,0.5); border:1px solid rgba(139,155,180,0.2);">' + m.catLabel + '</span>';
+                html += '</td>';
+                
+                /* 3, 4, 5, 6, 7, 8. Hidden Data Area */
+                html += '<td colspan="6" class="text-center position-relative" style="vertical-align: middle; border-left: 1px dashed rgba(255,255,255,0.05); padding: 0;">';
+                html += '<div style="filter: blur(6px); opacity: 0.18; font-family: monospace; user-select: none; font-size:0.8rem; padding: 14px 24px; width: 100%; text-align: left; white-space: nowrap; overflow: hidden;">Bearish &nbsp;|&nbsp; Sell &nbsp;|&nbsp; 1.9425 &nbsp;|&nbsp; Entry: 1.9420 &nbsp;|&nbsp; SL: 1.9500 &nbsp;|&nbsp; TP: 1.9100 &nbsp;|&nbsp; Trigger: Inactive &nbsp;|&nbsp; Score: 2/3 &nbsp;|&nbsp; Confidence: 72%</div>';
+                html += '<div class="position-absolute top-50 start-50 translate-middle">';
+                html += '<span class="badge" style="background:'+lockBg+'; border: 1px solid '+lockColor+'; color:'+lockColor+'; padding: 8px 18px; border-radius: 8px; font-size:0.75rem; box-shadow: 0 4px 16px rgba(0,0,0,0.6); letter-spacing: 0.5px; white-space: nowrap;">';
+                html += '<i class="fa-solid fa-crown me-2"></i>Upgrade ke ' + lockTierName;
+                html += '</span>';
+                html += '</div>';
+                html += '</td>';
+                
+                html += '</tr>';
+            }
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    /* ── Update single signal & flash row ────────────── */
+    function processSignal(item) {
+        var pair = item.pair || item.id || (item.data && item.data.pair) || null;
+        if (!pair) return;
+
+        // IMPORTANT: Merge carefully — item.data (nested HTF/MTF/STF frames) must NOT
+        // overwrite top-level trigger/price fields from the AI engine.
+        // Strategy: spread item.data FIRST, then overlay top-level item fields on top.
+        var nestedData = (item.data && typeof item.data === 'object') ? item.data : {};
+        var flatData = Object.assign({}, nestedData, item);
+        // Keep the original 'data' reference for raw inspection
+        flatData.data = item.data || null;
+
+        signals[pair] = flatData;
+        /* flash existing row if any */
+        var existingRow = document.getElementById('row-' + pair);
+        if (existingRow) existingRow.classList.add('flash-update');
+    }
+
+    /* ── Stats time update ───────────────────────────── */
+    function updateLastUpdate() {
+        var el = document.getElementById('lastUpdateBadge');
+        var tEl = document.getElementById('lastUpdateTime');
+        if (el) el.style.display = 'inline';
+        if (tEl) tEl.textContent = new Date().toLocaleTimeString();
+    }
+
+    /* ── WebSocket ───────────────────────────────────── */
+    var socket = null;
+    var reconnectTimer = null;
+    var manualClose = false;
+
+    function setStatus(state) {
+        var el = document.getElementById('connStatus');
+        var lb = document.getElementById('connLabel');
+        if (!el) return;
+        el.className = 'conn-status ' + state;
+        var labels = { connecting: 'CONNECTING...', connected: 'LIVE', disconnected: 'DISCONNECTED' };
+        if (lb) lb.textContent = labels[state] || state.toUpperCase();
+    }
+
+    function connect() {
+        if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return;
+        setStatus('connecting');
+        var url = WS_URL + '?tier=' + encodeURIComponent(USER_TIER);
+        socket = new WebSocket(url);
+
+        socket.addEventListener('open', function () {
+            setStatus('connected');
+            if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+        });
+
+        socket.addEventListener('message', function (ev) {
+            try {
+                var msg = JSON.parse(ev.data);
+                if (msg.type === 'signal') {
+                    processSignal(msg);
+                    renderTable();
+                    updateLastUpdate();
+                } else if (msg.type === 'active_signals' && Array.isArray(msg.payload)) {
+                    msg.payload.forEach(processSignal);
+                    renderTable();
+                    updateLastUpdate();
+                }
+            } catch (e) { /* ignore */ }
+        });
+
+        socket.addEventListener('close', function () {
+            if (manualClose) return;
+            setStatus('disconnected');
+            reconnectTimer = setTimeout(connect, RECONNECT_MS);
+        });
+
+        socket.addEventListener('error', function () {
+            setStatus('disconnected');
+        });
+    }
+
+    initSignalRoom();
+
+    /* Auto-refresh timeAgo every 30s */
+    setInterval(function () {
+        if (Object.keys(signals).length > 0) renderTable();
+    }, 30000);
+
+    /* ── Modal ───────────────────────────────────────── */
+    window.openDetail = function (pair) {
+        var d = signals[pair];
+        if (!d) return;
+        document.getElementById('modalPairTitle').textContent = pair;
+        document.getElementById('modalPairSub').textContent = getMeta(pair).full + ' — Signal Detail';
+
+        var fields = [
+            ['Trend',           d.trend || d.signal_trend || '—'],
+            ['STF Conclusion',  d.stf_conclusion || d.conclusion || d.signal || '—'],
+            ['Bid',             fmtPrice(d.bid || d.bid_price || d.stf_entry)],
+            ['Ask',             fmtPrice(d.ask || d.ask_price || d.stf_entry)],
+            ['Trigger Status',  getTriggerStatus(d)],
+            ['Entry Level',     fmtPrice(d.stf_entry || d.htf_entry || d.entry)],
+            ['Take Profit',     fmtPrice(d.stf_tp_price || d.trigger_level || d.tp)],
+            ['Stop Loss',       fmtPrice(d.stf_sl_price || d.stop_loss || d.sl)],
+            ['Risk/Reward',     d.stf_rr || d.rr || '—'],
+            ['Trigger Note',    d.stf_trigger_note || d.trigger_note || '—'],
+            ['Updated At',      localTime(d.updated_at || d.timestamp || d.waktu)],
+        ];
+
+        var gridHtml = fields.map(function (f) {
+            return '<div class="modal-data-item"><div class="modal-data-lbl">' + f[0] + '</div><div class="modal-data-val">' + f[1] + '</div></div>';
+        }).join('');
+        document.getElementById('modalDataGrid').innerHTML = gridHtml;
+        document.getElementById('modalRawJson').textContent = JSON.stringify(d, null, 2);
+
+        document.getElementById('detailModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    };
+
+    document.getElementById('modalClose').addEventListener('click', function () {
+        document.getElementById('detailModal').classList.remove('open');
+        document.body.style.overflow = '';
+    });
+    document.getElementById('detailModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            this.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    });
+
+    /* Cleanup on unload */
+    window.addEventListener('beforeunload', function () {
+        manualClose = true;
+        if (socket) socket.close();
+    });
+
+})();
+</script>
+
+</body>
+</html>

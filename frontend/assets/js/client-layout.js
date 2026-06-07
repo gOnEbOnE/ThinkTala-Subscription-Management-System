@@ -61,7 +61,8 @@
                 '<li class="nav-item"><a class="nav-link' + isActive('/client/dashboard') + '" href="/client/dashboard"><i class="fa-solid fa-chart-pie icon-left"></i><span class="link-text">Dashboard</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isDiscoverActive() + '" href="/client/discover"><i class="fa-solid fa-newspaper icon-left"></i><span class="link-text">Discover</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + ((path === '/market-insight' || path === '/client/market-insight') ? ' active' : '') + '" href="/client/market-insight"><i class="fa-solid fa-globe icon-left"></i><span class="link-text">Market Insight</span></a></li>' +
-                '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-satellite-dish icon-left"></i><span class="link-text">Deep Scanner</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + (path === '/client/signal-room' ? ' active' : '') + '" href="/client/signal-room" style="position:relative;"><i class="fa-solid fa-satellite-dish icon-left"></i><span class="link-text">Signal Room</span><span class="badge ms-auto" style="font-size:.55rem; background:linear-gradient(135deg,#bd00ff,#00f2ff); color:#000; font-weight:800; padding:2px 7px; border-radius:999px;">LIVE</span></a></li>' +
+                // '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-radar icon-left"></i><span class="link-text">Deep Scanner</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-wand-magic-sparkles icon-left"></i><span class="link-text">Ask Nizza</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="sidebar-section-label"><span class="link-text"></span></li>' +
                 '<li class="nav-item"><a class="nav-link' + isKycActive() + '" href="/client/kyc-status"><i class="fa-solid fa-id-card icon-left"></i><span class="link-text">KYC Verification</span></a></li>' +
@@ -69,9 +70,9 @@
             '</ul>' +
             '<ul class="nav flex-column mb-5">' +
                 '<li class="nav-item"><a class="nav-link' + isMembershipActive() + '" href="/client/packages-catalog"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span></a></li>' +
-                '<li class="nav-item"><a class="nav-link' + isSubscriptionActive() + '" href="/client/subscription-me"><i class="fa-solid fa-repeat icon-left"></i><span class="link-text">Langganan</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isSubscriptionActive() + '" href="/client/subscription-me"><i class="fa-solid fa-repeat icon-left"></i><span class="link-text">Subscription</span></a></li>' +
                 '<li class="nav-item"><a class="nav-link' + isBillingActive() + '" href="/client/billing-history"><i class="fa-solid fa-receipt icon-left"></i><span class="link-text">Billing History</span></a></li>' +
-                '<li class="nav-item"><a class="nav-link' + isSettingsActive() + '" href="/client/settings"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Pengaturan</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isSettingsActive() + '" href="/client/settings"><i class="fa-solid fa-gear icon-left"></i><span class="link-text">Settings</span></a></li>' +
             '</ul>' +
         '</nav>';
 
@@ -118,7 +119,7 @@
             '<div class="notif-drawer-header">' +
                 '<div>' +
                     '<h6 class="notif-drawer-title">Notifications</h6>' +
-                    '<div class="notif-drawer-subtitle">Ringkasan update terbaru</div>' +
+                    '<div class="notif-drawer-subtitle">Latest updates summary</div>' +
                 '</div>' +
                 '<button class="notif-close-btn" id="notifCloseBtn" aria-label="Close">' +
                     '<i class="fa-solid fa-xmark"></i>' +
@@ -128,7 +129,7 @@
                 '<button class="notif-mark-all" id="notifMarkAll">Mark all as read</button>' +
             '</div>' +
             '<div class="notif-drawer-body" id="notifDrawerBody">' +
-                '<div class="notif-empty">Memuat notifikasi terbaru...</div>' +
+                '<div class="notif-empty">Loading latest notifications...</div>' +
             '</div>' +
             '<div class="notif-drawer-footer">' +
                 '<a class="notif-see-all" href="/client/discover">See all notifications <i class="fa-solid fa-arrow-right"></i></a>' +
@@ -196,7 +197,7 @@
         if (!value) return '-';
         var date = new Date(value);
         if (Number.isNaN(date.getTime())) return '-';
-        return date.toLocaleString('id-ID', {
+        return date.toLocaleString('en-GB', {
             day: '2-digit',
             month: 'short',
             hour: '2-digit',
@@ -275,7 +276,7 @@
         var container = document.getElementById('notifDrawerBody');
         if (!container) return;
         if (!list || list.length === 0) {
-            container.innerHTML = '<div class="notif-empty">Tidak ada notifikasi baru.</div>';
+            container.innerHTML = '<div class="notif-empty">No new notifications.</div>';
             return;
         }
 
@@ -285,7 +286,7 @@
             var color = notifTypeColor[String(item.type || '').toLowerCase()] || '#00f2ff';
             var time = formatDrawerTime(item.created_at);
             var title = item.title || label;
-            var body = item.body || 'Tidak ada ringkasan.';
+            var body = item.body || 'No summary available.';
             var channel = item.source === 'event' ? formatChannel(item.channel) : '';
             var channelHtml = item.source === 'event'
                 ? '<span class="notif-channel"><i class="fa-solid ' + channelIcon(item.channel) + '"></i>' + escapeHtml(channel) + '</span>'

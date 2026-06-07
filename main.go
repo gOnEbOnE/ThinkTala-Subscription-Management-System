@@ -250,7 +250,7 @@ func main() {
 		go func(config ServiceConfig) {
 			defer wg.Done()
 
-			cmd := exec.Command("go", "run", "main.go")
+			cmd := exec.Command("go", "run", ".")
 			cmd.Dir = config.dir
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr

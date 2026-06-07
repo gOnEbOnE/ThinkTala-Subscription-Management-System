@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signal Detail | ThinkTala AI</title>
+    <meta name="description" content="Deep signal analysis for a specific trading pair — ThinkNalyze AI Engine.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        /* ── Back Bar ──────────────────────────────────── */
+        .back-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.03);
+            color: var(--text-muted);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+        .btn-back:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: rgba(0,242,255,0.06);
+        }
+        .breadcrumb-text {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .breadcrumb-text span { color: var(--text-main); font-weight: 600; }
+
+        /* ── Connection pill ─────────────────────────── */
+        .conn-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 12px; border-radius: 999px;
+            font-size: 0.68rem; font-weight: 700;
+            letter-spacing: 0.07em; text-transform: uppercase;
+            border: 1px solid; transition: all 0.4s;
+        }
+        .conn-pill.connecting  { background:rgba(255,153,0,0.12); border-color:rgba(255,153,0,0.4); color:#ff9900; }
+        .conn-pill.connected   { background:rgba(0,210,106,0.10); border-color:rgba(0,210,106,0.4); color:#00d26a; }
+        .conn-pill.disconnected{ background:rgba(249,62,62,0.10); border-color:rgba(249,62,62,0.35); color:#f93e3e; }
+        .conn-dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+        .conn-pill.connecting .conn-dot { animation: pdot 1.1s ease-in-out infinite; }
+        .conn-pill.connected  .conn-dot { box-shadow:0 0 6px #00d26a; }
+        @keyframes pdot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.7);} }
+
+        /* ── Hero ────────────────────────────────────── */
+        .pair-hero {
+            background: linear-gradient(135deg, rgba(11,14,23,0.98), rgba(15,18,29,0.95));
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 28px 32px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .pair-hero::before {
+            content:'';
+            position:absolute; top:0; left:0; right:0; height:3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple), var(--accent-cyan));
+            background-size:200%;
+            animation: shimmer 3s linear infinite;
+        }
+        @keyframes shimmer { 0%{background-position:-200% center;} 100%{background-position:200% center;} }
+        .hero-bg-glow {
+            position:absolute; top:-60px; right:-60px;
+            width:260px; height:260px;
+            background:radial-gradient(circle, rgba(189,0,255,0.06) 0%, transparent 70%);
+            pointer-events:none;
+        }
+
+        .pair-symbol {
+            font-size: 2.4rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.03em;
+            color: var(--text-heading);
+            line-height: 1;
+        }
+        .pair-full-name {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        .pair-cat-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; border-radius: 999px;
+            font-size: 0.68rem; font-weight: 700; border: 1px solid;
+            margin-top: 10px;
+        }
+
+        /* ── Live Price Card ─────────────────────────── */
+        .price-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0,242,255,0.15);
+            border-radius: 16px;
+            padding: 20px 24px;
+            text-align: center;
+            min-width: 190px;
+        }
+        .price-card-label {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .mid-price {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-heading);
+            transition: color 0.35s ease;
+            line-height: 1;
+        }
+        .mid-price.up   { color: #00d26a; }
+        .mid-price.down { color: #f93e3e; }
+        .bid-ask-row {
+            display: flex; gap: 20px;
+            margin-top: 12px; justify-content: center;
+        }
+        .ba-col { text-align: center; }
+        .ba-lbl { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+        .ba-val { font-family:'JetBrains Mono',monospace; font-size:0.88rem; font-weight:600; color:var(--text-heading); }
+        .ba-bid .ba-lbl { color: #f93e3e; }
+        .ba-ask .ba-lbl { color: #00d26a; }
+        .price-updated {
+            font-size: 0.65rem; color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* ── Section Cards ───────────────────────────── */
+        .section-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+        .section-card-header {
+            padding: 16px 22px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 9px;
+            background: rgba(255,255,255,0.01);
+        }
+        .section-card-header i { color: var(--accent-cyan); font-size: 0.9rem; }
+        .section-card-header span {
+            font-size: 0.82rem; font-weight: 700;
+            color: var(--text-heading);
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .section-card-body { padding: 20px 22px; }
+
+        /* ── Data Grid ───────────────────────────────── */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 12px;
+        }
+        .data-cell {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 14px 16px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .data-cell:hover {
+            border-color: rgba(0,242,255,0.18);
+            background: rgba(0,242,255,0.02);
+        }
+        .data-lbl {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .data-val {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            word-break: break-word;
+        }
+        .data-val.mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* ── Inline Badges ───────────────────────────── */
+        .sig-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 11px; border-radius: 7px;
+            font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid;
+        }
+        .sb-buy    { background:rgba(0,210,106,0.12); color:#00d26a; border-color:rgba(0,210,106,0.3); }
+        .sb-sell   { background:rgba(249,62,62,0.12);  color:#f93e3e; border-color:rgba(249,62,62,0.3); }
+        .sb-hold   { background:rgba(255,153,0,0.10);  color:#ff9900; border-color:rgba(255,153,0,0.25); }
+        .sb-bull   { background:rgba(0,210,106,0.10);  color:#00d26a; border-color:rgba(0,210,106,0.25); }
+        .sb-bear   { background:rgba(249,62,62,0.10);  color:#f93e3e; border-color:rgba(249,62,62,0.25); }
+        .sb-neutral{ background:rgba(139,155,180,0.1); color:#8b9bb4; border-color:rgba(139,155,180,0.2); }
+        .sb-active { background:rgba(0,242,255,0.08);  color:#00f2ff; border-color:rgba(0,242,255,0.25); }
+        .sb-inactive{ background:rgba(249,62,62,0.08);  color:#f93e3e; border-color:rgba(249,62,62,0.3); }
+
+        /* ── Trading Levels ──────────────────────────── */
+        .levels-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+        .level-box {
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid;
+        }
+        .level-box.tp-box {
+            background: rgba(0,210,106,0.06);
+            border-color: rgba(0,210,106,0.25);
+        }
+        .level-box.sl-box {
+            background: rgba(249,62,62,0.06);
+            border-color: rgba(249,62,62,0.25);
+        }
+        .level-box.trig-box {
+            background: rgba(0,242,255,0.05);
+            border-color: rgba(0,242,255,0.2);
+        }
+        .level-lbl {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .level-box.tp-box   .level-lbl { color: #00d26a; }
+        .level-box.sl-box   .level-lbl { color: #f93e3e; }
+        .level-box.trig-box .level-lbl { color: #00f2ff; }
+        .level-val {
+            font-size: 1.1rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-heading);
+        }
+        .level-sub {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ── Strength Meter ──────────────────────────── */
+        .strength-meter {
+            margin-top: 6px;
+        }
+        .strength-bar-bg {
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .strength-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 0.8s ease;
+        }
+        .strength-val-text {
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        /* ── Loading / Not Found ─────────────────────── */
+        .center-state {
+            text-align: center;
+            padding: 80px 24px;
+        }
+        .loading-spinner {
+            width: 44px; height: 44px;
+            border: 3px solid rgba(0,242,255,0.12);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 18px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 767px) {
+            .pair-symbol  { font-size: 1.8rem; }
+            .levels-row   { grid-template-columns: 1fr; }
+            .data-grid    { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="client-sidebar-placeholder"></div>
+<div id="client-navbar-placeholder"></div>
+
+<main class="main-content" id="mainContent">
+
+    <!-- Back Bar -->
+    <div class="back-bar">
+        <a class="btn-back" href="/client/signal-room">
+            <i class="fa-solid fa-arrow-left"></i> Signal Room
+        </a>
+        <div class="breadcrumb-text">Signal Room › <span id="breadcrumbPair">—</span></div>
+        <div class="ms-auto">
+            <div class="conn-pill connecting" id="connStatus">
+                <div class="conn-dot"></div>
+                <span id="connLabel">CONNECTING</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="center-state" id="loadingState">
+        <div class="loading-spinner"></div>
+        <div style="color:var(--text-muted); font-size:0.9rem;">Menghubungkan ke signal engine...</div>
+    </div>
+
+    <!-- Not Found -->
+    <div class="center-state" id="notFoundState" style="display:none;">
+        <div style="font-size:2.5rem; color:rgba(249,62,62,0.3); margin-bottom:16px;"><i class="fa-solid fa-circle-exclamation"></i></div>
+        <div style="font-size:1rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;">Data tidak ditemukan</div>
+        <div style="font-size:0.82rem; color:rgba(139,155,180,0.6);">
+            Tidak ada sinyal aktif untuk pair ini. <a href="/client/signal-room" style="color:var(--accent-cyan);">Kembali ke Signal Room</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="pageContent" style="display:none;">
+
+        <!-- Hero -->
+        <div class="pair-hero">
+            <div class="hero-bg-glow"></div>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
+                <div>
+                    <div class="pair-symbol" id="heroPair">—</div>
+                    <div class="pair-full-name" id="heroFull">—</div>
+                    <div id="heroCat"></div>
+                </div>
+                <div class="price-card">
+                    <div class="price-card-label live-price-lbl">
+                        <span style="color:#00d26a;">●</span>
+                        LIVE PRICE
+                    </div>
+                    <div class="mid-price" id="midPrice">—</div>
+                    <div class="bid-ask-row">
+                        <div class="ba-col ba-bid">
+                            <div class="ba-lbl">Bid</div>
+                            <div class="ba-val" id="bidPrice">—</div>
+                        </div>
+                        <div style="width:1px; background:rgba(255,255,255,0.08);"></div>
+                        <div class="ba-col ba-ask">
+                            <div class="ba-lbl">Ask</div>
+                            <div class="ba-val" id="askPrice">—</div>
+                        </div>
+                    </div>
+                    <div class="price-updated" id="priceUpdated">Menunggu data...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row: Signal Analysis + Trigger Status -->
+        <div class="row g-3 mb-0">
+            <!-- Signal Analysis -->
+            <div class="col-lg-8">
+                <div class="section-card h-100">
+                    <div class="section-card-header">
+                        <i class="fa-solid fa-brain"></i>
+                        <span>Analisis Sinyal AI</span>
+                    </div>
+                    <div class="section-card-body">
+                        <div class="data-grid" id="signalGrid"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Trigger Status -->
+            <div class="col-lg-4">
+                <div class="section-card h-100">
+                    <div class="section-card-header">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Status Trigger</span>
+                    </div>
+                    <div class="section-card-body d-flex flex-column align-items-center justify-content-center text-center gap-3" style="min-height:160px;">
+                        <div id="triggerStatusBig" style="font-size:1.5rem;"></div>
+                        <div id="triggerStatusLabel" style="font-size:0.8rem; color:var(--text-muted);"></div>
+                        <div id="triggerReasonBox" style="display:none; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:10px; padding:10px 14px; font-size:0.78rem; color:var(--text-muted); width:100%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trading Levels -->
+        <div class="section-card mt-3">
+            <div class="section-card-header">
+                <i class="fa-solid fa-crosshairs"></i>
+                <span>Level Trading</span>
+            </div>
+            <div class="section-card-body">
+                <div class="levels-row" id="levelsRow"></div>
+            </div>
+        </div>
+
+        <!-- Market Context -->
+        <div class="section-card">
+            <div class="section-card-header">
+                <i class="fa-solid fa-globe"></i>
+                <span>Konteks Pasar</span>
+            </div>
+            <div class="section-card-body">
+                <div class="data-grid" id="contextGrid"></div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/js/client-layout.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    /* ── Read pair from URL ──────────────────────────── */
+    var params = new URLSearchParams(location.search);
+    var TARGET_PAIR = (params.get('pair') || '').toUpperCase().trim();
+    if (!TARGET_PAIR) { window.location.href = '/client/signal-room'; return; }
+
+    document.title = TARGET_PAIR + ' Signal Detail | ThinkTala AI';
+    document.getElementById('breadcrumbPair').textContent = TARGET_PAIR;
+
+    /* ── Pair Metadata ───────────────────────────────── */
+    var PAIR_META = {
+        EURUSD: { full:'Euro / US Dollar',              cat:'Forex',           color:'#00f2ff' },
+        GBPUSD: { full:'British Pound / US Dollar',     cat:'Forex',           color:'#00f2ff' },
+        AUDUSD: { full:'Australian Dollar / US Dollar', cat:'Forex',           color:'#00f2ff' },
+        USDCAD: { full:'US Dollar / Canadian Dollar',   cat:'Forex',           color:'#00f2ff' },
+        USDCHF: { full:'US Dollar / Swiss Franc',       cat:'Forex',           color:'#00f2ff' },
+        USDJPY: { full:'US Dollar / Japanese Yen',      cat:'Forex',           color:'#00f2ff' },
+        NZDUSD: { full:'New Zealand Dollar / US Dollar',cat:'Forex',           color:'#00f2ff' },
+        XAUUSD: { full:'Gold Spot / US Dollar',         cat:'Precious Metal',  color:'#bd00ff' },
+        XAGUSD: { full:'Silver Spot / US Dollar',       cat:'Precious Metal',  color:'#bd00ff' },
+        BTCUSD: { full:'Bitcoin / US Dollar',           cat:'Crypto',          color:'#ff9900' },
+        ETHUSD: { full:'Ethereum / US Dollar',          cat:'Crypto',          color:'#ff9900' },
+        WTIUSD: { full:'Crude Oil WTI / US Dollar',     cat:'Commodity',       color:'#00d26a' },
+    };
+    var meta = PAIR_META[TARGET_PAIR] || { full: TARGET_PAIR, cat:'Instrument', color:'#8b9bb4' };
+
+    document.getElementById('heroPair').textContent = TARGET_PAIR;
+    document.getElementById('heroFull').textContent = meta.full;
+    document.getElementById('heroCat').innerHTML =
+        '<span class="pair-cat-badge" style="color:' + meta.color + '; border-color:' + meta.color + '30; background:' + meta.color + '12;">' +
+        '<i class="fa-solid fa-tag" style="font-size:0.6rem;"></i>' + meta.cat + '</span>';
+
+    /* ── Helpers ─────────────────────────────────────── */
+    function pick(d, keys) {
+        for (var i = 0; i < keys.length; i++) {
+            var v = d[keys[i]];
+            if (v !== undefined && v !== null && v !== '') return v;
+        }
+        return null;
+    }
+
+    function fmt(v, decimals) {
+        if (v === null || v === undefined || v === '') return '—';
+        var n = parseFloat(v);
+        if (isNaN(n)) return String(v);
+        if (decimals !== undefined) return n.toFixed(decimals);
+        return n > 100 ? n.toFixed(2) : n.toFixed(5);
+    }
+
+    function fmtTs(ts) {
+        if (!ts) return '—';
+        var n = Number(ts);
+        var d = (!isNaN(n) && n < 1e12) ? new Date(n * 1000) : new Date(ts);
+        if (isNaN(d.getTime())) return String(ts);
+        return d.toLocaleString('id-ID', { dateStyle:'medium', timeStyle:'medium' });
+    }
+
+    function trendBadge(v) {
+        if (!v) return emDash();
+        var lv = v.toString().toLowerCase();
+        if (/bull|up|buy|long/.test(lv))  return badge('sb-bull', '<i class="fa-solid fa-arrow-trend-up me-1"></i>' + v);
+        if (/bear|down|sell|short/.test(lv)) return badge('sb-bear', '<i class="fa-solid fa-arrow-trend-down me-1"></i>' + v);
+        return badge('sb-neutral', v);
+    }
+
+    function conclusionBadge(v) {
+        if (!v) return emDash();
+        var lv = v.toString().toLowerCase();
+        if (/buy|long/.test(lv))  return badge('sb-buy', v);
+        if (/sell|short/.test(lv)) return badge('sb-sell', v);
+        if (/hold|wait/.test(lv)) return badge('sb-hold', v);
+        return badge('sb-neutral', v);
+    }
+
+    function badge(cls, txt) { return '<span class="sig-badge ' + cls + '">' + txt + '</span>'; }
+    function emDash() { return '<span style="color:var(--text-muted);">—</span>'; }
+
+    /* ── Render Signal Grid ──────────────────────────── */
+    function renderSignalGrid(d) {
+        var fields = [
+            { label: 'Tren Utama',      render: function() { return trendBadge(pick(d,['trend','signal_trend','direction'])); } },
+            { label: 'Kesimpulan STF',  render: function() { return conclusionBadge(pick(d,['stf_conclusion','conclusion','signal','action'])); } },
+            { label: 'Timeframe',       render: function() {
+                var v = pick(d,['timeframe','tf']);
+                if (!v && d.data && d.data.STF && d.data.STF.sl_tp) {
+                    v = d.data.STF.sl_tp.atr_ref_tf;
+                }
+                return v ? '<span class="data-val mono">' + v.toUpperCase() + '</span>' : emDash();
+            } },
+            { label: 'Kekuatan Sinyal', render: function() {
+                var v = parseFloat(pick(d,['strength','signal_strength','confluence']));
+                if (isNaN(v)) {
+                    var sent = parseFloat(pick(d, ['stf_sentiment']));
+                    if (!isNaN(sent)) v = Math.abs(sent);
+                }
+                if (isNaN(v)) return emDash();
+                var pct = Math.min(100, Math.max(0, v));
+                var color = pct >= 70 ? '#00d26a' : pct >= 40 ? '#ff9900' : '#f93e3e';
+                return '<div class="strength-meter">' +
+                    '<span class="strength-val-text" style="color:' + color + ';">' + pct.toFixed(0) + '%</span>' +
+                    '<div class="strength-bar-bg"><div class="strength-bar-fill" style="width:' + pct + '%; background:' + color + ';"></div></div>' +
+                '</div>';
+            }},
+            { label: 'Pattern / Setup', render: function() {
+                var v = pick(d,['pattern','setup']);
+                if (!v && d.data && d.data.STF && d.data.STF.trigger) {
+                    var cp = d.data.STF.trigger.candle_pattern;
+                    var ema = d.data.STF.trigger.ema_cross;
+                    var parts = [];
+                    if (cp && cp !== 'none') parts.push(cp);
+                    if (ema && ema !== 'none') parts.push(ema);
+                    if (parts.length > 0) v = parts.join(' | ');
+                }
+                return v ? String(v) : emDash();
+            } },
+            { label: 'Risk/Reward',     render: function() { var v = pick(d,['risk_reward','rr','stf_rr']); return v ? '<span class="data-val mono">' + String(v) + '</span>' : emDash(); } },
+        ];
+
+        var html = '';
+        fields.forEach(function(f) {
+            html += '<div class="data-cell"><div class="data-lbl">' + f.label + '</div><div class="data-val">' + f.render() + '</div></div>';
+        });
+        document.getElementById('signalGrid').innerHTML = html;
+    }
+
+    /* ── Render Trigger Box ──────────────────────────── */
+    function renderTrigger(d) {
+        var status = pick(d, ['trigger_status','trigger']);
+        if (!status) {
+            var activeStr = pick(d, ['stf_trigger_active', 'trigger_active']);
+            var note = pick(d, ['stf_trigger_note', 'trigger_note', 'note', 'reason']) || '';
+            if (activeStr !== null && activeStr !== undefined && activeStr !== '') {
+                var val = String(activeStr).toLowerCase().trim();
+                if (val === 'true' || val === '1' || val === 'yes') {
+                    status = 'Active';
+                } else {
+                    var noteL = note.toLowerCase();
+                    if (noteL && !noteL.includes('neutral') && !noteL.includes('tunggu')) {
+                        status = 'Watching';
+                    } else {
+                        status = 'Inactive';
+                    }
+                }
+            } else {
+                status = 'Inactive';
+            }
+        }
+
+        var reason = pick(d, ['stf_trigger_note', 'trigger_reason', 'trigger_note', 'note', 'reason']);
+        var sl = status.toString().toLowerCase();
+
+        var icon, statusLabel;
+        if (/^active|^fired|^triggered/i.test(sl)) {
+            icon = '<span class="sig-badge sb-active" style="font-size:1rem; padding:8px 16px;"><i class="fa-solid fa-bolt me-1"></i>ACTIVE</span>';
+            statusLabel = '🟢 Trigger sudah aktif — harga sudah menyentuh level entry';
+        } else if (/pending|watch/.test(sl)) {
+            icon = '<span class="sig-badge sb-hold" style="font-size:1rem; padding:8px 16px;"><i class="fa-solid fa-eye me-1"></i>WATCHING</span>';
+            statusLabel = '🟡 Menunggu konfirmasi — harga mendekati level entry';
+        } else {
+            icon = '<span class="sig-badge sb-inactive" style="font-size:1rem; padding:8px 16px;"><i class="fa-solid fa-circle-xmark me-1"></i>INACTIVE</span>';
+            statusLabel = '🔴 Belum aktif — menunggu Konfirmasi Sistem';
+        }
+
+        document.getElementById('triggerStatusBig').innerHTML = icon;
+        document.getElementById('triggerStatusLabel').textContent = statusLabel;
+
+        var box = document.getElementById('triggerReasonBox');
+        if (reason) {
+            box.style.display = 'block';
+            box.innerHTML = '<i class="fa-solid fa-circle-info me-1" style="color:var(--accent-cyan);"></i>' + reason;
+        } else {
+            box.style.display = 'none';
+        }
+    }
+
+    /* ── Render Levels ───────────────────────────────── */
+    function renderLevels(d) {
+        var tp   = fmt(pick(d, ['stf_tp_price', 'trigger_level','tp','take_profit']));
+        var sl   = fmt(pick(d, ['stf_sl_price', 'stop_loss','sl']));
+        var trig = fmt(pick(d, ['stf_entry', 'entry','entry_level','trigger_entry']));
+
+        document.getElementById('levelsRow').innerHTML =
+            '<div class="level-box tp-box">' +
+                '<div class="level-lbl"><i class="fa-solid fa-bullseye me-1"></i>Take Profit</div>' +
+                '<div class="level-val">' + tp + '</div>' +
+                '<div class="level-sub">Target harga</div>' +
+            '</div>' +
+            '<div class="level-box sl-box">' +
+                '<div class="level-lbl"><i class="fa-solid fa-shield-halved me-1"></i>Stop Loss</div>' +
+                '<div class="level-val">' + sl + '</div>' +
+                '<div class="level-sub">Batas kerugian</div>' +
+            '</div>' +
+            '<div class="level-box trig-box">' +
+                '<div class="level-lbl"><i class="fa-solid fa-location-crosshairs me-1"></i>Entry / Trigger</div>' +
+                '<div class="level-val">' + trig + '</div>' +
+                '<div class="level-sub">Level masuk</div>' +
+            '</div>';
+    }
+
+    /* ── Render Context ──────────────────────────────── */
+    function renderContext(d) {
+        var refTf = (d.data && d.data.STF && d.data.STF.sl_tp && d.data.STF.sl_tp.atr_ref_tf) || 'm15';
+        
+        var volVal = pick(d, ['volume', 'vol']);
+        if (!volVal && d.data && d.data.STF && d.data.STF.tfs && d.data.STF.tfs[refTf]) {
+            volVal = d.data.STF.tfs[refTf].volume || d.data.STF.tfs[refTf].vol;
+        }
+
+        var volatilityVal = pick(d, ['volatility', 'atr']);
+        if (!volatilityVal && d.data && d.data.STF && d.data.STF.tfs && d.data.STF.tfs[refTf]) {
+            volatilityVal = d.data.STF.tfs[refTf].volatility;
+        }
+
+        var fields = [
+            { label: 'Sesi Pasar',    val: pick(d,['session_note','session','market_session']) },
+            { label: 'Volume',        val: volVal },
+            { label: 'Volatilitas',   val: volatilityVal },
+            { label: 'Spread',        val: pick(d,['spread']) },
+            { label: 'Diperbarui',    val: fmtTs(pick(d,['updated_at','timestamp','time'])) },
+            { label: 'Sumber Sinyal', val: pick(d,['source','engine','provider']) || 'ThinkNalyze AI' },
+        ];
+
+        var html = '';
+        fields.forEach(function(f) {
+            var display = f.val ? String(f.val) : '<span style="color:var(--text-muted);">—</span>';
+            html += '<div class="data-cell"><div class="data-lbl">' + f.label + '</div><div class="data-val">' + display + '</div></div>';
+        });
+        document.getElementById('contextGrid').innerHTML = html;
+    }
+
+    /* ── Live Price ──────────────────────────────────── */
+    var lastMid = null;
+    function updatePrice(d) {
+        // Cascade: realtime bid/ask → bid_price/ask_price field → entry price as fallback
+        var bidRaw = pick(d, ['bid', 'bid_price']) ||
+                     (d.data && d.data.bid) ||
+                     pick(d, ['stf_entry', 'htf_entry', 'entry', 'mtf_entry']);
+        var askRaw = pick(d, ['ask', 'ask_price']) ||
+                     (d.data && d.data.ask) ||
+                     pick(d, ['stf_entry', 'htf_entry', 'entry', 'mtf_entry']);
+
+        var hasRealtime = !!(pick(d, ['bid', 'ask', 'bid_price', 'ask_price']));
+
+        var bid = parseFloat(bidRaw);
+        var ask = parseFloat(askRaw);
+
+        if (!isNaN(bid)) {
+            document.getElementById('bidPrice').textContent = fmt(bid);
+        }
+        if (!isNaN(ask)) {
+            document.getElementById('askPrice').textContent = fmt(ask);
+        }
+
+        if (!isNaN(bid) && !isNaN(ask)) {
+            var mid = (bid + ask) / 2;
+            var el = document.getElementById('midPrice');
+            el.textContent = fmt(mid);
+            if (lastMid !== null) {
+                el.className = 'mid-price ' + (mid > lastMid ? 'up' : mid < lastMid ? 'down' : '');
+                setTimeout(function () { el.className = 'mid-price'; }, 800);
+            }
+            lastMid = mid;
+        }
+
+        // Update price label — show if realtime or estimated
+        var liveEl = document.querySelector('.live-price-lbl');
+        if (liveEl) {
+            if (hasRealtime) {
+                liveEl.innerHTML = '<span style="color:#00d26a;">●</span> LIVE PRICE';
+            } else if (!isNaN(bid)) {
+                liveEl.innerHTML = '<span style="color:#ff9900;">●</span> EST. ENTRY PRICE';
+            }
+        }
+
+        var ts = pick(d, ['updated_at','timestamp','time','waktu']);
+        if (ts) document.getElementById('priceUpdated').textContent = 'Diperbarui ' + fmtTs(ts);
+    }
+
+    /* ── Full render ─────────────────────────────────── */
+    function render(d) {
+        document.getElementById('loadingState').style.display  = 'none';
+        document.getElementById('notFoundState').style.display = 'none';
+        document.getElementById('pageContent').style.display   = 'block';
+        updatePrice(d);
+        renderSignalGrid(d);
+        renderTrigger(d);
+        renderLevels(d);
+        renderContext(d);
+    }
+
+    /* ── WebSocket ───────────────────────────────────── */
+    var wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
+    var WS_URL  = wsProto + '://' + (location.host || 'localhost:2000') + '/ws';
+    var socket  = null, reconnectTimer = null, manualClose = false, received = false;
+
+    function setConn(state) {
+        var el = document.getElementById('connStatus');
+        var lb = document.getElementById('connLabel');
+        if (!el) return;
+        el.className = 'conn-pill ' + state;
+        lb.textContent = { connecting:'CONNECTING', connected:'LIVE', disconnected:'DISCONNECTED' }[state] || state.toUpperCase();
+    }
+
+    var USER_TIER = 'basic';
+    async function connect() {
+        if (socket && socket.readyState <= 1) return;
+        setConn('connecting');
+        
+        try {
+            var u = JSON.parse(localStorage.getItem('user') || '{}');
+            var c = (u.tier || u.level || u.level_code || u.role || u.role_code || '').toString().toLowerCase();
+            if (/enterprise|vip|superadmin|ceo/.test(c)) USER_TIER = 'enterprise';
+            else if (/pro|premium/.test(c)) USER_TIER = 'pro';
+        } catch (e) {}
+
+        try {
+            var res = await fetch('/api/subscriptions/me', { credentials: 'include' });
+            if (res.ok) {
+                var json = await res.json();
+                var subs = [];
+                if (Array.isArray(json.active_subscriptions)) subs = json.active_subscriptions;
+                else if (Array.isArray(json.data)) subs = json.data;
+                else if (json.data && typeof json.data === 'object') subs = [json.data];
+                
+                for (var i = 0; i < subs.length; i++) {
+                    var pName = (subs[i].package_name || '').toLowerCase();
+                    if (/enterprise|vip/.test(pName)) {
+                        USER_TIER = 'enterprise'; break;
+                    } else if (/pro|premium/.test(pName)) {
+                        USER_TIER = 'pro';
+                    }
+                }
+            }
+        } catch (e) {}
+
+        var noDataTimer = setTimeout(function () {
+            if (!received) {
+                document.getElementById('loadingState').style.display  = 'none';
+                document.getElementById('notFoundState').style.display = 'block';
+            }
+        }, 8000);
+
+        socket = new WebSocket(WS_URL + '?tier=' + encodeURIComponent(USER_TIER));
+        socket.addEventListener('open', function () { setConn('connected'); });
+        socket.addEventListener('message', function (ev) {
+            try {
+                var msg = JSON.parse(ev.data);
+                var found = null;
+                if (msg.type === 'signal' && (msg.pair||'').toUpperCase() === TARGET_PAIR) {
+                    // Merge: nested data FIRST, then top-level fields override (same fix as signal-room)
+                    var nested = (msg.data && typeof msg.data === 'object') ? msg.data : {};
+                    found = Object.assign({}, nested, msg);
+                    found.data = msg.data || null;
+                } else if (msg.type === 'active_signals' && Array.isArray(msg.payload)) {
+                    msg.payload.forEach(function (item) {
+                        var p = (item.pair || item.id || (item.data && item.data.pair) || '').toUpperCase();
+                        if (p === TARGET_PAIR) {
+                            var nested = (item.data && typeof item.data === 'object') ? item.data : {};
+                            found = Object.assign({}, nested, item);
+                            found.data = item.data || null;
+                        }
+                    });
+                }
+                if (found) {
+                    if (!received) { clearTimeout(noDataTimer); received = true; }
+                    render(found);
+                }
+            } catch (e) {}
+        });
+        socket.addEventListener('close', function () {
+            if (manualClose) return;
+            setConn('disconnected');
+            reconnectTimer = setTimeout(connect, 4000);
+        });
+        socket.addEventListener('error', function () { setConn('disconnected'); });
+    }
+
+    connect();
+    window.addEventListener('beforeunload', function () { manualClose = true; if (socket) socket.close(); });
+})();
+</script>
+</body>
+</html>
