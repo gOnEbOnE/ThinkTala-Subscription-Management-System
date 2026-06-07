@@ -47,6 +47,8 @@
     { "source": "/client/support-ticket-detail", "destination": "/client/support-ticket-detail.html" },
     { "source": "/client/support-create", "destination": "/client/support-create.html" },
     { "source": "/client/settings", "destination": "/client/settings.html" },
+    { "source": "/client/signal-room", "destination": "/client/signal-room.html" },
+    { "source": "/client/signal-detail", "destination": "/client/signal-detail.html" },
     { "source": "/client/market-insight", "destination": "/market-insight.html" },
     { "source": "/ops/manage-users", "destination": "/ops/manage-users.html" },
     { "source": "/ops/create-user", "destination": "/ops/create-user.html" },

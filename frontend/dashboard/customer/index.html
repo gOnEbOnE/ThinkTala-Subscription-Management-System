@@ -58,7 +58,7 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
                 <h4 class="fw-bold mb-1" style="color: var(--text-heading)">Customer Detail</h4>
-                <p class="text-muted mb-0">Ringkasan profil loyalitas dan aktivitas customer</p>
+                <p class="text-muted mb-0">Customer loyalty and activity profile summary</p>
             </div>
             <button class="btn btn-sm btn-outline-light" onclick="window.history.back()">
                 <i class="fa-solid fa-arrow-left me-1"></i>Back
@@ -142,7 +142,7 @@
             }
             const role = String(user.role_code || user.level_code || user.level || '').toUpperCase();
             if (!ALLOWED_ROLES.has(role)) {
-                showToast('Anda tidak memiliki akses ke halaman ini.');
+                showToast('You do not have access to this page.');
                 return false;
             }
             return true;
@@ -151,7 +151,7 @@
         async function loadDetail() {
             const id = getCustomerIdFromPath();
             if (!id) {
-                showToast('Detail customer tidak tersedia.');
+                showToast('Customer details are unavailable.');
                 return;
             }
 
@@ -171,7 +171,7 @@
                     credentials: 'include'
                 });
                 if (res.status === 404) {
-                    showToast('Detail customer tidak tersedia.');
+                    showToast('Customer details are unavailable.');
                     return;
                 }
                 if (res.status === 401) {
@@ -179,7 +179,7 @@
                     return;
                 }
                 if (res.status === 403) {
-                    showToast('Akses ditolak.');
+                    showToast('Access denied.');
                     return;
                 }
                 if (!res.ok) {
@@ -199,7 +199,7 @@
                 document.getElementById('spentValue').textContent = formatMoney(data.total_spent || 0);
                 document.getElementById('activeValue').textContent = formatDate(data.last_active);
             } catch (_e) {
-                showToast('Detail customer tidak tersedia.');
+                showToast('Customer details are unavailable.');
             }
         }
 

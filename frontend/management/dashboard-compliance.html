@@ -161,7 +161,7 @@
                 <h4 class="fw-bold mb-0" style="color:var(--text-heading);">
                     <i class="fa-solid fa-shield-halved me-2" style="color:#818cf8;"></i>Compliance Analytics
                 </h4>
-                <small class="text-muted">Performa tim KYC berdasarkan SLA penyelesaian dalam 24 jam</small>
+                <small class="text-muted">KYC team performance based on 24-hour completion SLA</small>
             </div>
             <button class="btn btn-sm btn-outline-secondary" onclick="loadData()" title="Refresh">
                 <i class="fa-solid fa-arrows-rotate me-1"></i>Refresh
@@ -173,7 +173,7 @@
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Total Diproses
+                        Total Processed
                         <span class="metric-icon"><i class="fa-solid fa-layer-group"></i></span>
                     </div>
                     <div class="stat-value" id="statTotal">—</div>
@@ -212,11 +212,11 @@
         <div class="table-card">
             <div class="table-card-header">
                 <div>
-                    <div class="table-card-title">Performa Admin KYC</div>
-                    <div class="table-card-sub">SLA: penyelesaian dalam 24 jam sejak pengajuan masuk</div>
+                    <div class="table-card-title">KYC Admin Performance</div>
+                    <div class="table-card-sub">SLA: completion within 24 hours of submission</div>
                 </div>
                 <div class="filter-bar">
-                    <input type="text" class="form-control form-control-sm" id="searchAdmin" placeholder="Cari admin..." style="max-width:200px;" oninput="filterTable()">
+                    <input type="text" class="form-control form-control-sm" id="searchAdmin" placeholder="Search admin..." style="max-width:200px;" oninput="filterTable()">
                 </div>
             </div>
             <div class="table-responsive">
@@ -224,9 +224,9 @@
                     <thead>
                         <tr>
                             <th style="width:44px;">#</th>
-                            <th>Nama Admin</th>
-                            <th class="sortable" onclick="sortBy('total')" title="Klik untuk sort">
-                                Total Diproses <i class="fa-solid fa-sort ms-1" id="sortIconTotal" style="opacity:0.4;"></i>
+                            <th>Admin Name</th>
+                            <th class="sortable" onclick="sortBy('total')" title="Click to sort">
+                                Total Processed <i class="fa-solid fa-sort ms-1" id="sortIconTotal" style="opacity:0.4;"></i>
                             </th>
                             <th>Approved</th>
                             <th>Rejected</th>
@@ -236,7 +236,7 @@
                     </thead>
                     <tbody id="adminTableBody">
                         <tr><td colspan="7" class="text-center text-muted py-5">
-                            <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...
+                            <i class="fa-solid fa-spinner fa-spin me-2"></i>Loading data...
                         </td></tr>
                     </tbody>
                 </table>
@@ -308,7 +308,7 @@
 
         var tbody = document.getElementById('adminTableBody');
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-5"><i class="fa-solid fa-inbox me-2"></i>Tidak ada data</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-5"><i class="fa-solid fa-inbox me-2"></i>No data available</td></tr>';
             return;
         }
 
@@ -326,7 +326,7 @@
                 '<td><span style="color:#34d399;font-weight:600;">' + (s.approved || 0) + '</span></td>' +
                 '<td><span style="color:#f87171;font-weight:600;">' + (s.rejected || 0) + '</span></td>' +
                 '<td><span class="sla-badge ' + cls + '"><i class="fa-solid ' + icon + '"></i>' + (s.sla_rate || 0).toFixed(1) + '%</span></td>' +
-                '<td style="color:var(--text-muted);">' + (s.avg_review_hours || 0).toFixed(1) + ' jam</td>' +
+                '<td style="color:var(--text-muted);">' + (s.avg_review_hours || 0).toFixed(1) + ' hours</td>' +
                 '</tr>';
         }).join('');
     }

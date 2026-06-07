@@ -122,7 +122,7 @@
                 <h4 class="fw-bold mb-0" style="color:var(--text-heading);">
                     <i class="fa-solid fa-boxes-stacked me-2" style="color:#fbbf24;"></i>Operasional Analytics
                 </h4>
-                <small class="text-muted">Statistik order & subscription berdasarkan data real-time</small>
+                <small class="text-muted">Real-time order & subscription statistics</small>
             </div>
             <button class="btn btn-sm btn-outline-secondary" onclick="loadData()" title="Refresh">
                 <i class="fa-solid fa-arrows-rotate me-1"></i>Refresh
@@ -134,7 +134,7 @@
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Pending Pembayaran
+                        Pending Payment
                         <span class="metric-icon" style="color:#fbbf24;border-color:rgba(234,179,8,0.3);"><i class="fa-solid fa-clock"></i></span>
                     </div>
                     <div class="stat-value text-warning" id="statPending">—</div>
@@ -143,7 +143,7 @@
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Order Dibayar
+                        Paid Orders
                         <span class="metric-icon" style="color:#34d399;border-color:rgba(16,185,129,0.3);"><i class="fa-solid fa-circle-check"></i></span>
                     </div>
                     <div class="stat-value text-success" id="statPaid">—</div>
@@ -152,7 +152,7 @@
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Order Dibatalkan
+                        Cancelled Orders
                         <span class="metric-icon" style="color:#f87171;border-color:rgba(239,68,68,0.3);"><i class="fa-solid fa-circle-xmark"></i></span>
                     </div>
                     <div class="stat-value text-danger" id="statCancelled">—</div>
@@ -161,7 +161,7 @@
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Order Hari Ini
+                        Today's Orders
                         <span class="metric-icon"><i class="fa-solid fa-calendar-day"></i></span>
                     </div>
                     <div class="stat-value" id="statToday">—</div>
@@ -174,7 +174,7 @@
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Subscription Aktif
+                        Active Subscriptions
                         <span class="metric-icon" style="color:#818cf8;border-color:rgba(129,140,248,0.3);"><i class="fa-solid fa-crown"></i></span>
                     </div>
                     <div class="stat-value" style="color:#818cf8;" id="statSubActive">—</div>
@@ -183,7 +183,7 @@
             <div class="col-lg-3 col-sm-6">
                 <div class="stat-card">
                     <div class="stat-label">
-                        Subscription Expired
+                        Expired Subscriptions
                         <span class="metric-icon" style="color:#f87171;border-color:rgba(239,68,68,0.3);"><i class="fa-solid fa-hourglass-end"></i></span>
                     </div>
                     <div class="stat-value text-danger" id="statSubExpired">—</div>
@@ -195,8 +195,8 @@
         <div class="table-card">
             <div class="table-card-header">
                 <div>
-                    <div class="table-card-title">Order Menunggu Pembayaran</div>
-                    <div class="table-card-sub">Daftar order dengan status PENDING_PAYMENT — paling lama di atas</div>
+                    <div class="table-card-title">Pending Payment Orders</div>
+                    <div class="table-card-sub">List of orders with PENDING_PAYMENT status — oldest first</div>
                 </div>
             </div>
             <div class="table-responsive">
@@ -207,12 +207,12 @@
                             <th>Invoice</th>
                             <th>Status</th>
                             <th>Total</th>
-                            <th>Tanggal Order</th>
+                            <th>Order Date</th>
                         </tr>
                     </thead>
                     <tbody id="ordersTableBody">
                         <tr><td colspan="5" class="text-center text-muted py-5">
-                            <i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...
+                            <i class="fa-solid fa-spinner fa-spin me-2"></i>Loading data...
                         </td></tr>
                     </tbody>
                 </table>
@@ -257,7 +257,7 @@
                     .forEach(function (id) { document.getElementById(id).textContent = '—'; });
                 document.getElementById('ordersTableBody').innerHTML =
                     '<tr><td colspan="5" class="text-center text-danger py-5">' +
-                    '<i class="fa-solid fa-circle-exclamation me-2"></i>Gagal memuat data dari server</td></tr>';
+                    '<i class="fa-solid fa-circle-exclamation me-2"></i>Failed to load data from server</td></tr>';
             });
     }
 
@@ -265,7 +265,7 @@
         var tbody = document.getElementById('ordersTableBody');
         if (!rows.length) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5">' +
-                '<i class="fa-solid fa-inbox me-2"></i>Tidak ada order pending saat ini</td></tr>';
+                '<i class="fa-solid fa-inbox me-2"></i>No pending orders at the moment</td></tr>';
             return;
         }
         tbody.innerHTML = rows.map(function (o, i) {
@@ -281,13 +281,13 @@
 
     function formatPrice(n) {
         if (!n && n !== 0) return '—';
-        return Number(n).toLocaleString('id-ID');
+        return Number(n).toLocaleString('en-US');
     }
 
     function formatDate(s) {
         if (!s) return '—';
         try {
-            return new Date(s).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            return new Date(s).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         } catch (e) { return s; }
     }
 

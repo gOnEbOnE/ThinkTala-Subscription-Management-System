@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Langganan | ThinkTala</title>
-    <meta name="description" content="Status langganan dan perpanjangan paket ThinkTala">
+    <title>Subscription Status | ThinkTala</title>
+    <meta name="description" content="Subscription status and package renewal for ThinkTala">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -66,45 +66,45 @@
     <div class="main-content sub-page">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
             <div>
-                <h4 class="fw-bold mb-0" style="color: var(--text-heading);">Status Langganan</h4>
-                <small class="text-muted">Kelola langganan aktif dan ajukan perpanjangan</small>
+                <h4 class="fw-bold mb-0" style="color: var(--text-heading);">Subscription Status</h4>
+                <small class="text-muted">Manage your active subscriptions and submit renewals</small>
             </div>
             <a href="/client/billing-history" class="btn btn-sm btn-outline-secondary">
-                <i class="fa-solid fa-receipt me-1"></i>Riwayat Pesanan
+                <i class="fa-solid fa-receipt me-1"></i>Order History
             </a>
         </div>
 
         <div class="ai-card shadow-lg mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold text-muted text-uppercase small mb-0"><i class="fa-solid fa-crown me-2"></i>Langganan Saya</h6>
-                <span id="subStatusBadge" class="badge" style="background:rgba(255,255,255,0.1);color:var(--text-muted);">Memuat...</span>
+                <h6 class="fw-bold text-muted text-uppercase small mb-0"><i class="fa-solid fa-crown me-2"></i>My Subscription</h6>
+                <span id="subStatusBadge" class="badge" style="background:rgba(255,255,255,0.1);color:var(--text-muted);">Loading...</span>
             </div>
             <div class="row g-3">
                 <div class="col-md-4">
-                    <small class="text-muted text-uppercase" style="font-size:0.68rem;">Paket</small>
+                    <small class="text-muted text-uppercase" style="font-size:0.68rem;">Package</small>
                     <div class="fw-bold" id="subPackageName" style="color:var(--text-heading);">-</div>
                 </div>
                 <div class="col-md-4">
-                    <small class="text-muted text-uppercase" style="font-size:0.68rem;">Aktif Sejak</small>
+                    <small class="text-muted text-uppercase" style="font-size:0.68rem;">Active Since</small>
                     <div class="fw-semibold" id="subStartDate" style="color:var(--text-main);">-</div>
                 </div>
                 <div class="col-md-4">
-                    <small class="text-muted text-uppercase" style="font-size:0.68rem;">Berakhir</small>
+                    <small class="text-muted text-uppercase" style="font-size:0.68rem;">Expires</small>
                     <div class="fw-semibold" id="subEndDate" style="color:var(--text-main);">-</div>
                 </div>
             </div>
             <div class="mt-3 pt-3" style="border-top:1px solid var(--border-color);">
-                <small class="text-muted text-uppercase" style="font-size:0.68rem;">Daftar Paket</small>
+                <small class="text-muted text-uppercase" style="font-size:0.68rem;">Package List</small>
                 <div id="subPackagesList" class="subscription-list mt-2">
-                    <div class="text-muted small"><i class="fa-solid fa-spinner fa-spin me-1"></i>Memuat...</div>
+                    <div class="text-muted small"><i class="fa-solid fa-spinner fa-spin me-1"></i>Loading...</div>
                 </div>
             </div>
             <div class="mt-3 pt-3 d-flex flex-wrap gap-2" style="border-top:1px solid var(--border-color);">
                 <button type="button" id="renewNowBtn" class="btn btn-sm btn-success d-none">
-                    <i class="fa-solid fa-rotate me-1"></i>Perpanjang Sekarang
+                    <i class="fa-solid fa-rotate me-1"></i>Renew Now
                 </button>
                 <a href="/client/packages-catalog" class="btn btn-sm btn-outline-secondary">
-                    <i class="fa-solid fa-plus me-1"></i>Beli Paket Baru
+                    <i class="fa-solid fa-plus me-1"></i>Buy New Package
                 </a>
             </div>
         </div>
@@ -115,38 +115,38 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
                 <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-                    <h6 class="fw-bold mb-0" style="color: var(--text-heading);"><i class="fa-solid fa-rotate me-2"></i>Konfirmasi Perpanjangan</h6>
+                    <h6 class="fw-bold mb-0" style="color: var(--text-heading);"><i class="fa-solid fa-rotate me-2"></i>Confirm Renewal</h6>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold" style="color:var(--text-heading);">Paket</label>
+                        <label class="form-label small fw-semibold" style="color:var(--text-heading);">Package</label>
                         <select class="form-select" id="renewPackageSelect"></select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold" style="color:var(--text-heading);">Durasi Perpanjangan</label>
+                        <label class="form-label small fw-semibold" style="color:var(--text-heading);">Renewal Duration</label>
                         <select class="form-select" id="renewDuration">
-                            <option value="1">1 Bulan</option>
-                            <option value="3">3 Bulan</option>
-                            <option value="6">6 Bulan</option>
-                            <option value="12">12 Bulan</option>
+                            <option value="1">1 Month</option>
+                            <option value="3">3 Months</option>
+                            <option value="6">6 Months</option>
+                            <option value="12">12 Months</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label small fw-semibold" style="color:var(--text-heading);">Metode Pembayaran</label>
+                        <label class="form-label small fw-semibold" style="color:var(--text-heading);">Payment Method</label>
                         <select class="form-select" id="renewPaymentMethod">
-                            <option value="Transfer Bank">Transfer Bank</option>
+                            <option value="Transfer Bank">Bank Transfer</option>
                         </select>
                     </div>
                     <div class="renew-highlight mb-0">
                         <i class="fa-solid fa-calendar-day me-2" style="color:#00f2ff;"></i>
-                        Masa aktif baru dimulai dari: <strong id="renewalStartDateText" style="color:var(--text-heading);">-</strong>
+                        New active period starts from: <strong id="renewalStartDateText" style="color:var(--text-heading);">-</strong>
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
-                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-sm btn-success" id="submitRenewBtn">
-                        <i class="fa-solid fa-check me-1"></i>Konfirmasi Perpanjangan
+                        <i class="fa-solid fa-check me-1"></i>Confirm Renewal
                     </button>
                 </div>
             </div>
@@ -241,11 +241,11 @@
             }
 
             if (active.length === 0 && !latestSubscription) {
-                badge.textContent = 'Belum Berlangganan';
-                packageEl.textContent = 'Belum Berlangganan';
+                badge.textContent = 'No Active Subscription';
+                packageEl.textContent = 'No Active Subscription';
                 startEl.textContent = '-';
                 endEl.textContent = '-';
-                listEl.innerHTML = '<div class="text-muted small">Belum ada riwayat langganan.</div>';
+                listEl.innerHTML = '<div class="text-muted small">No subscription history found.</div>';
                 renewBtn.classList.add('d-none');
                 return;
             }
@@ -264,12 +264,12 @@
             if (active.length === 0) {
                 listEl.innerHTML = '<div class="subscription-item"><div class="subscription-item-name">' +
                     (latestSubscription.package_name || '-') + '</div>' +
-                    '<div class="subscription-item-meta">Periode: ' + formatIdDate(latestSubscription.start_date) +
+                    '<div class="subscription-item-meta">Period: ' + formatIdDate(latestSubscription.start_date) +
                     ' - ' + formatIdDate(latestSubscription.end_date) + ' &middot; ' + status + '</div></div>';
             } else {
                 listEl.innerHTML = active.map(function (item) {
                     return '<div class="subscription-item"><div class="subscription-item-name">' + (item.package_name || '-') +
-                        '</div><div class="subscription-item-meta">Periode: ' + formatIdDate(item.start_date) +
+                        '</div><div class="subscription-item-meta">Period: ' + formatIdDate(item.start_date) +
                         ' - ' + formatIdDate(item.end_date) + '</div></div>';
                 }).join('');
             }
@@ -295,12 +295,12 @@
             var select = document.getElementById('renewPackageSelect');
             if (!select) return;
             if (!catalogPackages.length) {
-                select.innerHTML = '<option value="">Tidak ada paket aktif</option>';
+                select.innerHTML = '<option value="">No active packages available</option>';
                 return;
             }
             select.innerHTML = catalogPackages.map(function (p) {
                 var id = p.id || p.package_id || '';
-                var name = p.name || p.package_name || 'Paket';
+                var name = p.name || p.package_name || 'Package';
                 return '<option value="' + id + '">' + name + '</option>';
             }).join('');
             if (defaultPackageId) {
@@ -321,12 +321,12 @@
             var paymentMethod = document.getElementById('renewPaymentMethod').value;
 
             if (!packageId) {
-                showToast('Pilih paket terlebih dahulu.', 'warning');
+                showToast('Please select a package first.', 'warning');
                 return;
             }
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Memproses...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Processing...';
 
             try {
                 var res = await fetch('/api/orders/renew', {
@@ -343,16 +343,16 @@
                 bootstrap.Modal.getOrCreateInstance(document.getElementById('renewModal')).hide();
 
                 if (res.ok && json.success) {
-                    sessionStorage.setItem('billingToast', 'Pesanan perpanjangan berhasil dibuat. Menunggu verifikasi pembayaran.');
+                    sessionStorage.setItem('billingToast', 'Renewal order created successfully. Awaiting payment verification.');
                     window.location.href = '/client/billing-history';
                     return;
                 }
-                showToast((json && json.error_message) ? json.error_message : 'Gagal mengajukan perpanjangan.', 'danger');
+                showToast((json && json.error_message) ? json.error_message : 'Failed to submit renewal.', 'danger');
             } catch (e) {
-                showToast('Gagal terhubung ke server.', 'danger');
+                showToast('Failed to connect to the server.', 'danger');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-check me-1"></i>Konfirmasi Perpanjangan';
+                btn.innerHTML = '<i class="fa-solid fa-check me-1"></i>Confirm Renewal';
             }
         }
 
@@ -370,7 +370,7 @@
                 }
                 renderSubscriptionOverview(json);
             } catch (e) {
-                document.getElementById('subPackagesList').innerHTML = '<div class="text-danger small">Gagal memuat status langganan.</div>';
+                document.getElementById('subPackagesList').innerHTML = '<div class="text-danger small">Failed to load subscription status.</div>';
             }
         }
 

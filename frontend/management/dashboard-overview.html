@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overview Kinerja Divisi | ThinkTala Management</title>
+    <title>Division Performance Overview | ThinkTala Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -107,9 +107,9 @@
         <div class="d-flex justify-content-between align-items-start mb-4">
             <div>
                 <h4 class="fw-bold mb-0" style="color:var(--text-heading);">
-                    <i class="fa-solid fa-chart-pie me-2" style="color:#818cf8;"></i>Overview Kinerja Divisi
+                    <i class="fa-solid fa-chart-pie me-2" style="color:#818cf8;"></i>Division Performance Overview
                 </h4>
-                <small class="text-muted">Ringkasan kinerja seluruh divisi — hari ini</small>
+                <small class="text-muted">Summary of performance across all divisions — today</small>
             </div>
             <div class="d-flex align-items-center gap-2">
                 <span class="last-updated" id="lastUpdated"></span>
@@ -120,7 +120,7 @@
         </div>
 
         <div class="error-banner mb-4" id="errorBanner">
-            <i class="fa-solid fa-triangle-exclamation me-2"></i><span id="errorText">Gagal memuat data dari server.</span>
+            <i class="fa-solid fa-triangle-exclamation me-2"></i><span id="errorText">Failed to load data from server.</span>
         </div>
 
         <div class="row g-4" id="cardsRow">
@@ -133,7 +133,7 @@
                         </div>
                         <div>
                             <p class="division-title">Compliance</p>
-                            <p class="division-sub">Review KYC & verifikasi identitas</p>
+                            <p class="division-sub">KYC review & identity verification</p>
                         </div>
                     </div>
                     <div class="division-card-body">
@@ -142,13 +142,13 @@
                             <span class="metric-val text-warning" id="kycPending">—</span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label"><i class="fa-solid fa-layer-group me-1" style="font-size:0.75rem;color:#818cf8;"></i>Total Diproses</span>
+                            <span class="metric-label"><i class="fa-solid fa-layer-group me-1" style="font-size:0.75rem;color:#818cf8;"></i>Total Processed</span>
                             <span class="metric-val" style="color:#818cf8;" id="kycProcessed">—</span>
                         </div>
                     </div>
                     <div class="division-card-footer">
                         <a href="/management/dashboard-compliance" class="btn btn-outline-secondary btn-detail">
-                            Lihat Detail <i class="fa-solid fa-arrow-right ms-1" style="font-size:0.8rem;"></i>
+                            View Details <i class="fa-solid fa-arrow-right ms-1" style="font-size:0.8rem;"></i>
                         </a>
                     </div>
                 </div>
@@ -163,22 +163,22 @@
                         </div>
                         <div>
                             <p class="division-title">Customer Support</p>
-                            <p class="division-sub">Penanganan tiket & keluhan pelanggan</p>
+                            <p class="division-sub">Handling tickets & customer complaints</p>
                         </div>
                     </div>
                     <div class="division-card-body">
                         <div class="metric-row">
-                            <span class="metric-label"><i class="fa-solid fa-ticket me-1 text-warning" style="font-size:0.75rem;"></i>Tiket Terbuka</span>
+                            <span class="metric-label"><i class="fa-solid fa-ticket me-1 text-warning" style="font-size:0.75rem;"></i>Open Tickets</span>
                             <span class="metric-val text-warning" id="suppOpen">—</span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label"><i class="fa-solid fa-circle-check me-1 text-success" style="font-size:0.75rem;"></i>Tiket Selesai</span>
+                            <span class="metric-label"><i class="fa-solid fa-circle-check me-1 text-success" style="font-size:0.75rem;"></i>Resolved Tickets</span>
                             <span class="metric-val text-success" id="suppResolved">—</span>
                         </div>
                     </div>
                     <div class="division-card-footer">
                         <a href="/management/dashboard-support" class="btn btn-outline-secondary btn-detail">
-                            Lihat Detail <i class="fa-solid fa-arrow-right ms-1" style="font-size:0.8rem;"></i>
+                            View Details <i class="fa-solid fa-arrow-right ms-1" style="font-size:0.8rem;"></i>
                         </a>
                     </div>
                 </div>
@@ -192,23 +192,23 @@
                             <i class="fa-solid fa-boxes-stacked"></i>
                         </div>
                         <div>
-                            <p class="division-title">Operasional</p>
-                            <p class="division-sub">Order masuk & status subscription</p>
+                            <p class="division-title">Operational</p>
+                            <p class="division-sub">Incoming orders & subscription status</p>
                         </div>
                     </div>
                     <div class="division-card-body">
                         <div class="metric-row">
-                            <span class="metric-label"><i class="fa-solid fa-clock me-1 text-warning" style="font-size:0.75rem;"></i>Menunggu Verifikasi</span>
+                            <span class="metric-label"><i class="fa-solid fa-clock me-1 text-warning" style="font-size:0.75rem;"></i>Awaiting Verification</span>
                             <span class="metric-val text-warning" id="opsPending">—</span>
                         </div>
                         <div class="metric-row">
-                            <span class="metric-label"><i class="fa-solid fa-crown me-1" style="font-size:0.75rem;color:#818cf8;"></i>Subscription Aktif</span>
+                            <span class="metric-label"><i class="fa-solid fa-crown me-1" style="font-size:0.75rem;color:#818cf8;"></i>Active Subscriptions</span>
                             <span class="metric-val" style="color:#818cf8;" id="opsActive">—</span>
                         </div>
                     </div>
                     <div class="division-card-footer">
                         <a href="/management/dashboard-operational" class="btn btn-outline-secondary btn-detail">
-                            Lihat Detail <i class="fa-solid fa-arrow-right ms-1" style="font-size:0.8rem;"></i>
+                            View Details <i class="fa-solid fa-arrow-right ms-1" style="font-size:0.8rem;"></i>
                         </a>
                     </div>
                 </div>
@@ -266,20 +266,20 @@
                 var errs = [];
                 if (kyc.error)  errs.push('Compliance: ' + kyc.error);
                 if (supp.error) errs.push('Support: '    + supp.error);
-                if (ops.error)  errs.push('Operasional: ' + ops.error);
+                if (ops.error)  errs.push('Operational: ' + ops.error);
                 if (errs.length) {
-                    showError('Sebagian data tidak tersedia: ' + errs.join(' | '));
+                    showError('Some data is unavailable: ' + errs.join(' | '));
                 }
 
                 // Update timestamp
-                var now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                document.getElementById('lastUpdated').textContent = 'Diperbarui: ' + now;
+                var now = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                document.getElementById('lastUpdated').textContent = 'Last updated: ' + now;
             })
             .catch(function (err) {
                 console.error('[Overview Dashboard] fetch error:', err);
                 ['kycPending','kycProcessed','suppOpen','suppResolved','opsPending','opsActive']
                     .forEach(function(id) { document.getElementById(id).textContent = '—'; });
-                showError('Gagal memuat data dari server: ' + (err.message || ''));
+                showError('Failed to load data from server: ' + (err.message || ''));
             });
     }
 

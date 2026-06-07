@@ -92,10 +92,11 @@
             (currentPath.startsWith('/dashboard/packages/') ? { activeKey: 'management-packages' } : {}));
     const activeKey  = route.activeKey  || '';
     const parentKey  = route.parentKey  || '';
+    const isSuperadmin = _opsRole === 'SUPERADMIN' || (guardUser && guardUser.level_code && guardUser.level_code.toUpperCase() === 'SUPERADMIN');
     const canOpenManagement = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'SUPERADMIN' || _opsRole === 'ADMIN';
     const canOpenPackageSales = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'ADMIN' || _opsRole === 'SUPERADMIN';
     const canOpenDivisionDash = !hasLocalUser || _opsRole === 'SUPERADMIN' || _opsRole === 'CEO' || _opsRole === 'MANAGEMENT';
-    const canCreateUser = _opsRole === 'SUPERADMIN' || (guardUser && guardUser.level_code && guardUser.level_code.toUpperCase() === 'SUPERADMIN');
+    const canCreateUser = isSuperadmin;
 
     // Helper: mark a link active
     function isActive(key) {
@@ -127,21 +128,21 @@
 
     <ul class="nav flex-column flex-grow-1">
 
-        <li class="nav-item">
+        ${!isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('dashboard')}" href="/ops/dashboard">
                 <i class="fa-solid fa-chart-pie icon-left"></i>
                 <span class="link-text">Dashboard</span>
             </a>
-        </li>
+        </li>` : ''}
 
-        ${canOpenManagement ? `<li class="nav-item">
+        ${canOpenManagement && !isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('management-dashboard')}" href="/management/dashboard-customers">
                 <i class="fa-solid fa-chart-line icon-left"></i>
                 <span class="link-text">Customer Churn</span>
             </a>
         </li>` : ''}
 
-        ${canOpenPackageSales ? `<li class="nav-item">
+        ${canOpenPackageSales && !isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('management-packages')}" href="/management/dashboard-packages">
                 <i class="fa-solid fa-cubes icon-left"></i>
                 <span class="link-text">Package Sales</span>
@@ -176,13 +177,6 @@
             </a>
         </li>` : ''}
 
-        ${canOpenDivisionDash ? `<li class="nav-item">
-            <a class="nav-link${isActive('management-market-insight')}" href="/management/market-insight">
-                <i class="fa-solid fa-globe icon-left"></i>
-                <span class="link-text">AI Market Insight</span>
-            </a>
-        </li>` : ''}
-
         ${canCreateUser ? `<li class="nav-item">
             <a class="nav-link${isActive('manage-users')}" href="/ops/manage-users">
                 <i class="fa-solid fa-users icon-left"></i>
@@ -190,8 +184,8 @@
             </a>
         </li>` : ''}
 
-        <!-- Notification (expandable) -->
-        <li class="nav-item nav-item-group">
+        <!-- Notification (expandable) - hidden for SUPERADMIN -->
+        ${!isSuperadmin ? `<li class="nav-item nav-item-group">
             <a class="nav-link nav-link-parent${isParentActive('notif')}"
                onclick="OpsLayout.toggleSubmenu(this)">
                 <i class="fa-solid fa-bell icon-left"></i>
@@ -218,41 +212,41 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li>` : ''}
 
-        <li class="nav-item">
+        ${!isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('orders')}" href="/ops/orders">
                 <i class="fa-solid fa-receipt icon-left"></i>
                 <span class="link-text">Orders</span>
             </a>
-        </li>
+        </li>` : ''}
 
         ${_isSupportRole ? `
         <li class="nav-item">
             <a class="nav-link${isActive('tickets')}" href="/ops/tickets">
                 <i class="fa-solid fa-ticket icon-left"></i>
-                <span class="link-text">Ticket</span>
+                <span class="link-text">Support Ticket</span>
             </a>
         </li>
         ` : ''}
 
-        <li class="nav-item">
+        ${!isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('subscriptions')}" href="/ops/subscriptions">
                 <i class="fa-solid fa-crown icon-left"></i>
                 <span class="link-text">Subscriptions</span>
             </a>
-        </li>
+        </li>` : ''}
 
     </ul>
 
     <ul class="nav flex-column mb-5">
-        <li class="nav-item">
+        ${!isSuperadmin ? `<li class="nav-item">
             <a class="nav-link disabled" href="#" title="Coming soon">
                 <i class="fa-solid fa-gear icon-left"></i>
                 <span class="link-text">Settings</span>
                 <span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span>
             </a>
-        </li>
+        </li>` : ''}
         <li class="nav-item">
             <a class="nav-link text-danger" href="#" onclick="OpsLayout.logout()">
                 <i class="fa-solid fa-right-from-bracket icon-left"></i>

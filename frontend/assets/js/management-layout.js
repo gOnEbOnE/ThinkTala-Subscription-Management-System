@@ -72,12 +72,6 @@
 '        <span class="link-text">Package Sales</span>' +
 '      </a>' +
 '    </li>' +
-'    <li class="nav-item">' +
-'      <a class="nav-link' + isActive(isMarketInsightPath) + '" href="/management/market-insight">' +
-'        <i class="fa-solid fa-globe icon-left"></i>' +
-'        <span class="link-text">AI Market Insight</span>' +
-'      </a>' +
-'    </li>' +
 '  </ul>' +
 '  <ul class="nav flex-column mb-5">' +
 '    <li class="nav-item">' +

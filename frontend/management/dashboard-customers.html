@@ -430,19 +430,19 @@
     <div id="exportModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1050; display: flex; align-items: center; justify-content: center;">
         <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; max-width: 360px; width: 90%;">
             <div style="font-size: 1.1rem; font-weight: 700; color: var(--text-heading); margin-bottom: 1rem;">Export Data</div>
-            <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Pilih format export yang anda inginkan:</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Select your desired export format:</div>
             <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                 <button onclick="performExport('summary')" style="padding: 0.75rem; background: var(--accent-cyan); color: #000; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-align: left;">
                     <i class="fa-solid fa-file-csv me-2"></i> Export Summary
-                    <div style="font-size: 0.8rem; color: rgba(0,0,0,0.6); margin-top: 0.25rem;">Ringkasan data retention & churn</div>
+                    <div style="font-size: 0.8rem; color: rgba(0,0,0,0.6); margin-top: 0.25rem;">Retention & churn data summary</div>
                 </button>
                 <button onclick="performExport('raw')" style="padding: 0.75rem; background: transparent; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 600; cursor: pointer; text-align: left;">
                     <i class="fa-solid fa-database me-2"></i> Export Raw Data
-                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Detail customer loyal & churned</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Detailed loyal & churned customers</div>
                 </button>
             </div>
             <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                <button onclick="closeExportModal()" style="flex: 1; padding: 0.5rem; background: transparent; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 600; cursor: pointer;">Batal</button>
+                <button onclick="closeExportModal()" style="flex: 1; padding: 0.5rem; background: transparent; color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
             </div>
         </div>
     </div>
@@ -462,7 +462,7 @@
         <div id="forbiddenState" class="forbidden-wrap">
             <div class="forbidden-code">403</div>
             <div class="h5 mb-2">Access Denied</div>
-            <div>Halaman ini hanya dapat diakses oleh role Management / Admin.</div>
+            <div>This page can only be accessed by Management / Admin roles.</div>
         </div>
 
         <div id="dashboardRoot">
@@ -533,10 +533,10 @@
                     </div>
                 </div>
                 <div id="errorState" class="error-state d-none justify-content-between align-items-center">
-                    <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat dashboard customer.</span>
+                    <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed to load customer dashboard.</span>
                     <button id="retryBtn" class="btn btn-sm btn-outline-light">Retry</button>
                 </div>
-                <div id="noDataPeriodState" class="empty-period-note">Tidak ada data pada periode ini.</div>
+                <div id="noDataPeriodState" class="empty-period-note">No data available for this period.</div>
             </div>
 
             <div class="chart-card mb-3">
@@ -546,7 +546,7 @@
                     <div id="growthChartSkeleton" class="chart-skeleton"></div>
                     <canvas id="growthChurnChart" height="120"></canvas>
                 </div>
-                <div id="growthEmptyHint" class="empty-hint">Belum ada data pertumbuhan pelanggan.</div>
+                <div id="growthEmptyHint" class="empty-hint">No customer growth data available.</div>
             </div>
 
             <div class="chart-card mb-3">
@@ -556,7 +556,7 @@
                     <div id="churnTrendSkeleton" class="chart-skeleton"></div>
                     <canvas id="churnTrendChart" height="110"></canvas>
                 </div>
-                <div id="churnEmptyHint" class="empty-hint">Tidak ada data churn.</div>
+                <div id="churnEmptyHint" class="empty-hint">No churn data available.</div>
             </div>
 
             <div class="chart-card mb-3">
@@ -586,7 +586,7 @@
                             </tr>
                         </thead>
                         <tbody id="loyalTableBody">
-                            <tr><td colspan="6" class="text-center text-muted py-4">Memuat data...</td></tr>
+                            <tr><td colspan="6" class="text-center text-muted py-4">Loading data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -617,7 +617,7 @@
                             </tr>
                         </thead>
                         <tbody id="churnedTableBody">
-                            <tr><td colspan="5" class="text-center text-muted py-4">Memuat data...</td></tr>
+                            <tr><td colspan="5" class="text-center text-muted py-4">Loading data...</td></tr>
                         </tbody>
                     </table>
                 </div>

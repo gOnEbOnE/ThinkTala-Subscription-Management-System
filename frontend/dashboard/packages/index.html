@@ -333,12 +333,12 @@
         <div id="forbiddenState" class="forbidden-wrap">
             <div class="forbidden-code">403</div>
             <div class="h5 mb-2">Access Denied</div>
-            <div>Halaman ini hanya dapat diakses oleh role Management / Admin.</div>
+            <div>This page can only be accessed by Management / Admin roles.</div>
         </div>
 
         <div id="notFoundState" class="not-found">
-            <div class="h6 mb-2">Detail package tidak tersedia.</div>
-            <div class="small">Data package yang diminta tidak ditemukan untuk periode ini.</div>
+            <div class="h6 mb-2">Package detail unavailable.</div>
+            <div class="small">The requested package data was not found for this period.</div>
         </div>
 
         <div id="detailRoot">
@@ -363,7 +363,7 @@
                     </div>
                 </div>
                 <div id="errorState" class="">
-                    <!-- <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat detail package. Silakan coba lagi.</span> -->
+                    <!-- <span><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed to load package details. Please try again.</span> -->
                     <!-- <button id="retryBtn" class="btn btn-sm btn-outline-light">Retry</button> -->
                 </div>
             </div>
@@ -418,7 +418,7 @@
                     <div id="trendSkeleton" class="chart-skeleton"></div>
                     <canvas id="trendChart" height="180"></canvas>
                 </div>
-                <div id="trendEmpty" class="trend-empty">Data trend belum tersedia.</div>
+                <div id="trendEmpty" class="trend-empty">Trend data is not yet available.</div>
             </div>
 
             <div class="chart-card mb-4">
@@ -434,7 +434,7 @@
                         </thead>
                         <tbody id="trendTableBody">
                             <tr>
-                                <td colspan="2" class="text-center text-muted py-4">Memuat data...</td>
+                                <td colspan="2" class="text-center text-muted py-4">Loading data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -553,7 +553,7 @@
 
         function validateDateRangeAndNotify() {
             if (isDateRangeValid()) return true;
-            showToast('Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+            showToast('Start date cannot be greater than end date.');
             return false;
         }
 
@@ -730,7 +730,7 @@
                 }
                 if (res.status === 400) {
                     const errBody = await safeJson(res);
-                    showToast((errBody && errBody.message) || 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir.');
+                    showToast((errBody && errBody.message) || 'Start date cannot be greater than end date.');
                     setLoadingState(false);
                     fetchController = null;
                     return;

@@ -66,7 +66,7 @@
                 '<li class="nav-item"><a class="nav-link disabled" href="#"><i class="fa-solid fa-wand-magic-sparkles icon-left"></i><span class="link-text">Ask Nizza</span><span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span></a></li>' +
                 '<li class="sidebar-section-label"><span class="link-text"></span></li>' +
                 '<li class="nav-item"><a class="nav-link' + isKycActive() + '" href="/client/kyc-status"><i class="fa-solid fa-id-card icon-left"></i><span class="link-text">KYC Verification</span></a></li>' +
-                '<li class="nav-item"><a class="nav-link' + isTicketActive() + '" href="/client/support-tickets"><i class="fa-solid fa-ticket icon-left"></i><span class="link-text">Ticket</span></a></li>' +
+                '<li class="nav-item"><a class="nav-link' + isTicketActive() + '" href="/client/support-tickets"><i class="fa-solid fa-ticket icon-left"></i><span class="link-text">Support Ticket</span></a></li>' +
             '</ul>' +
             '<ul class="nav flex-column mb-5">' +
                 '<li class="nav-item"><a class="nav-link' + isMembershipActive() + '" href="/client/packages-catalog"><i class="fa-solid fa-crown icon-left"></i><span class="link-text">Membership</span></a></li>' +
