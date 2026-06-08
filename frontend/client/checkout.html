@@ -622,7 +622,7 @@
                             </div>
 
                             <div class="btn-confirm-wrap">
-                                <button id="btnConfirm" class="btn-confirm" onclick="submitOrder()">
+                                <button type="button" id="btnConfirm" class="btn-confirm" onclick="submitOrder()">
                                     <span id="btnText"><i class="fa-solid fa-lock me-2"></i>Buat Pesanan</span>
                                     <span id="btnLoading" style="display:none"><i
                                             class="fa-solid fa-spinner fa-spin me-2"></i>Memproses...</span>
@@ -683,6 +683,7 @@
         var selectedPackage = null;
         var selectedTier = null; // { duration_months, price, label, is_special }
         var selectedPaymentMethod = 'Transfer Bank';
+        var isSubmittingOrder = false;
 
         // ===========================
         // HELPERS
@@ -969,6 +970,7 @@
         // SUBMIT ORDER
         // ===========================
         async function submitOrder() {
+            if (isSubmittingOrder) return;
             if (!selectedPackage) return;
 
             var nama = document.getElementById('inputNama').value.trim();
@@ -984,14 +986,15 @@
             }
             updateDurationPricing(durationMonths);
 
-            var canProceed = await ensureKYCApprovedBeforeOrder();
-            if (!canProceed) {
-                return;
-            }
-
+            isSubmittingOrder = true;
             setSubmitLoading(true);
 
             try {
+                var canProceed = await ensureKYCApprovedBeforeOrder();
+                if (!canProceed) {
+                    return;
+                }
+
                 var res = await fetch('/api/orders', {
                     method: 'POST',
                     credentials: 'include',
@@ -1041,6 +1044,7 @@
             } catch (e) {
                 showToast('Gagal terhubung ke server.', 'danger');
             } finally {
+                isSubmittingOrder = false;
                 setSubmitLoading(false);
             }
         }
