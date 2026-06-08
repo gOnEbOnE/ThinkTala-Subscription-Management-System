@@ -1138,6 +1138,1111 @@ function filterDivisionCards(query) {
 
 ---
 
+## Peserta 11
+
+### Soal 21 — [CREATE] KYC Resubmission: Submit Form ke API
+
+**File:** `frontend/client/kyc-resubmit.html`
+
+**Apa yang harus dilakukan:**
+Implementasikan tombol submit form KYC resubmission yang mengirim data (termasuk file baru) ke API `PUT /api/kyc/resubmit` menggunakan `FormData` + `fetch`, dengan loading state dan toast notifikasi sukses/gagal.
+
+**Status kode saat ini:**
+Tombol submit dan form sudah ada, tapi logika `fetch` mungkin belum lengkap atau hanya partial. Pastikan semua field (nama, NIK, tanggal lahir, dll) dan file KTP ikut terkirim.
+
+**Langkah pengerjaan:**
+
+1. Cari event handler submit form (biasanya `$('resubmitForm').addEventListener('submit', ...)`).
+2. Gunakan `FormData` untuk mengemas semua data:
+
+```js
+async function doResubmit() {
+    var btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mengirim...';
+
+    var form = document.getElementById('resubmitForm');
+    var fd = new FormData(form);
+
+    // Pastikan file ikut jika user mengunggah file baru
+    var fileInput = document.getElementById('ktpFile');
+    if (fileInput && fileInput.files[0]) {
+        fd.set('ktp_file', fileInput.files[0]);
+    }
+
+    try {
+        var res = await fetch('/api/kyc/resubmit', {
+            method: 'PUT',
+            credentials: 'include',
+            body: fd
+            // JANGAN set Content-Type, biarkan browser isi boundary otomatis
+        });
+        var data = await res.json();
+        if (res.ok) {
+            showToast('success', 'KYC berhasil dikirim ulang. Menunggu review...');
+            setTimeout(() => window.location.href = '/client/kyc-status', 2000);
+        } else {
+            showToast('error', data.message || 'Gagal mengirim KYC.');
+        }
+    } catch (err) {
+        showToast('error', 'Koneksi gagal. Coba lagi.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane me-2"></i>Kirim Ulang';
+    }
+}
+```
+
+---
+
+### Soal 22 — [READ] KYC Resubmission: Tampilkan Status & Riwayat KYC
+
+**File:** `frontend/client/kyc-resubmit.html`
+
+**Apa yang harus dilakukan:**
+Fetch status KYC terbaru user dari API `GET /api/kyc/status`, tampilkan badge status (pending/approved/rejected) di bagian atas halaman beserta tanggal pengajuan terakhir.
+
+**Langkah pengerjaan:**
+
+1. Tambahkan elemen status di atas form:
+
+```html
+<div id="kycStatusBar" class="d-flex align-items-center gap-3 p-3 rounded mb-4"
+     style="background:rgba(255,255,255,0.04); border:1px solid var(--border-color); display:none !important;">
+    <div>
+        <div class="small text-muted">Status KYC Terakhir</div>
+        <span id="kycStatusBadge" class="badge fs-6 mt-1"></span>
+    </div>
+    <div class="ms-auto text-end">
+        <div class="small text-muted">Diajukan pada</div>
+        <div id="kycSubmitDate" class="small" style="color:var(--text-heading);"></div>
+    </div>
+</div>
+```
+
+2. Fetch dan isi:
+
+```js
+async function loadKYCStatus() {
+    try {
+        var res = await fetch('/api/kyc/status', { credentials: 'include' });
+        if (!res.ok) return;
+        var data = await res.json();
+        var kyc = data.data;
+        if (!kyc) return;
+
+        var statusColors = {
+            pending:  { bg: '#f59e0b', text: 'Menunggu Review' },
+            approved: { bg: '#22c55e', text: 'Disetujui' },
+            rejected: { bg: '#ef4444', text: 'Ditolak' }
+        };
+        var cfg = statusColors[kyc.status] || { bg: '#94a3b8', text: kyc.status };
+
+        var badge = document.getElementById('kycStatusBadge');
+        badge.textContent = cfg.text;
+        badge.style.background = cfg.bg;
+        badge.style.color = '#000';
+
+        document.getElementById('kycSubmitDate').textContent =
+            new Date(kyc.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+
+        var bar = document.getElementById('kycStatusBar');
+        bar.style.display = 'flex';
+    } catch (e) { /* silent */ }
+}
+
+// Panggil saat halaman load
+document.addEventListener('DOMContentLoaded', loadKYCStatus);
+```
+
+---
+
+## Peserta 12
+
+### Soal 23 — [UPDATE] KYC Resubmission: Pre-fill Form dengan Data KYC Lama
+
+**File:** `frontend/client/kyc-resubmit.html`
+
+**Apa yang harus dilakukan:**
+Saat halaman dimuat, otomatis isi field-field form (nama, NIK, tanggal lahir, telepon, alamat) dengan data dari KYC sebelumnya yang diambil dari API, sehingga user tinggal mengubah bagian yang perlu dikoreksi.
+
+**Langkah pengerjaan:**
+
+1. Di dalam fungsi `loadKYCData()` yang sudah ada, setelah data API diterima, isi field form:
+
+```js
+// Di dalam loadKYCData(), setelah: var data = await res.json();
+var kyc = data.data;
+
+// Field mapping: ID element → key dari API response
+var fieldMap = {
+    'fullName':  kyc.full_name  || '',
+    'nik':       kyc.nik        || '',
+    'birthdate': kyc.birthdate  || '',
+    'phone':     kyc.phone      || '',
+    'address':   kyc.address    || ''
+};
+
+Object.keys(fieldMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && fieldMap[id]) el.value = fieldMap[id];
+});
+
+// Simpan data lama untuk perbandingan di modal ringkasan (Soal 18)
+window.previousKYC = kyc;
+```
+
+2. Tambahkan visual hint bahwa data sudah di-pre-fill:
+
+```js
+// Setelah mengisi field, tambahkan kelas highlight sementara
+Object.keys(fieldMap).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && fieldMap[id]) {
+        el.style.borderColor = 'rgba(0,212,255,0.4)';
+        el.addEventListener('focus', function() {
+            this.style.borderColor = '';
+        }, { once: true });
+    }
+});
+```
+
+---
+
+### Soal 24 — [DELETE] KYC Resubmission: Batalkan Pengajuan Pending
+
+**File:** `frontend/client/kyc-resubmit.html`
+
+**Apa yang harus dilakukan:**
+Tambahkan tombol "Batalkan Pengajuan" yang hanya muncul jika status KYC = `'pending'`. Tombol memicu modal konfirmasi, lalu mengirim `DELETE /api/kyc/cancel` ke API.
+
+**Langkah pengerjaan:**
+
+1. Tambahkan tombol batalkan di dekat status bar (Soal 22):
+
+```html
+<button id="btnCancelKYC" style="display:none;"
+        class="btn btn-sm btn-outline-danger"
+        onclick="showCancelConfirm()">
+    <i class="fa-solid fa-ban me-1"></i>Batalkan Pengajuan
+</button>
+```
+
+2. Tampilkan tombol hanya jika status = pending (di `loadKYCStatus()`):
+
+```js
+// Setelah mengisi badge status
+if (kyc.status === 'pending') {
+    document.getElementById('btnCancelKYC').style.display = 'inline-flex';
+}
+```
+
+3. Fungsi konfirmasi dan DELETE:
+
+```js
+function showCancelConfirm() {
+    var ok = confirm('Yakin ingin membatalkan pengajuan KYC yang sedang pending?\nTindakan ini tidak dapat dibatalkan.');
+    if (!ok) return;
+    cancelKYC();
+}
+
+async function cancelKYC() {
+    try {
+        var res = await fetch('/api/kyc/cancel', {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        var data = await res.json();
+        if (res.ok) {
+            showToast('success', 'Pengajuan KYC berhasil dibatalkan.');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showToast('error', data.message || 'Gagal membatalkan pengajuan.');
+        }
+    } catch (e) {
+        showToast('error', 'Koneksi gagal.');
+    }
+}
+```
+
+---
+
+## Peserta 13
+
+### Soal 25 — [CREATE] Register: Submit Form dengan Validasi Lengkap
+
+**File:** `frontend/account/register.html`
+
+**Apa yang harus dilakukan:**
+Implementasikan validasi lengkap sebelum submit form register: format email, panjang minimal password (8 karakter), kesesuaian konfirmasi password, dan format nomor telepon. Kirim POST ke `/api/auth/register`, lalu redirect ke halaman OTP jika berhasil.
+
+**Langkah pengerjaan:**
+
+1. Fungsi validasi semua field:
+
+```js
+function validateRegisterForm() {
+    var errors = [];
+    var name  = document.getElementById('fullName').value.trim();
+    var email = document.getElementById('email').value.trim();
+    var pass  = document.getElementById('password').value;
+    var conf  = document.getElementById('confirmPassword').value;
+    var phone = document.getElementById('phone').value.trim();
+
+    if (name.length < 3)
+        errors.push('Nama minimal 3 karakter.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+        errors.push('Format email tidak valid.');
+    if (pass.length < 8)
+        errors.push('Password minimal 8 karakter.');
+    if (pass !== conf)
+        errors.push('Konfirmasi password tidak cocok.');
+    if (!/^[0-9]{8,15}$/.test(phone.replace(/^0+/, '')))
+        errors.push('Nomor telepon tidak valid (8–15 digit).');
+
+    return errors;
+}
+```
+
+2. Di event submit, jalankan validasi dulu:
+
+```js
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var errors = validateRegisterForm();
+    if (errors.length) {
+        showToast('error', errors[0]); // tampilkan error pertama
+        return;
+    }
+
+    var btn = document.getElementById('btnRegister');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mendaftar...';
+
+    try {
+        var res = await fetch('/api/auth/register', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                full_name:  document.getElementById('fullName').value.trim(),
+                email:      document.getElementById('email').value.trim(),
+                password:   document.getElementById('password').value,
+                phone:      document.getElementById('phone').value.trim(),
+                birthdate:  document.getElementById('birthdate').value
+            })
+        });
+        var data = await res.json();
+        if (res.ok) {
+            showToast('success', 'Registrasi berhasil! Cek email untuk OTP.');
+            setTimeout(() => window.location.href = '/account/verify-otp', 1500);
+        } else {
+            showToast('error', data.message || 'Registrasi gagal.');
+        }
+    } catch (err) {
+        showToast('error', 'Koneksi gagal.');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Daftar Sekarang';
+    }
+});
+```
+
+---
+
+### Soal 26 — [READ] Login: Tampilkan Sambutan Nama User Setelah Berhasil Login
+
+**File:** `frontend/account/login.html`
+
+**Apa yang harus dilakukan:**
+Setelah login berhasil (response dari `/api/auth/login`), simpan data user ke `localStorage`, lalu tampilkan toast **"Selamat datang, [Nama]!"** selama 2 detik sebelum redirect ke dashboard.
+
+**Status kode saat ini:**
+Handler login yang ada (sekitar baris 145–191) langsung redirect tanpa menampilkan sambutan personalisasi.
+
+**Langkah pengerjaan:**
+
+Di dalam blok `if (res.ok)` pada handler login, tambahkan:
+
+```js
+// Simpan info user ke localStorage untuk dipakai di halaman lain
+if (data.data && data.data.user) {
+    localStorage.setItem('user', JSON.stringify(data.data.user));
+    localStorage.setItem('user_name', data.data.user.full_name || data.data.user.name || '');
+}
+
+// Tampilkan toast sambutan dengan nama user
+var name = (data.data && data.data.user)
+    ? (data.data.user.full_name || data.data.user.name || 'Pengguna')
+    : 'Pengguna';
+showToast('success', 'Selamat datang, ' + name + '! 👋');
+
+// Redirect setelah toast tampil
+var redirectUrl = data.data.redirect || '/client/dashboard';
+setTimeout(function() { window.location.href = redirectUrl; }, 1800);
+```
+
+**Baca data user di halaman lain:**
+```js
+// Di halaman dashboard / layout
+var storedUser = localStorage.getItem('user');
+if (storedUser) {
+    var user = JSON.parse(storedUser);
+    document.getElementById('navUserName').textContent = user.full_name || user.name;
+}
+```
+
+---
+
+## Peserta 14
+
+### Soal 27 — [UPDATE] Register: Form Input OTP 6-Digit dengan Auto-focus
+
+**File:** `frontend/account/verify-otp.html`
+
+**Apa yang harus dilakukan:**
+Implementasikan form verifikasi OTP dengan 6 kotak input terpisah (satu digit per kotak), auto-focus ke kotak berikutnya saat digit diisi, backspace pindah ke kotak sebelumnya, dan tombol Resend OTP dengan countdown 60 detik.
+
+**Langkah pengerjaan:**
+
+1. Markup 6 input OTP:
+
+```html
+<div class="d-flex gap-2 justify-content-center my-3" id="otpInputs">
+    <input type="text" maxlength="1" class="otp-box form-control text-center fw-bold fs-4"
+           style="width:52px; height:60px; border-radius:10px;" data-index="0" inputmode="numeric">
+    <!-- Ulangi 5x lebih untuk index 1-5 -->
+</div>
+<p class="text-muted small text-center mt-2">
+    Tidak menerima kode?
+    <button id="btnResend" class="btn btn-link p-0 small" disabled onclick="resendOTP()">
+        Kirim ulang (<span id="resendCountdown">60</span>s)
+    </button>
+</p>
+```
+
+2. Logika auto-focus dan backspace:
+
+```js
+document.querySelectorAll('.otp-box').forEach(function(input, idx, boxes) {
+    input.addEventListener('input', function(e) {
+        // Hanya izinkan digit
+        this.value = this.value.replace(/\D/g, '').slice(-1);
+        if (this.value && idx < boxes.length - 1) {
+            boxes[idx + 1].focus();
+        }
+        // Auto submit saat kotak terakhir diisi
+        if (idx === boxes.length - 1 && this.value) {
+            submitOTP();
+        }
+    });
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Backspace' && !this.value && idx > 0) {
+            boxes[idx - 1].focus();
+        }
+    });
+});
+
+function getOTPValue() {
+    return Array.from(document.querySelectorAll('.otp-box'))
+        .map(function(el) { return el.value; }).join('');
+}
+
+// Countdown Resend OTP
+var resendSeconds = 60;
+var resendTimer = setInterval(function() {
+    resendSeconds--;
+    document.getElementById('resendCountdown').textContent = resendSeconds;
+    if (resendSeconds <= 0) {
+        clearInterval(resendTimer);
+        var btn = document.getElementById('btnResend');
+        btn.disabled = false;
+        btn.textContent = 'Kirim ulang sekarang';
+    }
+}, 1000);
+
+async function resendOTP() {
+    var res = await fetch('/api/auth/resend-otp', { method: 'POST', credentials: 'include' });
+    if (res.ok) {
+        showToast('success', 'Kode OTP baru telah dikirim ke email Anda.');
+        resendSeconds = 60;
+        document.getElementById('btnResend').disabled = true;
+        document.getElementById('btnResend').innerHTML =
+            'Kirim ulang (<span id="resendCountdown">60</span>s)';
+        // Restart timer
+    }
+}
+```
+
+---
+
+### Soal 28 — [DELETE] Login/Register: Logout Paksa Semua Sesi Aktif
+
+**File:** `frontend/assets/js/ops-layout.js` atau `client-layout.js`
+
+**Apa yang harus dilakukan:**
+Tambahkan opsi **"Keluar dari Semua Perangkat"** di menu dropdown profil. Fitur ini mengirim `DELETE /api/auth/sessions` untuk menghapus semua sesi aktif user sekaligus, bukan hanya sesi saat ini.
+
+**Langkah pengerjaan:**
+
+1. Tambahkan item menu di dropdown profil (cari area sekitar `logout` di layout):
+
+```html
+<!-- Di dalam dropdown profil, setelah tombol logout biasa -->
+<li><hr class="dropdown-divider" style="border-color:var(--border-color);"></li>
+<li>
+    <a class="dropdown-item text-danger small" href="#" onclick="logoutAllSessions(event)">
+        <i class="fa-solid fa-right-from-bracket me-2"></i>Keluar dari Semua Perangkat
+    </a>
+</li>
+```
+
+2. Fungsi logout semua sesi:
+
+```js
+async function logoutAllSessions(e) {
+    e.preventDefault();
+    var ok = confirm('Ini akan menutup semua sesi aktif di semua perangkat. Lanjutkan?');
+    if (!ok) return;
+
+    try {
+        await fetch('/api/auth/sessions', {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+    } catch (e) { /* biarkan lanjut */ }
+
+    // Bersihkan storage lokal
+    localStorage.clear();
+    sessionStorage.clear();
+
+    showToast('success', 'Semua sesi telah diakhiri.');
+    setTimeout(() => window.location.href = '/account/login', 1500);
+}
+```
+
+---
+
+## Peserta 15
+
+### Soal 29 — [CREATE] Superadmin Manajemen Akun: Form Tambah Akun Internal
+
+**File:** `frontend/ops/create-user.html`
+
+**Apa yang harus dilakukan:**
+Implementasikan form penuh untuk menambah akun internal baru: validasi semua field, dropdown pilihan role (Admin/Compliance/Support/Operasional), dan kirim `POST /api/admin/users` ke API.
+
+**Langkah pengerjaan:**
+
+1. Pastikan form memiliki field: `full_name`, `email`, `password`, `role`, `phone` (opsional).
+
+2. Dropdown role:
+```html
+<select class="form-control" id="role" required>
+    <option value="" disabled selected>Pilih Role</option>
+    <option value="admin">Admin</option>
+    <option value="compliance">Compliance</option>
+    <option value="support">Customer Support</option>
+    <option value="operational">Operasional</option>
+</select>
+```
+
+3. Submit handler:
+
+```js
+document.getElementById('createUserForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    var payload = {
+        full_name: document.getElementById('fullName').value.trim(),
+        email:     document.getElementById('email').value.trim(),
+        password:  document.getElementById('password').value,
+        role:      document.getElementById('role').value,
+        phone:     document.getElementById('phone') ? document.getElementById('phone').value.trim() : ''
+    };
+
+    // Validasi dasar
+    if (!payload.full_name || !payload.email || !payload.password || !payload.role) {
+        showToast('error', 'Semua field wajib diisi.');
+        return;
+    }
+    if (payload.password.length < 8) {
+        showToast('error', 'Password minimal 8 karakter.');
+        return;
+    }
+
+    var btn = document.getElementById('btnCreate');
+    btn.disabled = true;
+
+    try {
+        var res = await fetch('/api/admin/users', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        var data = await res.json();
+        if (res.ok) {
+            showToast('success', 'Akun internal berhasil dibuat.');
+            setTimeout(() => window.location.href = '/ops/manage-users', 1500);
+        } else {
+            showToast('error', data.message || 'Gagal membuat akun.');
+        }
+    } catch (err) {
+        showToast('error', 'Koneksi gagal.');
+    } finally {
+        btn.disabled = false;
+    }
+});
+```
+
+---
+
+### Soal 30 — [READ] Superadmin Manajemen Akun: Export Tabel ke CSV
+
+**File:** `frontend/ops/manage-users.html`
+
+**Apa yang harus dilakukan:**
+Tambahkan tombol **"Export CSV"** yang mengunduh data akun internal yang sedang ditampilkan (sesuai filter aktif) sebagai file `.csv`, tanpa membutuhkan backend — generate langsung dari data array di browser.
+
+**Konteks kode saat ini:**
+Data tabel tersimpan di array `usersData` setelah `loadUsers()` dipanggil. Gunakan array ini sebagai sumber data.
+
+**Langkah pengerjaan:**
+
+1. Tambahkan tombol di area header:
+
+```html
+<button class="btn btn-sm btn-outline-secondary" onclick="exportToCSV()">
+    <i class="fa-solid fa-file-csv me-1"></i>Export CSV
+</button>
+```
+
+2. Fungsi generate dan download CSV:
+
+```js
+function exportToCSV() {
+    if (!usersData || usersData.length === 0) {
+        showToast('error', 'Tidak ada data untuk di-export.');
+        return;
+    }
+
+    var headers = ['Nama', 'Email', 'Role', 'Status', 'Tanggal Dibuat'];
+    var rows = usersData.map(function(u) {
+        return [
+            '"' + (u.full_name || '').replace(/"/g, '""') + '"',
+            '"' + (u.email    || '').replace(/"/g, '""') + '"',
+            '"' + (u.role     || '').replace(/"/g, '""') + '"',
+            u.status === 'active' ? 'Aktif' : 'Nonaktif',
+            '"' + formatDate(u.created_at) + '"'
+        ].join(',');
+    });
+
+    var csvContent = '﻿' + headers.join(',') + '\n' + rows.join('\n');
+    // ﻿ = BOM agar Excel membaca UTF-8 dengan benar
+
+    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href   = url;
+    a.download = 'akun-internal-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+```
+
+---
+
+## Peserta 16
+
+### Soal 31 — [UPDATE] Superadmin Manajemen Akun: Toggle Status Aktif/Nonaktif Inline
+
+**File:** `frontend/ops/manage-users.html`
+
+**Apa yang harus dilakukan:**
+Ganti tombol "Aktifkan/Nonaktifkan" yang ada dengan **toggle switch** langsung di kolom Status tabel. Klik toggle memunculkan konfirmasi, lalu mengirim `PATCH /api/admin/users/:id/status` untuk memperbarui status tanpa reload halaman.
+
+**Langkah pengerjaan:**
+
+1. Saat render baris tabel, ganti badge status statis dengan toggle:
+
+```js
+function renderStatusToggle(u) {
+    var checked  = u.status === 'active' ? 'checked' : '';
+    var label    = u.status === 'active' ? 'Aktif' : 'Nonaktif';
+    var colorVar = u.status === 'active' ? '#22c55e' : '#94a3b8';
+
+    return '<div class="form-check form-switch d-flex align-items-center gap-2 mb-0">' +
+        '<input class="form-check-input" type="checkbox" role="switch" ' + checked +
+        ' onchange="confirmToggleStatus(\'' + u.user_id + '\', \'' + u.full_name + '\', this)"' +
+        ' style="width:2.2em; height:1.1em; cursor:pointer;">' +
+        '<span class="small" style="color:' + colorVar + ';">' + label + '</span>' +
+        '</div>';
+}
+```
+
+2. Fungsi konfirmasi dan PATCH:
+
+```js
+function confirmToggleStatus(userId, userName, checkbox) {
+    var willActivate = checkbox.checked;
+    var actionText   = willActivate ? 'mengaktifkan' : 'menonaktifkan';
+
+    var ok = confirm('Yakin ingin ' + actionText + ' akun "' + userName + '"?');
+    if (!ok) {
+        checkbox.checked = !checkbox.checked; // kembalikan toggle
+        return;
+    }
+
+    toggleUserStatus(userId, willActivate, checkbox);
+}
+
+async function toggleUserStatus(userId, activate, checkbox) {
+    try {
+        var res = await fetch('/api/admin/users/' + userId + '/status', {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: activate ? 'active' : 'inactive' })
+        });
+        var data = await res.json();
+        if (!res.ok) {
+            checkbox.checked = !checkbox.checked; // rollback toggle
+            showToast('error', data.message || 'Gagal mengubah status.');
+        } else {
+            var label = checkbox.nextElementSibling;
+            if (activate) {
+                label.textContent = 'Aktif';
+                label.style.color = '#22c55e';
+            } else {
+                label.textContent = 'Nonaktif';
+                label.style.color = '#94a3b8';
+            }
+            showToast('success', 'Status akun berhasil diubah.');
+        }
+    } catch (e) {
+        checkbox.checked = !checkbox.checked;
+        showToast('error', 'Koneksi gagal.');
+    }
+}
+```
+
+---
+
+### Soal 32 — [DELETE] Superadmin Manajemen Akun: Hapus Massal dengan Checkbox
+
+**File:** `frontend/ops/manage-users.html`
+
+**Apa yang harus dilakukan:**
+Tambahkan checkbox di setiap baris tabel dan tombol **"Hapus Terpilih"** di header. Tombol hanya aktif saat minimal 1 checkbox dicentang, memunculkan konfirmasi jumlah akun yang akan dihapus, lalu mengirim request DELETE.
+
+**Langkah pengerjaan:**
+
+1. Tambahkan checkbox header dan per-baris:
+
+```html
+<!-- Header th pertama -->
+<th style="padding:16px 20px; width:40px;">
+    <input type="checkbox" id="checkAll" onchange="toggleCheckAll(this)">
+</th>
+
+<!-- Dalam render baris, td pertama -->
+// row.innerHTML = '<td><input type="checkbox" class="row-check" value="' + u.user_id + '"></td>' + row.innerHTML;
+```
+
+2. Tombol hapus massal (di toolbar atas tabel):
+
+```html
+<button id="btnBulkDelete" class="btn btn-sm btn-outline-danger" style="display:none;"
+        onclick="confirmBulkDelete()">
+    <i class="fa-solid fa-trash me-1"></i>Hapus Terpilih
+    (<span id="selectedCount">0</span>)
+</button>
+```
+
+3. Logika checkbox dan hapus:
+
+```js
+function toggleCheckAll(master) {
+    document.querySelectorAll('.row-check').forEach(function(cb) {
+        cb.checked = master.checked;
+    });
+    updateBulkDeleteBtn();
+}
+
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('row-check')) updateBulkDeleteBtn();
+});
+
+function updateBulkDeleteBtn() {
+    var checked = document.querySelectorAll('.row-check:checked');
+    var btn = document.getElementById('btnBulkDelete');
+    document.getElementById('selectedCount').textContent = checked.length;
+    btn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+}
+
+function confirmBulkDelete() {
+    var ids = Array.from(document.querySelectorAll('.row-check:checked'))
+        .map(function(cb) { return cb.value; });
+    if (!ids.length) return;
+
+    var ok = confirm('Hapus ' + ids.length + ' akun yang dipilih?\nTindakan ini tidak dapat dibatalkan.');
+    if (!ok) return;
+
+    bulkDeleteUsers(ids);
+}
+
+async function bulkDeleteUsers(ids) {
+    try {
+        var res = await fetch('/api/admin/users/bulk-delete', {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: ids })
+        });
+        var data = await res.json();
+        if (res.ok) {
+            showToast('success', ids.length + ' akun berhasil dihapus.');
+            loadUsers(1);
+        } else {
+            showToast('error', data.message || 'Gagal menghapus akun.');
+        }
+    } catch (e) {
+        showToast('error', 'Koneksi gagal.');
+    }
+}
+```
+
+---
+
+## Peserta 17
+
+### Soal 33 — [CREATE] Superadmin Kinerja Divisi: Tambah Catatan/Note pada Divisi
+
+**File:** `frontend/management/dashboard-overview.html`
+
+**Apa yang harus dilakukan:**
+Tambahkan tombol **"+ Catatan"** pada setiap kartu divisi. Tombol membuka modal input teks. Catatan disimpan ke `localStorage` (tidak membutuhkan API) dan ditampilkan di bawah kartu sebagai sticky note.
+
+**Langkah pengerjaan:**
+
+1. Tambahkan tombol dan area catatan di setiap `.division-card`:
+
+```html
+<!-- Di dalam setiap kartu divisi, setelah metric terakhir -->
+<div class="mt-3 pt-2" style="border-top:1px solid var(--border-color);">
+    <div id="note-compliance" class="small text-muted fst-italic mb-1"
+         style="min-height:20px;"></div>
+    <button class="btn btn-link p-0 small text-muted"
+            onclick="openNoteModal('compliance', 'Divisi Compliance')">
+        <i class="fa-solid fa-pen-to-square me-1"></i>+ Catatan
+    </button>
+</div>
+```
+
+2. Modal catatan (satu modal reusable):
+
+```html
+<div class="modal fade" id="noteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content" style="background:var(--bg-card); border:1px solid var(--border-color);">
+            <div class="modal-body p-3">
+                <h6 class="fw-bold mb-2" id="noteModalTitle"></h6>
+                <textarea id="noteInput" class="form-control" rows="4"
+                          placeholder="Tulis catatan untuk divisi ini..."
+                          style="background:var(--bg-main); border-color:var(--border-color); color:var(--text-heading);"></textarea>
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-sm btn-outline-secondary flex-fill"
+                            data-bs-dismiss="modal">Batal</button>
+                    <button class="btn btn-sm flex-fill" id="btnSaveNote"
+                            style="background:var(--accent-cyan); color:#000;">
+                        <i class="fa-solid fa-floppy-disk me-1"></i>Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+```
+
+3. Logika simpan ke localStorage:
+
+```js
+var currentNoteKey = '';
+
+function openNoteModal(divisionKey, divisionName) {
+    currentNoteKey = 'division_note_' + divisionKey;
+    document.getElementById('noteModalTitle').textContent = 'Catatan: ' + divisionName;
+    document.getElementById('noteInput').value = localStorage.getItem(currentNoteKey) || '';
+    new bootstrap.Modal(document.getElementById('noteModal')).show();
+}
+
+document.getElementById('btnSaveNote').addEventListener('click', function() {
+    var text = document.getElementById('noteInput').value.trim();
+    if (text) {
+        localStorage.setItem(currentNoteKey, text);
+    } else {
+        localStorage.removeItem(currentNoteKey);
+    }
+    bootstrap.Modal.getInstance(document.getElementById('noteModal')).hide();
+    renderNotes(); // refresh tampilan catatan
+});
+
+function renderNotes() {
+    ['compliance', 'support', 'operational'].forEach(function(key) {
+        var el = document.getElementById('note-' + key);
+        if (!el) return;
+        var note = localStorage.getItem('division_note_' + key);
+        el.textContent = note ? '"' + note + '"' : '';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', renderNotes);
+```
+
+---
+
+### Soal 34 — [READ] Superadmin Kinerja Divisi: Chart Bar Perbandingan Antar Divisi
+
+**File:** `frontend/management/dashboard-overview.html`
+
+**Apa yang harus dilakukan:**
+Tambahkan visualisasi chart bar sederhana (tanpa library eksternal — menggunakan CSS + flexbox) yang membandingkan persentase penyelesaian task tiap divisi secara berdampingan.
+
+**Langkah pengerjaan:**
+
+1. Tambahkan section chart sebelum `#cardsRow`:
+
+```html
+<div class="ai-card p-4 mb-4" id="divisionChart">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0" style="color:var(--text-heading);">
+            <i class="fa-solid fa-chart-bar me-2" style="color:var(--accent-cyan);"></i>
+            Perbandingan Penyelesaian Task
+        </h6>
+        <span class="small text-muted" id="chartUpdated"></span>
+    </div>
+    <div id="chartBars" class="d-flex align-items-end gap-4 justify-content-center"
+         style="height:160px;"></div>
+    <div id="chartLegend" class="d-flex gap-4 justify-content-center mt-3 flex-wrap"></div>
+</div>
+```
+
+2. Fungsi render chart (panggil setelah data API diterima):
+
+```js
+var DIVISION_COLORS = {
+    compliance: '#00d4ff',
+    support:    '#22c55e',
+    operational:'#f59e0b'
+};
+
+function renderDivisionChart(divisions) {
+    var barsEl   = document.getElementById('chartBars');
+    var legendEl = document.getElementById('chartLegend');
+    if (!barsEl) return;
+
+    barsEl.innerHTML   = '';
+    legendEl.innerHTML = '';
+
+    document.getElementById('chartUpdated').textContent =
+        'Update: ' + new Date().toLocaleTimeString('id-ID');
+
+    divisions.forEach(function(div) {
+        var resolved = div.resolved || div.done || 0;
+        var pending  = div.pending  || div.open  || 0;
+        var total    = resolved + pending;
+        var pct      = total > 0 ? Math.round((resolved / total) * 100) : 0;
+        var color    = DIVISION_COLORS[div.key] || '#94a3b8';
+
+        // Bar
+        barsEl.innerHTML +=
+            '<div class="d-flex flex-column align-items-center" style="flex:1; max-width:120px;">' +
+            '<div class="small fw-bold mb-1" style="color:' + color + ';">' + pct + '%</div>' +
+            '<div style="width:48px; height:' + Math.max(pct, 4) + '%; background:' + color + '; ' +
+            'border-radius:6px 6px 0 0; transition:height 0.6s ease; min-height:4px;"></div>' +
+            '</div>';
+
+        // Legend
+        legendEl.innerHTML +=
+            '<div class="d-flex align-items-center gap-1 small">' +
+            '<span style="width:12px; height:12px; background:' + color + '; border-radius:3px; display:inline-block;"></span>' +
+            '<span style="color:var(--text-muted);">' + (div.name || div.key) + '</span>' +
+            '</div>';
+    });
+}
+```
+
+---
+
+## Peserta 18
+
+### Soal 35 — [UPDATE] Superadmin Kinerja Divisi: Edit Target Task Divisi Inline
+
+**File:** `frontend/management/dashboard-overview.html`
+
+**Apa yang harus dilakukan:**
+Tambahkan field **"Target"** yang dapat di-edit inline pada setiap kartu divisi: double-click untuk mengaktifkan edit mode, tekan Enter atau klik luar untuk menyimpan. Target dibandingkan dengan aktual dan ditampilkan dengan warna berbeda (hijau/merah).
+
+**Langkah pengerjaan:**
+
+1. Tambahkan elemen target di setiap kartu:
+
+```html
+<!-- Di dalam .division-card, di bawah metric resolved -->
+<div class="mt-2 small" style="color:var(--text-muted);">
+    Target:
+    <span class="target-display fw-semibold" data-division="compliance"
+          title="Double-click untuk edit" style="cursor:pointer; text-decoration:underline dotted;">
+        —
+    </span>
+    <span class="target-diff ms-1 small"></span>
+</div>
+```
+
+2. Logika inline edit dengan localStorage:
+
+```js
+// Inisialisasi target dari localStorage
+function initTargets() {
+    document.querySelectorAll('.target-display').forEach(function(el) {
+        var key = 'division_target_' + el.getAttribute('data-division');
+        var saved = localStorage.getItem(key);
+        el.textContent = saved ? saved + ' task' : 'Set target';
+
+        el.addEventListener('dblclick', function() {
+            var cur = parseInt(localStorage.getItem(key)) || 0;
+            var input = document.createElement('input');
+            input.type  = 'number';
+            input.value = cur;
+            input.min   = '0';
+            input.style.cssText = 'width:70px; font-size:0.8rem; padding:1px 4px; ' +
+                'background:var(--bg-main); border:1px solid var(--accent-cyan); ' +
+                'color:var(--text-heading); border-radius:4px;';
+
+            el.replaceWith(input);
+            input.focus();
+            input.select();
+
+            function save() {
+                var val = parseInt(input.value) || 0;
+                localStorage.setItem(key, val);
+                // Kembalikan ke tampilan
+                el.textContent = val + ' task';
+                input.replaceWith(el);
+                updateTargetDiff(el.getAttribute('data-division'), val);
+            }
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') save();
+                if (e.key === 'Escape') input.replaceWith(el);
+            });
+            input.addEventListener('blur', save);
+        });
+    });
+}
+
+function updateTargetDiff(divisionKey, target) {
+    var divData = window.divisionData && window.divisionData.find(function(d) {
+        return d.key === divisionKey;
+    });
+    if (!divData) return;
+
+    var actual = divData.resolved || divData.done || 0;
+    var diff   = actual - target;
+    var diffEl = document.querySelector('.target-display[data-division="' + divisionKey + '"]')
+        .nextElementSibling;
+    if (!diffEl) return;
+
+    if (diff >= 0) {
+        diffEl.textContent = '(+' + diff + ' ✓)';
+        diffEl.style.color = '#22c55e';
+    } else {
+        diffEl.textContent = '(' + diff + ' ⚠)';
+        diffEl.style.color = '#ef4444';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initTargets);
+```
+
+---
+
+### Soal 36 — [DELETE] Superadmin Kinerja Divisi: Reset Data Kinerja Divisi
+
+**File:** `frontend/management/dashboard-overview.html`
+
+**Apa yang harus dilakukan:**
+Tambahkan tombol **"Reset Data"** di setiap kartu divisi yang, setelah konfirmasi, mengirim `DELETE /api/management/divisions/:key/reset` ke API untuk menghapus data kinerja periode tersebut dan me-reload kartu.
+
+**Langkah pengerjaan:**
+
+1. Tambahkan tombol reset di setiap kartu (di samping nama divisi):
+
+```html
+<!-- Di header kartu divisi -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="fw-bold division-title" style="color:var(--text-heading);">Compliance</div>
+    <button class="btn btn-link p-0 text-muted" title="Reset data divisi ini"
+            onclick="confirmResetDivision('compliance', 'Compliance')">
+        <i class="fa-solid fa-rotate-left fa-sm"></i>
+    </button>
+</div>
+```
+
+2. Fungsi konfirmasi dan DELETE:
+
+```js
+function confirmResetDivision(divisionKey, divisionName) {
+    var ok = confirm(
+        'Reset semua data kinerja divisi "' + divisionName + '"?\n\n' +
+        'Semua task (resolved & pending) akan direset ke 0.\n' +
+        'Tindakan ini TIDAK DAPAT DIBATALKAN.'
+    );
+    if (!ok) return;
+
+    // Double confirm untuk aksi destruktif
+    var reconfirm = confirm('Konfirmasi terakhir: Lanjutkan reset divisi ' + divisionName + '?');
+    if (!reconfirm) return;
+
+    resetDivisionData(divisionKey, divisionName);
+}
+
+async function resetDivisionData(divisionKey, divisionName) {
+    try {
+        var res = await fetch('/api/management/divisions/' + divisionKey + '/reset', {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        var data = await res.json();
+        if (res.ok) {
+            showToast('success', 'Data divisi ' + divisionName + ' berhasil direset.');
+            loadData(); // reload semua kartu
+        } else {
+            showToast('error', data.message || 'Gagal mereset data divisi.');
+        }
+    } catch (e) {
+        showToast('error', 'Koneksi gagal.');
+    }
+}
+```
+
+3. Setelah reset berhasil, tambahkan visual feedback kartu:
+
+```js
+// Di dalam loadData() setelah data dimuat, highlight kartu yang baru di-reset
+function highlightCard(divisionKey) {
+    var card = document.querySelector('[data-division="' + divisionKey + '"] .division-card');
+    if (!card) return;
+    card.style.transition = 'border-color 0.5s';
+    card.style.borderColor = '#22c55e';
+    setTimeout(function() { card.style.borderColor = ''; }, 2000);
+}
+```
+
+---
+
 ## Referensi Cepat — File yang Relevan
 
 | Fitur | File Utama |

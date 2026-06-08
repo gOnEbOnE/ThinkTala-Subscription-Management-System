@@ -582,7 +582,12 @@
 
     /* ── Config ──────────────────────────────────────── */
     var wsProto   = location.protocol === 'https:' ? 'wss' : 'ws';
-    var WS_URL    = wsProto + '://' + (location.host || 'localhost:2000') + '/ws';
+    // Production (Vercel) must connect directly to the Railway gateway because
+    // Vercel serverless cannot proxy WebSocket protocol upgrades.
+    var _isLocal  = (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+    var WS_URL    = _isLocal
+        ? wsProto + '://' + location.host + '/ws'
+        : 'wss://gateway-production-1827.up.railway.app/ws';
     var RECONNECT_MS = 4000;
 
     /* ── Tier Detection ──────────────────────────────── */
