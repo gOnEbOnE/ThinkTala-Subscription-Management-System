@@ -5,7 +5,7 @@ WORKDIR /app
 # Install git jika package kamu ada di private repo atau github
 RUN apk add --no-cache git 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -ldflags="-s -w" -o thinknalyze-gateway main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -mod=vendor -ldflags="-s -w" -o thinknalyze-gateway .
 
 # Run Stage
 FROM alpine:latest

@@ -667,3 +667,350 @@ func HandleCreateUserSupportTicket(db *sql.DB) http.HandlerFunc {
 		})
 	}
 }
+
+// HandleGetMySupportTickets returns support tickets owned by authenticated user.
+// Supports:
+// - status=on-process|done
+// - sort=asc|desc (default desc)
+// - search=keyword (LIKE on title)
+func HandleGetMySupportTickets(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			corehttp.WriteJSONError(w, http.StatusMethodNotAllowed, "method not allowed")
+			return
+		}
+
+		if db == nil {
+			corehttp.WriteJSONError(w, http.StatusInternalServerError, "database unavailable")
+			return
+		}
+
+		user := auth.GetAuthenticatedUserFromRequest(r)
+		user.ID = strings.TrimSpace(user.ID)
+		if user.ID == "" {
+			corehttp.WriteJSONError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		// Optional guard: if caller tries to force another user_id, reject with 403.
+		if requestedUserID := strings.TrimSpace(r.URL.Query().Get("user_id")); requestedUserID != "" && requestedUserID != user.ID {
+			corehttp.WriteJSONError(w, http.StatusForbidden, "forbidden")
+			return
+		}
+
+		statusFilter := strings.TrimSpace(r.URL.Query().Get("status"))
+		search := strings.TrimSpace(r.URL.Query().Get("search"))
+		sortParam := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("sort")))
+		page := utils.ParsePositiveInt(r.URL.Query().Get("page"), 1)
+		perPage := utils.ParsePositiveInt(r.URL.Query().Get("per_page"), 6)
+		if perPage <= 0 || perPage > 6 {
+			perPage = 6
+		}
+
+		normalizedStatus := ""
+		if statusFilter != "" {
+			switch strings.ToLower(strings.ReplaceAll(statusFilter, "_", "-")) {
+			case "on-process", "on process":
+				normalizedStatus = "ON PROCESS"
+			case "done":
+				normalizedStatus = "DONE"
+			default:
+				corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid status filter")
+				return
+			}
+		}
+
+		sortOrder := "DESC"
+		if sortParam == "asc" || sortParam == "oldest" {
+			sortOrder = "ASC"
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+
+		whereClauses := []string{"st.user_id = $1"}
+		args := []any{user.ID}
+
+		if normalizedStatus != "" {
+			whereClauses = append(whereClauses, fmt.Sprintf("st.status = $%d", len(args)+1))
+			args = append(args, normalizedStatus)
+		}
+
+		if search != "" {
+			whereClauses = append(whereClauses, fmt.Sprintf("st.title ILIKE $%d", len(args)+1))
+			args = append(args, "%"+search+"%")
+		}
+
+		countQuery := fmt.Sprintf(`
+			SELECT COUNT(1)
+			FROM support_tickets st
+			WHERE %s
+		`, strings.Join(whereClauses, " AND "))
+
+		var total int
+		if err := db.QueryRowContext(ctx, countQuery, args...).Scan(&total); err != nil {
+			log.Printf("[ERROR] Failed counting my support tickets: %v", err)
+			corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to fetch support tickets")
+			return
+		}
+
+		offset := (page - 1) * perPage
+
+		query := fmt.Sprintf(`
+			SELECT st.id, st.title, st.status, st.created_at
+			FROM support_tickets st
+			WHERE %s
+			ORDER BY st.created_at %s
+			LIMIT $%d OFFSET $%d
+		`, strings.Join(whereClauses, " AND "), sortOrder, len(args)+1, len(args)+2)
+
+		queryArgs := append(append([]any{}, args...), perPage, offset)
+		rows, err := db.QueryContext(ctx, query, queryArgs...)
+		if err != nil {
+			log.Printf("[ERROR] Failed querying my support tickets: %v", err)
+			corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to fetch support tickets")
+			return
+		}
+		defer rows.Close()
+
+		type myTicketItem struct {
+			ID        string `json:"id"`
+			Title     string `json:"title"`
+			Status    string `json:"status"`
+			CreatedAt string `json:"created_at"`
+		}
+		result := make([]myTicketItem, 0)
+
+		for rows.Next() {
+			var (
+				id        string
+				title     string
+				status    string
+				createdAt time.Time
+			)
+			if scanErr := rows.Scan(&id, &title, &status, &createdAt); scanErr != nil {
+				log.Printf("[ERROR] Failed scanning my support tickets: %v", scanErr)
+				corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to parse support tickets")
+				return
+			}
+
+			createdAt = config.NormalizeNaiveTimestampToAppTZ(createdAt)
+			result = append(result, myTicketItem{
+				ID:        id,
+				Title:     title,
+				Status:    status,
+				CreatedAt: createdAt.Format(time.RFC3339),
+			})
+		}
+
+		if err = rows.Err(); err != nil {
+			log.Printf("[ERROR] Rows error on my support tickets: %v", err)
+			corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to read support tickets")
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		totalPages := 0
+		if total > 0 {
+			totalPages = (total + perPage - 1) / perPage
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"data": result,
+			"pagination": map[string]any{
+				"page":        page,
+				"per_page":    perPage,
+				"total":       total,
+				"total_pages": totalPages,
+				"has_next":    page < totalPages,
+				"has_prev":    page > 1 && totalPages > 0,
+			},
+		})
+	}
+}
+
+// HandleGetMySupportTicketDetail returns single support ticket detail owned by authenticated user.
+// Path:
+// - /api/support/tickets/{id}
+// - /api/support/tickets/{id}/attachment
+func HandleGetMySupportTicketDetail(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			corehttp.WriteJSONError(w, http.StatusMethodNotAllowed, "method not allowed")
+			return
+		}
+
+		if db == nil {
+			corehttp.WriteJSONError(w, http.StatusInternalServerError, "database unavailable")
+			return
+		}
+
+		if !auth.HasClientSupportCreateRole(r) {
+			corehttp.WriteJSONError(w, http.StatusForbidden, "forbidden")
+			return
+		}
+
+		ticketID, action, ok := utils.ParseClientSupportTicketPath(r.URL.Path)
+		if !ok {
+			corehttp.WriteJSONError(w, http.StatusNotFound, "not found")
+			return
+		}
+
+		user := auth.GetAuthenticatedUserFromRequest(r)
+		user.ID = strings.TrimSpace(user.ID)
+		if user.ID == "" {
+			corehttp.WriteJSONError(w, http.StatusUnauthorized, "unauthorized")
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+		defer cancel()
+
+		var (
+			title          string
+			category       string
+			description    string
+			status         string
+			createdAt      time.Time
+			hasAttachment  bool
+			attachmentName sql.NullString
+			attachmentMIME sql.NullString
+			attachmentData []byte
+		)
+
+		err := db.QueryRowContext(ctx, `
+			SELECT title, category, description, status, created_at,
+			       CASE WHEN attachment_data IS NULL OR OCTET_LENGTH(attachment_data) = 0 THEN FALSE ELSE TRUE END AS has_attachment,
+			       attachment_name, attachment_mime, attachment_data
+			FROM support_tickets
+			WHERE id = $1 AND user_id = $2
+			LIMIT 1
+		`, ticketID, user.ID).Scan(
+			&title,
+			&category,
+			&description,
+			&status,
+			&createdAt,
+			&hasAttachment,
+			&attachmentName,
+			&attachmentMIME,
+			&attachmentData,
+		)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				var exists bool
+				existsErr := db.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM support_tickets WHERE id = $1)`, ticketID).Scan(&exists)
+				if existsErr == nil && exists {
+					corehttp.WriteJSONError(w, http.StatusForbidden, "forbidden")
+					return
+				}
+				corehttp.WriteJSONError(w, http.StatusNotFound, "ticket tidak ditemukan")
+				return
+			}
+			log.Printf("[ERROR] Failed querying my support ticket detail: %v", err)
+			corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to fetch support ticket detail")
+			return
+		}
+
+		if action == "attachment" {
+			if !hasAttachment || len(attachmentData) == 0 {
+				corehttp.WriteJSONError(w, http.StatusNotFound, "lampiran tidak ditemukan")
+				return
+			}
+
+			contentType := strings.ToLower(strings.TrimSpace(attachmentMIME.String))
+			if !utils.IsAllowedImageMIME(contentType) {
+				contentType = strings.ToLower(strings.TrimSpace(http.DetectContentType(attachmentData)))
+			}
+			if !utils.IsAllowedImageMIME(contentType) {
+				contentType = "application/octet-stream"
+			}
+
+			filename := utils.SanitizeUploadFileName(attachmentName.String)
+			if filename == "" {
+				filename = "attachment"
+			}
+
+			w.Header().Set("Content-Type", contentType)
+			w.Header().Set("Content-Length", strconv.Itoa(len(attachmentData)))
+			w.Header().Set("Cache-Control", "no-store")
+			w.Header().Set("Content-Disposition", fmt.Sprintf("inline; filename=\"%s\"", filename))
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(attachmentData)
+			return
+		}
+
+		replyRows, replyErr := db.QueryContext(ctx, `
+			SELECT id, admin_id, message, created_at
+			FROM support_ticket_replies
+			WHERE ticket_id = $1
+			ORDER BY created_at ASC, id ASC
+		`, ticketID)
+		if replyErr != nil {
+			log.Printf("[ERROR] Failed querying support ticket replies: %v", replyErr)
+			corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to fetch support ticket detail")
+			return
+		}
+		defer replyRows.Close()
+
+		replies := make([]map[string]any, 0)
+		adminResponse := ""
+		respondedAtText := ""
+		adminResponded := false
+
+		for replyRows.Next() {
+			var (
+				replyID    string
+				adminID    string
+				message    string
+				createdAtR time.Time
+			)
+			if scanErr := replyRows.Scan(&replyID, &adminID, &message, &createdAtR); scanErr != nil {
+				log.Printf("[ERROR] Failed scanning support ticket reply: %v", scanErr)
+				corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to fetch support ticket detail")
+				return
+			}
+
+			createdAtR = config.NormalizeNaiveTimestampToAppTZ(createdAtR)
+			replies = append(replies, map[string]any{
+				"id":         replyID,
+				"admin_id":   adminID,
+				"message":    message,
+				"created_at": createdAtR.Format(time.RFC3339),
+			})
+
+			// Keep latest admin response for backward compatibility.
+			adminResponse = message
+			respondedAtText = createdAtR.Format(time.RFC3339)
+			adminResponded = strings.TrimSpace(message) != ""
+		}
+		if err = replyRows.Err(); err != nil {
+			log.Printf("[ERROR] Rows error on support ticket replies: %v", err)
+			corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to fetch support ticket detail")
+			return
+		}
+
+		createdAt = config.NormalizeNaiveTimestampToAppTZ(createdAt)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"data": map[string]any{
+				"id":               ticketID,
+				"title":            title,
+				"category":         category,
+				"description":      description,
+				"status":           status,
+				"created_at":       createdAt.Format(time.RFC3339),
+				"completed_at":     respondedAtText,
+				"admin_response":   adminResponse,
+				"has_attachment":   hasAttachment,
+				"attachment_url":   utils.BuildClientAttachmentURL(ticketID, hasAttachment),
+				"admin_replied":    adminResponded,
+				"admin_replied_at": respondedAtText,
+				"replies":          replies,
+			},
+		})
+	}
+}

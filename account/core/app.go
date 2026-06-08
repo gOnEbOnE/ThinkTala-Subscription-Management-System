@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -56,10 +57,15 @@ func New(cfg Config) *App {
 		log.Println("[CORE] Connecting to Database...")
 		dbWrapper, err = database.Connect(cfg.DBConfig)
 		if err != nil {
-			// Jika diset TRUE tapi gagal connect, aplikasi harus mati (Fatal)
-			log.Fatalf("[CORE] Database connect error: %v", err)
+			if strings.EqualFold(utils.GetEnv("postgres_optional"), "true") {
+				log.Printf("[CORE] Database unavailable: %v — continuing without DB (postgres_optional=true) ⚠️", err)
+				dbWrapper = &database.DBWrapper{Pool: nil}
+			} else {
+				log.Fatalf("[CORE] Database connect error: %v", err)
+			}
+		} else {
+			log.Println("[CORE] Database Connected ✅")
 		}
-		log.Println("[CORE] Database Connected ✅")
 	} else {
 		// Jika diset FALSE, bypass connection
 		log.Println("[CORE] Database is DISABLED in .env (Running without DB) ⚠️")

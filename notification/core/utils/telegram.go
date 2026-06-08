@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -45,9 +46,14 @@ func (t *TelegramSender) Send(chatID, text string) (string, error) {
 
 	apiURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", t.BotToken)
 
+	// Ensure we don't forward raw HTML tags (e.g. <p>) to Telegram.
+	// Telegram is configured to parse Markdown; sending raw HTML tags
+	// results in visible tags in the message bubble. Strip tags here.
+	cleanText := stripHTMLTags(text)
+
 	payload := telegramPayload{
 		ChatID:    chatID,
-		Text:      text,
+		Text:      cleanText,
 		ParseMode: "Markdown",
 	}
 	body, err := json.Marshal(payload)
@@ -72,4 +78,31 @@ func (t *TelegramSender) Send(chatID, text string) (string, error) {
 
 	log.Printf("[TELEGRAM] Sent to chatID=%s status=%d", chatID, resp.StatusCode)
 	return fmt.Sprintf("telegram:ok:%d", resp.StatusCode), nil
+}
+
+// stripHTMLTags removes simple HTML tags like <p>, <br>, <strong>, etc.
+// It is intentionally simple (state machine) to avoid importing regex.
+func stripHTMLTags(s string) string {
+	var b strings.Builder
+	inTag := false
+	for _, r := range s {
+		switch r {
+		case '<':
+			inTag = true
+		case '>':
+			if inTag {
+				inTag = false
+			} else {
+				b.WriteRune(r)
+			}
+		default:
+			if !inTag {
+				b.WriteRune(r)
+			}
+		}
+	}
+	// Collapse multiple consecutive newlines and trim spaces
+	out := strings.ReplaceAll(b.String(), "\r", "")
+	out = strings.TrimSpace(out)
+	return out
 }

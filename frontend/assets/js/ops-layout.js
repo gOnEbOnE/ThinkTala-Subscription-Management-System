@@ -83,6 +83,7 @@
         '/management/dashboard-compliance'  : { activeKey: 'management-compliance' },
         '/management/dashboard-support'    : { activeKey: 'management-support' },
         '/management/dashboard-operational': { activeKey: 'management-operational' },
+        '/management/market-insight'       : { activeKey: 'management-market-insight' },
     };
 
     const currentPath = window.location.pathname;
@@ -91,10 +92,11 @@
             (currentPath.startsWith('/dashboard/packages/') ? { activeKey: 'management-packages' } : {}));
     const activeKey  = route.activeKey  || '';
     const parentKey  = route.parentKey  || '';
+    const isSuperadmin = _opsRole === 'SUPERADMIN' || (guardUser && guardUser.level_code && guardUser.level_code.toUpperCase() === 'SUPERADMIN');
     const canOpenManagement = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'SUPERADMIN' || _opsRole === 'ADMIN';
     const canOpenPackageSales = !hasLocalUser || _opsRole === 'MANAGEMENT' || _opsRole === 'ADMIN' || _opsRole === 'SUPERADMIN';
     const canOpenDivisionDash = !hasLocalUser || _opsRole === 'SUPERADMIN' || _opsRole === 'CEO' || _opsRole === 'MANAGEMENT';
-    const canCreateUser = _opsRole === 'SUPERADMIN' || (guardUser && guardUser.level_code && guardUser.level_code.toUpperCase() === 'SUPERADMIN');
+    const canCreateUser = isSuperadmin;
 
     // Helper: mark a link active
     function isActive(key) {
@@ -126,21 +128,21 @@
 
     <ul class="nav flex-column flex-grow-1">
 
-        <li class="nav-item">
+        ${!isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('dashboard')}" href="/ops/dashboard">
                 <i class="fa-solid fa-chart-pie icon-left"></i>
                 <span class="link-text">Dashboard</span>
             </a>
-        </li>
+        </li>` : ''}
 
-        ${canOpenManagement ? `<li class="nav-item">
+        ${canOpenManagement && !isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('management-dashboard')}" href="/management/dashboard-customers">
                 <i class="fa-solid fa-chart-line icon-left"></i>
                 <span class="link-text">Customer Churn</span>
             </a>
         </li>` : ''}
 
-        ${canOpenPackageSales ? `<li class="nav-item">
+        ${canOpenPackageSales && !isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('management-packages')}" href="/management/dashboard-packages">
                 <i class="fa-solid fa-cubes icon-left"></i>
                 <span class="link-text">Package Sales</span>
@@ -150,40 +152,40 @@
         ${canOpenDivisionDash ? `<li class="nav-item">
             <a class="nav-link${isActive('management-overview')}" href="/management/dashboard-overview">
                 <i class="fa-solid fa-chart-pie icon-left"></i>
-                <span class="link-text">Overview Kinerja</span>
+                <span class="link-text">Performance Overview</span>
             </a>
         </li>` : ''}
 
         ${canOpenDivisionDash ? `<li class="nav-item">
             <a class="nav-link${isActive('management-compliance')}" href="/management/dashboard-compliance">
                 <i class="fa-solid fa-shield-halved icon-left"></i>
-                <span class="link-text">Kinerja Compliance</span>
+                <span class="link-text">Compliance Performance</span>
             </a>
         </li>` : ''}
 
         ${canOpenDivisionDash ? `<li class="nav-item">
             <a class="nav-link${isActive('management-support')}" href="/management/dashboard-support">
                 <i class="fa-solid fa-headset icon-left"></i>
-                <span class="link-text">Kinerja Support</span>
+                <span class="link-text">Support Performance</span>
             </a>
         </li>` : ''}
 
         ${canOpenDivisionDash ? `<li class="nav-item">
             <a class="nav-link${isActive('management-operational')}" href="/management/dashboard-operational">
                 <i class="fa-solid fa-boxes-stacked icon-left"></i>
-                <span class="link-text">Kinerja Operasional</span>
+                <span class="link-text">Operational Performance</span>
             </a>
         </li>` : ''}
 
         ${canCreateUser ? `<li class="nav-item">
             <a class="nav-link${isActive('manage-users')}" href="/ops/manage-users">
                 <i class="fa-solid fa-users icon-left"></i>
-                <span class="link-text">Kelola Akun Internal</span>
+                <span class="link-text">Manage Internal Accounts</span>
             </a>
         </li>` : ''}
 
-        <!-- Notification (expandable) -->
-        <li class="nav-item nav-item-group">
+        <!-- Notification (expandable) - hidden for SUPERADMIN -->
+        ${!isSuperadmin ? `<li class="nav-item nav-item-group">
             <a class="nav-link nav-link-parent${isParentActive('notif')}"
                onclick="OpsLayout.toggleSubmenu(this)">
                 <i class="fa-solid fa-bell icon-left"></i>
@@ -210,41 +212,41 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li>` : ''}
 
-        <li class="nav-item">
+        ${!isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('orders')}" href="/ops/orders">
                 <i class="fa-solid fa-receipt icon-left"></i>
-                <span class="link-text">Pesanan</span>
+                <span class="link-text">Orders</span>
             </a>
-        </li>
+        </li>` : ''}
 
         ${_isSupportRole ? `
         <li class="nav-item">
             <a class="nav-link${isActive('tickets')}" href="/ops/tickets">
                 <i class="fa-solid fa-ticket icon-left"></i>
-                <span class="link-text">Ticket</span>
+                <span class="link-text">Support Ticket</span>
             </a>
         </li>
         ` : ''}
 
-        <li class="nav-item">
+        ${!isSuperadmin ? `<li class="nav-item">
             <a class="nav-link${isActive('subscriptions')}" href="/ops/subscriptions">
                 <i class="fa-solid fa-crown icon-left"></i>
                 <span class="link-text">Subscriptions</span>
             </a>
-        </li>
+        </li>` : ''}
 
     </ul>
 
     <ul class="nav flex-column mb-5">
-        <li class="nav-item">
-            <a class="nav-link disabled" href="#" title="Segera hadir">
+        ${!isSuperadmin ? `<li class="nav-item">
+            <a class="nav-link disabled" href="#" title="Coming soon">
                 <i class="fa-solid fa-gear icon-left"></i>
                 <span class="link-text">Settings</span>
                 <span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span>
             </a>
-        </li>
+        </li>` : ''}
         <li class="nav-item">
             <a class="nav-link text-danger" href="#" onclick="OpsLayout.logout()">
                 <i class="fa-solid fa-right-from-bracket icon-left"></i>
@@ -266,19 +268,19 @@
         <span class="badge bg-warning text-dark" id="roleBadge">ADMIN_SUPPORT</span>
         <!-- Assumed Role Indicator -->
         <span class="badge bg-info text-dark" id="assumedRoleBadge" style="display:none;">
-            <i class="fa-solid fa-user-secret me-1"></i>Sedang sebagai: <strong id="assumedRoleName"></strong>
+            <i class="fa-solid fa-user-secret me-1"></i>Acting as: <strong id="assumedRoleName"></strong>
         </span>
     </div>
     <div class="d-flex align-items-center gap-2 gap-md-3">
         <!-- Assume Role Dropdown (SUPERADMIN only) -->
         <div class="dropdown" id="assumeRoleSection" style="display:none;">
             <button class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" style="font-size:0.8rem;">
-                <i class="fa-solid fa-user-secret me-1"></i>Simulasi Peran
+                <i class="fa-solid fa-user-secret me-1"></i>Simulate Role
             </button>
             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-2">
-                <li><h6 class="dropdown-header">Pilih Simulasi Peran</h6></li>
+                <li><h6 class="dropdown-header">Select Role Simulation</h6></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('ADMIN_SUPPORT')"><i class="fa-solid fa-ticket me-2"></i>Customer Support</a></li>
-                <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('OPERASIONAL')"><i class="fa-solid fa-cogs me-2"></i>Operasional</a></li>
+                <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('OPERASIONAL')"><i class="fa-solid fa-cogs me-2"></i>Operational</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('COMPLIANCE')"><i class="fa-solid fa-shield-halved me-2"></i>Compliance</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('MANAGEMENT')"><i class="fa-solid fa-chart-line me-2"></i>Management</a></li>
                 <li><a class="dropdown-item" href="#" onclick="OpsLayout.assumeRole('CEO')"><i class="fa-solid fa-briefcase me-2"></i>CEO</a></li>
@@ -298,7 +300,7 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate mt-3">
                 <li class="px-3 py-2">
-                    <span class="d-block fw-bold text-main" id="userName">Staff Operasional</span>
+                    <span class="d-block fw-bold text-main" id="userName">Operations Staff</span>
                     <small class="text-muted" id="userEmail">ops@thinktala.com</small>
                 </li>
                 <li>
@@ -415,10 +417,10 @@
                     localStorage.setItem('user', JSON.stringify(user));
                     window.location.href = (json.data && json.data.redirect_url) || '/ops/dashboard';
                 } else {
-                    alert(json.message || json.msg || 'Gagal simulasi role');
+                    alert(json.message || json.msg || 'Failed to simulate role');
                 }
             } catch (e) {
-                alert('Gagal menghubungi server');
+                alert('Failed to connect to server');
             }
         }
     };

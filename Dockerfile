@@ -9,7 +9,7 @@ COPY . .
 
 WORKDIR /repo/gateway
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o thinknalyze-gateway main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o thinknalyze-gateway .
 
 # Run Stage
 FROM alpine:latest

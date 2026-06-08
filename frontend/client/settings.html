@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="en" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengaturan Akun | ThinkTala</title>
-    <meta name="description" content="Kelola pengaturan akun dan integrasi notifikasi Telegram kamu">
+    <title>Account Settings | ThinkTala</title>
+    <meta name="description" content="Manage your account settings and Telegram notification integration">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link
@@ -320,8 +320,8 @@
 
     <div class="main-content settings-page">
 
-        <h1 class="settings-page-title">Pengaturan Akun</h1>
-        <p class="settings-page-sub">Kelola preferensi dan integrasi akun kamu</p>
+        <h1 class="settings-page-title">Account Settings</h1>
+        <p class="settings-page-sub">Manage your account preferences and integrations</p>
 
         <!-- ── Telegram Integration Card ──────────────────────────── -->
         <div class="section-card">
@@ -330,13 +330,12 @@
                     <i class="fa-brands fa-telegram"></i>
                 </div>
                 <div>
-                    <h6>Notifikasi Telegram</h6>
-                    <p>Hubungkan akun Telegram untuk menerima notifikasi news, promo, dan market analysis secara
-                        personal</p>
+                    <h6>Telegram Notifications</h6>
+                    <p>Connect your Telegram account to receive personalized news, promo, and market analysis notifications</p>
                 </div>
                 <div class="ms-auto">
                     <span class="tg-status-badge unlinked" id="tgStatusBadge">
-                        <i class="fa-solid fa-circle" style="font-size:6px"></i> Belum terhubung
+                        <i class="fa-solid fa-circle" style="font-size:6px"></i> Not Connected
                     </span>
                 </div>
             </div>
@@ -347,18 +346,17 @@
                 <div id="tgLinkedState" style="display:none">
                     <div class="current-tg-row">
                         <div>
-                            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:3px">Chat ID Terdaftar
+                            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:3px">Registered Chat ID
                             </div>
                             <div class="tg-chat-id" id="tgCurrentChatID">—</div>
                         </div>
                         <button class="btn-tg-unlink" id="btnUnlink" onclick="unlinkTelegram()">
-                            <i class="fa-solid fa-link-slash me-1"></i> Lepas Koneksi
+                            <i class="fa-solid fa-link-slash me-1"></i> Disconnect
                         </button>
                     </div>
                     <p style="font-size:0.83rem;color:var(--text-muted)">
                         <i class="fa-solid fa-circle-check text-success me-1"></i>
-                        Kamu akan otomatis menerima notifikasi news, promo, dan analisis pasar di Telegram saat ada
-                        konten baru yang dipublikasikan.
+                        You will automatically receive news, promo, and market analysis notifications on Telegram whenever new content is published.
                     </p>
                 </div>
 
@@ -369,8 +367,8 @@
                         id="botBannerLink">
                         <div class="bot-banner-icon">🤖</div>
                         <div class="bot-banner-text">
-                            <p>Buka @ThinkNalyze_bot di Telegram</p>
-                            <small>Klik di sini → kirim /start ke bot → salin Chat ID yang diberikan</small>
+                            <p>Open @ThinkNalyze_bot on Telegram</p>
+                            <small>Click here → send /start to the bot → copy the Chat ID provided</small>
                         </div>
                         <i class="fa-solid fa-arrow-up-right-from-square ms-auto" style="color:#29b6f6;opacity:.7"></i>
                     </a>
@@ -380,30 +378,30 @@
                         <li>
                             <div class="step-dot">1</div>
                             <div class="step-content">
-                                <p>Buka <strong>@ThinkNalyze_bot</strong> di Telegram atau klik banner di atas</p>
+                                <p>Open <strong>@ThinkNalyze_bot</strong> on Telegram or click the banner above</p>
                             </div>
                         </li>
                         <li>
                             <div class="step-dot">2</div>
                             <div class="step-content">
-                                <p>Klik tombol <strong>Start</strong> atau kirim perintah <code>/start</code></p>
-                                <small>Bot akan membalas dengan Chat ID kamu</small>
+                                <p>Click the <strong>Start</strong> button or send the command <code>/start</code></p>
+                                <small>The bot will reply with your Chat ID</small>
                             </div>
                         </li>
                         <li>
                             <div class="step-dot">3</div>
                             <div class="step-content">
-                                <p>Salin angka Chat ID dari balasan bot, lalu paste di kolom di bawah</p>
+                                <p>Copy the Chat ID number from the bot's reply, then paste it in the field below</p>
                             </div>
                         </li>
                     </ul>
 
                     <!-- Input -->
                     <div class="tg-input-wrap">
-                        <input type="text" class="tg-input" id="tgChatIDInput" placeholder="Contoh: 123456789"
+                        <input type="text" class="tg-input" id="tgChatIDInput" placeholder="Example: 123456789"
                             inputmode="numeric" maxlength="20" autocomplete="off">
                         <button class="btn-tg-link" id="btnLink" onclick="linkTelegram()">
-                            <i class="fa-brands fa-telegram me-1"></i> Hubungkan
+                            <i class="fa-brands fa-telegram me-1"></i> Connect
                         </button>
                     </div>
 
@@ -455,7 +453,7 @@
             document.getElementById('tgCurrentChatID').textContent = chatID;
             const badge = document.getElementById('tgStatusBadge');
             badge.className = 'tg-status-badge linked';
-            badge.innerHTML = '<i class="fa-solid fa-circle" style="font-size:6px"></i> Terhubung';
+            badge.innerHTML = '<i class="fa-solid fa-circle" style="font-size:6px"></i> Connected';
         }
 
         function setUnlinkedState() {
@@ -463,7 +461,7 @@
             document.getElementById('tgUnlinkedState').style.display = 'block';
             const badge = document.getElementById('tgStatusBadge');
             badge.className = 'tg-status-badge unlinked';
-            badge.innerHTML = '<i class="fa-solid fa-circle" style="font-size:6px"></i> Belum terhubung';
+            badge.innerHTML = '<i class="fa-solid fa-circle" style="font-size:6px"></i> Not Connected';
         }
 
         async function checkStatus() {
@@ -489,13 +487,13 @@
             hideAlert();
             const chatID = document.getElementById('tgChatIDInput').value.trim();
             if (!chatID || !/^\-?\d+$/.test(chatID)) {
-                showAlert('Chat ID tidak valid. Pastikan hanya angka (boleh awalan -).',  'error');
+                showAlert('Invalid Chat ID. Please ensure it contains only digits (negative prefix allowed).',  'error');
                 return;
             }
 
             const btn = document.getElementById('btnLink');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Menghubungkan...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Connecting...';
 
             const userID = getUserID();
             try {
@@ -509,25 +507,25 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    showAlert(data.message || 'Telegram berhasil dihubungkan!', 'success');
+                    showAlert(data.message || 'Telegram connected successfully!', 'success');
                     setTimeout(() => setLinkedState(chatID), 800);
                 } else {
-                    showAlert(data.error || 'Gagal menghubungkan Telegram.', 'error');
+                    showAlert(data.error || 'Failed to connect Telegram.', 'error');
                 }
             } catch (e) {
-                showAlert('Terjadi kesalahan jaringan. Coba lagi.', 'error');
+                showAlert('A network error occurred. Please try again.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-brands fa-telegram me-1"></i> Hubungkan';
+                btn.innerHTML = '<i class="fa-brands fa-telegram me-1"></i> Connect';
             }
         }
 
         async function unlinkTelegram() {
-            if (!confirm('Yakin ingin melepas koneksi Telegram? Kamu tidak akan menerima notifikasi Telegram lagi.')) return;
+            if (!confirm('Are you sure you want to disconnect Telegram? You will no longer receive Telegram notifications.')) return;
 
             const btn = document.getElementById('btnUnlink');
             btn.disabled = true;
-            btn.textContent = 'Memproses...';
+            btn.textContent = 'Processing...';
 
             const userID = getUserID();
             try {
@@ -539,13 +537,13 @@
                 if (res.ok) {
                     setUnlinkedState();
                 } else {
-                    alert(data.error || 'Gagal melepas koneksi.');
+                    alert(data.error || 'Failed to disconnect.');
                 }
             } catch (e) {
-                alert('Terjadi kesalahan jaringan.');
+                alert('A network error occurred.');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-link-slash me-1"></i> Lepas Koneksi';
+                btn.innerHTML = '<i class="fa-solid fa-link-slash me-1"></i> Disconnect';
             }
         }
 

@@ -82,7 +82,7 @@
         <h4 class="fw-bold mb-1" style="color: var(--text-heading);">
             <i class="fa-solid fa-shield-halved text-cyan me-2"></i>Verification Queue
         </h4>
-        <p class="text-muted small mb-4">Review dan verifikasi pengajuan KYC dari pengguna</p>
+        <p class="text-muted small mb-4">Review and verify user KYC applications</p>
 
         <!-- Stats Row -->
         <div class="stats-row">
@@ -109,14 +109,14 @@
             <!-- Filter Bar -->
             <div class="filter-bar">
                 <select class="form-select form-select-sm" id="filterStatus" style="max-width: 180px;">
-                    <option value="all">Semua Status</option>
+                    <option value="all">All Statuses</option>
                     <option value="pending" selected>Pending</option>
                     <option value="approved">Approved</option>
                     <option value="rejected">Rejected</option>
                 </select>
                 <div class="position-relative" style="max-width: 300px; flex: 1;">
                     <i class="fa-solid fa-magnifying-glass position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
-                    <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Cari nama atau email..." style="padding-left: 2.2rem;">
+                    <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="Search name or email..." style="padding-left: 2.2rem;">
                 </div>
                 <button class="btn btn-sm btn-outline-light" onclick="loadKYCList()" title="Refresh">
                     <i class="fa-solid fa-arrows-rotate"></i>
@@ -128,15 +128,15 @@
                 <table class="kyc-table" id="kycTable">
                     <thead>
                         <tr>
-                            <th>Tanggal Pengajuan</th>
-                            <th>Nama User</th>
-                            <th>Email User</th>
+                            <th>Submission Date</th>
+                            <th>User Name</th>
+                            <th>User Email</th>
                             <th>Status</th>
-                            <th style="text-align: right;">Aksi</th>
+                            <th style="text-align: right;">Action</th>
                         </tr>
                     </thead>
                     <tbody id="kycTableBody">
-                        <tr><td colspan="5" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...</td></tr>
+                        <tr><td colspan="5" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -144,8 +144,8 @@
             <!-- Empty State -->
             <div class="empty-state" id="emptyState" style="display: none;">
                 <i class="fa-solid fa-inbox"></i>
-                <p class="fw-semibold mb-1" style="color: var(--text-heading);">Tidak ada pengajuan yang sesuai.</p>
-                <p class="small text-muted">Coba ubah filter atau kata kunci pencarian Anda</p>
+                <p class="fw-semibold mb-1" style="color: var(--text-heading);">No matching applications found.</p>
+                <p class="small text-muted">Try changing your filters or search keywords</p>
             </div>
 
             <!-- Pagination -->
@@ -228,7 +228,7 @@
         var table  = document.getElementById('kycTable');
         var pagBar = document.getElementById('paginationBar');
 
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Memuat data...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading data...</td></tr>';
         empty.style.display = 'none';
         table.style.display = 'table';
 
@@ -238,7 +238,7 @@
             .then(function (res) {
                 if (res.status === 401) { window.location.href = '/account/login'; return null; }
                 if (res.status === 403) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4"><i class="fa-solid fa-lock me-2"></i>Anda tidak memiliki akses</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4"><i class="fa-solid fa-lock me-2"></i>You do not have access</td></tr>';
                     pagBar.style.display = 'none';
                     return null;
                 }
@@ -271,7 +271,7 @@
             })
             .catch(function (e) {
                 console.error('loadKYCList error:', e);
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4"><i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal memuat data</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-4"><i class="fa-solid fa-triangle-exclamation me-2"></i>Failed to load data</td></tr>';
                 pagBar.style.display = 'none';
             });
     }
@@ -285,7 +285,7 @@
         var from    = (currentPage - 1) * limit + 1;
         var to      = Math.min(currentPage * limit, total);
 
-        info.textContent = 'Menampilkan ' + from + '\u2013' + to + ' dari ' + total + ' data';
+        info.textContent = 'Showing ' + from + '\u2013' + to + ' of ' + total + ' entries';
 
         if (pages <= 1) { pagBar.style.display = 'none'; return; }
         pagBar.style.display = 'flex';
@@ -307,7 +307,7 @@
     /* ===== Helpers ===== */
     function formatDate(d) {
         if (!d) return '-';
-        try { return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
+        try { return new Date(d).toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
         catch (e) { return d; }
     }
 

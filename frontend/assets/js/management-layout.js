@@ -26,6 +26,7 @@
         window.location.pathname.startsWith('/dashboard/customer/');
     const isPackagePath = window.location.pathname === '/management/dashboard-packages' ||
         window.location.pathname.startsWith('/dashboard/packages/');
+    const isMarketInsightPath = window.location.pathname === '/management/market-insight';
 
     function isActive(flag) {
         return flag ? ' active' : '';

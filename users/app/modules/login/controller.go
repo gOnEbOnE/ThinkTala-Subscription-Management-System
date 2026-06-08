@@ -3,6 +3,7 @@ package login
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -103,12 +104,18 @@ func (c *Controller) Auth(w http.ResponseWriter, r *http.Request) {
 
 	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "auth", payload, concurrency.PriorityHigh)
 	if err != nil {
-		fmt.Printf("[LOGIN ERROR] %v\n", err)
 		// PBI-55: Deactivated users get a specific message
 		if err.Error() == "ACCOUNT_DEACTIVATED" {
+			fmt.Printf("[LOGIN ERROR] ACCOUNT_DEACTIVATED\n")
 			c.Response.JSON(w, r, map[string]any{"status": false, "msg": "Akun Anda telah dinonaktifkan. Hubungi administrator."})
 			return
 		}
+		if errors.Is(err, ErrDatabaseUnavailable) {
+			fmt.Printf("[LOGIN ERROR] PostgreSQL tidak tersedia (layanan tanpa DB / koneksi gagal)\n")
+			c.Response.JSON(w, r, map[string]any{"status": false, "msg": ErrDatabaseUnavailable.Error()})
+			return
+		}
+		fmt.Printf("[LOGIN ERROR] %v\n", err)
 		c.Response.JSON(w, r, map[string]any{"status": false, "msg": err.Error()})
 		return
 	}
