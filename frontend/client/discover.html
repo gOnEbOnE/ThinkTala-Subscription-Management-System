@@ -191,6 +191,11 @@
             box-shadow: 0 24px 48px rgba(0, 0, 0, 0.42);
         }
 
+        .featured-card,
+        .recent-item {
+            cursor: pointer;
+        }
+
         .featured-media {
             position: relative;
             min-height: 320px;
@@ -242,9 +247,9 @@
         }
 
         .featured-chip.pinned {
-            color: #0ff2ff;
-            border: 1px solid rgba(0, 242, 255, 0.55);
-            background: rgba(0, 242, 255, 0.16);
+            color: #ffe870;
+            border: 1px solid rgba(255, 232, 112, 0.55);
+            background: rgba(152, 122, 28, 0.25);
         }
 
         .featured-title {
@@ -261,6 +266,20 @@
             line-height: 1.65;
             color: rgba(220, 234, 255, 0.75);
             margin: 0;
+        }
+
+        .featured-desc h1,
+        .featured-desc h2,
+        .featured-desc h3 {
+            margin: 0 0 6px;
+            font-size: 1.05rem;
+            line-height: 1.35;
+        }
+
+        .featured-desc p,
+        .featured-desc ul,
+        .featured-desc ol {
+            margin: 0 0 8px;
         }
 
         .featured-meta {
@@ -307,8 +326,46 @@
             background: rgba(152, 122, 28, 0.25);
         }
 
+        .featured-type.type-info {
+            color: #7dd3fc;
+            border: 1px solid rgba(125, 211, 252, 0.45);
+            background: rgba(14, 76, 122, 0.28);
+        }
+
+        .featured-type.type-warning {
+            color: #ffb347;
+            border: 1px solid rgba(255, 179, 71, 0.45);
+            background: rgba(144, 88, 18, 0.25);
+        }
+
+        .featured-type.type-system {
+            color: #b8c0ff;
+            border: 1px solid rgba(184, 192, 255, 0.45);
+            background: rgba(66, 80, 144, 0.25);
+        }
+
+        .featured-type.type-event {
+            color: #7ef29a;
+            border: 1px solid rgba(126, 242, 154, 0.45);
+            background: rgba(33, 120, 78, 0.22);
+        }
+
+        .featured-type.type-education {
+            color: #6ee7b7;
+            border: 1px solid rgba(110, 231, 183, 0.45);
+            background: rgba(24, 120, 86, 0.22);
+        }
+
         .featured-actions {
             margin-top: 6px;
+        }
+
+        .featured-readmore {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
         }
 
         .featured-cta {
@@ -467,6 +524,36 @@
             background: rgba(152, 122, 28, 0.2);
         }
 
+        .recent-item-type.type-info {
+            color: #7dd3fc;
+            border: 1px solid rgba(125, 211, 252, 0.35);
+            background: rgba(14, 76, 122, 0.24);
+        }
+
+        .recent-item-type.type-warning {
+            color: #ffb347;
+            border: 1px solid rgba(255, 179, 71, 0.35);
+            background: rgba(144, 88, 18, 0.2);
+        }
+
+        .recent-item-type.type-system {
+            color: #b8c0ff;
+            border: 1px solid rgba(184, 192, 255, 0.35);
+            background: rgba(66, 80, 144, 0.2);
+        }
+
+        .recent-item-type.type-event {
+            color: #7ef29a;
+            border: 1px solid rgba(126, 242, 154, 0.35);
+            background: rgba(33, 120, 78, 0.18);
+        }
+
+        .recent-item-type.type-education {
+            color: #6ee7b7;
+            border: 1px solid rgba(110, 231, 183, 0.35);
+            background: rgba(24, 120, 86, 0.18);
+        }
+
         .recent-item-desc {
             margin: 0;
             color: rgba(225, 236, 255, 0.58);
@@ -478,6 +565,20 @@
             line-clamp: 2;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
+        }
+
+        .recent-item-desc h1,
+        .recent-item-desc h2,
+        .recent-item-desc h3 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+            line-height: 1.35;
+        }
+
+        .recent-item-desc p,
+        .recent-item-desc ul,
+        .recent-item-desc ol {
+            margin: 0 0 8px;
         }
 
         .recent-footer {
@@ -519,6 +620,342 @@
 
         .recent-link:hover {
             color: #67f8ff;
+        }
+
+        .recent-readmore {
+            color: var(--accent-cyan);
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .discover-detail-view {
+            max-width: 920px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        .detail-back {
+            border: none;
+            background: transparent;
+            color: var(--accent-cyan);
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .detail-hero {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .detail-title {
+            font-size: clamp(2rem, 3vw, 2.6rem);
+            font-weight: 800;
+            color: var(--text-heading);
+            margin: 0;
+        }
+
+        .detail-meta {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .detail-media {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 22px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .detail-media img {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover;
+        }
+
+        .detail-content {
+            color: rgba(220, 234, 255, 0.75);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .detail-content h1,
+        .detail-content h2,
+        .detail-content h3 {
+            color: #f4f9ff;
+            margin: 18px 0 10px;
+        }
+
+        .detail-content ul,
+        .detail-content ol {
+            padding-left: 22px;
+        }
+
+        /* Quill-generated markup on client */
+        .detail-content a {
+            color: #00f2ff;
+            text-decoration: underline;
+        }
+
+        .detail-content a:hover {
+            color: #67f8ff;
+        }
+
+        .detail-content blockquote {
+            border-left: 3px solid rgba(0, 242, 255, 0.45);
+            margin: 12px 0;
+            padding: 8px 16px;
+            color: rgba(200, 220, 255, 0.6);
+            background: rgba(0, 242, 255, 0.04);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .detail-content pre {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 14px 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            color: #7ee787;
+            margin: 12px 0;
+        }
+
+        .detail-content code {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: #79d4ff;
+        }
+
+        /* Also apply detail-content styles inside the modal body */
+        .news-modal-body a {
+            color: #00f2ff;
+            text-decoration: underline;
+        }
+
+        .news-modal-body blockquote {
+            border-left: 3px solid rgba(0, 242, 255, 0.45);
+            margin: 10px 0;
+            padding: 8px 14px;
+            color: rgba(200, 220, 255, 0.6);
+            background: rgba(0, 242, 255, 0.04);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .news-modal-body pre {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 12px 14px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.86rem;
+            color: #7ee787;
+            margin: 10px 0;
+        }
+
+        .news-modal-body code {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+            color: #79d4ff;
+        }
+
+        .detail-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00f2ff, #07d8df);
+            color: #04151f;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            padding: 12px 20px;
+            text-decoration: none;
+        }
+
+        /* ── News Modal ─────────────────────────────────────── */
+        .news-modal-dialog {
+            max-width: 560px;
+            width: 100%;
+        }
+
+        .news-modal-content {
+            background: linear-gradient(160deg, rgba(14, 22, 38, 0.98), rgba(8, 12, 22, 0.99));
+            border: 1px solid rgba(0, 242, 255, 0.22);
+            border-radius: 20px;
+            box-shadow:
+                0 0 0 1px rgba(0, 242, 255, 0.06) inset,
+                0 28px 56px rgba(0, 0, 0, 0.55),
+                0 0 80px rgba(0, 242, 255, 0.06);
+            overflow: hidden;
+        }
+
+        .news-modal-header {
+            padding: 22px 24px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(0, 242, 255, 0.03);
+        }
+
+        .news-modal-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .news-modal-badge {
+            min-height: 22px;
+        }
+
+        .news-modal-close {
+            border: none;
+            background: rgba(255, 255, 255, 0.07);
+            color: rgba(200, 220, 255, 0.7);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .news-modal-close:hover {
+            background: rgba(255, 255, 255, 0.14);
+            color: #f0f8ff;
+        }
+
+        .news-modal-title {
+            font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+            font-weight: 800;
+            color: #f4f9ff;
+            margin: 0 0 10px;
+            line-height: 1.3;
+            letter-spacing: -0.01em;
+        }
+
+        .news-modal-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            color: rgba(181, 201, 227, 0.65);
+            font-size: 0.82rem;
+        }
+
+        .news-modal-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .modal-meta-sep {
+            color: rgba(181, 201, 227, 0.3);
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .news-modal-body-wrap {
+            padding: 20px 24px;
+            max-height: 55vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 242, 255, 0.25) transparent;
+        }
+
+        .news-modal-body-wrap::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .news-modal-body-wrap::-webkit-scrollbar-thumb {
+            background: rgba(0, 242, 255, 0.25);
+            border-radius: 4px;
+        }
+
+        .news-modal-body {
+            color: rgba(220, 234, 255, 0.82);
+            font-size: 1.05rem;
+            line-height: 1.75;
+        }
+
+        .news-modal-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        .news-modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .news-modal-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            background: linear-gradient(135deg, #00f2ff, #07d8df);
+            color: #04151f;
+            font-weight: 800;
+            font-size: 0.88rem;
+            border-radius: 10px;
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .news-modal-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(0, 242, 255, 0.35);
+            color: #04151f;
+        }
+
+        .news-modal-dismiss {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: rgba(200, 220, 255, 0.75);
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .news-modal-dismiss:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f0f8ff;
         }
 
         .section-empty {
@@ -616,6 +1053,7 @@
     <div id="client-navbar-placeholder"></div>
 
     <div class="main-content discover-page">
+        <div id="discoverListView">
         <div class="discover-hero mb-4">
             <div class="discover-hero-kicker"></div>
             <h1 class="discover-title">What's New</h1>
@@ -625,9 +1063,9 @@
         <div class="discover-toolbar">
             <div class="discover-tabs" id="discoverTabs">
                 <button type="button" class="discover-tab active" data-filter="all">All</button>
-                <button type="button" class="discover-tab" data-filter="analysis">Market Analysis</button>
                 <button type="button" class="discover-tab" data-filter="promo">Promos</button>
-                <button type="button" class="discover-tab" data-filter="feature">New Features</button>
+                <button type="button" class="discover-tab" data-filter="education">Education</button>
+                <button type="button" class="discover-tab" data-filter="updates">Updates</button>
             </div>
             <label class="discover-search mb-0">
                 <i class="fa-solid fa-magnifying-glass"></i>
@@ -649,6 +1087,52 @@
         <div class="recent-panel" id="recentContainer">
             <div class="section-empty border-0 bg-transparent py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Loading recent news...</div>
         </div>
+        </div>
+
+        <div class="discover-detail-view" id="discoverDetailView">
+            <button class="detail-back" id="detailBackBtn"><i class="fa-solid fa-arrow-left"></i>Back to News</button>
+            <div class="detail-hero">
+                <div id="detailTypeBadge"></div>
+                <h1 class="detail-title" id="detailTitle"></h1>
+                <div class="detail-meta" id="detailMeta"></div>
+            </div>
+            <div class="detail-media" id="detailMedia" style="display:none;">
+                <img id="detailImage" alt="" />
+            </div>
+            <div class="detail-content" id="detailContent"></div>
+            <a class="detail-cta" id="detailCta" href="#" target="_blank" rel="noopener" style="display:none;">Read More <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+    </div>
+
+    <div class="modal fade" id="newsModal" tabindex="-1" aria-labelledby="newsModalTitle" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-dialog-centered news-modal-dialog">
+            <div class="modal-content news-modal-content">
+                <!-- Header -->
+                <div class="news-modal-header">
+                    <div class="news-modal-header-top">
+                        <div id="newsModalBadge" class="news-modal-badge"></div>
+                        <button type="button" class="news-modal-close" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <h5 class="news-modal-title" id="newsModalTitle"></h5>
+                    <div class="news-modal-meta" id="newsModalMeta"></div>
+                </div>
+                <!-- Body -->
+                <div class="news-modal-body-wrap">
+                    <div class="news-modal-body" id="newsModalBody"></div>
+                </div>
+                <!-- Footer -->
+                <div class="news-modal-footer">
+                    <a class="news-modal-cta" id="newsModalCta" href="#" target="_blank" rel="noopener" style="display:none;">
+                        Open Link <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                    <button type="button" class="news-modal-dismiss" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-xmark"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <footer class="fixed-footer">
@@ -662,65 +1146,26 @@
     <script>
         const DISCOVER_FALLBACK = [
             {
-                id: 'promo-referral',
-                title: 'Year-End Referral Bonus!',
-                description: 'Earn extra commission by referring new clients to ThinkTala before December 31st. Referral bonuses are credited within 5 business days of activation.',
-                type: 'promo',
-                is_pinned: true,
-                image_url: '/assets/img/marketinsight.png',
-                author: 'ThinkTala Research',
-                cta_url: 'https://www.thinktala.com/terms/referral',
-                created_at: '2026-04-17T09:10:00Z',
-                expiry_date: '2026-12-31T23:59:59Z'
+                id: 'short-maintenance',
+                title: 'Maintenance Window Tonight',
+                description: 'Platform will be briefly unavailable at 23:00-23:20 WIB. Trading and dashboard will resume normally.',
+                type: 'system',
+                has_detail: false,
+                cta_url: 'https://www.thinktala.com/status',
+                created_at: '2026-05-10T11:00:00Z'
             },
             {
-                id: 'analysis-q4-market',
-                title: 'Q4 Market Trend Analysis',
-                description: 'Comprehensive analysis of global market shifts in Q4 2026 covering equities, forex, and commodities with forward-looking portfolio signals.',
-                type: 'analysis',
-                is_pinned: true,
+                id: 'long-risk-playbook',
+                title: 'Risk Management Playbook for New Traders',
+                excerpt: 'A practical guide to position sizing, stop losses, and risk checks you can apply today.',
+                description: '<h2>Why it matters</h2><p>Markets can move fast. A simple risk routine keeps your decisions consistent and protects capital when volatility spikes.</p><h3>Core checklist</h3><ul><li>Set a max loss per trade (1-2% of capital).</li><li>Use a stop loss before entering the trade.</li><li>Size the position based on stop distance.</li><li>Take partial profits at predefined levels.</li></ul><p><strong>Pro tip:</strong> Write your rule set and review it weekly. Small adjustments compound quickly.</p><h3>Example workflow</h3><p>Plan the entry, define the stop, calculate size, and log the outcome. Repeat this sequence to build a stable edge.</p>',
+                full_content: '<h2>Why it matters</h2><p>Markets can move fast. A simple risk routine keeps your decisions consistent and protects capital when volatility spikes.</p><h3>Core checklist</h3><ul><li>Set a max loss per trade (1-2% of capital).</li><li>Use a stop loss before entering the trade.</li><li>Size the position based on stop distance.</li><li>Take partial profits at predefined levels.</li></ul><p><strong>Pro tip:</strong> Write your rule set and review it weekly. Small adjustments compound quickly.</p><h3>Example workflow</h3><p>Plan the entry, define the stop, calculate size, and log the outcome. Repeat this sequence to build a stable edge.</p>',
+                type: 'education',
+                has_detail: true,
                 image_url: '/assets/img/ecosystem.png',
-                author: 'Market Desk',
-                cta_url: 'https://www.thinktala.com/research/q4-market',
-                created_at: '2026-04-18T04:35:00Z'
-            },
-            {
-                id: 'update-reporting',
-                title: 'v2.1 Platform Upgrade: New Reporting Feature',
-                description: 'Powerful reporting modules are now available with custom date ranges and export-ready charts.',
-                type: 'feature',
-                created_at: '2026-04-18T07:40:00Z'
-            },
-            {
-                id: 'education-trade-ui',
-                title: 'Understanding the New Trade Interface',
-                description: 'A complete walkthrough of the redesigned trade interface and new quick-order controls.',
-                type: 'analysis',
-                cta_url: 'https://www.thinktala.com/help/new-trade-interface',
-                created_at: '2026-04-16T08:30:00Z'
-            },
-            {
-                id: 'event-webinar',
-                title: 'Client Webinar Series: Navigating Volatility',
-                description: 'Join our senior analysts this weekend for practical risk management tactics in volatile markets.',
-                type: 'feature',
-                cta_url: 'https://www.thinktala.com/events/volatility-webinar',
-                created_at: '2026-04-12T03:00:00Z'
-            },
-            {
-                id: 'feature-new-markets',
-                title: 'New Regional Markets Now Available',
-                description: 'ThinkTala now supports trading across 8 additional regional exchanges for broader diversification.',
-                type: 'feature',
-                created_at: '2026-04-06T13:10:00Z'
-            },
-            {
-                id: 'analysis-midyear',
-                title: 'Mid-Year Economic Outlook: Emerging Markets',
-                description: 'Our research team published an updated perspective on inflation pathways and currency risk.',
-                type: 'analysis',
-                cta_url: 'https://www.thinktala.com/research/mid-year-outlook',
-                created_at: '2026-03-31T10:20:00Z'
+                author: 'ThinkTala Academy',
+                cta_url: 'https://www.thinktala.com/learn/risk-playbook',
+                created_at: '2026-05-09T08:00:00Z'
             }
         ];
 
@@ -730,10 +1175,133 @@
             keyword: ''
         };
 
+        const DETAIL_API_BASE = '/api/notifications';
+        let currentDetailId = '';
+
         function escapeHtml(value) {
             const div = document.createElement('div');
             div.textContent = value == null ? '' : String(value);
             return div.innerHTML;
+        }
+
+        function stripHtml(value) {
+            const div = document.createElement('div');
+            div.innerHTML = value == null ? '' : String(value);
+            return div.textContent || '';
+        }
+
+        /**
+         * Auto-detect whether an article needs a Full Page or a Modal.
+         * Rules:
+         *   - has an image_url                       → Full Page
+         *   - contains complex HTML (h1-h6, ul, ol,
+         *     img, table, figure)                    → Full Page
+         *   - plain/rich text > 1 000 characters     → Full Page
+         *   - everything else                        → Modal
+         */
+        const COMPLEX_TAG_RE = /<(h[1-6]|ul|ol|li|img|table|figure|blockquote)/i;
+        const CHAR_THRESHOLD  = 1000;
+
+        function shouldUseFullPage(item) {
+            if (item.imageUrl) return true;
+            const content = String(item.fullContent || item.description || '').trim();
+            if (COMPLEX_TAG_RE.test(content)) return true;
+            const plainLen = stripHtml(content).length;
+            return plainLen > CHAR_THRESHOLD;
+        }
+
+        // Tags that Quill can produce — all safe for rendering
+        const ALLOWED_DESC_TAGS = new Set([
+            'B', 'STRONG', 'I', 'EM', 'U', 'S', 'STRIKE', 'BR',
+            'P', 'H1', 'H2', 'H3', 'H4',
+            'UL', 'OL', 'LI',
+            'SPAN',         // Quill uses span for color/size/font
+            'A',            // Links inserted via Quill link tool
+            'PRE', 'CODE',  // Code blocks
+            'BLOCKQUOTE'    // Blockquotes
+        ]);
+
+        // Inline style properties that are safe to preserve on <span>
+        const ALLOWED_STYLE_PROPS = new Set([
+            'color', 'background-color', 'font-size', 'font-family',
+            'font-weight', 'font-style', 'text-decoration'
+        ]);
+
+        function sanitizeStyleAttr(styleStr) {
+            if (!styleStr) return '';
+            return styleStr.split(';').map(function (decl) {
+                const colon = decl.indexOf(':');
+                if (colon < 0) return '';
+                const prop = decl.slice(0, colon).trim().toLowerCase();
+                const val  = decl.slice(colon + 1).trim();
+                // Block javascript: and expression() in values
+                if (/javascript|expression|url\s*\(/i.test(val)) return '';
+                if (ALLOWED_STYLE_PROPS.has(prop)) return prop + ':' + val;
+                return '';
+            }).filter(Boolean).join(';');
+        }
+
+        function sanitizeRichText(value) {
+            const raw = String(value || '');
+            if (!raw) return '';
+            const template = document.createElement('template');
+            template.innerHTML = raw;
+
+            const nodes = [];
+            const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT, null);
+            while (walker.nextNode()) {
+                nodes.push(walker.currentNode);
+            }
+
+            // Process deepest nodes first to avoid breaking parent references
+            nodes.reverse().forEach(function (el) {
+                const tag = el.tagName;
+                if (!ALLOWED_DESC_TAGS.has(tag)) {
+                    // Unwrap: keep inner text/children, remove the element
+                    const frag = document.createDocumentFragment();
+                    while (el.firstChild) frag.appendChild(el.firstChild);
+                    el.parentNode.replaceChild(frag, el);
+                    return;
+                }
+
+                // Strip all attributes, then restore safe ones
+                const attrsToKeep = {};
+                if (tag === 'SPAN') {
+                    const style = sanitizeStyleAttr(el.getAttribute('style'));
+                    if (style) attrsToKeep['style'] = style;
+                    const cls = el.getAttribute('class') || '';
+                    // Quill uses class="ql-font-*" etc.
+                    if (cls && /^ql-/.test(cls.trim())) attrsToKeep['class'] = cls;
+                }
+                if (tag === 'A') {
+                    const href = (el.getAttribute('href') || '').trim();
+                    try {
+                        const parsed = new URL(href, window.location.origin);
+                        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+                            attrsToKeep['href']   = parsed.href;
+                            attrsToKeep['target'] = '_blank';
+                            attrsToKeep['rel']    = 'noopener noreferrer';
+                        }
+                    } catch (_) {}
+                }
+
+                while (el.attributes.length > 0) {
+                    el.removeAttribute(el.attributes[0].name);
+                }
+                Object.keys(attrsToKeep).forEach(function (attr) {
+                    el.setAttribute(attr, attrsToKeep[attr]);
+                });
+            });
+
+            return template.innerHTML;
+        }
+
+        function renderDescription(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return '';
+            if (!/[<>]/.test(raw)) return escapeHtml(raw);
+            const sanitized = sanitizeRichText(raw);
+            return sanitized || escapeHtml(raw);
         }
 
         function safeUrl(value) {
@@ -762,8 +1330,11 @@
         }
 
         function toDate(value) {
-            const dt = new Date(value || 0);
-            return Number.isNaN(dt.getTime()) ? null : dt;
+            if (!value) return null;
+            const dt = new Date(value);
+            const time = dt.getTime();
+            if (Number.isNaN(time) || time <= 0) return null;
+            return dt;
         }
 
         function relativeTime(dt) {
@@ -783,7 +1354,8 @@
         }
 
         function estimateReadTime(text) {
-            const words = String(text || '').trim().split(/\s+/).filter(Boolean).length;
+            const plain = stripHtml(text || '');
+            const words = String(plain).trim().split(/\s+/).filter(Boolean).length;
             if (words === 0) return '1 min read';
             return Math.max(1, Math.round(words / 35)) + ' min read';
         }
@@ -791,11 +1363,14 @@
         function normalizeType(rawType) {
             const t = String(rawType || '').toLowerCase();
             if (t.includes('promo')) return 'promo';
-            if (t.includes('analysis') || t.includes('education')) return 'analysis';
-            if (t.includes('feature') || t.includes('update') || t.includes('system') || t.includes('event') || t.includes('warning') || t.includes('info')) {
-                return 'feature';
-            }
-            return 'feature';
+            if (t.includes('education')) return 'education';
+            if (t.includes('analysis')) return 'analysis';
+            if (t.includes('warning')) return 'warning';
+            if (t.includes('info')) return 'info';
+            if (t.includes('system')) return 'system';
+            if (t.includes('event')) return 'event';
+            if (t.includes('feature') || t.includes('update')) return 'feature';
+            return 'info';
         }
 
         function typeMeta(type) {
@@ -817,6 +1392,51 @@
                     actionText: 'Open Full Report'
                 };
             }
+            if (type === 'warning') {
+                return {
+                    className: 'type-warning',
+                    label: 'Warning',
+                    icon: 'fa-solid fa-triangle-exclamation',
+                    iconColor: '#ffb347',
+                    actionText: 'Read Update'
+                };
+            }
+            if (type === 'info') {
+                return {
+                    className: 'type-info',
+                    label: 'Info',
+                    icon: 'fa-solid fa-circle-info',
+                    iconColor: '#7dd3fc',
+                    actionText: 'Read Update'
+                };
+            }
+            if (type === 'system') {
+                return {
+                    className: 'type-system',
+                    label: 'System',
+                    icon: 'fa-solid fa-shield-halved',
+                    iconColor: '#b8c0ff',
+                    actionText: 'Read Update'
+                };
+            }
+            if (type === 'event') {
+                return {
+                    className: 'type-event',
+                    label: 'Event',
+                    icon: 'fa-solid fa-calendar-days',
+                    iconColor: '#7ef29a',
+                    actionText: 'View Details'
+                };
+            }
+            if (type === 'education') {
+                return {
+                    className: 'type-education',
+                    label: 'Education',
+                    icon: 'fa-solid fa-book-open',
+                    iconColor: '#6ee7b7',
+                    actionText: 'Start Learning'
+                };
+            }
             return {
                 className: 'type-feature',
                 label: 'Feature',
@@ -828,26 +1448,278 @@
 
         function parseNotification(item, index) {
             const title = String(item.title || '').trim();
-            const description = String(item.description || item.message || '').trim();
-            if (!title && !description) return null;
+            const preview = String(item.excerpt || item.description || item.message || '').trim();
+            if (!title && !preview) return null;
 
             const type = normalizeType(item.type);
             const created = toDate(item.created_at);
             const expire = toDate(item.expiry_date);
             const author = String(item.author || item.author_name || item.source || '').trim();
+            const fullContent = String(item.full_content || item.fullContent || item.description || item.message || '').trim();
+            const imageUrl = safeImageUrl(item.image_url);
+
+            // Build a temporary normalised object so shouldUseFullPage can inspect it
+            const partial = {
+                imageUrl:    imageUrl,
+                fullContent: fullContent,
+                description: preview
+            };
+            // Explicit flag from backend overrides auto-detection
+            const explicitDetail = item.has_detail != null ? Boolean(item.has_detail)
+                                 : item.hasDetail != null  ? Boolean(item.hasDetail)
+                                 : item.is_long_content != null ? Boolean(item.is_long_content)
+                                 : null;
+            const hasDetail = explicitDetail !== null ? explicitDetail : shouldUseFullPage(partial);
 
             return {
                 id: item.id || ('notification-' + index),
                 title: title || 'Untitled update',
-                description: description || 'No description available.',
+                description: preview || 'No description available.',
                 type: type,
                 createdAt: created,
                 expiryAt: expire,
                 ctaUrl: safeUrl(item.cta_url),
-                imageUrl: safeImageUrl(item.image_url),
+                imageUrl: imageUrl,
                 author: author,
-                isPinned: Boolean(item.is_pinned || item.isPinned || item.pinned)
+                isPinned: Boolean(item.is_pinned || item.isPinned || item.pinned),
+                hasDetail: hasDetail,
+                fullContent: fullContent
             };
+        }
+
+        function normalizeDetailItem(item) {
+            const title = String(item.title || '').trim();
+            const description = String(item.description || item.message || '').trim();
+            const fullContent = String(item.full_content || item.fullContent || item.description || item.message || '').trim();
+            const type = normalizeType(item.type);
+            const created = toDate(item.created_at);
+            const expire = toDate(item.expiry_date);
+            const author = String(item.author || item.author_name || item.source || '').trim();
+            const imageUrl = safeImageUrl(item.image_url);
+
+            const partial = { imageUrl, fullContent, description };
+            const explicitDetail = item.has_detail != null ? Boolean(item.has_detail)
+                                 : item.hasDetail != null  ? Boolean(item.hasDetail)
+                                 : item.is_long_content != null ? Boolean(item.is_long_content)
+                                 : null;
+            const hasDetail = explicitDetail !== null ? explicitDetail : shouldUseFullPage(partial);
+
+            return {
+                id: item.id || '',
+                title: title || 'Untitled update',
+                description: description || 'No description available.',
+                fullContent: fullContent,
+                type: type,
+                createdAt: created,
+                expiryAt: expire,
+                ctaUrl: safeUrl(item.cta_url),
+                imageUrl: imageUrl,
+                author: author,
+                isPinned: Boolean(item.is_pinned || item.isPinned || item.pinned),
+                hasDetail: hasDetail
+            };
+        }
+
+        async function fetchNotificationDetail(id) {
+            const query = getNotificationQuery();
+            const endpoint = DETAIL_API_BASE + '/' + encodeURIComponent(id) + (query ? ('?' + query) : '');
+
+            const res = await fetch(endpoint, {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed with status ' + res.status);
+            }
+
+            const json = await res.json();
+            return json.data || null;
+        }
+
+        function setViewMode(mode) {
+            const listView = document.getElementById('discoverListView');
+            const detailView = document.getElementById('discoverDetailView');
+            if (listView) listView.style.display = mode === 'detail' ? 'none' : '';
+            // Must use 'block' (not '') — empty string falls back to CSS class display:none
+            if (detailView) detailView.style.display = mode === 'detail' ? 'block' : 'none';
+        }
+
+        function setDetailHistory(id) {
+            if (!id) return;
+            currentDetailId = id;
+            history.pushState({ detailId: id }, '', '#news/' + encodeURIComponent(id));
+        }
+
+        function clearDetailHistory() {
+            currentDetailId = '';
+            history.pushState({}, '', window.location.pathname + window.location.search);
+        }
+
+        function getDetailIdFromLocation() {
+            if (window.location.hash.indexOf('#news/') !== 0) return '';
+            return decodeURIComponent(window.location.hash.replace('#news/', '').trim());
+        }
+
+        function showDetailView(detail, pushHistory) {
+            setViewMode('detail');
+            if (pushHistory) {
+                setDetailHistory(detail.id);
+            }
+
+            const meta = typeMeta(detail.type);
+            const typeBadge = document.getElementById('detailTypeBadge');
+            if (typeBadge) {
+                typeBadge.innerHTML = '<span class="featured-type ' + meta.className + '">' + escapeHtml(meta.label) + '</span>';
+            }
+            const titleEl = document.getElementById('detailTitle');
+            if (titleEl) titleEl.textContent = detail.title || '';
+
+            const metaEl = document.getElementById('detailMeta');
+            const published = detail.createdAt ? shortDate(detail.createdAt) : '';
+            const expiry = detail.expiryAt ? ('Expires ' + shortDate(detail.expiryAt)) : '';
+            const author = detail.author ? escapeHtml(detail.author) : '';
+            if (metaEl) {
+                const parts = [];
+                if (author) parts.push('<span><i class="fa-regular fa-user"></i>' + author + '</span>');
+                if (published) parts.push('<span><i class="fa-regular fa-calendar"></i>' + escapeHtml(published) + '</span>');
+                if (expiry) parts.push('<span><i class="fa-regular fa-clock"></i>' + escapeHtml(expiry) + '</span>');
+                metaEl.innerHTML = parts.join('');
+            }
+
+            const media = document.getElementById('detailMedia');
+            const imageEl = document.getElementById('detailImage');
+            if (detail.imageUrl) {
+                if (imageEl) imageEl.src = detail.imageUrl;
+                if (media) media.style.display = '';
+            } else if (media) {
+                media.style.display = 'none';
+            }
+
+            const contentEl = document.getElementById('detailContent');
+            if (contentEl) {
+                // Prefer fullContent (complete article) over the short description preview
+                const body = (detail.fullContent && detail.fullContent.length > detail.description.length)
+                    ? detail.fullContent
+                    : detail.description;
+                contentEl.innerHTML = renderDescription(body);
+            }
+
+            const ctaEl = document.getElementById('detailCta');
+            if (ctaEl) {
+                if (detail.ctaUrl) {
+                    ctaEl.href = detail.ctaUrl;
+                    ctaEl.style.display = '';
+                } else {
+                    ctaEl.style.display = 'none';
+                }
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        function showListView(pushHistory) {
+            setViewMode('list');
+            if (pushHistory) {
+                clearDetailHistory();
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function openShortModal(detail) {
+            const titleEl = document.getElementById('newsModalTitle');
+            const bodyEl  = document.getElementById('newsModalBody');
+            const ctaEl   = document.getElementById('newsModalCta');
+            const metaEl  = document.getElementById('newsModalMeta');
+            const badgeEl = document.getElementById('newsModalBadge');
+
+            if (titleEl) titleEl.textContent = detail.title || '';
+
+            if (badgeEl) {
+                const meta = typeMeta(detail.type);
+                badgeEl.innerHTML = '<span class="recent-item-type ' + meta.className + '">' + escapeHtml(meta.label) + '</span>';
+            }
+
+            if (metaEl) {
+                const parts = [];
+                if (detail.author) parts.push('<span><i class="fa-regular fa-user"></i> ' + escapeHtml(detail.author) + '</span>');
+                if (detail.createdAt) parts.push('<span><i class="fa-regular fa-calendar"></i> ' + escapeHtml(shortDate(detail.createdAt)) + '</span>');
+                metaEl.innerHTML = parts.join('<span class="modal-meta-sep">·</span>');
+            }
+
+            if (bodyEl) bodyEl.innerHTML = renderDescription(detail.description);
+
+            if (ctaEl) {
+                if (detail.ctaUrl) {
+                    ctaEl.href = detail.ctaUrl;
+                    ctaEl.style.display = '';
+                } else {
+                    ctaEl.style.display = 'none';
+                }
+            }
+            const modal = new bootstrap.Modal(document.getElementById('newsModal'));
+            modal.show();
+        }
+
+        function openNotificationById(id, pushHistory) {
+            if (!id) return;
+            fetchNotificationDetail(id)
+                .then(function (raw) {
+                    if (!raw) throw new Error('Empty response');
+                    const detail = normalizeDetailItem(raw);
+                    if (detail.hasDetail) {
+                        showDetailView(detail, pushHistory);
+                    } else {
+                        openShortModal(detail);
+                    }
+                })
+                .catch(function () {
+                    const local = (DISCOVER_STATE.allItems || []).find(function (item) {
+                        return item.id === id;
+                    });
+                    if (local) {
+                        const detail = {
+                            id:          local.id,
+                            title:       local.title,
+                            description: local.description || '',
+                            fullContent: local.fullContent || local.description || '',
+                            type:        local.type,
+                            createdAt:   local.createdAt,
+                            expiryAt:    local.expiryAt,
+                            ctaUrl:      local.ctaUrl,
+                            imageUrl:    local.imageUrl,
+                            author:      local.author,
+                            isPinned:    local.isPinned,
+                            hasDetail:   local.hasDetail
+                        };
+                        // Re-check using runtime rule (covers edge-cases from cached data)
+                        const useFullPage = detail.hasDetail || shouldUseFullPage(detail);
+                        if (useFullPage) {
+                            showDetailView(detail, pushHistory);
+                        } else {
+                            openShortModal(detail);
+                        }
+                        return;
+                    }
+                    alert('Gagal memuat detail berita.');
+                });
+        }
+
+        function bindCardClicks() {
+            document.querySelectorAll('[data-news-id]').forEach(function (card) {
+                card.addEventListener('click', function () {
+                    const id = card.getAttribute('data-news-id');
+                    openNotificationById(id, true);
+                });
+            });
+            document.querySelectorAll('.featured-cta, .recent-link').forEach(function (link) {
+                link.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                });
+            });
         }
 
         function getNotificationQuery() {
@@ -902,11 +1774,22 @@
         function getFilteredItems() {
             const keyword = DISCOVER_STATE.keyword.toLowerCase().trim();
             return DISCOVER_STATE.allItems.filter(function (item) {
-                const byFilter = DISCOVER_STATE.activeFilter === 'all' || item.type === DISCOVER_STATE.activeFilter;
+                let byFilter = false;
+                if (DISCOVER_STATE.activeFilter === 'all') {
+                    byFilter = true;
+                } else if (DISCOVER_STATE.activeFilter === 'promo') {
+                    byFilter = ['promo', 'event'].includes(item.type);
+                } else if (DISCOVER_STATE.activeFilter === 'education') {
+                    byFilter = item.type === 'education';
+                } else if (DISCOVER_STATE.activeFilter === 'updates') {
+                    byFilter = ['system', 'info', 'warning'].includes(item.type);
+                } else {
+                    byFilter = item.type === DISCOVER_STATE.activeFilter;
+                }
                 if (!byFilter) return false;
                 if (!keyword) return true;
 
-                const text = (item.title + ' ' + item.description).toLowerCase();
+                const text = (item.title + ' ' + stripHtml(item.description)).toLowerCase();
                 return text.includes(keyword);
             });
         }
@@ -932,16 +1815,20 @@
                 const actionHtml = item.ctaUrl
                     ? '<a class="featured-cta" href="' + item.ctaUrl + '" target="_blank" rel="noopener">' + escapeHtml(meta.actionText) + '<i class="fa-solid fa-arrow-right"></i></a>'
                     : '';
+                const pinnedBadge = item.isPinned ? '<span class="featured-chip pinned">Featured</span>' : '';
+                const readMore = item.hasDetail ? '<span class="featured-readmore">Read More <i class="fa-solid fa-arrow-right"></i></span>' : '';
                 return [
                     '<div class="col-xl-6 col-lg-6 col-12">',
-                    '<article class="featured-card">',
+                    '<article class="featured-card" data-news-id="' + escapeHtml(item.id || '') + '">',
                     '<div class="featured-media" ' + mediaStyle + '>',
                     '<div class="featured-body">',
                     '<div class="featured-topline">',
+                    pinnedBadge,
                     '<span class="featured-type ' + meta.className + '">' + escapeHtml(meta.label) + '</span>',
+                    readMore,
                     '</div>',
                     '<h3 class="featured-title">' + escapeHtml(item.title) + '</h3>',
-                    '<p class="featured-desc">' + escapeHtml(item.description) + '</p>',
+                    '<div class="featured-desc">' + renderDescription(item.description) + '</div>',
                     '<div class="featured-meta">' + authorHtml + '<span>' + escapeHtml(dateInfo + expiry) + '</span></div>',
                     '<div class="featured-actions">' + actionHtml + '</div>',
                     '</div>',
@@ -974,9 +1861,10 @@
                 const actionHtml = item.ctaUrl
                     ? '<a class="recent-link" href="' + item.ctaUrl + '" target="_blank" rel="noopener">Read Story <i class="fa-solid fa-arrow-right"></i></a>'
                     : '';
+                const readMore = item.hasDetail ? '<span class="recent-readmore">Read More <i class="fa-solid fa-arrow-right"></i></span>' : '';
 
                 return [
-                    '<article class="recent-item">',
+                    '<article class="recent-item" data-news-id="' + escapeHtml(item.id || '') + '">',
                     '<div class="recent-content">',
                     '<div class="recent-author-row">',
                     '<span class="recent-author-avatar">' + authorInitial + '</span>',
@@ -984,13 +1872,14 @@
                     '<span class="recent-item-type ' + meta.className + '">' + escapeHtml(meta.label) + '</span>',
                     '</div>',
                     '<h3 class="recent-item-title">' + escapeHtml(item.title) + '</h3>',
-                    '<p class="recent-item-desc">' + escapeHtml(item.description) + '</p>',
+                    '<div class="recent-item-desc">' + renderDescription(item.description) + '</div>',
                     '<div class="recent-footer">',
                     '<div class="recent-meta">',
                     '<span><i class="fa-regular fa-calendar"></i>' + escapeHtml(dateText) + '</span>',
                     '<span><i class="fa-regular fa-clock"></i>' + escapeHtml(read) + '</span>',
                     '<span><i class="fa-regular fa-eye"></i>' + escapeHtml(when) + '</span>',
                     '</div>',
+                    readMore,
                     actionHtml,
                     '</div>',
                     '</div>',
@@ -1002,21 +1891,32 @@
 
         function renderDiscover() {
             const filtered = getFilteredItems();
-            const pinned = filtered.filter(function (item) { return item.isPinned; });
-            const nonPinned = filtered.filter(function (item) { return !item.isPinned; });
-            const featured = pinned.slice(0, 2);
-
-            if (featured.length < 2) {
-                featured.push.apply(featured, nonPinned.slice(0, 2 - featured.length));
+            const showFeatured = DISCOVER_STATE.activeFilter === 'all';
+            const featuredTitle = document.querySelector('.discover-section-title');
+            const featuredContainer = document.getElementById('featuredContainer');
+            if (featuredTitle) {
+                featuredTitle.style.display = showFeatured ? '' : 'none';
+            }
+            if (featuredContainer) {
+                featuredContainer.style.display = showFeatured ? '' : 'none';
             }
 
-            const featuredIds = new Set(featured.map(function (item) { return item.id; }));
-            const recent = filtered.filter(function (item) {
-                return !featuredIds.has(item.id) && !item.isPinned;
-            });
+            let recent = filtered;
 
-            renderFeatured(featured);
+            if (showFeatured) {
+                const pinned = filtered.filter(function (item) { return item.isPinned; });
+                const featured = pinned.slice(0, 2);
+                const featuredIds = new Set(featured.map(function (item) { return item.id; }));
+                recent = filtered.filter(function (item) {
+                    return !featuredIds.has(item.id) && !item.isPinned;
+                });
+                renderFeatured(featured);
+            } else if (featuredContainer) {
+                featuredContainer.innerHTML = '';
+            }
+
             renderRecent(recent);
+            bindCardClicks();
         }
 
         function setTabFilter(filter) {
@@ -1043,6 +1943,13 @@
                     renderDiscover();
                 });
             }
+
+			const backBtn = document.getElementById('detailBackBtn');
+			if (backBtn) {
+				backBtn.addEventListener('click', function () {
+					showListView(true);
+				});
+			}
         }
 
         async function initDiscoverPage() {
@@ -1064,9 +1971,23 @@
             DISCOVER_STATE.allItems = normalized;
             applyCountToSidebar(normalized.length);
             renderDiscover();
+
+            const detailId = getDetailIdFromLocation();
+            if (detailId) {
+                openNotificationById(detailId, false);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', initDiscoverPage);
+
+        window.addEventListener('popstate', function () {
+            const detailId = getDetailIdFromLocation();
+            if (detailId) {
+                openNotificationById(detailId, false);
+                return;
+            }
+            showListView(false);
+        });
     </script>
 </body>
 </html>

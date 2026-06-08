@@ -80,6 +80,15 @@ func (c *Controller) CreateOrderHandler(w http.ResponseWriter, r *http.Request) 
 		})
 		return
 	}
+	dto.PackageID = strings.TrimSpace(dto.PackageID)
+	if dto.PackageID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "package_id wajib diisi",
+		})
+		return
+	}
 	if dto.DurationMonths <= 0 {
 		dto.DurationMonths = 1
 	}
@@ -184,7 +193,7 @@ func (c *Controller) ListOrdersClientHandler(w http.ResponseWriter, r *http.Requ
 		w.WriteHeader(http.StatusBadRequest)
 		c.response.JSON(w, r, map[string]interface{}{
 			"success":       false,
-			"error_message": "start_date tidak boleh setelah end_date",
+			"error_message": "Rentang tanggal tidak valid.",
 		})
 		return
 	}
@@ -845,7 +854,11 @@ func (c *Controller) CancelOrderHandler(w http.ResponseWriter, r *http.Request) 
 
 	c.response.JSON(w, r, map[string]interface{}{
 		"success": true,
-		"message": "Pesanan berhasil dibatalkan",
+		"message": "Pesanan berhasil dibatalkan.",
+		"data": map[string]interface{}{
+			"order_id": orderID,
+			"status":   "CANCELLED",
+		},
 	})
 }
 
@@ -876,6 +889,15 @@ func (c *Controller) RenewOrderHandler(w http.ResponseWriter, r *http.Request) {
 		c.response.JSON(w, r, map[string]interface{}{
 			"success":       false,
 			"error_message": "Format request tidak valid",
+		})
+		return
+	}
+	dto.PackageID = strings.TrimSpace(dto.PackageID)
+	if dto.PackageID == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "package_id wajib diisi",
 		})
 		return
 	}
@@ -962,7 +984,8 @@ func (c *Controller) GetInvoiceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/pdf")
-	w.Header().Set("Content-Disposition", `attachment; filename="`+invoiceNum+`.pdf"`)
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Content-Disposition", `attachment; filename="invoice-`+invoiceNum+`.pdf"`)
 	_, _ = w.Write(pdfBytes)
 }
 
@@ -1008,7 +1031,8 @@ func (c *Controller) GetInvoiceAdminHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.Header().Set("Content-Type", "application/pdf")
-	w.Header().Set("Content-Disposition", `attachment; filename="`+invoiceNum+`.pdf"`)
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Content-Disposition", `attachment; filename="invoice-`+invoiceNum+`.pdf"`)
 	_, _ = w.Write(pdfBytes)
 }
 
@@ -1047,13 +1071,22 @@ func (c *Controller) GetMySubscriptionHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	latest, _ := c.service.GetLatestSubscriptionForUser(r.Context(), userID)
+	canRenew := false
+	if latest != nil {
+		st := strings.ToUpper(strings.TrimSpace(latest.Status))
+		canRenew = st == "ACTIVE" || st == "EXPIRED"
+	}
+
 	if len(subs) == 0 {
 		c.response.JSON(w, r, map[string]interface{}{
 			"success":                    true,
 			"message":                    "Belum berlangganan",
-			"data":                       nil,
+			"data":                       latest,
 			"active_subscriptions":       []SubscriptionStatus{},
 			"total_active_subscriptions": 0,
+			"latest_subscription":        latest,
+			"can_renew":                  canRenew,
 		})
 		return
 	}
@@ -1065,5 +1098,48 @@ func (c *Controller) GetMySubscriptionHandler(w http.ResponseWriter, r *http.Req
 		"data":                       current,
 		"active_subscriptions":       subs,
 		"total_active_subscriptions": len(subs),
+		"latest_subscription":        latest,
+		"can_renew":                  canRenew,
+	})
+}
+
+// GetLatestSubscriptionHandler — GET /api/subscriptions/latest
+func (c *Controller) GetLatestSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
+	if roleCode(r) != "CLIENT" {
+		w.WriteHeader(http.StatusForbidden)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "endpoint ini hanya dapat diakses oleh role CLIENT",
+		})
+		return
+	}
+
+	userID := strings.TrimSpace(r.Header.Get("X-User-ID"))
+	if userID == "" {
+		w.WriteHeader(http.StatusUnauthorized)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": "Anda harus login terlebih dahulu",
+		})
+		return
+	}
+
+	latest, err := c.service.GetLatestSubscriptionForUser(r.Context(), userID)
+	if err != nil {
+		statusCode := http.StatusBadRequest
+		if strings.Contains(strings.ToLower(err.Error()), "gagal") {
+			statusCode = http.StatusInternalServerError
+		}
+		w.WriteHeader(statusCode)
+		c.response.JSON(w, r, map[string]interface{}{
+			"success":       false,
+			"error_message": err.Error(),
+		})
+		return
+	}
+
+	c.response.JSON(w, r, map[string]interface{}{
+		"success": true,
+		"data":    latest,
 	})
 }

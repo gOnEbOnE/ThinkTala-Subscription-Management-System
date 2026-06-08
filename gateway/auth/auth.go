@@ -177,6 +177,11 @@ func isRoleAllowed(path string, role string) bool {
 		return true
 	}
 
+	// Legacy client aliases (redirect to /client/*)
+	if role == "CLIENT" && (strings.HasPrefix(path, "/orders/") || strings.HasPrefix(path, "/subscription/")) {
+		return true
+	}
+
 	if strings.HasPrefix(path, "/support/") && role == "CLIENT" {
 		return true
 	}

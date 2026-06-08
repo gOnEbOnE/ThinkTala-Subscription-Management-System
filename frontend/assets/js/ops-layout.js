@@ -66,6 +66,7 @@
         '/ops/tickets'                : { activeKey: 'tickets' },
         '/ops/notifications'          : { activeKey: 'notifications',          parentKey: 'notif' },
         '/ops/notification-templates' : { activeKey: 'notification-templates', parentKey: 'notif' },
+        '/ops/notification-monitoring': { activeKey: 'notification-monitoring', parentKey: 'notif' },
         '/ops/orders'                 : { activeKey: 'orders' },
         '/ops/orders-detail'          : { activeKey: 'orders' },
         '/ops/support-ticket-detail'  : { activeKey: 'tickets' },
@@ -202,6 +203,12 @@
                         <span>Template Management</span>
                     </a>
                 </li>
+                <li>
+                    <a class="nav-link${isActive('notification-monitoring')}" href="/ops/notification-monitoring">
+                        <i class="fa-solid fa-eye me-2" style="font-size:.85rem"></i>
+                        <span>Monitoring Management</span>
+                    </a>
+                </li>
             </ul>
         </li>
 
@@ -232,9 +239,10 @@
 
     <ul class="nav flex-column mb-5">
         <li class="nav-item">
-            <a class="nav-link" href="/ops/settings">
+            <a class="nav-link disabled" href="#" title="Segera hadir">
                 <i class="fa-solid fa-gear icon-left"></i>
                 <span class="link-text">Settings</span>
+                <span class="badge bg-secondary ms-auto" style="font-size:.55rem">Soon</span>
             </a>
         </li>
         <li class="nav-item">

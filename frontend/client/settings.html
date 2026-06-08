@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan Akun | ThinkTala</title>
+    <meta name="description" content="Kelola pengaturan akun dan integrasi notifikasi Telegram kamu">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+    <style>
+        .settings-page {
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .settings-page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-heading);
+            margin-bottom: 0.25rem;
+        }
+
+        .settings-page-sub {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1.75rem;
+        }
+
+        /* ── Section Card ─────────── */
+        .section-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 1.25rem;
+        }
+
+        .section-card-header {
+            padding: 1.1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .section-icon-tg {
+            background: rgba(41, 182, 246, 0.12);
+            color: #29b6f6;
+            border: 1px solid rgba(41, 182, 246, 0.25);
+        }
+
+        .section-card-header h6 {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-heading);
+            margin: 0;
+        }
+
+        .section-card-header p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .section-card-body {
+            padding: 1.4rem 1.5rem;
+        }
+
+        /* ── Status Badge ─────────── */
+        .tg-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+        }
+
+        .tg-status-badge.linked {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .tg-status-badge.unlinked {
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            color: var(--text-muted);
+        }
+
+        /* ── How To Steps ─────────── */
+        .how-to-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem;
+        }
+
+        .how-to-list li {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .how-to-list li:last-child {
+            border-bottom: none;
+        }
+
+        .step-dot {
+            min-width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #29b6f6, #0284c7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .step-content p {
+            font-size: 0.85rem;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .step-content small {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .step-content code {
+            background: rgba(41, 182, 246, 0.1);
+            border: 1px solid rgba(41, 182, 246, 0.2);
+            border-radius: 5px;
+            padding: 1px 7px;
+            font-size: 0.82rem;
+            color: #29b6f6;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ── Input & Button ─────────── */
+        .tg-input-wrap {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        .tg-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.6rem 1rem;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .tg-input:focus {
+            border-color: #29b6f6;
+            box-shadow: 0 0 0 3px rgba(41, 182, 246, 0.12);
+        }
+
+        .tg-input::placeholder {
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+        }
+
+        .btn-tg-link {
+            background: linear-gradient(135deg, #29b6f6 0%, #0284c7 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0 1.4rem;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: opacity .2s, transform .15s;
+            white-space: nowrap;
+        }
+
+        .btn-tg-link:hover {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .btn-tg-link:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-tg-unlink {
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            background: rgba(239, 68, 68, 0.08);
+            border-radius: 10px;
+            padding: 0.5rem 1.2rem;
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: background .2s, border-color .2s;
+        }
+
+        .btn-tg-unlink:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
+        /* ── Current Status Row ─────── */
+        .current-tg-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .current-tg-row .tg-chat-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #10b981;
+        }
+
+        /* ── Alert box ─────────────── */
+        .tg-alert {
+            display: none;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.83rem;
+            margin-top: 0.75rem;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tg-alert.show {
+            display: flex;
+        }
+
+        .tg-alert.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+
+        .tg-alert.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        /* ── Bot hint banner ─────────── */
+        .bot-banner {
+            background: rgba(41, 182, 246, 0.06);
+            border: 1px solid rgba(41, 182, 246, 0.2);
+            border-radius: 12px;
+            padding: 0.9rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 1.5rem;
+            text-decoration: none;
+            transition: background .2s;
+        }
+
+        .bot-banner:hover {
+            background: rgba(41, 182, 246, 0.1);
+        }
+
+        .bot-banner-icon {
+            font-size: 1.6rem;
+        }
+
+        .bot-banner-text p {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #29b6f6;
+            margin: 0;
+        }
+
+        .bot-banner-text small {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="client-sidebar-placeholder"></div>
+    <div id="client-navbar-placeholder"></div>
+
+    <div class="main-content settings-page">
+
+        <h1 class="settings-page-title">Pengaturan Akun</h1>
+        <p class="settings-page-sub">Kelola preferensi dan integrasi akun kamu</p>
+
+        <!-- ── Telegram Integration Card ──────────────────────────── -->
+        <div class="section-card">
+            <div class="section-card-header">
+                <div class="section-icon section-icon-tg">
+                    <i class="fa-brands fa-telegram"></i>
+                </div>
+                <div>
+                    <h6>Notifikasi Telegram</h6>
+                    <p>Hubungkan akun Telegram untuk menerima notifikasi news, promo, dan market analysis secara
+                        personal</p>
+                </div>
+                <div class="ms-auto">
+                    <span class="tg-status-badge unlinked" id="tgStatusBadge">
+                        <i class="fa-solid fa-circle" style="font-size:6px"></i> Belum terhubung
+                    </span>
+                </div>
+            </div>
+
+            <div class="section-card-body">
+
+                <!-- State: Sudah terhubung -->
+                <div id="tgLinkedState" style="display:none">
+                    <div class="current-tg-row">
+                        <div>
+                            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:3px">Chat ID Terdaftar
+                            </div>
+                            <div class="tg-chat-id" id="tgCurrentChatID">—</div>
+                        </div>
+                        <button class="btn-tg-unlink" id="btnUnlink" onclick="unlinkTelegram()">
+                            <i class="fa-solid fa-link-slash me-1"></i> Lepas Koneksi
+                        </button>
+                    </div>
+                    <p style="font-size:0.83rem;color:var(--text-muted)">
+                        <i class="fa-solid fa-circle-check text-success me-1"></i>
+                        Kamu akan otomatis menerima notifikasi news, promo, dan analisis pasar di Telegram saat ada
+                        konten baru yang dipublikasikan.
+                    </p>
+                </div>
+
+                <!-- State: Belum terhubung -->
+                <div id="tgUnlinkedState">
+                    <!-- Bot Banner -->
+                    <a class="bot-banner" href="https://t.me/ThinkNalyze_bot" target="_blank" rel="noopener"
+                        id="botBannerLink">
+                        <div class="bot-banner-icon">🤖</div>
+                        <div class="bot-banner-text">
+                            <p>Buka @ThinkNalyze_bot di Telegram</p>
+                            <small>Klik di sini → kirim /start ke bot → salin Chat ID yang diberikan</small>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square ms-auto" style="color:#29b6f6;opacity:.7"></i>
+                    </a>
+
+                    <!-- How To Steps -->
+                    <ul class="how-to-list">
+                        <li>
+                            <div class="step-dot">1</div>
+                            <div class="step-content">
+                                <p>Buka <strong>@ThinkNalyze_bot</strong> di Telegram atau klik banner di atas</p>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="step-dot">2</div>
+                            <div class="step-content">
+                                <p>Klik tombol <strong>Start</strong> atau kirim perintah <code>/start</code></p>
+                                <small>Bot akan membalas dengan Chat ID kamu</small>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="step-dot">3</div>
+                            <div class="step-content">
+                                <p>Salin angka Chat ID dari balasan bot, lalu paste di kolom di bawah</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- Input -->
+                    <div class="tg-input-wrap">
+                        <input type="text" class="tg-input" id="tgChatIDInput" placeholder="Contoh: 123456789"
+                            inputmode="numeric" maxlength="20" autocomplete="off">
+                        <button class="btn-tg-link" id="btnLink" onclick="linkTelegram()">
+                            <i class="fa-brands fa-telegram me-1"></i> Hubungkan
+                        </button>
+                    </div>
+
+                    <!-- Alert -->
+                    <div class="tg-alert" id="tgAlert"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="fixed-footer">
+        <div>&copy; 2026 <strong>ThinkTala</strong>. All rights reserved.</div>
+        <div>v1.3.0</div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/za-theme.js"></script>
+    <script src="/assets/js/za-sidebar.js"></script>
+    <script src="/assets/js/client-layout.js"></script>
+    <script>
+        const API_BASE = '/api';
+
+        function getUserID() {
+            // Diprioritaskan dari client-layout.js yang di-inject lebih dulu
+            if (window.__currentUserID) return window.__currentUserID;
+            // Fallback: ambil dari localStorage user object (sama seperti client-layout.js)
+            try {
+                var u = JSON.parse(localStorage.getItem('user') || '{}');
+                if (u.id) return u.id;
+            } catch (e) {}
+            return localStorage.getItem('user_id') || sessionStorage.getItem('user_id') || '';
+        }
+
+        function showAlert(msg, type) {
+            const el = document.getElementById('tgAlert');
+            el.className = 'tg-alert show ' + type;
+            el.innerHTML = `<i class="fa-solid fa-${type === 'success' ? 'circle-check' : 'triangle-exclamation'}"></i> ${msg}`;
+        }
+
+        function hideAlert() {
+            const el = document.getElementById('tgAlert');
+            el.className = 'tg-alert';
+        }
+
+        function setLinkedState(chatID) {
+            document.getElementById('tgLinkedState').style.display = 'block';
+            document.getElementById('tgUnlinkedState').style.display = 'none';
+            document.getElementById('tgCurrentChatID').textContent = chatID;
+            const badge = document.getElementById('tgStatusBadge');
+            badge.className = 'tg-status-badge linked';
+            badge.innerHTML = '<i class="fa-solid fa-circle" style="font-size:6px"></i> Terhubung';
+        }
+
+        function setUnlinkedState() {
+            document.getElementById('tgLinkedState').style.display = 'none';
+            document.getElementById('tgUnlinkedState').style.display = 'block';
+            const badge = document.getElementById('tgStatusBadge');
+            badge.className = 'tg-status-badge unlinked';
+            badge.innerHTML = '<i class="fa-solid fa-circle" style="font-size:6px"></i> Belum terhubung';
+        }
+
+        async function checkStatus() {
+            const userID = getUserID();
+            if (!userID) return;
+            try {
+                const res = await fetch(`${API_BASE}/telegram/status`, {
+                    headers: { 'X-User-ID': userID, 'Content-Type': 'application/json' }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.linked && data.chat_id) {
+                    setLinkedState(data.chat_id);
+                } else {
+                    setUnlinkedState();
+                }
+            } catch (e) {
+                console.warn('[TELEGRAM STATUS]', e);
+            }
+        }
+
+        async function linkTelegram() {
+            hideAlert();
+            const chatID = document.getElementById('tgChatIDInput').value.trim();
+            if (!chatID || !/^\-?\d+$/.test(chatID)) {
+                showAlert('Chat ID tidak valid. Pastikan hanya angka (boleh awalan -).',  'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnLink');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Menghubungkan...';
+
+            const userID = getUserID();
+            try {
+                const res = await fetch(`${API_BASE}/telegram/link`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-ID': userID
+                    },
+                    body: JSON.stringify({ chat_id: chatID })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showAlert(data.message || 'Telegram berhasil dihubungkan!', 'success');
+                    setTimeout(() => setLinkedState(chatID), 800);
+                } else {
+                    showAlert(data.error || 'Gagal menghubungkan Telegram.', 'error');
+                }
+            } catch (e) {
+                showAlert('Terjadi kesalahan jaringan. Coba lagi.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-brands fa-telegram me-1"></i> Hubungkan';
+            }
+        }
+
+        async function unlinkTelegram() {
+            if (!confirm('Yakin ingin melepas koneksi Telegram? Kamu tidak akan menerima notifikasi Telegram lagi.')) return;
+
+            const btn = document.getElementById('btnUnlink');
+            btn.disabled = true;
+            btn.textContent = 'Memproses...';
+
+            const userID = getUserID();
+            try {
+                const res = await fetch(`${API_BASE}/telegram/unlink`, {
+                    method: 'DELETE',
+                    headers: { 'X-User-ID': userID }
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setUnlinkedState();
+                } else {
+                    alert(data.error || 'Gagal melepas koneksi.');
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan jaringan.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-link-slash me-1"></i> Lepas Koneksi';
+            }
+        }
+
+        // Cek status saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', checkStatus);
+
+        // Enter key di input
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('tgChatIDInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') linkTelegram();
+            });
+        });
+    </script>
+</body>
+
+</html>

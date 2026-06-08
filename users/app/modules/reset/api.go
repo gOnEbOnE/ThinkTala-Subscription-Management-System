@@ -34,9 +34,9 @@ func writeJSON(w http.ResponseWriter, code int, body any) {
 
 // dispatchResetNotification sends a password_reset event to the notification service.
 // Pattern mirrors dispatchKYCNotification in kyc/service.go exactly.
-func dispatchResetNotification(to string, vars map[string]string) {
+func dispatchResetNotification(to, userID, userName string, vars map[string]string) {
 	// 1. Try Redis queue first
-	if err := utils.PublishNotificationEvent("password_reset", "email", to, vars); err == nil {
+	if err := utils.PublishNotificationEvent("password_reset", "email", to, userID, userName, vars); err == nil {
 		log.Printf("[RESET NOTIF] Event published to queue: to=%s", to)
 		return
 	}
@@ -48,6 +48,8 @@ func dispatchResetNotification(to string, vars map[string]string) {
 		"channel":    "email",
 		"to":         to,
 		"vars":       vars,
+		"user_id":    userID,
+		"user_name":  userName,
 	}
 	body, _ := json.Marshal(payload)
 
@@ -131,7 +133,7 @@ func (h *APIHandler) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 
 	frontendURL := utils.GetEnv("FRONTEND_URL", "https://propensuy-thinknalyze.vercel.app")
 	resetURL := fmt.Sprintf("%s/account/reset?token=%s", frontendURL, token)
-	go dispatchResetNotification(email, map[string]string{
+	go dispatchResetNotification(email, userID, fullName, map[string]string{
 		"full_name": fullName,
 		"reset_url": resetURL,
 	})

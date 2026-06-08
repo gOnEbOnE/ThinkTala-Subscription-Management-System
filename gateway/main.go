@@ -142,7 +142,12 @@ func loadConfig() (*Config, error) {
 	merged := &Config{AllowedOrigins: []string{"*"}}
 	loadedFrom := make([]string, 0, 2)
 
-	baseCandidates := []string{"routes.json", "config/routes.json"}
+	baseCandidates := []string{
+		"routes.json",
+		"config/routes.json",
+		"gateway/routes.json",
+		"gateway/config/routes.json",
+	}
 	for _, path := range baseCandidates {
 		if _, err := os.Stat(path); err == nil {
 			cfg, err := readConfig(path)
@@ -429,6 +434,19 @@ func createProxyHandler(target string, enableCORS bool) http.HandlerFunc {
 // ========================================
 // Frontend page server
 // ========================================
+func serve404Page(frontendDir string, w http.ResponseWriter, r *http.Request) {
+	page404 := filepath.Join(frontendDir, "404.html")
+	f, err := os.Open(page404)
+	if err == nil {
+		defer f.Close()
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		http.ServeContent(w, r, "404.html", time.Time{}, f)
+		return
+	}
+	http.Error(w, "404 Page Not Found", http.StatusNotFound)
+}
+
 func serveFrontendPage(frontendDir, section, defaultPage string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
@@ -454,7 +472,22 @@ func serveFrontendPage(frontendDir, section, defaultPage string) http.HandlerFun
 			return
 		}
 
-		http.Error(w, "Page not found", http.StatusNotFound)
+		serve404Page(frontendDir, w, r)
+	}
+}
+
+func serveLandingPage(frontendDir string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+
+		landingFile := filepath.Join(frontendDir, "landing.html")
+		if _, err := os.Stat(landingFile); err == nil {
+			http.ServeFile(w, r, landingFile)
+			return
+		}
+		http.Redirect(w, r, "/account/login", http.StatusFound)
 	}
 }
 
@@ -529,6 +562,20 @@ func main() {
 
 	// /client/* → Only CLIENT, SUPERADMIN
 	http.HandleFunc("/client/", withRoleAuth(serveFrontendPage(frontendDir, "client", "dashboard")))
+
+	// Public landing + legacy pages
+	http.HandleFunc("/landing", serveLandingPage(frontendDir))
+	http.HandleFunc("/landing.html", serveLandingPage(frontendDir))
+	http.HandleFunc("/market-insight", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/client/discover", http.StatusFound)
+	})
+	http.HandleFunc("/orders/history", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/client/billing-history", http.StatusFound)
+	}))
+	http.HandleFunc("/subscription/me", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/client/subscription-me", http.StatusFound)
+	}))
+
 	http.HandleFunc("/support/create", withRoleAuth(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/client/support-create", http.StatusFound)
 	}))
@@ -550,7 +597,7 @@ func main() {
 			http.ServeFile(w, r, detailFile)
 			return
 		}
-		http.Error(w, "Page not found", http.StatusNotFound)
+		serve404Page(frontendDir, w, r)
 	}))
 
 	// /dashboard/packages/{id} → package detail page for management
@@ -564,7 +611,7 @@ func main() {
 			http.ServeFile(w, r, detailFile)
 			return
 		}
-		http.Error(w, "Page not found", http.StatusNotFound)
+		serve404Page(frontendDir, w, r)
 	}))
 
 	// ========================================
@@ -630,13 +677,21 @@ func main() {
 	// 5. Root redirect
 	// ========================================
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/" || r.URL.Path == "" {
+		if r.URL.Path == "/" || r.URL.Path == "" || r.URL.Path == "/landing.html" || r.URL.Path == "/landing" || r.URL.Path == "/index.html" {
 			// If user has valid token, redirect to their dashboard
 			if user, err := auth.GetUserFromToken(r); err == nil {
 				redirect := redirectByRole(user.RoleCode)
 				http.Redirect(w, r, redirect, http.StatusFound)
 				return
 			}
+			
+			// Serve landing page if not authenticated
+			landingFile := filepath.Join(frontendDir, "landing.html")
+			if _, err := os.Stat(landingFile); err == nil {
+				http.ServeFile(w, r, landingFile)
+				return
+			}
+			
 			http.Redirect(w, r, "/account/login", http.StatusFound)
 			return
 		}
@@ -649,7 +704,8 @@ func main() {
 			}
 		}
 
-		http.Error(w, "Not found", http.StatusNotFound)
+		// Serve branded 404 page for unmatched routes
+		serve404Page(frontendDir, w, r)
 	})
 
 	// ========================================
@@ -666,6 +722,15 @@ func main() {
 		return ""
 	}
 
+	getRouteConfig := func(path string) (RouteConfig, bool) {
+		for _, route := range config.Routes {
+			if route.Path == path {
+				return route, true
+			}
+		}
+		return RouteConfig{}, false
+	}
+
 	// --- SUBSCRIPTION SERVICE (role-protected) ---
 	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
 	notifPublicTarget := getRouteTarget("/api/notifications/public")
@@ -678,6 +743,61 @@ func main() {
 	http.HandleFunc("/api/notifications/public", createProxyHandler(notifPublicTarget, true))
 	http.HandleFunc("/api/notifications/public/", createProxyHandler(notifPublicTarget, true))
 	log.Printf("[GW] Public API: /api/notifications/public -> %s", notifPublicTarget)
+
+	notifRoute, notifRouteOk := getRouteConfig("/api/notifications/")
+	if !notifRouteOk {
+		notifRoute, notifRouteOk = getRouteConfig("/api/notifications")
+	}
+	if notifRouteOk {
+		notifHandler := createProxyHandler(notifRoute.Target, notifRoute.CORS)
+		recentRoles := []string{"CLIENT", "OPERASIONAL", "COMPLIANCE", "MANAGEMENT", "ADMIN", "ADMIN_SUPPORT", "ADMIN_KYC", "SUPERADMIN", "CEO"}
+		http.HandleFunc("/api/notifications/recent", withRolesAuth(recentRoles, notifHandler))
+		http.HandleFunc("/api/notifications/recent/", withRolesAuth(recentRoles, notifHandler))
+		isUUIDLike := func(value string) bool {
+			if len(value) != 36 {
+				return false
+			}
+			for i, ch := range value {
+				switch i {
+				case 8, 13, 18, 23:
+					if ch != '-' {
+						return false
+					}
+				default:
+					if !(ch >= '0' && ch <= '9') && !(ch >= 'a' && ch <= 'f') && !(ch >= 'A' && ch <= 'F') {
+						return false
+					}
+				}
+			}
+			return true
+		}
+
+		if notifRoute.Auth {
+			http.HandleFunc("/api/notifications", withRolesAuth(notifRoute.Roles, notifHandler))
+		} else {
+			http.HandleFunc("/api/notifications", notifHandler)
+		}
+
+		// /api/notifications/logs — monitoring log (OPERASIONAL+) dan event drawer (semua role terautentikasi)
+		logsRoles := []string{"CLIENT", "OPERASIONAL", "COMPLIANCE", "MANAGEMENT", "ADMIN", "ADMIN_SUPPORT", "ADMIN_KYC", "SUPERADMIN", "CEO"}
+		http.HandleFunc("/api/notifications/logs", withRolesAuth(logsRoles, notifHandler))
+		http.HandleFunc("/api/notifications/logs/", withRolesAuth(logsRoles, notifHandler))
+		log.Printf("[GW] API: /api/notifications/logs -> %s (CLIENT+OPERASIONAL+)", notifRoute.Target)
+
+		http.HandleFunc("/api/notifications/", func(w http.ResponseWriter, r *http.Request) {
+			suffix := strings.TrimPrefix(r.URL.Path, "/api/notifications/")
+			if r.Method == http.MethodGet && suffix != "" && !strings.Contains(suffix, "/") && isUUIDLike(suffix) {
+				notifHandler(w, r)
+				return
+			}
+			if notifRoute.Auth {
+				withRolesAuth(notifRoute.Roles, notifHandler)(w, r)
+				return
+			}
+			notifHandler(w, r)
+		})
+		log.Printf("[GW] API: /api/notifications/:id -> %s (public GET)", notifRoute.Target)
+	}
 
 	// --- SUBSCRIPTION SERVICE (role-protected) ---
 	// PBI-32,33,34,35,36: Admin package management — CEO, SUPERADMIN, OPERASIONAL only
@@ -836,6 +956,12 @@ func main() {
 		if strings.HasPrefix(route.Path, "/api/") {
 			// Skip routes already registered above
 			if route.Path == "/api/notifications/public" || route.Path == "/api/notifications/public/" {
+				continue
+			}
+			if route.Path == "/api/notifications" || route.Path == "/api/notifications/" {
+				continue
+			}
+			if route.Path == "/api/notifications/recent" || route.Path == "/api/notifications/recent/" {
 				continue
 			}
 			if strings.HasPrefix(route.Path, "/api/admin/") ||

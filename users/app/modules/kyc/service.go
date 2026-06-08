@@ -27,9 +27,9 @@ func NewService(repo Repository) *Service {
 
 // dispatchNotification mengirim event KYC ke Notification Service.
 // Urutan: 1) Redis queue → 2) HTTP langsung.
-func dispatchKYCNotification(eventType, to string, vars map[string]string) {
+func dispatchKYCNotification(eventType, to, userID, userName string, vars map[string]string) {
 	// 1. Coba Redis queue terlebih dahulu (async, reliable)
-	if err := utils.PublishNotificationEvent(eventType, "email", to, vars); err == nil {
+	if err := utils.PublishNotificationEvent(eventType, "email", to, userID, userName, vars); err == nil {
 		log.Printf("[KYC NOTIF] Event dipublish ke queue: event=%s to=%s", eventType, to)
 		return
 	}
@@ -41,6 +41,8 @@ func dispatchKYCNotification(eventType, to string, vars map[string]string) {
 		"channel":    "email",
 		"to":         to,
 		"vars":       vars,
+		"user_id":    userID,
+		"user_name":  userName,
 	}
 	body, _ := json.Marshal(payload)
 
@@ -438,7 +440,7 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 	}
 
 	// Kirim email notification ke user (async)
-	s.sendKYCNotification(detail.Email, detail.FullName, newStatus, rejectReason)
+	s.sendKYCNotification(detail.Email, detail.FullName, detail.UserID, newStatus, rejectReason)
 
 	msg := "KYC berhasil di-approve"
 	if newStatus == "rejected" {
@@ -454,15 +456,15 @@ func (s *Service) ProcessAdminKYCReviewJob(ctx context.Context, payload any) (an
 
 // sendKYCNotification mengirim email notifikasi ke user saat KYC di-approve/reject.
 // Semua pengiriman dilakukan melalui Notification Service (Brevo-only).
-func (s *Service) sendKYCNotification(email, fullName, status, rejectReason string) {
+func (s *Service) sendKYCNotification(email, fullName, userID, status, rejectReason string) {
 	go func() {
 		switch status {
 		case "approved":
-			dispatchKYCNotification("kyc_approved", email, map[string]string{
+			dispatchKYCNotification("kyc_approved", email, userID, fullName, map[string]string{
 				"full_name": fullName,
 			})
 		case "rejected":
-			dispatchKYCNotification("kyc_rejected", email, map[string]string{
+			dispatchKYCNotification("kyc_rejected", email, userID, fullName, map[string]string{
 				"full_name":     fullName,
 				"reject_reason": rejectReason,
 			})

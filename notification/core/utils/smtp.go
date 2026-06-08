@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -17,8 +18,8 @@ import (
 
 // EmailSender is the interface used by the notification service.
 type EmailSender interface {
-	SendEmail(to, subject, body string) error
-	SendHTMLEmail(to, subject, htmlBody string) error
+	SendEmail(to, subject, body string) (string, error)
+	SendHTMLEmail(to, subject, htmlBody string) (string, error)
 }
 
 // NewEmailSender returns a Brevo sender.
@@ -36,12 +37,12 @@ func NewEmailSender() EmailSender {
 
 type MissingBrevoSender struct{}
 
-func (m *MissingBrevoSender) SendEmail(_, _, _ string) error {
-	return fmt.Errorf("brevo sender not configured: BREVO_API_KEY is required")
+func (m *MissingBrevoSender) SendEmail(_, _, _ string) (string, error) {
+	return "", fmt.Errorf("brevo sender not configured: BREVO_API_KEY is required")
 }
 
-func (m *MissingBrevoSender) SendHTMLEmail(_, _, _ string) error {
-	return fmt.Errorf("brevo sender not configured: BREVO_API_KEY is required")
+func (m *MissingBrevoSender) SendHTMLEmail(_, _, _ string) (string, error) {
+	return "", fmt.Errorf("brevo sender not configured: BREVO_API_KEY is required")
 }
 
 // ============================================================
@@ -68,7 +69,7 @@ type brevoContact struct {
 	Name  string `json:"name,omitempty"`
 }
 
-func (b *BrevoClient) SendEmail(to, subject, body string) error {
+func (b *BrevoClient) SendEmail(to, subject, body string) (string, error) {
 	return b.send(brevoPayload{
 		Sender:      brevoContact{Email: b.FromEmail, Name: b.FromName},
 		To:          []brevoContact{{Email: to}},
@@ -77,7 +78,7 @@ func (b *BrevoClient) SendEmail(to, subject, body string) error {
 	})
 }
 
-func (b *BrevoClient) SendHTMLEmail(to, subject, htmlBody string) error {
+func (b *BrevoClient) SendHTMLEmail(to, subject, htmlBody string) (string, error) {
 	return b.send(brevoPayload{
 		Sender:      brevoContact{Email: b.FromEmail, Name: b.FromName},
 		To:          []brevoContact{{Email: to}},
@@ -86,15 +87,15 @@ func (b *BrevoClient) SendHTMLEmail(to, subject, htmlBody string) error {
 	})
 }
 
-func (b *BrevoClient) send(payload brevoPayload) error {
+func (b *BrevoClient) send(payload brevoPayload) (string, error) {
 	body, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("brevo marshal: %w", err)
+		return "", fmt.Errorf("brevo marshal: %w", err)
 	}
 
 	req, err := http.NewRequest("POST", "https://api.brevo.com/v3/smtp/email", bytes.NewReader(body))
 	if err != nil {
-		return fmt.Errorf("brevo request: %w", err)
+		return "", fmt.Errorf("brevo request: %w", err)
 	}
 	req.Header.Set("api-key", b.APIKey)
 	req.Header.Set("Content-Type", "application/json")
@@ -103,16 +104,21 @@ func (b *BrevoClient) send(payload brevoPayload) error {
 	client := &http.Client{Timeout: 15 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("brevo send: %w", err)
+		return "", fmt.Errorf("brevo send: %w", err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode >= 400 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("brevo error %d: %s", resp.StatusCode, string(respBody))
+	respBody, _ := io.ReadAll(resp.Body)
+	respText := strings.TrimSpace(string(respBody))
+	if respText == "" {
+		respText = fmt.Sprintf("brevo status=%d", resp.StatusCode)
 	}
 
-	return nil
+	if resp.StatusCode >= 400 {
+		return respText, fmt.Errorf("brevo error %d: %s", resp.StatusCode, respText)
+	}
+
+	return respText, nil
 }
 
 func getEnv(key string, fallback ...string) string {

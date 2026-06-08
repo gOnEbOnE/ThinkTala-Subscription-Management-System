@@ -70,6 +70,25 @@
             border-radius: 999px;
         }
 
+        .invoice-download-btn {
+            background: linear-gradient(135deg, #00f2ff, #0088ff);
+            color: #000;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 12px rgba(0, 242, 255, 0.3);
+            cursor: pointer;
+            transition: filter .2s, box-shadow .2s;
+        }
+
+        .invoice-download-btn:hover {
+            filter: brightness(1.12);
+            box-shadow: 0 0 18px rgba(0, 242, 255, 0.45);
+            color: #000;
+        }
+
         .info-label {
             font-size: 0.72rem;
             text-transform: uppercase;
@@ -189,6 +208,11 @@
                     <div class="text-end">
                         <div class="info-label">Status</div>
                         <div id="dStatus">-</div>
+                        <div id="invoiceDownloadZone" class="mt-3 d-none">
+                            <button type="button" class="btn btn-sm invoice-download-btn" onclick="downloadInvoiceAdmin()">
+                                <i class="fa-solid fa-file-pdf me-1"></i>Unduh Invoice PDF
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -249,12 +273,6 @@
                         <h6 class="fw-bold mb-3" style="color: var(--text-heading)">Aksi Verifikasi</h6>
                         <div id="verifyReadonly" class="alert verify-state verify-readonly d-none">
                             Pesanan ini sudah diverifikasi. Tidak ada aksi lanjutan yang diperlukan.
-                        </div>
-
-                        <div id="invoiceDownloadZone" class="mt-3 d-none">
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="downloadInvoiceAdmin()">
-                                <i class="fa-solid fa-file-pdf me-1"></i>Unduh Invoice PDF
-                            </button>
                         </div>
 
                         <div id="verifyBlocked" class="alert verify-state verify-blocked d-none">

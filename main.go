@@ -157,7 +157,11 @@ func autoFreePort(serviceName, port string) bool {
 
 	fmt.Printf("[!] Port %s bentrok untuk %s. Auto-kill PID: %s\n", port, serviceName, strings.Join(pids, ", "))
 	for _, pid := range pids {
-		_ = exec.Command("kill", "-TERM", pid).Run()
+		if runtime.GOOS == "windows" {
+			_ = exec.Command("taskkill", "/F", "/PID", pid).Run()
+		} else {
+			_ = exec.Command("kill", "-TERM", pid).Run()
+		}
 	}
 
 	if waitUntilPortFree(port, 2*time.Second) {
@@ -166,7 +170,11 @@ func autoFreePort(serviceName, port string) bool {
 
 	fmt.Printf("[!] Port %s masih dipakai, paksa kill PID: %s\n", port, strings.Join(pids, ", "))
 	for _, pid := range pids {
-		_ = exec.Command("kill", "-KILL", pid).Run()
+		if runtime.GOOS == "windows" {
+			_ = exec.Command("taskkill", "/F", "/PID", pid).Run()
+		} else {
+			_ = exec.Command("kill", "-KILL", pid).Run()
+		}
 	}
 
 	if waitUntilPortFree(port, 2*time.Second) {

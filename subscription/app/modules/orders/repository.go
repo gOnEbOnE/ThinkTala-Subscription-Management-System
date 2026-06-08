@@ -34,6 +34,8 @@ type Repository interface {
 	ListActiveSubscriptionsByUser(ctx context.Context, userID string) ([]SubscriptionStatus, error)
 	GetActiveSubscriptionByUser(ctx context.Context, userID string) (*SubscriptionStatus, error)
 	GetLatestSubscriptionByUser(ctx context.Context, userID string) (*SubscriptionStatus, error)
+	GetLatestSubscriptionByUserAndPackage(ctx context.Context, userID, packageID string) (*SubscriptionStatus, error)
+	LogInvoiceDownload(ctx context.Context, userID, orderID string) error
 }
 
 // ==========================================
@@ -114,11 +116,11 @@ func (r *orderRepo) CreateOrder(ctx context.Context, userID string, dto CreateOr
 	var o Order
 	err := r.db.Pool.QueryRow(ctx,
 		`INSERT INTO subscription.orders
-		   (id, invoice_number, user_id, package_id, duration_months, payment_method, total_price, status, created_at, updated_at)
-		 VALUES ($1, $2, $3, $4, $5, $6, $7, 'PENDING_PAYMENT', NOW(), NOW())
+		   (id, invoice_number, user_id, package_id, duration_months, payment_method, client_name, client_email, total_price, status, created_at, updated_at)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'PENDING_PAYMENT', NOW(), NOW())
 		 RETURNING id, invoice_number, package_id, duration_months, payment_method, total_price, status,
 		          FALSE AS has_payment_proof, NULL::timestamp AS payment_proof_uploaded_at, created_at`,
-		id, invoice, userID, dto.PackageID, durationMonths, dto.PaymentMethod, totalPrice,
+		id, invoice, userID, dto.PackageID, durationMonths, dto.PaymentMethod, dto.ClientName, dto.ClientEmail, totalPrice,
 	).Scan(&o.ID, &o.InvoiceNumber, &o.PackageID, &o.DurationMonths, &o.PaymentMethod, &o.TotalPrice, &o.Status, &o.HasPaymentProof, &o.PaymentProofUploadedAt, &o.CreatedAt)
 
 	if err != nil {
@@ -127,11 +129,11 @@ func (r *orderRepo) CreateOrder(ctx context.Context, userID string, dto CreateOr
 			invoice = generateInvoiceNumber()
 			err = r.db.Pool.QueryRow(ctx,
 				`INSERT INTO subscription.orders
-				   (id, invoice_number, user_id, package_id, duration_months, payment_method, total_price, status, created_at, updated_at)
-				 VALUES ($1, $2, $3, $4, $5, $6, $7, 'PENDING_PAYMENT', NOW(), NOW())
+				   (id, invoice_number, user_id, package_id, duration_months, payment_method, client_name, client_email, total_price, status, created_at, updated_at)
+				 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'PENDING_PAYMENT', NOW(), NOW())
 				 RETURNING id, invoice_number, package_id, duration_months, payment_method, total_price, status,
 				          FALSE AS has_payment_proof, NULL::timestamp AS payment_proof_uploaded_at, created_at`,
-				uuid.New().String(), invoice, userID, dto.PackageID, durationMonths, dto.PaymentMethod, totalPrice,
+				uuid.New().String(), invoice, userID, dto.PackageID, durationMonths, dto.PaymentMethod, dto.ClientName, dto.ClientEmail, totalPrice,
 			).Scan(&o.ID, &o.InvoiceNumber, &o.PackageID, &o.DurationMonths, &o.PaymentMethod, &o.TotalPrice, &o.Status, &o.HasPaymentProof, &o.PaymentProofUploadedAt, &o.CreatedAt)
 			if err != nil {
 				return nil, fmt.Errorf("gagal membuat order setelah retry: %w", err)
@@ -150,8 +152,8 @@ func (r *orderRepo) getOrderByIDWithFallback(ctx context.Context, orderID string
 		o.user_id,
 		o.package_id,
 		COALESCE(p.name, '-') AS package_name,
-		COALESCE(u.name, 'Unknown') AS client_name,
-		COALESCE(u.email, '-') AS client_email,
+		COALESCE(NULLIF(o.client_name, ''), u.name, 'Unknown') AS client_name,
+		COALESCE(NULLIF(o.client_email, ''), u.email, '-') AS client_email,
 		o.duration_months,
 		o.total_price,
 		o.payment_method,
@@ -174,8 +176,8 @@ func (r *orderRepo) getOrderByIDWithFallback(ctx context.Context, orderID string
 		o.user_id,
 		o.package_id,
 		COALESCE(p.name, '-') AS package_name,
-		'Unknown' AS client_name,
-		'-' AS client_email,
+		COALESCE(NULLIF(o.client_name, ''), 'Unknown') AS client_name,
+		COALESCE(NULLIF(o.client_email, ''), '-') AS client_email,
 		o.duration_months,
 		o.total_price,
 		o.payment_method,
@@ -374,10 +376,10 @@ func (r *orderRepo) ListOrdersForAdmin(ctx context.Context, filter AdminOrderFil
 
 	buildQuery := func(withUsers bool, w string) string {
 		join := ""
-		clientName := "'Unknown' AS client_name"
+		clientName := "COALESCE(NULLIF(o.client_name, ''), 'Unknown') AS client_name"
 		if withUsers {
 			join = "LEFT JOIN users u ON u.id = o.user_id"
-			clientName = "COALESCE(u.name, 'Unknown') AS client_name"
+			clientName = "COALESCE(NULLIF(o.client_name, ''), u.name, 'Unknown') AS client_name"
 		}
 		return fmt.Sprintf(`
 			SELECT
@@ -608,6 +610,50 @@ func (r *orderRepo) GetLatestSubscriptionByUser(ctx context.Context, userID stri
 	return &item, nil
 }
 
+// GetLatestSubscriptionByUserAndPackage mengambil subscription terbaru berdasarkan user + package.
+func (r *orderRepo) GetLatestSubscriptionByUserAndPackage(ctx context.Context, userID, packageID string) (*SubscriptionStatus, error) {
+	var item SubscriptionStatus
+	err := r.db.Pool.QueryRow(ctx,
+		`SELECT
+			s.id,
+			s.package_id,
+			COALESCE(p.name, '-') AS package_name,
+			s.start_date,
+			s.end_date,
+			s.status
+		 FROM subscription.subscriptions s
+		 LEFT JOIN subscription.packages p ON p.id = s.package_id
+		 WHERE s.user_id = $1
+		   AND s.package_id = $2
+		 ORDER BY s.created_at DESC
+		 LIMIT 1`,
+		userID, packageID,
+	).Scan(&item.SubscriptionID, &item.PackageID, &item.PackageName, &item.StartDate, &item.EndDate, &item.Status)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("gagal mengambil subscription terbaru: %w", err)
+	}
+	return &item, nil
+}
+
+// LogInvoiceDownload mencatat aktivitas unduhan invoice untuk audit trail (PBI-64).
+func (r *orderRepo) LogInvoiceDownload(ctx context.Context, userID, orderID string) error {
+	if r.db == nil || r.db.Pool == nil {
+		return nil
+	}
+	_, err := r.db.Pool.Exec(ctx,
+		`INSERT INTO subscription.invoice_download_logs (id, user_id, order_id, downloaded_at)
+		 VALUES ($1, $2, $3, NOW())`,
+		uuid.New().String(), userID, orderID,
+	)
+	if err != nil {
+		return fmt.Errorf("gagal mencatat log unduhan invoice: %w", err)
+	}
+	return nil
+}
+
 // SavePaymentProof menyimpan bukti transfer ke orders
 func (r *orderRepo) SavePaymentProof(ctx context.Context, orderID string, file PaymentProofFile) (*UploadPaymentProofResult, error) {
 	var uploadedAt time.Time
@@ -672,8 +718,14 @@ func (r *orderRepo) CreateSubscriptionFromOrder(ctx context.Context, orderID str
 		return nil, fmt.Errorf("aktivasi hanya bisa diproses untuk order berstatus PAID")
 	}
 
+	tx, err := r.db.Pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("gagal memulai transaksi aktivasi: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
 	var existingID string
-	err = r.db.Pool.QueryRow(ctx,
+	err = tx.QueryRow(ctx,
 		`SELECT id FROM subscription.subscriptions WHERE order_id = $1 LIMIT 1`,
 		orderID,
 	).Scan(&existingID)
@@ -690,10 +742,87 @@ func (r *orderRepo) CreateSubscriptionFromOrder(ctx context.Context, orderID str
 	if duration <= 0 {
 		duration = 1
 	}
-	endDate := startDate.AddDate(0, duration, 0)
 
+	_, err = tx.Exec(ctx,
+		`UPDATE subscription.subscriptions
+		 SET status = 'EXPIRED',
+		     updated_at = NOW()
+		 WHERE user_id = $1
+		   AND package_id = $2
+		   AND status = 'ACTIVE'
+		   AND end_date < CURRENT_DATE`,
+		order.UserID, order.PackageID,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("gagal merapikan subscription kadaluarsa: %w", err)
+	}
+
+	// Jika user masih punya subscription aktif dengan paket yang sama, lakukan perpanjangan.
+	var activeID string
+	var activeStart time.Time
+	var activeEnd time.Time
+	err = tx.QueryRow(ctx,
+		`SELECT id, start_date, end_date
+		 FROM subscription.subscriptions
+		 WHERE user_id = $1
+		   AND package_id = $2
+		   AND status = 'ACTIVE'
+		   AND end_date >= CURRENT_DATE
+		 ORDER BY end_date DESC
+		 LIMIT 1`,
+		order.UserID, order.PackageID,
+	).Scan(&activeID, &activeStart, &activeEnd)
+	if err == nil {
+		baseEnd := activeEnd
+		if baseEnd.Before(startDate) {
+			baseEnd = startDate
+		}
+		newEnd := baseEnd.AddDate(0, duration, 0)
+
+		_, err = tx.Exec(ctx,
+			`UPDATE subscription.subscriptions
+			 SET end_date = $1,
+			     updated_at = NOW()
+			 WHERE id = $2`,
+			newEnd, activeID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("gagal memperpanjang subscription: %w", err)
+		}
+
+		// Pastikan hanya ada satu subscription aktif per paket untuk user ini.
+		_, err = tx.Exec(ctx,
+			`UPDATE subscription.subscriptions
+			 SET status = 'EXPIRED',
+			     updated_at = NOW()
+			 WHERE user_id = $1
+			   AND package_id = $2
+			   AND status = 'ACTIVE'
+			   AND id <> $3`,
+			order.UserID, order.PackageID, activeID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("gagal merapikan subscription aktif: %w", err)
+		}
+
+		if err := tx.Commit(ctx); err != nil {
+			return nil, fmt.Errorf("gagal commit perpanjangan subscription: %w", err)
+		}
+
+		return &ActivationResult{
+			SubscriptionID: activeID,
+			StartDate:      activeStart,
+			EndDate:        newEnd,
+			Status:         "ACTIVE",
+		}, nil
+	}
+	if err != nil && err != pgx.ErrNoRows {
+		return nil, fmt.Errorf("gagal mengecek subscription aktif: %w", err)
+	}
+
+	endDate := startDate.AddDate(0, duration, 0)
 	res := &ActivationResult{}
-	err = r.db.Pool.QueryRow(ctx,
+	err = tx.QueryRow(ctx,
 		`INSERT INTO subscription.subscriptions
 			(id, order_id, user_id, package_id, start_date, end_date, status, created_at, updated_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', NOW(), NOW())
@@ -702,6 +831,10 @@ func (r *orderRepo) CreateSubscriptionFromOrder(ctx context.Context, orderID str
 	).Scan(&res.SubscriptionID, &res.StartDate, &res.EndDate, &res.Status)
 	if err != nil {
 		return nil, fmt.Errorf("gagal membuat subscription: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("gagal commit aktivasi subscription: %w", err)
 	}
 
 	return res, nil
@@ -717,12 +850,21 @@ func (r *orderRepo) ListActiveSubscriptionsByUser(ctx context.Context, userID st
 			s.start_date,
 			s.end_date,
 			s.status
-		 FROM subscription.subscriptions s
+		 FROM (
+			SELECT DISTINCT ON (package_id)
+				id,
+				package_id,
+				start_date,
+				end_date,
+				status
+			 FROM subscription.subscriptions
+			 WHERE user_id = $1
+			   AND status = 'ACTIVE'
+			   AND end_date >= CURRENT_DATE
+			 ORDER BY package_id, end_date DESC, created_at DESC
+		 ) s
 		 LEFT JOIN subscription.packages p ON p.id = s.package_id
-		 WHERE s.user_id = $1
-		   AND s.status = 'ACTIVE'
-		   AND s.end_date >= CURRENT_DATE
-		 ORDER BY s.created_at DESC`,
+		 ORDER BY s.end_date DESC`,
 		userID,
 	)
 	if err != nil {

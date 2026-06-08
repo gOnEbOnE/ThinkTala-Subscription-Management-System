@@ -227,6 +227,44 @@
       "cors": true,
       "auth": true,
       "roles": ["SUPERADMIN"]
+    },
+    {
+      "path": "/api/notifications/recent",
+      "target": "http://notification.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "OPERASIONAL", "COMPLIANCE", "MANAGEMENT", "ADMIN", "ADMIN_SUPPORT", "ADMIN_KYC", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/notifications/recent/",
+      "target": "http://notification.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "OPERASIONAL", "COMPLIANCE", "MANAGEMENT", "ADMIN", "ADMIN_SUPPORT", "ADMIN_KYC", "SUPERADMIN", "CEO"]
+    },
+    {
+      "path": "/api/telegram/link",
+      "target": "http://notification.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"],
+      "description": "User menghubungkan akun Telegram mereka untuk menerima notifikasi personal"
+    },
+    {
+      "path": "/api/telegram/unlink",
+      "target": "http://notification.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"],
+      "description": "User melepas hubungan Telegram dari akun"
+    },
+    {
+      "path": "/api/telegram/status",
+      "target": "http://notification.railway.internal:5003",
+      "cors": true,
+      "auth": true,
+      "roles": ["CLIENT", "SUPERADMIN", "CEO"],
+      "description": "Cek apakah user sudah menghubungkan Telegram"
     }
   ]
 }
