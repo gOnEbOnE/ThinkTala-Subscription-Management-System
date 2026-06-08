@@ -197,7 +197,7 @@ func main() {
 	// Service configurations
 	serviceConfigs := []ServiceConfig{
 		{"account", "account", "2001"},
-		{"gateway", "gateway", "2000"},
+		{"gateway", "gateway", "3000"},
 		{"users", "users", "2006"},
 		{"tickets", "tickets", "2004"},
 		{"notification", "notification", "5003"},
@@ -269,10 +269,10 @@ func main() {
 		fmt.Printf("  ℹ️  SKIPPED %d SERVICES (PORT IN USE)\n", skippedCount)
 	}
 	fmt.Println("=========================================")
-	fmt.Println("\n  🌐 Gateway (Port 2000):")
-	fmt.Println("     http://localhost:2000")
+	fmt.Println("\n  🌐 Gateway (Port 3000):")
+	fmt.Println("     http://localhost:3000")
 	fmt.Println("\n  🔐 Login:")
-	fmt.Println("     http://localhost:2000/account/login")
+	fmt.Println("     http://localhost:3000/account/login")
 	fmt.Println("\n  📊 Test Credentials:")
 	fmt.Println("     Email: superadmin@thinktala.com")
 	fmt.Println("     Pass:  Super123")
