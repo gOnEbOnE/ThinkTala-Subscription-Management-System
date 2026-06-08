@@ -64,6 +64,7 @@
     { "source": "/management/package-detail", "destination": "/management/package-detail.html" },
     { "source": "/market-insight", "destination": "/market-insight.html" },
     { "source": "/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/ws", "destination": "https://gateway-production-1827.up.railway.app/ws" },
     { "source": "/account/login/auth", "destination": "https://gateway-production-1827.up.railway.app/account/login/auth" },
     { "source": "/api/:path*", "destination": "https://gateway-production-1827.up.railway.app/api/:path*" }
   ]
