@@ -90,11 +90,11 @@
                 </div>
                 <div class="col-md-4">
                     <small class="text-muted text-uppercase" style="font-size:0.68rem;">Expires</small>
-                    <div class="fw-semibold" id="subEndDate" style="color:var(--text-main);">-</div>
-                                            <div class="info-item">
-                            <div class="info-label">Sisa Hari Aktif</div>
-                            <div class="info-value" id="subDaysRemaining">-</div>
-                        </div>
+                        <div class="fw-semibold" id="subEndDate" style="color:var(--text-main);">-</div>
+                                                <div class="info-item">
+                                <div class="info-label">Sisa Hari Aktif</div>
+                                <div class="info-value" id="subDaysRemaining">-</div>
+                            </div>
                 </div>
             </div>
             <div class="mt-3 pt-3" style="border-top:1px solid var(--border-color);">
@@ -104,12 +104,12 @@
                 </div>
             </div>
             <div class="mt-3 pt-3 d-flex flex-wrap align-items-center gap-2" style="border-top:1px solid var(--border-color);">
-                <button type="button" id="renewNowBtn" class="btn btn-sm btn-success d-none">
-                    <i class="fa-solid fa-rotate me-1"></i>Perpanjang Sekarang
-                </button>
-                <small id="renewHint" class="text-muted d-none" style="font-size:0.8rem;">
-                    Perpanjangan tersedia 7 hari sebelum masa aktif berakhir.
-                </small>
+                    <button type="button" id="renewNowBtn" class="btn btn-sm btn-success d-none">
+                        <i class="fa-solid fa-rotate me-1"></i>Perpanjang Sekarang
+                    </button>
+                    <small id="renewHint" class="text-muted d-none" style="font-size:0.8rem;">
+                        Perpanjangan tersedia 7 hari sebelum berakhir.
+                    </small>
                 <a href="/client/packages-catalog" class="btn btn-sm btn-outline-secondary">
                     <i class="fa-solid fa-plus me-1"></i>Buy New Package
                 </a>
@@ -227,7 +227,6 @@
             return [];
         }
 
-        /** Sisa hari dari end_date (fallback jika days_remaining tidak ada di API). */
         function getDaysRemaining(sub) {
             if (!sub) return null;
             if (typeof sub.days_remaining === 'number') return sub.days_remaining;
@@ -239,21 +238,16 @@
             return Math.ceil((end - today) / (1000 * 60 * 60 * 24));
         }
 
-        /**
-         * Aturan perpanjangan (FE only):
-         * - > 7 hari lagi: tombol disabled + teks keterangan
-         * - ≤ 7 hari atau sudah lewat/expired: tombol aktif
-         */
         function updateRenewButtonState(display, status, canRenew) {
-            var renewBtn = document.getElementById('renewNowBtn');
-            var renewHint = document.getElementById('renewHint');
-            if (!renewBtn) return;
+                var renewBtn = document.getElementById('renewNowBtn');
+                var renewHint = document.getElementById('renewHint');
+                if (!renewBtn) return;
 
-            if (!canRenew) {
-                renewBtn.classList.add('d-none');
-                if (renewHint) renewHint.classList.add('d-none');
-                return;
-            }
+                if (!canRenew) {
+                    renewBtn.classList.add('d-none');
+                    if (renewHint) renewHint.classList.add('d-none');
+                    return;
+                }
 
             renewBtn.classList.remove('d-none');
             var days = getDaysRemaining(display);
@@ -261,15 +255,15 @@
             var withinRenewWindow = days !== null && days <= 7;
             var mayRenew = isExpired || withinRenewWindow;
 
-            renewBtn.disabled = !mayRenew;
-            renewBtn.innerHTML = '<i class="fa-solid fa-rotate me-1"></i>' +
-                (isExpired ? 'Perpanjang Sekarang (Expired)' : 'Perpanjang Sekarang');
+                renewBtn.disabled = !mayRenew;
+                renewBtn.innerHTML = '<i class="fa-solid fa-rotate me-1"></i>' +
+                    (isExpired ? 'Perpanjang Sekarang (Expired)' : 'Perpanjang Sekarang');
 
-            if (renewHint) {
-                var showHint = !mayRenew && status === 'ACTIVE' && days !== null && days > 7;
-                renewHint.classList.toggle('d-none', !showHint);
+                if (renewHint) {
+                    var showHint = !mayRenew && status === 'ACTIVE' && days !== null && days > 7;
+                    renewHint.classList.toggle('d-none', !showHint);
+                }
             }
-        }
 
         function renderSubscriptionOverview(json) {
             var badge = document.getElementById('subStatusBadge');
@@ -280,7 +274,7 @@
 
             var active = normalizeSubscriptionsPayload(json);
             latestSubscription = json.latest_subscription || (active.length ? active[0] : null);
-            var canRenew = !!json.can_renew;
+                var canRenew = !!json.can_renew;
 
             subscriptionMap = {};
             active.forEach(function (s) {

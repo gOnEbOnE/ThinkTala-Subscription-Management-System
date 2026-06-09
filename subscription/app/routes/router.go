@@ -54,6 +54,9 @@ func Init(app *core.App, packagesController *packages.Controller, ordersControll
 	// Legacy alias sesuai routes.json gateway
 	app.Router.HandleFunc("GET /api/subscriptions", packagesController.GetPackagesAdminHandler)
 
+	app.Router.HandleFunc("POST /api/admin/packages/{id}/duplicate", packagesController.DuplicatePackageHandler)
+	app.Router.HandleFunc("POST /api/subscriptions/{id}/duplicate", packagesController.DuplicatePackageHandler)
+
 	// ===================================================
 	// EPIC04 PBI-45: Create Order (Client)
 	// ===================================================

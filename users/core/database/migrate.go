@@ -294,5 +294,7 @@ func MigrateAndSeed(db interface{}) {
 	}
 	log.Println("  ✓ Customer Support (support@thinktala.com / Support123)")
 
+	seedDashboardClients(ctx, pool)
+
 	log.Println("Migrasi dan Seeding selesai!")
 }

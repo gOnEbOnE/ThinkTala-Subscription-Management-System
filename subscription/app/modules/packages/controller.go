@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/master-abror/zaframework/core/concurrency"
 	ehttp "github.com/master-abror/zaframework/core/http"
@@ -71,6 +72,45 @@ func (c *Controller) CreatePackageHandler(w http.ResponseWriter, r *http.Request
 	c.response.JSON(w, r, map[string]interface{}{
 		"success": true,
 		"message": "Paket berhasil dibuat",
+		"data":    result,
+	})
+}
+
+func (c *Controller) DuplicatePackageHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if id == "" {
+		path := r.URL.Path
+		for _, prefix := range []string{"/api/admin/packages/", "/api/subscriptions/"} {
+			const suffix = "/duplicate"
+			if strings.HasPrefix(path, prefix) && strings.HasSuffix(path, suffix) && len(path) > len(prefix)+len(suffix) {
+				id = path[len(prefix) : len(path)-len(suffix)]
+				break
+			}
+		}
+	}
+	if id == "" {
+		c.response.JSON(w, r, map[string]interface{}{
+			"success": false,
+			"message": "ID paket harus disertakan pada URL",
+		})
+		return
+	}
+
+	result, err := c.dispatcher.DispatchAndWait(r.Context(), "duplicate_package", id, concurrency.PriorityHigh)
+	if err != nil {
+		if err.Error() == "paket tidak ditemukan atau sudah dihapus" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		c.response.JSON(w, r, map[string]interface{}{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.response.JSON(w, r, map[string]interface{}{
+		"success": true,
+		"message": "Paket berhasil diduplikasi",
 		"data":    result,
 	})
 }
@@ -353,4 +393,12 @@ func (s *packageService) ProcessTogglePackageStatusJob(ctx context.Context, payl
 		return nil, fmt.Errorf("invalid payload type for TogglePackageStatusJob")
 	}
 	return s.TogglePackageStatus(ctx, id)
+}
+
+func (s *packageService) ProcessDuplicatePackageJob(ctx context.Context, payload interface{}) (interface{}, error) {
+	id, ok := payload.(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload type for DuplicatePackageJob")
+	}
+	return s.DuplicatePackage(ctx, id)
 }
