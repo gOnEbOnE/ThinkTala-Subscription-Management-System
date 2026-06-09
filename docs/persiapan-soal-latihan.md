@@ -5,9 +5,103 @@ Dokumen ini memandu pengerjaan 10 soal latihan berdasarkan 4 fitur utama:
 
 ---
 
-## Peserta 1
+<!-- TOC START -->
+## 📑 Daftar Isi
 
-### Soal 1 — KYC Resubmission: Tampilkan Alasan Penolakan sebagai Alert/Banner
+- [Peserta 1](#peserta-1)
+  - [Soal 1 — KYC Resubmission: Tampilkan Alasan Penolakan sebagai Alert/Banner](#soal-1)
+  - [Soal 2 — Login: Tambahkan Tombol Show/Hide Password](#soal-2)
+- [Peserta 2](#peserta-2)
+  - [Soal 3 — Register: Indikator Kekuatan Password (Real-time)](#soal-3)
+  - [Soal 4 — Superadmin Manajemen Akun: Konfirmasi Dialog Sebelum Hapus](#soal-4)
+- [Peserta 3](#peserta-3)
+  - [Soal 5 — Superadmin Kinerja Divisi: Filter Date Range](#soal-5)
+  - [Soal 6 — KYC Resubmission: Preview Dokumen Sebelum Submit](#soal-6)
+- [Peserta 4](#peserta-4)
+  - [Soal 7 — Logout: Konfirmasi Dialog Sebelum Keluar](#soal-7)
+  - [Soal 8 — Superadmin Manajemen Akun: Kolom "Terakhir Aktif" + Sortable](#soal-8)
+- [Peserta 5](#peserta-5)
+  - [Soal 9 — Register: Dropdown Country Code di Field Telepon](#soal-9)
+  - [Soal 10 — Superadmin Kinerja Divisi: Card Summary di Atas Halaman](#soal-10)
+- [Peserta 6](#peserta-6)
+  - [Soal 11 — Superadmin Manajemen Akun: Tampilkan Jumlah Hasil Filter](#soal-11)
+  - [Soal 12 — Superadmin Kinerja Divisi: Sort Kartu Berdasarkan Task Pending](#soal-12)
+- [Peserta 7](#peserta-7)
+  - [Soal 13 — KYC Resubmission: Lightbox Preview Gambar KTP](#soal-13)
+  - [Soal 14 — Superadmin Manajemen Akun: Sortable Column Header](#soal-14)
+- [Peserta 8](#peserta-8)
+  - [Soal 15 — Register: Modal Konfirmasi Data Sebelum Submit](#soal-15)
+  - [Soal 16 — Superadmin Kinerja Divisi: Sort Berdasarkan Persentase Penyelesaian](#soal-16)
+- [Peserta 9](#peserta-9)
+  - [Soal 17 — Superadmin Manajemen Akun: Modal Quick View Detail](#soal-17)
+  - [Soal 18 — KYC Resubmission: Modal Ringkasan Perubahan Data](#soal-18)
+- [Peserta 10](#peserta-10)
+  - [Soal 19 — Login: Modal Lockout Setelah 3 Kali Gagal](#soal-19)
+  - [Soal 20 — Superadmin Kinerja Divisi: Search Bar Filter Nama Divisi](#soal-20)
+- [Peserta 11](#peserta-11)
+  - [Soal 21 — [CREATE] KYC Resubmission: Submit Form ke API](#soal-21)
+  - [Soal 22 — [READ] KYC Resubmission: Tampilkan Status & Riwayat KYC](#soal-22)
+- [Peserta 12](#peserta-12)
+  - [Soal 23 — [UPDATE] KYC Resubmission: Pre-fill Form dengan Data KYC Lama](#soal-23)
+  - [Soal 24 — [DELETE] KYC Resubmission: Batalkan Pengajuan Pending](#soal-24)
+    - [Panduan Backend — Soal 24](#backend-soal-24)
+- [Peserta 13](#peserta-13)
+  - [Soal 25 — [CREATE] Register: Submit Form dengan Validasi Lengkap](#soal-25)
+  - [Soal 26 — [READ] Login: Tampilkan Sambutan Nama User Setelah Berhasil Login](#soal-26)
+- [Peserta 14](#peserta-14)
+  - [Soal 27 — [UPDATE] Register: Form Input OTP 6-Digit dengan Auto-focus](#soal-27)
+  - [Soal 28 — [DELETE] Login/Register: Logout Paksa Semua Sesi Aktif](#soal-28)
+    - [Panduan Backend — Soal 28](#backend-soal-28)
+- [Peserta 15](#peserta-15)
+  - [Soal 29 — [CREATE] Superadmin Manajemen Akun: Form Tambah Akun Internal](#soal-29)
+  - [Soal 30 — [READ] Superadmin Manajemen Akun: Export Tabel ke CSV](#soal-30)
+- [Peserta 16](#peserta-16)
+  - [Soal 31 — [UPDATE] Superadmin Manajemen Akun: Toggle Status Aktif/Nonaktif Inline](#soal-31)
+  - [Soal 32 — [DELETE] Superadmin Manajemen Akun: Hapus Massal dengan Checkbox](#soal-32)
+    - [Panduan Backend — Soal 32](#backend-soal-32)
+- [Peserta 17](#peserta-17)
+  - [Soal 33 — [CREATE] Superadmin Kinerja Divisi: Tambah Catatan/Note pada Divisi](#soal-33)
+  - [Soal 34 — [READ] Superadmin Kinerja Divisi: Chart Bar Perbandingan Antar Divisi](#soal-34)
+- [Peserta 18](#peserta-18)
+  - [Soal 35 — [UPDATE] Superadmin Kinerja Divisi: Edit Target Task Divisi Inline](#soal-35)
+  - [Soal 36 — [DELETE] Superadmin Kinerja Divisi: Reset Data Kinerja Divisi](#soal-36)
+    - [Panduan Backend — Soal 36](#backend-soal-36)
+- [Soal Tambahan — Latihan Frontend Mandiri (Soal 37–58)](#soal-tambahan-latihan-frontend-mandiri-soal-37-58)
+  - [Soal 37 — Login: Peringatan Caps Lock di Field Password](#soal-37)
+  - [Soal 38 — Login: Ingat Email Terakhir (localStorage)](#soal-38)
+  - [Soal 39 — Register: Tampilkan Umur Otomatis dari Tanggal Lahir](#soal-39)
+  - [Soal 40 — Register: Batasi Field Telepon Hanya Angka](#soal-40)
+  - [Soal 41 — Verifikasi OTP: Samarkan (Mask) Alamat Email](#soal-41)
+  - [Soal 42 — Manajemen Akun: Shortcut `/` Fokus Pencarian + `Esc` Bersihkan](#soal-42)
+  - [Soal 43 — Manajemen Akun: Tombol "Salin Email" per Baris](#soal-43)
+  - [Soal 44 — Manajemen Akun: Avatar Inisial di Kolom Nama](#soal-44)
+  - [Soal 45 — Kinerja Divisi: Auto-Refresh dengan Toggle](#soal-45)
+  - [Soal 46 — Kinerja Divisi: Kartu "Total Pending Semua Divisi"](#soal-46)
+  - [Soal 47 — KYC Resubmission: Penghitung Karakter Field Alamat](#soal-47)
+  - [Soal 48 — Pola: Menambah Tombol Beserta Fungsinya (Studi Kasus: "Salin Email")](#soal-48)
+  - [Soal 49 — Pola: Menambah Field Baru di Halaman Read/Detail (Studi Kasus: "Terakhir Diperbarui")](#soal-49)
+  - [Soal 50 — Pola: Menambah Pagination (Client-Side) pada List yang Belum Punya](#soal-50)
+- [Tambah Field & Tombol per Fitur (Soal 51–58)](#tambah-field-tombol-per-fitur-soal-51-58)
+  - [🔹 Fitur: KYC Resubmission](#fitur-kyc-resubmission)
+    - [Soal 51 — Tombol "Perbarui Status" (tanpa reload)](#soal-51)
+    - [Soal 52 — Field "Nomor Pengajuan" di View Read](#soal-52)
+  - [🔹 Fitur: Login / Logout / Register](#fitur-login-logout-register)
+    - [Soal 53 — Field "Konfirmasi Email" + Validasi Saat Submit](#soal-53)
+    - [Soal 54 — Tombol "Bersihkan Formulir" (Reset)](#soal-54)
+  - [🔹 Fitur: Superadmin Manajemen Akun Internal (CRUD)](#fitur-superadmin-manajemen-akun-internal-crud)
+    - [Soal 55 — Field "Jumlah per Halaman" (Page Size)](#soal-55)
+    - [Soal 56 — Tombol "Buat Password Kuat" (Generate)](#soal-56)
+  - [🔹 Fitur: Superadmin Memantau Kinerja Divisi](#fitur-superadmin-memantau-kinerja-divisi)
+    - [Soal 57 — Field Metrik "KYC Ditolak" di Kartu Compliance](#soal-57)
+    - [Soal 58 — Tombol "Salin Ringkasan" ke Clipboard](#soal-58)
+- [Referensi Cepat — File yang Relevan](#referensi-cepat-file-yang-relevan)
+- [Pola Umum di Codebase Ini](#pola-umum-di-codebase-ini)
+
+<!-- TOC END -->
+
+## Peserta 1 <a id="peserta-1"></a>
+
+### Soal 1 — KYC Resubmission: Tampilkan Alasan Penolakan sebagai Alert/Banner <a id="soal-1"></a>
 
 **File:** `frontend/client/kyc-resubmit.html`
 
@@ -45,7 +139,7 @@ topAlert.style.display = 'flex';
 
 ---
 
-### Soal 2 — Login: Tambahkan Tombol Show/Hide Password
+### Soal 2 — Login: Tambahkan Tombol Show/Hide Password <a id="soal-2"></a>
 
 **File:** `frontend/account/login.html`
 
@@ -79,9 +173,9 @@ toggleBtn.addEventListener('click', function() {
 
 ---
 
-## Peserta 2
+## Peserta 2 <a id="peserta-2"></a>
 
-### Soal 3 — Register: Indikator Kekuatan Password (Real-time)
+### Soal 3 — Register: Indikator Kekuatan Password (Real-time) <a id="soal-3"></a>
 
 **File:** `frontend/account/register.html`
 
@@ -143,7 +237,7 @@ document.getElementById('password').addEventListener('input', function() {
 
 ---
 
-### Soal 4 — Superadmin Manajemen Akun: Konfirmasi Dialog Sebelum Hapus
+### Soal 4 — Superadmin Manajemen Akun: Konfirmasi Dialog Sebelum Hapus <a id="soal-4"></a>
 
 **File:** `frontend/ops/manage-users.html`
 
@@ -179,9 +273,9 @@ function confirmDeleteUser(userId, userName, userEmail) {
 
 ---
 
-## Peserta 3
+## Peserta 3 <a id="peserta-3"></a>
 
-### Soal 5 — Superadmin Kinerja Divisi: Filter Date Range
+### Soal 5 — Superadmin Kinerja Divisi: Filter Date Range <a id="soal-5"></a>
 
 **File:** `frontend/management/dashboard-overview.html`
 
@@ -231,7 +325,7 @@ async function loadData(dateFrom, dateTo) {
 
 ---
 
-### Soal 6 — KYC Resubmission: Preview Dokumen Sebelum Submit
+### Soal 6 — KYC Resubmission: Preview Dokumen Sebelum Submit <a id="soal-6"></a>
 
 **File:** `frontend/client/kyc-resubmit.html`
 
@@ -260,9 +354,9 @@ Preview sudah **ada** (`#previewContainer`, `#previewImage`) dan diisi di fungsi
 
 ---
 
-## Peserta 4
+## Peserta 4 <a id="peserta-4"></a>
 
-### Soal 7 — Logout: Konfirmasi Dialog Sebelum Keluar
+### Soal 7 — Logout: Konfirmasi Dialog Sebelum Keluar <a id="soal-7"></a>
 
 **File:** `frontend/assets/js/ops-layout.js` atau komponen sidebar (cek `ops-sidebar-placeholder`)
 
@@ -312,7 +406,7 @@ function showLogoutConfirm(logoutUrl) {
 
 ---
 
-### Soal 8 — Superadmin Manajemen Akun: Kolom "Terakhir Aktif" + Sortable
+### Soal 8 — Superadmin Manajemen Akun: Kolom "Terakhir Aktif" + Sortable <a id="soal-8"></a>
 
 **File:** `frontend/ops/manage-users.html`
 
@@ -360,9 +454,9 @@ function sortTable(field) {
 
 ---
 
-## Peserta 5
+## Peserta 5 <a id="peserta-5"></a>
 
-### Soal 9 — Register: Dropdown Country Code di Field Telepon
+### Soal 9 — Register: Dropdown Country Code di Field Telepon <a id="soal-9"></a>
 
 **File:** `frontend/account/register.html`
 
@@ -406,7 +500,7 @@ var fullPhone = code + num;  // e.g. "+628123456789"
 
 ---
 
-### Soal 10 — Superadmin Kinerja Divisi: Card Summary di Atas Halaman
+### Soal 10 — Superadmin Kinerja Divisi: Card Summary di Atas Halaman <a id="soal-10"></a>
 
 **File:** `frontend/management/dashboard-overview.html`
 
@@ -471,9 +565,9 @@ function updateSummaryCards(divisions) {
 
 ---
 
-## Peserta 6
+## Peserta 6 <a id="peserta-6"></a>
 
-### Soal 11 — Superadmin Manajemen Akun: Tampilkan Jumlah Hasil Filter
+### Soal 11 — Superadmin Manajemen Akun: Tampilkan Jumlah Hasil Filter <a id="soal-11"></a>
 
 **File:** `frontend/ops/manage-users.html`
 
@@ -522,7 +616,7 @@ if (status)  tagsEl.innerHTML += '<span class="badge bg-secondary">Status: ' + (
 
 ---
 
-### Soal 12 — Superadmin Kinerja Divisi: Sort Kartu Berdasarkan Task Pending
+### Soal 12 — Superadmin Kinerja Divisi: Sort Kartu Berdasarkan Task Pending <a id="soal-12"></a>
 
 **File:** `frontend/management/dashboard-overview.html`
 
@@ -577,9 +671,9 @@ function renderCards() {
 
 ---
 
-## Peserta 7
+## Peserta 7 <a id="peserta-7"></a>
 
-### Soal 13 — KYC Resubmission: Lightbox Preview Gambar KTP
+### Soal 13 — KYC Resubmission: Lightbox Preview Gambar KTP <a id="soal-13"></a>
 
 **File:** `frontend/client/kyc-resubmit.html`
 
@@ -640,7 +734,7 @@ document.addEventListener('keydown', function(e) {
 
 ---
 
-### Soal 14 — Superadmin Manajemen Akun: Sortable Column Header
+### Soal 14 — Superadmin Manajemen Akun: Sortable Column Header <a id="soal-14"></a>
 
 **File:** `frontend/ops/manage-users.html`
 
@@ -706,9 +800,9 @@ if (sortField) {
 
 ---
 
-## Peserta 8
+## Peserta 8 <a id="peserta-8"></a>
 
-### Soal 15 — Register: Modal Konfirmasi Data Sebelum Submit
+### Soal 15 — Register: Modal Konfirmasi Data Sebelum Submit <a id="soal-15"></a>
 
 **File:** `frontend/account/register.html`
 
@@ -777,7 +871,7 @@ document.getElementById('btnFinalSubmit').addEventListener('click', function() {
 
 ---
 
-### Soal 16 — Superadmin Kinerja Divisi: Sort Berdasarkan Persentase Penyelesaian
+### Soal 16 — Superadmin Kinerja Divisi: Sort Berdasarkan Persentase Penyelesaian <a id="soal-16"></a>
 
 **File:** `frontend/management/dashboard-overview.html`
 
@@ -833,9 +927,9 @@ function applySortDivisions(mode) {
 
 ---
 
-## Peserta 9
+## Peserta 9 <a id="peserta-9"></a>
 
-### Soal 17 — Superadmin Manajemen Akun: Modal Quick View Detail
+### Soal 17 — Superadmin Manajemen Akun: Modal Quick View Detail <a id="soal-17"></a>
 
 **File:** `frontend/ops/manage-users.html`
 
@@ -906,7 +1000,7 @@ function closeDetailModal() {
 
 ---
 
-### Soal 18 — KYC Resubmission: Modal Ringkasan Perubahan Data
+### Soal 18 — KYC Resubmission: Modal Ringkasan Perubahan Data <a id="soal-18"></a>
 
 **File:** `frontend/client/kyc-resubmit.html`
 
@@ -990,9 +1084,9 @@ document.getElementById('btnConfirmResubmit').addEventListener('click', function
 
 ---
 
-## Peserta 10
+## Peserta 10 <a id="peserta-10"></a>
 
-### Soal 19 — Login: Modal Lockout Setelah 3 Kali Gagal
+### Soal 19 — Login: Modal Lockout Setelah 3 Kali Gagal <a id="soal-19"></a>
 
 **File:** `frontend/account/login.html`
 
@@ -1061,7 +1155,7 @@ function startLockout() {
 
 ---
 
-### Soal 20 — Superadmin Kinerja Divisi: Search Bar Filter Nama Divisi
+### Soal 20 — Superadmin Kinerja Divisi: Search Bar Filter Nama Divisi <a id="soal-20"></a>
 
 **File:** `frontend/management/dashboard-overview.html`
 
@@ -1138,9 +1232,9 @@ function filterDivisionCards(query) {
 
 ---
 
-## Peserta 11
+## Peserta 11 <a id="peserta-11"></a>
 
-### Soal 21 — [CREATE] KYC Resubmission: Submit Form ke API
+### Soal 21 — [CREATE] KYC Resubmission: Submit Form ke API <a id="soal-21"></a>
 
 **File:** `frontend/client/kyc-resubmit.html`
 
@@ -1195,7 +1289,7 @@ async function doResubmit() {
 
 ---
 
-### Soal 22 — [READ] KYC Resubmission: Tampilkan Status & Riwayat KYC
+### Soal 22 — [READ] KYC Resubmission: Tampilkan Status & Riwayat KYC <a id="soal-22"></a>
 
 **File:** `frontend/client/kyc-resubmit.html`
 
@@ -1257,9 +1351,9 @@ document.addEventListener('DOMContentLoaded', loadKYCStatus);
 
 ---
 
-## Peserta 12
+## Peserta 12 <a id="peserta-12"></a>
 
-### Soal 23 — [UPDATE] KYC Resubmission: Pre-fill Form dengan Data KYC Lama
+### Soal 23 — [UPDATE] KYC Resubmission: Pre-fill Form dengan Data KYC Lama <a id="soal-23"></a>
 
 **File:** `frontend/client/kyc-resubmit.html`
 
@@ -1309,7 +1403,7 @@ Object.keys(fieldMap).forEach(function(id) {
 
 ---
 
-### Soal 24 — [DELETE] KYC Resubmission: Batalkan Pengajuan Pending
+### Soal 24 — [DELETE] KYC Resubmission: Batalkan Pengajuan Pending <a id="soal-24"></a>
 
 **File:** `frontend/client/kyc-resubmit.html`
 
@@ -1367,9 +1461,129 @@ async function cancelKYC() {
 
 ---
 
-## Peserta 13
+> **⚠️ Endpoint `DELETE /api/kyc/cancel` belum ada di backend — kerjakan langkah berikut sebelum implementasi frontend.**
 
-### Soal 25 — [CREATE] Register: Submit Form dengan Validasi Lengkap
+#### Panduan Backend — Soal 24 <a id="backend-soal-24"></a>
+
+**Service:** `users` · **Framework:** ZaFramework (bukan Gin)
+
+**Langkah 1 — [users/app/routes/router.go](../users/app/routes/router.go)**
+
+Tambah 1 baris setelah route `PUT /api/kyc/resubmit`:
+```go
+app.Router.HandleFunc("DELETE /api/kyc/cancel", kycController.Cancel)
+```
+
+**Langkah 2 — [users/app/modules/kyc/repository.go](../users/app/modules/kyc/repository.go)**
+
+Di `type Repository interface { ... }`, tambah:
+```go
+CancelByUserID(ctx context.Context, userID string) error
+```
+
+Implementasi di bawah fungsi terakhir file:
+```go
+func (r *kycRepo) CancelByUserID(ctx context.Context, userID string) error {
+    tag, err := r.db.Pool.Exec(ctx,
+        `UPDATE kyc_submissions SET status='cancelled', updated_at=NOW()
+         WHERE user_id=$1 AND status='pending'`, userID)
+    if err != nil {
+        return err
+    }
+    if tag.RowsAffected() == 0 {
+        return fmt.Errorf("NOT_PENDING")
+    }
+    return nil
+}
+```
+
+**Langkah 3 — [users/app/modules/kyc/service.go](../users/app/modules/kyc/service.go)**
+
+> ⚠️ **JANGAN tulis `case "kyc_cancel":`.** Service ini tidak punya `switch`. Pola ZaFramework di project ini adalah **1 fungsi `Process…Job` per task** lalu didaftarkan di `main.go`. Menulis `case "kyc_cancel": m := p.(…)` akan menghasilkan error **`undefined: p`** karena variabel `p` memang tidak ada.
+
+Tambah fungsi baru. Letakkan di antara fungsi `Process…Job` lain (mis. tepat setelah `ProcessKYCStatusJob` berakhir, sekitar baris 210):
+```go
+// ProcessKYCCancelJob — handler untuk dispatcher job "kyc_cancel"
+func (s *Service) ProcessKYCCancelJob(ctx context.Context, payload any) (any, error) {
+	data, ok := payload.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload format")
+	}
+	userID, _ := data["user_id"].(string)
+	if userID == "" {
+		return nil, fmt.Errorf("user_id wajib diisi")
+	}
+	return nil, s.repo.CancelByUserID(ctx, userID)
+}
+```
+*(Import `context` dan `fmt` sudah ada di file ini — tidak perlu menambah import.)*
+
+**Langkah 4 — [users/main.go](../users/main.go)** — daftarkan job-nya (kalau tidak, dispatch akan error "job not found")
+
+Tambah **1 baris** di blok `RegisterJob`, tepat setelah baris `kyc_resubmit` (sekitar baris 157):
+```go
+app.RegisterJob("kyc_cancel", kycService.ProcessKYCCancelJob)
+```
+
+**Langkah 5 — [users/app/modules/kyc/controller.go](../users/app/modules/kyc/controller.go)**
+
+Tambah method `Cancel` sebagai fungsi top-level di akhir file:
+```go
+func (c *Controller) Cancel(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("X-User-ID")
+	if userID == "" {
+		resp.ApiJSON(w, r, http.StatusUnauthorized, false, "Sesi tidak valid", nil)
+		return
+	}
+	_, err := c.Dispatcher.DispatchAndWait(r.Context(), "kyc_cancel",
+		map[string]any{"user_id": userID}, concurrency.PriorityHigh)
+	if err != nil {
+		if err.Error() == "NOT_PENDING" {
+			resp.ApiJSON(w, r, http.StatusBadRequest, false, "Tidak ada KYC pending untuk dibatalkan", nil)
+			return
+		}
+		resp.ApiJSON(w, r, http.StatusInternalServerError, false, err.Error(), nil)
+		return
+	}
+	resp.ApiJSON(w, r, http.StatusOK, true, "Pengajuan KYC berhasil dibatalkan", nil)
+}
+```
+*(Import `concurrency`, `resp` (alias `core/http`), dan `net/http` sudah dipakai controller lain di file ini — tidak perlu menambah import.)*
+
+**Langkah 6 — [users/core/database/migrate.go](../users/core/database/migrate.go)** ⚠️ **WAJIB.** Tanpa ini, `DELETE /api/kyc/cancel` membalas **500** karena status `'cancelled'` ditolak CHECK constraint.
+
+a) **DB baru** — pada `CREATE TABLE … kyc_submissions`, ubah kolom `status` (sekitar baris 126) menjadi:
+```sql
+status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+```
+
+b) **DB yang sudah ada** — tambah patch idempotent ini **setelah** baris `ALTER TABLE kyc_submissions ADD COLUMN IF NOT EXISTS rejected_fields TEXT[];` (sekitar baris 144). Aman dijalankan berulang kali:
+```sql
+-- Patch: allow 'cancelled' status for KYC cancel feature (idempotent)
+DO $$
+DECLARE v TEXT;
+BEGIN
+	SELECT conname INTO v
+	FROM pg_constraint
+	WHERE conrelid = 'kyc_submissions'::regclass
+	AND contype = 'c'
+	AND pg_get_constraintdef(oid) LIKE '%pending%'
+	AND pg_get_constraintdef(oid) NOT LIKE '%cancelled%'
+	LIMIT 1;
+	IF v IS NOT NULL THEN
+		EXECUTE 'ALTER TABLE kyc_submissions DROP CONSTRAINT ' || v;
+		EXECUTE 'ALTER TABLE kyc_submissions ADD CONSTRAINT kyc_submissions_status_check CHECK (status IN (''pending'', ''approved'', ''rejected'', ''cancelled''))';
+	END IF;
+END$$;
+```
+
+> **Catatan frontend Soal 24:** tombol "Batalkan Pengajuan" paling tepat dipasang di **`frontend/client/kyc-status.html`** (di blok status `pending`), bukan di `kyc-resubmit.html` — karena `kyc-resubmit.html` hanya menampilkan form untuk status `rejected`. Setelah cancel sukses, arahkan ke `/client/kyc` (form pengajuan baru), bukan `location.reload()`.
+
+---
+
+## Peserta 13 <a id="peserta-13"></a>
+
+### Soal 25 — [CREATE] Register: Submit Form dengan Validasi Lengkap <a id="soal-25"></a>
 
 **File:** `frontend/account/register.html`
 
@@ -1450,7 +1664,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
 
 ---
 
-### Soal 26 — [READ] Login: Tampilkan Sambutan Nama User Setelah Berhasil Login
+### Soal 26 — [READ] Login: Tampilkan Sambutan Nama User Setelah Berhasil Login <a id="soal-26"></a>
 
 **File:** `frontend/account/login.html`
 
@@ -1494,9 +1708,9 @@ if (storedUser) {
 
 ---
 
-## Peserta 14
+## Peserta 14 <a id="peserta-14"></a>
 
-### Soal 27 — [UPDATE] Register: Form Input OTP 6-Digit dengan Auto-focus
+### Soal 27 — [UPDATE] Register: Form Input OTP 6-Digit dengan Auto-focus <a id="soal-27"></a>
 
 **File:** `frontend/account/verify-otp.html`
 
@@ -1577,7 +1791,7 @@ async function resendOTP() {
 
 ---
 
-### Soal 28 — [DELETE] Login/Register: Logout Paksa Semua Sesi Aktif
+### Soal 28 — [DELETE] Login/Register: Logout Paksa Semua Sesi Aktif <a id="soal-28"></a>
 
 **File:** `frontend/assets/js/ops-layout.js` atau `client-layout.js`
 
@@ -1624,9 +1838,62 @@ async function logoutAllSessions(e) {
 
 ---
 
-## Peserta 15
+> **⚠️ Endpoint `DELETE /api/auth/sessions` belum ada di backend — kerjakan langkah berikut sebelum implementasi frontend.**
 
-### Soal 29 — [CREATE] Superadmin Manajemen Akun: Form Tambah Akun Internal
+#### Panduan Backend — Soal 28 <a id="backend-soal-28"></a>
+
+**Service:** `users` · **Framework:** ZaFramework
+
+Sesi disimpan di Redis dengan dua key: UUID acak (dari cookie) + `session:<userID>`. Implementasi ini menghapus `session:<userID>` sehingga semua token yang bergantung pada key tersebut tidak bisa divalidasi ulang.
+
+**Langkah 1 — [users/app/routes/router.go](../users/app/routes/router.go)**
+
+Tambah 1 baris setelah route `POST /api/auth/logout`:
+```go
+app.Router.HandleFunc("DELETE /api/auth/sessions", loginController.LogoutAllSessions)
+```
+
+**Langkah 2 — [users/app/modules/login/logout.go](../users/app/modules/login/logout.go)**
+
+Tambah fungsi baru di akhir file:
+```go
+func (c *Controller) LogoutAllSessions(w http.ResponseWriter, r *http.Request) {
+    userID := r.Header.Get("X-User-ID")
+    if userID == "" {
+        resp.ApiJSON(w, r, http.StatusUnauthorized, false, "Sesi tidak valid", nil)
+        return
+    }
+
+    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+    defer cancel()
+
+    // Hapus session key user dari Redis
+    sessionKey := "session:" + userID
+    if err := utils.RedisDel(ctx, sessionKey); err != nil {
+        log.Printf("[LOGOUT-ALL] Redis delete session:%s error: %v", userID, err)
+    }
+
+    // Clear cookie sesi saat ini
+    cookieNames := []string{"token", "_authz", "session_id",
+        utils.GetEnv("SESSION_NAME", "za_session")}
+    for _, name := range cookieNames {
+        http.SetCookie(w, &http.Cookie{
+            Name: name, Value: "", Path: "/", MaxAge: -1, HttpOnly: true,
+        })
+    }
+
+    resp.ApiJSON(w, r, http.StatusOK, true, "Semua sesi berhasil diakhiri", nil)
+}
+```
+*(Tidak perlu menambah import: `context`, `time`, `log`, `net/http`, `utils`, dan `resp` semuanya sudah di-import di `logout.go` karena dipakai fungsi `Logout` di atasnya. `utils.RedisDel` juga sudah ada — dipakai di `Logout`.)*
+
+> ✅ **Endpoint ini stateless** — tidak perlu `RegisterJob`/dispatcher karena `LogoutAllSessions` langsung memanggil Redis & set cookie, bukan lewat worker.
+
+---
+
+## Peserta 15 <a id="peserta-15"></a>
+
+### Soal 29 — [CREATE] Superadmin Manajemen Akun: Form Tambah Akun Internal <a id="soal-29"></a>
 
 **File:** `frontend/ops/create-user.html`
 
@@ -1699,7 +1966,7 @@ document.getElementById('createUserForm').addEventListener('submit', async funct
 
 ---
 
-### Soal 30 — [READ] Superadmin Manajemen Akun: Export Tabel ke CSV
+### Soal 30 — [READ] Superadmin Manajemen Akun: Export Tabel ke CSV <a id="soal-30"></a>
 
 **File:** `frontend/ops/manage-users.html`
 
@@ -1754,9 +2021,9 @@ function exportToCSV() {
 
 ---
 
-## Peserta 16
+## Peserta 16 <a id="peserta-16"></a>
 
-### Soal 31 — [UPDATE] Superadmin Manajemen Akun: Toggle Status Aktif/Nonaktif Inline
+### Soal 31 — [UPDATE] Superadmin Manajemen Akun: Toggle Status Aktif/Nonaktif Inline <a id="soal-31"></a>
 
 **File:** `frontend/ops/manage-users.html`
 
@@ -1830,7 +2097,21 @@ async function toggleUserStatus(userId, activate, checkbox) {
 
 ---
 
-### Soal 32 — [DELETE] Superadmin Manajemen Akun: Hapus Massal dengan Checkbox
+> **ℹ️ Soal 31 — Tidak perlu endpoint baru.** Endpoint `PATCH /api/admin/users/{id}/deactivate` dan `…/reactivate` sudah terdaftar di [users/app/routes/router.go](../users/app/routes/router.go) baris 104–105 (controller `DeactivateUser`/`ReactivateUser`, role `SUPERADMIN`). Keduanya **tidak butuh body** (user ID diambil dari path). Ganti fetch di `toggleUserStatus()` seperti berikut:
+
+```js
+// Ganti baris: fetch('/api/admin/users/' + userId + '/status', { method: 'PATCH', ... })
+// Dengan:
+var endpoint = activate
+    ? '/api/admin/users/' + userId + '/reactivate'
+    : '/api/admin/users/' + userId + '/deactivate';
+
+var res = await fetch(endpoint, { method: 'PATCH', credentials: 'include' });
+```
+
+---
+
+### Soal 32 — [DELETE] Superadmin Manajemen Akun: Hapus Massal dengan Checkbox <a id="soal-32"></a>
 
 **File:** `frontend/ops/manage-users.html`
 
@@ -1916,9 +2197,117 @@ async function bulkDeleteUsers(ids) {
 
 ---
 
-## Peserta 17
+> **⚠️ Endpoint `DELETE /api/admin/users/bulk-delete` belum ada di backend — kerjakan langkah berikut sebelum implementasi frontend.**
 
-### Soal 33 — [CREATE] Superadmin Kinerja Divisi: Tambah Catatan/Note pada Divisi
+#### Panduan Backend — Soal 32 <a id="backend-soal-32"></a>
+
+**Service:** `users` · **Framework:** ZaFramework
+
+> ⚠️ **Cek skema dulu.** Tabel `users` di project ini berkolom: `id (UUID)`, `name`, `email`, `role_id`, `status`. **Tidak ada** kolom `role`, **tidak ada** `deleted_at`, dan `status` hanya menerima `'banned' | 'active' | 'inactive'` (CHECK constraint di `migrate.go` baris 66). Jadi query lama `SET status='deleted', deleted_at=NOW() … role != 'SUPERADMIN'` **pasti error** (3 sebab: kolom `deleted_at` tidak ada, kolom `role` tidak ada, nilai `'deleted'` melanggar CHECK). Versi di bawah memakai **hard-delete** — aman karena semua foreign key ke `users(id)` memakai `ON DELETE SET NULL`/`CASCADE`, dan baris langsung hilang dari tabel sehingga cocok dengan UX "dihapus".
+
+**Langkah 1 — [users/app/routes/router.go](../users/app/routes/router.go)**
+
+Tambah 1 baris setelah route `…/reactivate` (sekitar baris 105). Urutan tidak masalah: Go 1.22 `ServeMux` memilih pola paling spesifik dan **tidak ada** route `DELETE /api/admin/users/{id}`, jadi tidak bentrok:
+```go
+app.Router.HandleFunc("DELETE /api/admin/users/bulk-delete", adminController.BulkDeleteUsers)
+```
+
+**Langkah 2 — [users/app/modules/admin/repository.go](../users/app/modules/admin/repository.go)**
+
+a) Di dalam `type Repository interface { … }` (setelah `InsertAuditLog`, sekitar baris 24), tambah:
+```go
+	BulkDeleteByIDs(ctx context.Context, ids []string) (int, error)
+```
+
+b) Implementasi di akhir file. Hanya butuh import `context` yang **sudah ada**:
+```go
+// BulkDeleteByIDs menghapus banyak akun sekaligus, kecuali SUPERADMIN.
+func (r *adminRepo) BulkDeleteByIDs(ctx context.Context, ids []string) (int, error) {
+	if len(ids) == 0 {
+		return 0, nil
+	}
+	tag, err := r.db.Pool.Exec(ctx, `
+		DELETE FROM users
+		WHERE id::text = ANY($1)
+		  AND role_id NOT IN (SELECT id FROM roles WHERE UPPER(code) = 'SUPERADMIN')
+	`, ids)
+	if err != nil {
+		return 0, err
+	}
+	return int(tag.RowsAffected()), nil
+}
+```
+> `id::text = ANY($1)` membandingkan UUID (di-cast ke text) dengan `[]string` — pgx meng-encode slice jadi array Postgres, jadi tidak perlu membangun placeholder `$1,$2,…` manual (yang butuh `fmt` & `strings`).
+
+**Langkah 3 — [users/app/modules/admin/service.go](../users/app/modules/admin/service.go)**
+
+> ⚠️ Sama seperti Soal 24: service ini **tidak punya `switch`/`case`**. Jangan tulis `case "admin_bulk_delete_users":` — akan error **`undefined: p`**. Buat fungsi `Process…Job` baru.
+
+Tambah fungsi (mis. setelah `ProcessReactivateUserJob`, akhir file sekitar baris 399). Import `context` & `fmt` sudah ada:
+```go
+// ProcessBulkDeleteUsersJob — worker untuk hapus massal akun internal
+func (s *Service) ProcessBulkDeleteUsersJob(ctx context.Context, payload any) (any, error) {
+	data, ok := payload.(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload format")
+	}
+	ids, ok := data["ids"].([]string)
+	if !ok || len(ids) == 0 {
+		return nil, fmt.Errorf("ids wajib diisi")
+	}
+	count, err := s.repo.BulkDeleteByIDs(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]any{"deleted": count}, nil
+}
+```
+
+**Langkah 4 — [users/main.go](../users/main.go)** — daftarkan job-nya (kalau tidak, dispatch error "job not found")
+
+Tambah 1 baris di blok `RegisterJob`, setelah `admin_reactivate_user` (sekitar baris 167):
+```go
+app.RegisterJob("admin_bulk_delete_users", adminService.ProcessBulkDeleteUsersJob)
+```
+
+**Langkah 5 — [users/app/modules/admin/controller.go](../users/app/modules/admin/controller.go)**
+
+Tambah method di akhir file. Semua import (`strings`, `encoding/json`, `net/http`, `concurrency`, `ehttp`) **sudah dipakai** controller lain di file ini:
+```go
+func (c *Controller) BulkDeleteUsers(w http.ResponseWriter, r *http.Request) {
+	userRole := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Role")))
+	userLevel := strings.ToUpper(strings.TrimSpace(r.Header.Get("X-User-Level")))
+	if userRole != "SUPERADMIN" && userLevel != "SUPERADMIN" {
+		ehttp.ApiJSON(w, r, http.StatusForbidden, false, "Akses ditolak", nil)
+		return
+	}
+
+	r.Body = http.MaxBytesReader(w, r.Body, 1<<20)
+	var body struct {
+		IDs []string `json:"ids"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || len(body.IDs) == 0 {
+		ehttp.ApiJSON(w, r, http.StatusBadRequest, false, "Field 'ids' wajib diisi", nil)
+		return
+	}
+
+	result, err := c.Dispatcher.DispatchAndWait(r.Context(), "admin_bulk_delete_users",
+		map[string]any{"ids": body.IDs}, concurrency.PriorityHigh)
+	if err != nil {
+		ehttp.ApiJSON(w, r, http.StatusInternalServerError, false, err.Error(), nil)
+		return
+	}
+	ehttp.ApiJSON(w, r, http.StatusOK, true, "Akun berhasil dihapus", result)
+}
+```
+
+> **Gateway:** path `/api/admin/users/bulk-delete` sudah ter-cover prefix `/api/admin/users/` (role `SUPERADMIN`) di `gateway/routes.json` & `routes.railway.json` — tidak perlu menambah route gateway.
+
+---
+
+## Peserta 17 <a id="peserta-17"></a>
+
+### Soal 33 — [CREATE] Superadmin Kinerja Divisi: Tambah Catatan/Note pada Divisi <a id="soal-33"></a>
 
 **File:** `frontend/management/dashboard-overview.html`
 
@@ -2003,7 +2392,7 @@ document.addEventListener('DOMContentLoaded', renderNotes);
 
 ---
 
-### Soal 34 — [READ] Superadmin Kinerja Divisi: Chart Bar Perbandingan Antar Divisi
+### Soal 34 — [READ] Superadmin Kinerja Divisi: Chart Bar Perbandingan Antar Divisi <a id="soal-34"></a>
 
 **File:** `frontend/management/dashboard-overview.html`
 
@@ -2076,9 +2465,9 @@ function renderDivisionChart(divisions) {
 
 ---
 
-## Peserta 18
+## Peserta 18 <a id="peserta-18"></a>
 
-### Soal 35 — [UPDATE] Superadmin Kinerja Divisi: Edit Target Task Divisi Inline
+### Soal 35 — [UPDATE] Superadmin Kinerja Divisi: Edit Target Task Divisi Inline <a id="soal-35"></a>
 
 **File:** `frontend/management/dashboard-overview.html`
 
@@ -2169,7 +2558,7 @@ document.addEventListener('DOMContentLoaded', initTargets);
 
 ---
 
-### Soal 36 — [DELETE] Superadmin Kinerja Divisi: Reset Data Kinerja Divisi
+### Soal 36 — [DELETE] Superadmin Kinerja Divisi: Reset Data Kinerja Divisi <a id="soal-36"></a>
 
 **File:** `frontend/management/dashboard-overview.html`
 
@@ -2243,7 +2632,758 @@ function highlightCard(divisionKey) {
 
 ---
 
-## Referensi Cepat — File yang Relevan
+> **⚠️ Endpoint `DELETE /api/management/divisions/:key/reset` belum ada di backend — kerjakan langkah berikut sebelum implementasi frontend.**
+
+#### Panduan Backend — Soal 36 <a id="backend-soal-36"></a>
+
+**Service:** `management` · **Framework:** Gin (berbeda dari `users` yang pakai ZaFramework)
+
+> Signature router: `func Register(r *gin.Engine, dashboardHandler *dashboard.Handler)`. Endpoint ini **mock** untuk menguji frontend.
+
+**Langkah 1 — [management/app/routes/router.go](../management/app/routes/router.go)**
+
+a) Tambah import `"time"`. Blok import saat ini hanya `net/http`, `management/app/modules/dashboard`, dan `gin`. Jadikan:
+```go
+import (
+	"net/http"
+	"time"
+
+	"management/app/modules/dashboard"
+
+	"github.com/gin-gonic/gin"
+)
+```
+
+b) Tambah handler **di dalam** fungsi `Register(...)`, sebelum kurung tutup `}` (mis. tepat setelah baris `r.GET("/api/superadmin/dashboard/overview", …)`):
+```go
+	// Soal 36: reset data kinerja divisi (mock). Cek role SUPERADMIN dari header yang di-inject gateway.
+	r.DELETE("/api/management/divisions/:key/reset", func(c *gin.Context) {
+		if c.GetHeader("X-User-Role") != "SUPERADMIN" {
+			c.JSON(http.StatusForbidden, gin.H{"success": false, "message": "Akses ditolak"})
+			return
+		}
+		key := c.Param("key")
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"message": "Data divisi " + key + " berhasil direset",
+			"data":    gin.H{"key": key, "reset_at": time.Now().Format(time.RFC3339)},
+		})
+	})
+```
+*(`net/http` dan `gin` sudah ter-import; hanya `time` yang perlu ditambah.)*
+
+**Langkah 2 — Gateway (WAJIB agar request sampai ke service)** — [gateway/routes.json](../gateway/routes.json)
+
+Gateway **belum** punya route `/api/management/…` (service `management` selama ini hanya diakses lewat `/api/dashboard/…`). Tanpa entri ini, fetch dari frontend kena **404 di gateway** dan tidak pernah sampai ke handler. Tambah objek berikut ke array `routes` (lakukan juga di [gateway/routes.railway.json](../gateway/routes.railway.json) dengan target railway, mis. `http://management.railway.internal:8080`):
+```json
+{
+  "path": "/api/management/",
+  "target": "http://localhost:5006",
+  "cors": true,
+  "auth": true,
+  "roles": ["MANAGEMENT", "SUPERADMIN", "ADMIN"]
+}
+```
+> Alternatif tanpa edit gateway (untuk uji cepat): panggil langsung port service `management` lewat REST client, mis. `DELETE http://localhost:5006/api/management/divisions/compliance/reset` dengan header `X-User-Role: SUPERADMIN`, lewati gateway.
+
+---
+
+## Soal Tambahan — Latihan Frontend Mandiri (Soal 37–58) <a id="soal-tambahan-latihan-frontend-mandiri-soal-37-58"></a>
+
+> Semua soal berikut **frontend-only** (tanpa sentuh backend), **self-contained** (umumnya cukup tempel 1 blok JS di dalam `<script>` file terkait), dan sudah **diverifikasi** memakai ID elemen + fungsi yang benar-benar ada di file.
+>
+> 📚 **Soal 48–50 adalah tutorial pola** (step-by-step) untuk 3 keterampilan inti: **(48)** menambah tombol beserta fungsinya, **(49)** menambah field di halaman read/detail, **(50)** menambah pagination pada list yang belum punya.
+>
+> 🧩 **Soal 51–58 dikelompokkan per fitur** (KYC · Login/Logout/Register · Manajemen Akun · Kinerja Divisi), masing-masing 1 soal **tambah field** + 1 soal **tambah tombol**.
+>
+> ⚠️ **Tanda tangan `showToast` BERBEDA antar file — perhatikan urutan argumen:**
+>
+> | File | Signature | Pemanggilan yang BENAR |
+> |---|---|---|
+> | `login.html`, `register.html`, `verify-otp.html`, `manage-users.html` | `showToast(msg, type)` | `showToast('Berhasil', 'success')` |
+> | `kyc-resubmit.html` | `showToast(type, message)` | `showToast('success', 'Berhasil')` |
+> | `kyc-status.html` | *(tidak ada)* | pakai `alert(...)` |
+> | `dashboard-overview.html` | *(tidak ada)* | pakai `showError(msg)` (banner) |
+
+### Soal 37 — Login: Peringatan Caps Lock di Field Password <a id="soal-37"></a>
+
+**File:** `frontend/account/login.html`
+
+Tampilkan peringatan "Caps Lock aktif" di bawah field password saat Caps Lock menyala — mencegah user salah ketik password.
+
+**Solusi** — tempel di dalam `<script>` (mis. setelah definisi `showToast`). Elemen `#password` ada di dalam `div.mb-3`:
+```js
+(function () {
+    var pw = document.getElementById('password');
+    var warn = document.createElement('div');
+    warn.className = 'small mt-1';
+    warn.style.cssText = 'color:#dc2626; display:none;';
+    warn.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i>Caps Lock sedang aktif';
+    pw.closest('.mb-3').appendChild(warn);
+
+    function toggle(e) {
+        var on = e.getModifierState && e.getModifierState('CapsLock');
+        warn.style.display = on ? 'block' : 'none';
+    }
+    pw.addEventListener('keydown', toggle);
+    pw.addEventListener('keyup', toggle);
+    pw.addEventListener('blur', function () { warn.style.display = 'none'; });
+})();
+```
+
+---
+
+### Soal 38 — Login: Ingat Email Terakhir (localStorage) <a id="soal-38"></a>
+
+**File:** `frontend/account/login.html`
+
+Saat halaman dibuka, isi otomatis field email dengan email login terakhir agar user tidak perlu mengetik ulang.
+
+**Solusi** — tempel di dalam `<script>`. Memakai `validateLoginForm()` & `#loginForm` yang sudah ada; listener submit kedua ini **tidak** mengganggu listener submit asli:
+```js
+// Prefill email terakhir saat halaman dibuka
+window.addEventListener('DOMContentLoaded', function () {
+    var saved = localStorage.getItem('last_login_email');
+    if (saved) {
+        document.getElementById('email').value = saved;
+        validateLoginForm(); // aktifkan tombol Sign In jika password juga terisi
+    }
+});
+
+// Simpan email setiap kali form dikirim
+document.getElementById('loginForm').addEventListener('submit', function () {
+    localStorage.setItem('last_login_email', document.getElementById('email').value.trim());
+});
+```
+
+---
+
+### Soal 39 — Register: Tampilkan Umur Otomatis dari Tanggal Lahir <a id="soal-39"></a>
+
+**File:** `frontend/account/register.html`
+
+Setelah user memilih tanggal lahir (`#birthdate`), tampilkan umurnya ("Umur: 25 tahun") di bawah field.
+
+**Solusi** — tempel di dalam `<script>`. Variabel `elBirthdate` sudah didefinisikan global; field-nya ada di dalam `div.mb-2`:
+```js
+(function () {
+    var info = document.createElement('small');
+    info.className = 'validation-msg';
+    info.style.color = '#0077b6';
+    elBirthdate.closest('.mb-2').appendChild(info);
+
+    function showAge() {
+        if (!elBirthdate.value) { info.textContent = ''; return; }
+        var d = new Date(elBirthdate.value), now = new Date();
+        var age = now.getFullYear() - d.getFullYear();
+        var m = now.getMonth() - d.getMonth();
+        if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
+        info.textContent = age >= 0 ? 'Umur: ' + age + ' tahun' : '';
+    }
+    elBirthdate.addEventListener('change', showAge);
+    elBirthdate.addEventListener('input', showAge);
+})();
+```
+
+---
+
+### Soal 40 — Register: Batasi Field Telepon Hanya Angka <a id="soal-40"></a>
+
+**File:** `frontend/account/register.html`
+
+Cegah user mengetik huruf/simbol di field telepon — strip otomatis non-digit dan beri umpan balik visual (border merah sekejap).
+
+**Solusi** — tempel di dalam `<script>`. Class `.form-control.is-invalid` (border merah) sudah ada di CSS file ini; `elPhone` & `validateAll()` sudah ada:
+```js
+elPhone.addEventListener('input', function () {
+    var before = this.value;
+    this.value = this.value.replace(/\D/g, ''); // sisakan angka saja
+    if (this.value !== before) {
+        this.classList.add('is-invalid');
+        var el = this;
+        setTimeout(function () { el.classList.remove('is-invalid'); }, 800);
+    }
+    validateAll(); // sinkronkan status tombol Daftar
+});
+```
+
+---
+
+### Soal 41 — Verifikasi OTP: Samarkan (Mask) Alamat Email <a id="soal-41"></a>
+
+**File:** `frontend/account/verify-otp.html`
+
+Demi privasi, tampilkan email yang disamarkan (`jo****@gmail.com`) di `#emailDisplay`, bukan email penuh.
+
+**Solusi** — di dalam `<script>`, **ganti** baris `document.getElementById('emailDisplay').textContent = email;` menjadi:
+```js
+document.getElementById('emailDisplay').textContent = maskEmail(email);
+
+function maskEmail(e) {
+    var parts = String(e).split('@');
+    if (parts.length !== 2) return e;
+    var name = parts[0];
+    var masked = name.length <= 2
+        ? name.charAt(0) + '*'
+        : name.slice(0, 2) + '*'.repeat(Math.max(1, name.length - 2));
+    return masked + '@' + parts[1];
+}
+```
+
+---
+
+### Soal 42 — Manajemen Akun: Shortcut `/` Fokus Pencarian + `Esc` Bersihkan <a id="soal-42"></a>
+
+**File:** `frontend/ops/manage-users.html`
+
+Tekan `/` di mana saja untuk langsung fokus ke kolom pencarian; tekan `Esc` saat di kolom pencarian untuk mengosongkan + reload.
+
+**Solusi** — tempel di dalam `<script>`. Memakai `#searchInput` & `loadUsers(1)` yang sudah ada (tanpa edit HTML):
+```js
+document.addEventListener('keydown', function (e) {
+    var search = document.getElementById('searchInput');
+    var active = document.activeElement;
+    var typing = active && ['INPUT', 'TEXTAREA', 'SELECT'].indexOf(active.tagName) !== -1;
+
+    if (e.key === '/' && !typing) {       // fokuskan pencarian
+        e.preventDefault();
+        search.focus();
+    }
+    if (e.key === 'Escape' && active === search && search.value) { // bersihkan
+        search.value = '';
+        loadUsers(1);
+    }
+});
+```
+
+---
+
+### Soal 43 — Manajemen Akun: Tombol "Salin Email" per Baris <a id="soal-43"></a>
+
+**File:** `frontend/ops/manage-users.html`
+
+Tambahkan tombol salin di setiap baris untuk menyalin email user ke clipboard.
+
+**Langkah 1** — di dalam `renderActionButtons(u)`, **sebelum** baris `return`, tambahkan:
+```js
+var copyBtn = '<button class="btn btn-sm detail-btn" title="Salin email" ' +
+    'data-email="' + escapeHtml(u.email) + '" onclick="copyEmail(this)">' +
+    '<i class="fa-solid fa-copy"></i></button>';
+```
+lalu ubah baris `return` menjadi (sisipkan `copyBtn`):
+```js
+return '<div class="d-flex gap-2 justify-content-center">' + detailBtn + copyBtn + toggleBtn + '</div>';
+```
+
+**Langkah 2** — tambahkan fungsi (memakai `showToast(msg, type)` — urutan pesan dulu):
+```js
+function copyEmail(btn) {
+    var email = btn.getAttribute('data-email');
+    navigator.clipboard.writeText(email).then(function () {
+        showToast('Email disalin: ' + email, 'success');
+    }).catch(function () {
+        showToast('Gagal menyalin email', 'error');
+    });
+}
+```
+
+---
+
+### Soal 44 — Manajemen Akun: Avatar Inisial di Kolom Nama <a id="soal-44"></a>
+
+**File:** `frontend/ops/manage-users.html`
+
+Tampilkan lingkaran inisial (mis. "BS" untuk "Budi Santoso") di samping nama pada setiap baris tabel.
+
+**Langkah 1** — tambahkan helper di antara render helper lain:
+```js
+function getInitials(name) {
+    var parts = (name || '').trim().split(/\s+/);
+    if (!parts[0]) return '?';
+    var first = parts[0].charAt(0);
+    var last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+    return (first + last).toUpperCase();
+}
+```
+
+**Langkah 2** — di dalam `loadUsers()` pada `list.map(...)`, **ganti** cell Nama (`'<td style="padding:16px 20px;"><strong style="color:#e2e8f0;">' + escapeHtml(u.full_name) + '</strong></td>'`) menjadi:
+```js
+'<td style="padding:16px 20px;">' +
+    '<div class="d-flex align-items-center gap-2">' +
+        '<span style="width:34px;height:34px;border-radius:50%;background:rgba(0,180,216,0.15);' +
+              'color:#00b4d8;display:inline-flex;align-items:center;justify-content:center;' +
+              'font-weight:700;font-size:0.8rem;flex-shrink:0;">' + getInitials(u.full_name) + '</span>' +
+        '<strong style="color:#e2e8f0;">' + escapeHtml(u.full_name) + '</strong>' +
+    '</div>' +
+'</td>' +
+```
+
+---
+
+### Soal 45 — Kinerja Divisi: Auto-Refresh dengan Toggle <a id="soal-45"></a>
+
+**File:** `frontend/management/dashboard-overview.html`
+
+Tambahkan switch "Auto" di header; saat aktif, data di-refresh otomatis tiap 30 detik via `loadData()`.
+
+**Langkah 1** — di header (di dalam `<div class="d-flex align-items-center gap-2">`, sebelum tombol Refresh), tambahkan:
+```html
+<div class="form-check form-switch d-flex align-items-center gap-1 mb-0 me-2">
+    <input class="form-check-input" type="checkbox" role="switch" id="autoRefreshToggle">
+    <label class="form-check-label small text-muted" for="autoRefreshToggle">Auto</label>
+</div>
+```
+
+**Langkah 2** — tambahkan di dalam `<script>`:
+```js
+var autoRefreshTimer = null;
+document.getElementById('autoRefreshToggle').addEventListener('change', function () {
+    if (this.checked) {
+        autoRefreshTimer = setInterval(loadData, 30000); // 30 detik
+        loadData();
+    } else {
+        clearInterval(autoRefreshTimer);
+        autoRefreshTimer = null;
+    }
+});
+```
+
+---
+
+### Soal 46 — Kinerja Divisi: Kartu "Total Pending Semua Divisi" <a id="soal-46"></a>
+
+**File:** `frontend/management/dashboard-overview.html`
+
+Tampilkan satu kartu ringkasan di atas grid yang menjumlahkan semua antrean pending (KYC + tiket terbuka + order menunggu verifikasi).
+
+**Langkah 1** — tambahkan **sebelum** `<div class="row g-4" id="cardsRow">`:
+```html
+<div class="mb-4">
+    <div class="division-card p-3 d-flex align-items-center justify-content-between">
+        <span class="metric-label">
+            <i class="fa-solid fa-layer-group me-2" style="color:#fbbf24;"></i>Total Pending Semua Divisi
+        </span>
+        <span class="metric-val text-warning" id="totalPending">—</span>
+    </div>
+</div>
+```
+
+**Langkah 2** — di dalam `loadData()`, tepat setelah blok Operational (baris yang men-set `opsActive`), tambahkan. Field `kyc.pending`, `supp.open`, `ops.pending_payment` adalah nama asli dari API:
+```js
+// Total pending lintas divisi
+var totalPending = (kyc.pending || 0) + (supp.open || 0) + (ops.pending_payment || 0);
+document.getElementById('totalPending').textContent = totalPending;
+```
+
+---
+
+### Soal 47 — KYC Resubmission: Penghitung Karakter Field Alamat <a id="soal-47"></a>
+
+**File:** `frontend/client/kyc-resubmit.html`
+
+Batasi alamat maksimal 255 karakter dan tampilkan penghitung "x / 255" yang berubah merah saat mendekati batas.
+
+**Solusi** — tempel di dalam `<script>`. Helper `$ = id => document.getElementById(id)` & textarea `#address` sudah ada:
+```js
+(function () {
+    var addr = $('address');
+    if (!addr) return;
+    var MAX = 255;
+    addr.setAttribute('maxlength', MAX);
+
+    var counter = document.createElement('small');
+    counter.className = 'text-muted d-block mt-1';
+    counter.style.textAlign = 'right';
+    addr.parentNode.appendChild(counter);
+
+    function update() {
+        var len = addr.value.length;
+        counter.textContent = len + ' / ' + MAX;
+        counter.style.color = len > MAX - 20 ? '#dc2626' : '';
+    }
+    addr.addEventListener('input', update);
+    update();
+})();
+```
+
+> Catatan: di file ini `showToast(type, message)` urutannya **type dulu** (mis. `showToast('error', 'Pesan')`) — beda dari halaman lain. Soal ini sendiri tidak butuh toast.
+
+---
+
+### Soal 48 — Pola: Menambah Tombol Beserta Fungsinya (Studi Kasus: "Salin Email") <a id="soal-48"></a>
+
+**File:** `frontend/ops/user-detail.html`
+
+**Tujuan belajar:** memahami **anatomi 3 langkah** sebuah tombol yang berfungsi — *markup → handler → wiring* — plus memberi umpan balik ke user. Di halaman ini sudah ada grup tombol `#actionButtons` dan objek `currentUser` (hasil fetch detail). Kita tambah tombol **Salin Email**.
+
+**Langkah 1 — Markup tombol.** Di dalam `<div class="action-group" id="actionButtons">`, tambah (mis. setelah tombol Edit):
+```html
+<button id="btnCopyEmail" class="btn btn-back" onclick="copyUserEmail()">
+    <i class="fa-regular fa-copy me-1"></i> Salin Email
+</button>
+```
+
+**Langkah 2 — Fungsi handler.** Tambah di dalam `<script>`. Memakai `currentUser` & `showToast(msg, type)` yang sudah ada:
+```js
+function copyUserEmail() {
+    if (!currentUser || !currentUser.email) {
+        showToast('Email tidak tersedia', 'error');
+        return;
+    }
+    navigator.clipboard.writeText(currentUser.email).then(function () {
+        showToast('Email disalin: ' + currentUser.email, 'success');
+    }).catch(function () {
+        showToast('Gagal menyalin email', 'error');
+    });
+}
+```
+
+**Langkah 3 — Wiring.** Sudah otomatis lewat `onclick="copyUserEmail()"` di markup. *(Alternatif tanpa `onclick`: `document.getElementById('btnCopyEmail').addEventListener('click', copyUserEmail);` — taruh setelah elemen tersedia.)*
+
+> **Anatomi yang bisa dipakai ulang untuk tombol APA PUN:** *markup* (tombol + class + ikon) → *handler* (fungsi yang membaca data lalu melakukan aksi) → *wiring* (`onclick` atau `addEventListener`) → *feedback* (`showToast` / ubah teks tombol jadi loading). Untuk tombol yang memanggil API, tambahkan langkah `fetch(...)` di dalam handler + state `disabled` selama proses (lihat pola di Soal 43 & `executeAction()` pada file ini).
+
+---
+
+### Soal 49 — Pola: Menambah Field Baru di Halaman Read/Detail (Studi Kasus: "Terakhir Diperbarui") <a id="soal-49"></a>
+
+**File:** `frontend/ops/user-detail.html`
+
+**Tujuan belajar:** menambah satu baris data pada tampilan detail. Field `updated_at` **sudah dikirim API** (`GET /api/admin/users/{id}` → `data.updated_at`, lihat struct `UserDetail`) tetapi belum ditampilkan.
+
+**Pola read view di file ini:** tiap data = satu `<div class="info-row">` berisi `.info-label` (judul) + `.info-value` (isi, ber-`id`), lalu diisi di fungsi `renderDetail(u)`.
+
+**Langkah 1 — Tambah baris konten.** Di dalam `<div id="detailContent">`, setelah baris "Terakhir Login" (`#detailLastLogin`), tambah:
+```html
+<div class="info-row">
+    <span class="info-label">Terakhir Diperbarui</span>
+    <span class="info-value" id="detailUpdatedAt">-</span>
+</div>
+```
+
+**Langkah 2 — Isi datanya.** Di dalam `renderDetail(u)`, setelah baris `document.getElementById('detailLastLogin').textContent = formatDate(u.last_login_at);`, tambah:
+```js
+document.getElementById('detailUpdatedAt').textContent = formatDate(u.updated_at);
+```
+
+**Langkah 3 (opsional, rapi) — Skeleton loading.** Agar tampilan loading tetap selaras, di dalam `#loadingState` tambah satu baris skeleton:
+```html
+<div class="info-row"><span class="info-label">Terakhir Diperbarui</span><span class="skeleton" style="width:160px;"></span></div>
+```
+
+> **Resep umum menambah field read:** (1) pastikan field sudah ada di response API → (2) tambah `info-row` + `id` di area konten → (3) isi di fungsi render → (4) (opsional) tambah skeleton. **Jika field belum dikirim API**, barulah perlu ubah backend: tambah kolom di `SELECT` (repository) + field di struct response — baru lanjut 4 langkah di atas.
+
+---
+
+### Soal 50 — Pola: Menambah Pagination (Client-Side) pada List yang Belum Punya <a id="soal-50"></a>
+
+**File:** `frontend/ops/notifications.html`
+
+**Tujuan belajar:** halaman ini me-render **semua** baris sekaligus via `renderTable(list)` — berat bila data banyak. Kita tambah **pagination sisi-klien** tanpa mengubah backend, memanfaatkan cache `cachedNotifications` & fungsi `renderTable` yang sudah ada.
+
+**Langkah 1 — Elemen kontrol halaman.** Tambah tepat setelah `</table>` (penutup tabel notifikasi):
+```html
+<div id="notifPagination" class="d-flex justify-content-between align-items-center mt-3 px-1"></div>
+```
+
+**Langkah 2 — State + fungsi pagination.** Tambah di dalam `<script>` (mis. tepat di bawah definisi `renderTable`):
+```js
+// ── Pagination sisi-klien ──
+var notifPage = 1;
+var notifPerPage = 10;
+var notifFullList = []; // daftar (sudah difilter) yang sedang ditampilkan
+
+// Pengganti renderTable(...) — pakai saat daftar berubah (load / search / filter)
+function renderWithPagination(list) {
+    notifFullList = Array.isArray(list) ? list : [];
+    notifPage = 1; // selalu kembali ke halaman 1 saat daftar berubah
+    renderNotifPage();
+}
+
+function renderNotifPage() {
+    var total = notifFullList.length;
+    var totalPages = Math.max(1, Math.ceil(total / notifPerPage));
+    if (notifPage > totalPages) notifPage = totalPages;
+
+    var start = (notifPage - 1) * notifPerPage;
+    var pageItems = notifFullList.slice(start, start + notifPerPage);
+
+    renderTable(pageItems); // pakai renderer yang sudah ada
+    renderNotifPagination(total, totalPages);
+}
+
+function renderNotifPagination(total, totalPages) {
+    var el = document.getElementById('notifPagination');
+    if (!el) return;
+    if (total === 0) { el.innerHTML = ''; return; }
+
+    var start = (notifPage - 1) * notifPerPage + 1;
+    var end = Math.min(notifPage * notifPerPage, total);
+
+    el.innerHTML =
+        '<div class="small text-muted">Menampilkan ' + start + '–' + end + ' dari ' + total + ' data</div>' +
+        '<div class="d-flex gap-2 align-items-center">' +
+            '<button class="btn btn-sm btn-outline-secondary" ' + (notifPage <= 1 ? 'disabled' : '') +
+                ' onclick="gotoNotifPage(' + (notifPage - 1) + ')"><i class="fa-solid fa-chevron-left"></i></button>' +
+            '<span class="small text-muted">Hal ' + notifPage + ' / ' + totalPages + '</span>' +
+            '<button class="btn btn-sm btn-outline-secondary" ' + (notifPage >= totalPages ? 'disabled' : '') +
+                ' onclick="gotoNotifPage(' + (notifPage + 1) + ')"><i class="fa-solid fa-chevron-right"></i></button>' +
+        '</div>';
+}
+
+function gotoNotifPage(p) {
+    notifPage = p;
+    renderNotifPage();
+}
+```
+
+**Langkah 3 — Sambungkan ke alur yang ada.** Ganti **kedua** pemanggilan `renderTable(applyLocalSearch(cachedNotifications))` (satu di `loadNotifications()`, satu di handler pencarian/filter) menjadi:
+```js
+renderWithPagination(applyLocalSearch(cachedNotifications));
+```
+
+Hasil: list tampil 10 baris per halaman, search & filter tetap jalan (otomatis balik ke halaman 1), dan tombol Prev/Next nonaktif sendiri di ujung.
+
+> **Klien vs server?** Pagination **klien** (di atas) cocok jika API mengirim semua data sekaligus & jumlahnya wajar (≤ beberapa ratus baris). Untuk data sangat besar, pagination harus di **server** lewat query `?page=&per_page=` — lihat pola asli di `manage-users.html` (`loadUsers(page)` + `renderPagination`).
+
+---
+
+## Tambah Field & Tombol per Fitur (Soal 51–58) <a id="tambah-field-tombol-per-fitur-soal-51-58"></a>
+
+### 🔹 Fitur: KYC Resubmission <a id="fitur-kyc-resubmission"></a>
+
+#### Soal 51 — Tombol "Perbarui Status" (tanpa reload) <a id="soal-51"></a>
+
+**File:** `frontend/client/kyc-status.html`
+
+User pending sering me-refresh halaman untuk cek apakah sudah di-review. Tambah tombol yang memanggil ulang `fetchKYCStatus()` (sudah ada) tanpa reload.
+
+**Langkah 1** — di dalam kartu header (yang memuat `#statusBadge`), setelah `<div id="statusMessage">…</div>`, tambah:
+```html
+<button class="btn btn-sm btn-outline-secondary mt-3" onclick="fetchKYCStatus()">
+    <i class="fa-solid fa-arrows-rotate me-1"></i>Perbarui Status
+</button>
+```
+Selesai — `fetchKYCStatus()` akan fetch ulang `/api/kyc/status` dan memanggil `displayKYCData()` untuk merender ulang. Tidak perlu JS tambahan.
+
+#### Soal 52 — Field "Nomor Pengajuan" di View Read <a id="soal-52"></a>
+
+**File:** `frontend/client/kyc-status.html`
+
+API `/api/kyc/status` mengirim `data.kyc.id` (lihat struct `KYCStatusResult`), tapi belum ditampilkan. Tambahkan di kartu **Address & Status**.
+
+**Langkah 1** — setelah baris "Last Updated" (`#dataReviewedAt`), tambah:
+```html
+<div class="info-row">
+    <span class="info-label">Nomor Pengajuan</span>
+    <span class="info-value" id="dataKycId" style="font-family:monospace; font-size:0.8rem;">-</span>
+</div>
+```
+
+**Langkah 2** — di dalam `displayKYCData(data)`, setelah baris `document.getElementById('dataReviewedAt').textContent = ...`, tambah:
+```js
+document.getElementById('dataKycId').textContent = kyc.id || '-';
+```
+
+---
+
+### 🔹 Fitur: Login / Logout / Register <a id="fitur-login-logout-register"></a>
+
+> Untuk **Logout**, soal tombol sudah ada: Soal 7 (konfirmasi keluar) & Soal 28 (keluar semua perangkat).
+
+#### Soal 53 — Field "Konfirmasi Email" + Validasi Saat Submit <a id="soal-53"></a>
+
+**File:** `frontend/account/register.html`
+
+Cegah salah ketik email dengan field konfirmasi. Karena `validateAll()` tidak tahu field baru ini, kita validasi **saat submit** memakai listener `capture` di `document` (jalan **sebelum** handler submit asli di form).
+
+**Langkah 1** — tambah setelah blok field Email (`#email`):
+```html
+<div class="mb-2">
+    <label class="form-label">Konfirmasi Email</label>
+    <div class="input-group">
+        <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+        <input type="email" class="form-control" id="confirmEmail" placeholder="Ulangi email" required>
+    </div>
+    <div class="validation-msg" id="confirmEmailMsg"></div>
+</div>
+```
+
+**Langkah 2** — tambah di dalam `<script>` (memakai `setMsg`/`clearMsg` yang sudah ada):
+```js
+// Validasi konfirmasi email saat submit — capture di document jalan lebih dulu
+// daripada handler submit form, sehingga bisa membatalkannya bila tidak cocok.
+document.addEventListener('submit', function (e) {
+    if (!e.target || e.target.id !== 'registerForm') return;
+    var email = document.getElementById('email').value.trim().toLowerCase();
+    var conf  = document.getElementById('confirmEmail').value.trim().toLowerCase();
+    if (email !== conf) {
+        e.preventDefault();
+        e.stopPropagation();   // cegah event sampai ke handler submit utama
+        setMsg('confirmEmailMsg', 'Email konfirmasi tidak cocok', true);
+    } else {
+        clearMsg('confirmEmailMsg');
+    }
+}, true); // <-- true = fase capture (kunci agar jalan duluan)
+```
+> Kenapa `capture` di `document`, bukan di form? Karena form adalah *target* event submit-nya sendiri; dua listener di elemen yang sama dijalankan sesuai urutan pendaftaran. Listener `capture` di **ancestor** (`document`) dijamin jalan sebelum listener di target.
+
+#### Soal 54 — Tombol "Bersihkan Formulir" (Reset) <a id="soal-54"></a>
+
+**File:** `frontend/account/register.html`
+
+Tambah tombol untuk mengosongkan semua field + pesan validasi sekaligus.
+
+**Langkah 1** — tambah setelah tombol `#btnRegister`:
+```html
+<button type="button" class="btn btn-link w-100 mt-2 small text-muted" id="btnClearForm">
+    <i class="fa-solid fa-eraser me-1"></i>Bersihkan Formulir
+</button>
+```
+
+**Langkah 2** — tambah di dalam `<script>` (memakai `clearMsg`, `validateAll`, `elFullName` yang sudah ada):
+```js
+document.getElementById('btnClearForm').addEventListener('click', function () {
+    document.getElementById('registerForm').reset();
+    ['fullNameMsg', 'emailMsg', 'phoneMsg', 'birthdateMsg', 'passwordMsg', 'confirmMsg'].forEach(clearMsg);
+    validateAll();        // tombol Daftar otomatis nonaktif lagi (field kosong)
+    elFullName.focus();
+});
+```
+> Jika Anda juga mengerjakan Soal 53, tambahkan `'confirmEmailMsg'` ke array agar pesannya ikut dibersihkan.
+
+---
+
+### 🔹 Fitur: Superadmin Manajemen Akun Internal (CRUD) <a id="fitur-superadmin-manajemen-akun-internal-crud"></a>
+
+#### Soal 55 — Field "Jumlah per Halaman" (Page Size) <a id="soal-55"></a>
+
+**File:** `frontend/ops/manage-users.html`
+
+Beri user kontrol berapa baris per halaman. `loadUsers()` sudah mengirim `per_page`, tinggal buat nilainya dapat diubah.
+
+**Langkah 1** — ubah deklarasi konstanta menjadi variabel agar bisa diganti:
+```js
+// Ganti baris:  const perPage = 20;
+// Menjadi:
+let perPage = 20;
+```
+
+**Langkah 2** — tambah selektor di area filter (di samping dropdown `#filterStatus`):
+```html
+<select class="form-select form-select-sm" id="filterPerPage" style="width:auto;"
+        onchange="changePerPage(this.value)">
+    <option value="10">10 / halaman</option>
+    <option value="20" selected>20 / halaman</option>
+    <option value="50">50 / halaman</option>
+    <option value="100">100 / halaman</option>
+</select>
+```
+
+**Langkah 3** — tambah fungsi (memakai `loadUsers` yang sudah ada):
+```js
+function changePerPage(val) {
+    perPage = parseInt(val, 10) || 20;
+    loadUsers(1); // muat ulang dari halaman 1 dengan ukuran baru
+}
+```
+
+#### Soal 56 — Tombol "Buat Password Kuat" (Generate) <a id="soal-56"></a>
+
+**File:** `frontend/ops/create-user.html`
+
+Bantu superadmin membuat password acak yang kuat dengan sekali klik, langsung mengisi field password + konfirmasi.
+
+**Langkah 1** — tambah di dalam blok Password (mis. setelah `<div class="password-strength" id="passwordStrength">…</div>`):
+```html
+<button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="btnGenPassword">
+    <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Buat Password Kuat
+</button>
+```
+
+**Langkah 2** — tambah di dalam `<script>` (memakai `passwordInput`, `confirmPasswordInput`, `showToast` yang sudah ada):
+```js
+document.getElementById('btnGenPassword').addEventListener('click', function () {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
+    var pw = '';
+    for (var i = 0; i < 14; i++) pw += chars.charAt(Math.floor(Math.random() * chars.length));
+
+    // Tampilkan sebagai teks agar admin bisa mencatatnya
+    passwordInput.type = 'text';
+    confirmPasswordInput.type = 'text';
+    passwordInput.value = pw;
+    confirmPasswordInput.value = pw;
+
+    // Picu validasi + bar kekuatan yang sudah ada
+    passwordInput.dispatchEvent(new Event('input'));
+    confirmPasswordInput.dispatchEvent(new Event('input'));
+
+    showToast('Password kuat dibuat — jangan lupa disalin', 'success');
+});
+```
+> Untuk keamanan lebih, ganti `Math.random()` dengan `crypto.getRandomValues(new Uint32Array(1))[0]` sebagai sumber acak.
+
+---
+
+### 🔹 Fitur: Superadmin Memantau Kinerja Divisi <a id="fitur-superadmin-memantau-kinerja-divisi"></a>
+
+#### Soal 57 — Field Metrik "KYC Ditolak" di Kartu Compliance <a id="soal-57"></a>
+
+**File:** `frontend/management/dashboard-overview.html`
+
+API overview mengirim `data.kyc.rejected` (sudah dipakai untuk menghitung "Total Processed"), tapi belum ditampilkan terpisah. Tambah sebagai metrik baru.
+
+**Langkah 1** — di dalam body kartu **Compliance** (setelah baris metrik `#kycProcessed`), tambah:
+```html
+<div class="metric-row">
+    <span class="metric-label"><i class="fa-solid fa-circle-xmark me-1 text-danger" style="font-size:0.75rem;"></i>KYC Ditolak</span>
+    <span class="metric-val text-danger" id="kycRejected">—</span>
+</div>
+```
+
+**Langkah 2** — di dalam `loadData()`, setelah baris yang men-set `kycProcessed`, tambah:
+```js
+document.getElementById('kycRejected').textContent = kyc.rejected != null ? kyc.rejected : '—';
+```
+> Opsional rapi: tambahkan `'kycRejected'` ke kedua array reset state (`['kycPending', ...]`) agar ikut menampilkan `…` saat loading dan `—` saat error.
+
+#### Soal 58 — Tombol "Salin Ringkasan" ke Clipboard <a id="soal-58"></a>
+
+**File:** `frontend/management/dashboard-overview.html`
+
+Tambah tombol untuk menyalin ringkasan semua metrik (mis. untuk ditempel ke laporan/chat). Halaman ini tidak punya `showToast`, jadi umpan balik lewat teks `#lastUpdated`.
+
+**Langkah 1** — di header (di dalam `<div class="d-flex align-items-center gap-2">`, dekat tombol Refresh), tambah:
+```html
+<button class="btn btn-sm btn-outline-secondary" onclick="copySummary()" title="Salin ringkasan">
+    <i class="fa-regular fa-copy me-1"></i>Salin Ringkasan
+</button>
+```
+
+**Langkah 2** — tambah fungsi (memakai ID metrik & `#lastUpdated` yang sudah ada):
+```js
+function copySummary() {
+    function v(id) { return document.getElementById(id).textContent; }
+    var text =
+        'Ringkasan Kinerja Divisi\n' +
+        '- KYC Pending      : ' + v('kycPending')   + '\n' +
+        '- KYC Diproses     : ' + v('kycProcessed') + '\n' +
+        '- Tiket Terbuka    : ' + v('suppOpen')     + '\n' +
+        '- Tiket Selesai    : ' + v('suppResolved') + '\n' +
+        '- Order Menunggu   : ' + v('opsPending')   + '\n' +
+        '- Langganan Aktif  : ' + v('opsActive');
+
+    navigator.clipboard.writeText(text).then(function () {
+        var el = document.getElementById('lastUpdated');
+        var old = el.textContent;
+        el.textContent = 'Ringkasan disalin ✓';
+        setTimeout(function () { el.textContent = old; }, 2000);
+    });
+}
+```
+
+---
+
+## Referensi Cepat — File yang Relevan <a id="referensi-cepat-file-yang-relevan"></a>
 
 | Fitur | File Utama |
 |---|---|
@@ -2255,7 +3395,7 @@ function highlightCard(divisionKey) {
 | Kinerja Divisi (Overview) | `frontend/management/dashboard-overview.html` |
 | Kinerja Divisi (Detail) | `frontend/management/dashboard-compliance.html`, `dashboard-support.html`, `dashboard-operational.html` |
 
-## Pola Umum di Codebase Ini
+## Pola Umum di Codebase Ini <a id="pola-umum-di-codebase-ini"></a>
 
 - **Toast notifikasi:** fungsi `showToast(type, message)` — `type` berisi `'success'` atau `'error'`
 - **Modal konfirmasi:** gunakan `.modal-overlay` + `.modal-box` yang sudah ada di `manage-users.html`
