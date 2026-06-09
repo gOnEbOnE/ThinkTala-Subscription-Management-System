@@ -4381,3 +4381,467 @@ Karena hanya **1 C/U/D + 1 R**, berikut probabilitas area yang dipilih interview
 ---
 
 *Part 4 — Juni 2026. Detail implementasi: [`LIVE_CODING_CHEATSHEET.md`](LIVE_CODING_CHEATSHEET.md) v2.2.*
+
+---
+
+# PART 5: SOAL KHUSUS — DUPLIKASI PAKET DENGAN MODIFIKASI
+
+> **Dokumen ini hanya panduan implementasi (README).** Belum diimplementasikan di kode — ikuti urutan di bawah saat live coding atau PR.
+> **Halaman:** [`/ops/subscriptions`](https://propensuy-thinknalyze.vercel.app/ops/subscriptions) (`frontend/ops/subscriptions.html`)
+> **Estimasi:** 20–25 menit (1 soal C/U/D penuh: backend + frontend)
+
+---
+
+## Ringkasan soal
+
+| Aspek | Requirement |
+|-------|-------------|
+| **Masalah** | Admin harus isi form dari nol meski paket baru 80% mirip paket lama |
+| **Solusi** | Tombol **Duplikasi** per baris → konfirmasi → paket baru muncul di tabel |
+| **Nama hasil** | `[nama asli] - Copy` (duplikasi lagi → `... - Copy - Copy`) |
+| **Status hasil** | Selalu **INACTIVE** |
+| **Field lain** | `price`, `quota`, `pricing_tiers` disalin persis |
+| **Waktu** | `created_at` / `updated_at` = sekarang (DB `NOW()`) |
+| **Backend** | Endpoint baru berdasarkan ID paket sumber |
+
+---
+
+## Analisis cepat (sebelum coding)
+
+### Pola yang sudah ada di repo (salin ini)
+
+| Fitur existing | File | Pola yang dipakai ulang |
+|----------------|------|-------------------------|
+| Create paket | `service.CreatePackage` + `repo.CreatePackage` | Insert paket + `savePricingTiers` |
+| Ambil paket by ID | `repo.GetPackageByID` | Sudah load `pricing_tiers` |
+| Delete / Toggle | `controller` → `dispatcher.DispatchAndWait` → job di `main.go` | **Ikuti pola yang sama** |
+| Tombol per baris | `subscriptions.html` `renderTable` | Salin struktur tombol Edit/Delete |
+| Modal konfirmasi | `deletePkgModal`, `toggleStatusModal` | Salin untuk modal duplikasi |
+
+### Endpoint baru (rekomendasi)
+
+```
+POST /api/admin/packages/{id}/duplicate
+```
+
+- **Auth:** role OPERASIONAL (sudah di-cover gateway `withRoleAuth` pada prefix `/api/admin/packages/`)
+- **Body:** kosong `{}` — semua data diambil dari paket sumber
+- **Response sukses:**
+```json
+{
+  "success": true,
+  "message": "Paket berhasil diduplikasi",
+  "data": { "id": "...", "name": "Paket Basic - Copy", "status": "INACTIVE", ... }
+}
+```
+
+### Aturan bisnis
+
+```
+1. Cari paket sumber by ID (404 jika tidak ada / DELETED)
+2. newName = source.Name + " - Copy"   // selalu append, tidak replace
+3. newStatus = "INACTIVE"              // paksa, abaikan status sumber
+4. Copy: price, quota, pricing_tiers[]
+5. Insert paket baru (UUID baru) → created_at = NOW()
+6. Return paket baru lengkap dengan tiers
+```
+
+**Tidak perlu** validasi nama unik khusus — jika DB punya unique constraint nama, pertimbangkan loop suffix; soal mengizinkan `Paket Basic - Copy - Copy`.
+
+---
+
+## Urutan implementasi (wajib ikuti)
+
+```
+repository (opsional, bisa pakai Get + Create)
+    ↓
+service.DuplicatePackage
+    ↓
+controller + dispatcher job
+    ↓
+router.go + main.go (register job)
+    ↓
+go build
+    ↓
+frontend: tombol + modal + fetch
+    ↓
+test browser + curl
+```
+
+---
+
+## STEP 1 — Service interface (`packages/service.go`)
+
+**Ctrl+F:** `type Service interface {`
+
+**TAMBAHKAN** method baru:
+
+```go
+	DuplicatePackage(ctx context.Context, sourceID string) (*Package, error)
+```
+
+**TAMBAHKAN** di worker processors:
+
+```go
+	ProcessDuplicatePackageJob(ctx context.Context, payload interface{}) (interface{}, error)
+```
+
+---
+
+## STEP 2 — Logic bisnis (`packages/service.go`)
+
+**Tambah function** `DuplicatePackage` (setelah `TogglePackageStatus`):
+
+```go
+func (s *packageService) DuplicatePackage(ctx context.Context, sourceID string) (*Package, error) {
+	if strings.TrimSpace(sourceID) == "" {
+		return nil, errors.New("id paket sumber wajib diisi")
+	}
+
+	source, err := s.repo.GetPackageByID(ctx, sourceID)
+	if err != nil {
+		return nil, err
+	}
+	if source == nil {
+		return nil, errors.New("paket tidak ditemukan atau sudah dihapus")
+	}
+
+	// Salin pricing tiers ke DTO
+	tiers := make([]PricingTierDTO, 0, len(source.PricingTiers))
+	for _, t := range source.PricingTiers {
+		tiers = append(tiers, PricingTierDTO{
+			DurationMonths: t.DurationMonths,
+			Price:          t.Price,
+			Label:          t.Label,
+		})
+	}
+
+	payload := CreatePackageDTO{
+		Name:         source.Name + " - Copy",
+		Price:        source.Price,
+		Quota:        source.Quota,
+		Status:       "INACTIVE",
+		PricingTiers: tiers,
+	}
+
+	return s.repo.CreatePackage(ctx, payload)
+}
+```
+
+**Kenapa pakai `CreatePackage` repo, bukan SQL baru?**
+- `created_at` / `updated_at` sudah `NOW()` di INSERT existing
+- `savePricingTiers` sudah jalan
+- Minim diff, minim bug
+
+**Tambah import** `"strings"` jika belum ada.
+
+---
+
+## STEP 3 — Worker job processor (`packages/service.go`)
+
+**Ctrl+F:** `ProcessTogglePackageStatusJob`
+
+**TAMBAHKAN setelahnya:**
+
+```go
+func (s *packageService) ProcessDuplicatePackageJob(ctx context.Context, payload interface{}) (interface{}, error) {
+	id, ok := payload.(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid payload type for DuplicatePackageJob")
+	}
+	return s.DuplicatePackage(ctx, id)
+}
+```
+
+---
+
+## STEP 4 — Register job (`subscription/main.go`)
+
+**Ctrl+F:** `app.RegisterJob("toggle_package_status"`
+
+**TAMBAHKAN setelahnya:**
+
+```go
+	app.RegisterJob("duplicate_package", packagesService.ProcessDuplicatePackageJob)
+```
+
+---
+
+## STEP 5 — Controller handler (`packages/controller.go`)
+
+**Ctrl+F:** `TogglePackageStatusHandler`
+
+**TAMBAHKAN handler baru** (salin pola extract ID dari Toggle/Delete):
+
+```go
+// DuplicatePackageHandler - POST /api/admin/packages/{id}/duplicate
+func (c *Controller) DuplicatePackageHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if id == "" {
+		const prefix = "/api/admin/packages/"
+		const suffix = "/duplicate"
+		path := r.URL.Path
+		if len(path) > len(prefix)+len(suffix) {
+			id = path[len(prefix) : len(path)-len(suffix)]
+		}
+	}
+	if id == "" {
+		c.response.JSON(w, r, map[string]interface{}{
+			"success": false,
+			"message": "ID paket harus disertakan pada URL",
+		})
+		return
+	}
+
+	result, err := c.dispatcher.DispatchAndWait(r.Context(), "duplicate_package", id, concurrency.PriorityHigh)
+	if err != nil {
+		if err.Error() == "paket tidak ditemukan atau sudah dihapus" {
+			w.WriteHeader(http.StatusNotFound)
+		}
+		c.response.JSON(w, r, map[string]interface{}{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.response.JSON(w, r, map[string]interface{}{
+		"success": true,
+		"message": "Paket berhasil diduplikasi",
+		"data":    result,
+	})
+}
+```
+
+---
+
+## STEP 6 — Route (`subscription/app/routes/router.go`)
+
+**Ctrl+F:** `PATCH /api/admin/packages/{id}/status`
+
+**TAMBAHKAN:**
+
+```go
+	app.Router.HandleFunc("POST /api/admin/packages/{id}/duplicate", packagesController.DuplicatePackageHandler)
+```
+
+> Gateway sudah proxy `/api/admin/packages/` — **tidak perlu ubah gateway** untuk path ini.
+
+---
+
+## STEP 7 — Build check backend
+
+```bash
+cd subscription && go build ./...
+```
+
+**Expected:** compile sukses, tanpa error interface not implemented.
+
+---
+
+## STEP 8 — Test curl (sebelum frontend)
+
+```bash
+# Ganti {TOKEN} dan {PACKAGE_ID}
+curl -X POST "http://localhost:2000/api/admin/packages/{PACKAGE_ID}/duplicate" \
+  -H "Cookie: session=..." \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+**Expected response:**
+- `success: true`
+- `data.name` = `"Nama Asli - Copy"`
+- `data.status` = `"INACTIVE"`
+- `data.id` ≠ id sumber (UUID baru)
+- `data.pricing_tiers` sama jumlah & harga dengan sumber
+
+**Test edge case:**
+```bash
+# Duplikasi paket hasil copy → nama jadi "... - Copy - Copy"
+curl -X POST ".../api/admin/packages/{ID_COPY}/duplicate" ...
+```
+
+---
+
+## STEP 9 — Frontend: modal konfirmasi (`subscriptions.html`)
+
+**Ctrl+F:** `<!-- Delete Modal -->`
+
+**TAMBAHKAN SEBELUM** Delete Modal:
+
+```html
+    <!-- Duplicate Modal -->
+    <div class="modal fade" id="duplicatePkgModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <i class="fa-solid fa-copy fa-3x mb-3" style="color:var(--accent-cyan);"></i>
+                    <h6 class="fw-bold text-main">Duplikasi Paket?</h6>
+                    <p class="text-muted small mb-0" id="duplicatePkgDesc">Duplikasi paket ini?</p>
+                    <input type="hidden" id="duplicatePkgId">
+                    <div class="d-flex gap-2 justify-content-center mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-sm btn-info px-4" id="duplicateConfirmBtn" onclick="confirmDuplicatePkg()">
+                            Ya, Duplikasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+```
+
+---
+
+## STEP 10 — Frontend: tombol Duplikasi di tabel
+
+**Ctrl+F:** `function renderTable` → blok `tbody.innerHTML = pageData.map`
+
+**Di dalam `<div class="d-flex gap-1 ...">` actions**, tambahkan tombol **untuk semua status** (ACTIVE dan INACTIVE), **sebelum** tombol Deactivate/Activate:
+
+```javascript
+<button class="btn btn-sm btn-outline-info btn-action" title="Duplikasi"
+    onclick="openDuplicate('${pkg.id}','${(pkg.name || '').replace(/'/g, "\\'")}')">
+    <i class="fa-solid fa-copy fa-xs"></i>
+</button>
+```
+
+**Posisi disarankan:** `[Duplikasi] [Deactivate/Activate] [Edit] [Delete]`
+
+> Tombol duplikasi boleh muncul juga pada paket ACTIVE — admin sering duplicate dari paket yang masih aktif.
+
+---
+
+## STEP 11 — Frontend: JavaScript functions
+
+**Ctrl+F:** `function openDelete`
+
+**TAMBAHKAN sebelum `openDelete`:**
+
+```javascript
+        function openDuplicate(id, name) {
+            document.getElementById('duplicatePkgId').value = id;
+            document.getElementById('duplicatePkgDesc').textContent =
+                'Duplikasi paket "' + name + '"? Salinan akan berstatus INACTIVE.';
+            new bootstrap.Modal(document.getElementById('duplicatePkgModal')).show();
+        }
+
+        async function confirmDuplicatePkg() {
+            const id = document.getElementById('duplicatePkgId').value;
+            const btn = document.getElementById('duplicateConfirmBtn');
+            btn.disabled = true;
+            try {
+                const res = await fetch('/api/admin/packages/' + id + '/duplicate', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: '{}'
+                });
+                const json = await res.json();
+                bootstrap.Modal.getInstance(document.getElementById('duplicatePkgModal')).hide();
+                if (json.success) {
+                    showToast('Paket berhasil diduplikasi: ' + (json.data && json.data.name ? json.data.name : ''), 'success');
+                    loadPackages();
+                } else {
+                    showToast(json.message || 'Gagal menduplikasi paket', 'danger');
+                }
+            } catch (e) {
+                showToast('Error: ' + e.message, 'danger');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+```
+
+---
+
+## STEP 12 — Verifikasi browser (30 detik)
+
+1. Login role **OPERASIONAL**
+2. Buka `http://localhost:2000/ops/subscriptions`
+3. Pada baris **Paket Basic** → klik ikon **Duplikasi**
+4. Modal: "Duplikasi paket ini?" → **Ya, Duplikasi**
+5. **Expected:**
+   - Toast sukses
+   - Tabel refresh
+   - Baris baru: **Paket Basic - Copy**, status **INACTIVE**
+   - Harga bulanan/tahunan & tier sama dengan asli
+6. Duplikasi lagi baris **Paket Basic - Copy**
+7. **Expected:** **Paket Basic - Copy - Copy**, status INACTIVE
+
+---
+
+## Diagram alur
+
+```mermaid
+sequenceDiagram
+    participant Admin
+    participant FE as subscriptions.html
+    participant GW as Gateway :2000
+    participant Sub as Subscription :5004
+    participant DB as PostgreSQL
+
+    Admin->>FE: Klik Duplikasi
+    FE->>Admin: Modal konfirmasi
+    Admin->>FE: Ya, Duplikasi
+    FE->>GW: POST /api/admin/packages/{id}/duplicate
+    GW->>Sub: Forward request
+    Sub->>DB: SELECT paket + tiers by ID
+    Sub->>DB: INSERT paket baru (nama + " - Copy", INACTIVE, NOW())
+    Sub->>DB: INSERT pricing_tiers (copy)
+    Sub-->>FE: JSON success + data paket baru
+    FE->>FE: loadPackages() refresh tabel
+```
+
+---
+
+## Checklist live coding (centang saat demo)
+
+### Backend
+- [ ] `DuplicatePackage` di service — salin field + append `" - Copy"`
+- [ ] Status paksa `INACTIVE`
+- [ ] `ProcessDuplicatePackageJob` + register di `main.go`
+- [ ] `DuplicatePackageHandler` + route POST
+- [ ] `go build ./...` sukses
+
+### Frontend
+- [ ] Tombol Duplikasi di setiap baris
+- [ ] Modal konfirmasi
+- [ ] `fetch` POST + `loadPackages()` setelah sukses
+- [ ] Toast sukses / error
+
+### Demo ke asdos
+- [ ] Duplikasi Paket Basic → muncul "Paket Basic - Copy" INACTIVE
+- [ ] Duplikasi lagi → "Paket Basic - Copy - Copy"
+- [ ] Sebut file: `service.go`, `controller.go`, `router.go`, `subscriptions.html`
+
+---
+
+## Troubleshooting
+
+| Gejala | Penyebab | Fix |
+|--------|----------|-----|
+| 404 Not Found | Route belum register / ID salah | Cek `router.go` + URL `{id}/duplicate` |
+| `invalid payload type` | Job payload bukan string | Pastikan dispatcher kirim `id` string |
+| 500 duplicate key name | DB unique pada `name` | Append suffix lagi atau izinkan duplicate (cek constraint) |
+| Tombol tidak muncul | Hanya ditambah di branch INACTIVE | Taruh di luar `if ACTIVE` |
+| Tier kosong di copy | `GetPackageByID` tidak load tiers | Pastikan `loadPricingTiers` dipanggil (sudah ada) |
+| Paket copy status ACTIVE | Lupa set `Status: "INACTIVE"` di payload | Paksa di service |
+
+---
+
+## Mapping ke cheat sheet existing
+
+| Konsep soal ini | Mirip § |
+|-----------------|---------|
+| Tombol baru + modal + fetch | §15 (modal), §1 (tombol per baris) |
+| Endpoint baru + service validasi | §16 (business rule di service) |
+| Reuse `CreatePackage` repo | §1 (field baru via existing insert) |
+| Toast setelah aksi | §35 |
+
+**Belum ada §46 di cheat sheet** — gunakan Part 5 ini sebagai referensi khusus soal duplikasi.
+
+---
+
+*Part 5 — Duplikasi Paket. Panduan README only; implementasi on demand.*
