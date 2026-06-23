@@ -206,21 +206,7 @@ func MigrateAndSeed(db interface{}) {
 		log.Printf("[WARN] Gagal seed pricing tiers: %v", err)
 	}
 
-	cleanupDummyOrdersSQL := `
-	DELETE FROM subscription.orders
-	WHERE invoice_number IN (
-		'INV-2026-00001',
-		'INV-2026-00002',
-		'INV-2026-00003',
-		'INV-2026-00004',
-		'INV-2026-00005'
-	);
-	`
-
-	log.Println("Membersihkan data dummy order subscription...")
-	if _, err = pool.Exec(ctx, cleanupDummyOrdersSQL); err != nil {
-		log.Printf("[WARN] Gagal membersihkan dummy orders: %v", err)
-	}
+	seedDashboardOrders(ctx, pool)
 
 	log.Println("Migrasi dan Seeding selesai! (Subscription)")
 }

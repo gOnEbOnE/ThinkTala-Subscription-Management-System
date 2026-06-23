@@ -17,6 +17,7 @@ type Service interface {
 	UpdatePackage(ctx context.Context, id string, payload UpdatePackageDTO) (*Package, error)
 	DeletePackage(ctx context.Context, id string) error
 	TogglePackageStatus(ctx context.Context, id string) (*Package, error)
+	DuplicatePackage(ctx context.Context, id string) (*Package, error)
 
 	// Worker Job Processors
 	ProcessCreatePackageJob(ctx context.Context, payload interface{}) (interface{}, error)
@@ -25,6 +26,7 @@ type Service interface {
 	ProcessUpdatePackageJob(ctx context.Context, payload interface{}) (interface{}, error)
 	ProcessDeletePackageJob(ctx context.Context, payload interface{}) (interface{}, error)
 	ProcessTogglePackageStatusJob(ctx context.Context, payload interface{}) (interface{}, error)
+	ProcessDuplicatePackageJob(ctx context.Context, payload interface{}) (interface{}, error)
 }
 
 // ==========================================
@@ -174,4 +176,41 @@ func (s *packageService) DeletePackage(ctx context.Context, id string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *packageService) DuplicatePackage(ctx context.Context, id string) (*Package, error) {
+	if id == "" {
+		return nil, errors.New("id paket sumber wajib diisi")
+	}
+
+	source, err := s.repo.GetPackageByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if source == nil {
+		return nil, errors.New("paket tidak ditemukan atau sudah dihapus")
+	}
+	tiers := make([]PricingTierDTO, 0, len(source.PricingTiers))
+	for _, t := range source.PricingTiers {
+		tiers = append(tiers, PricingTierDTO{
+			DurationMonths: t.DurationMonths,
+			Price:          t.Price,
+			Label:          t.Label,
+		})
+	}
+	if len(tiers) == 0 {
+		tiers = []PricingTierDTO{{
+			DurationMonths: 1,
+			Price:          source.Price,
+			Label:          "",
+		}}
+	}
+	payload := CreatePackageDTO{
+		Name:         source.Name + " - Copy",
+		Price:        source.Price,
+		Quota:        source.Quota,
+		Status:       "INACTIVE",
+		PricingTiers: tiers,
+	}
+	return s.repo.CreatePackage(ctx, payload)
 }

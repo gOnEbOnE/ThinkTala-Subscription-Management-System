@@ -245,6 +245,21 @@
         </div>
     </div>
 
+    <div class="modal fade" id="duplicatePkgModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content" style="background: var(--bg-panel); border: 1px solid var(--border-color);">
+                <div class="modal-body text-center py-4">
+                    <p class="text-main small mb-0">Duplikasi paket ini?</p>
+                    <input type="hidden" id="duplicatePkgId">
+                    <div class="d-flex gap-2 justify-content-center mt-3">
+                        <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                        <button class="btn btn-sm btn-success px-4" id="duplicateConfirmBtn" onclick="confirmDuplicatePkg()">Ya</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Delete Modal -->
     <div class="modal fade" id="deletePkgModal" tabindex="-1">
         <div class="modal-dialog modal-sm">
@@ -406,17 +421,20 @@
                     <td class="py-3">${statusBadge(pkg.status)}</td>
                     <td class="py-3 text-end">
                         <div class="d-flex gap-1 justify-content-end flex-nowrap">
+                            <button class="btn btn-sm btn-outline-success px-3" style="white-space:nowrap;" onclick="openDuplicate('${pkg.id}')">
+                                <i class="fa-solid fa-toggle-off fa-xs me-1"></i>Duplicate
+                            </button>
                             ${pkg.status === 'ACTIVE' ? `
-                            <button class="btn btn-sm btn-outline-warning px-3" style="white-space:nowrap;" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','ACTIVE')">
+                            <button class="btn btn-sm btn-outline-warning px-3" style="white-space:nowrap;" onclick="toggleStatus('${pkg.id}','${(pkg.name || '').replace(/'/g, "\\'")}','ACTIVE')">
                                 <i class="fa-solid fa-toggle-on fa-xs me-1"></i>Deactivate
                             </button>` : `
-                            <button class="btn btn-sm btn-outline-success px-3" style="white-space:nowrap;" onclick="toggleStatus('${pkg.id}','${pkg.name || ''}','INACTIVE')">
+                            <button class="btn btn-sm btn-outline-success px-3" style="white-space:nowrap;" onclick="toggleStatus('${pkg.id}','${(pkg.name || '').replace(/'/g, "\\'")}','INACTIVE')">
                                 <i class="fa-solid fa-toggle-off fa-xs me-1"></i>Activate
                             </button>
                             <a href="/ops/subscriptions-edit?id=${pkg.id}" class="btn btn-sm btn-outline-secondary btn-action" title="Edit">
                                 <i class="fa-solid fa-pen fa-xs"></i>
                             </a>
-                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="openDelete('${pkg.id}','${pkg.name || ''}')">
+                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="openDelete('${pkg.id}','${(pkg.name || '').replace(/'/g, "\\'")}')">
                                 <i class="fa-solid fa-trash fa-xs"></i>
                             </button>`}
                         </div>
@@ -464,6 +482,38 @@
             document.getElementById('filterMaxPrice').value = '';
             currentPage = 1;
             renderTable(allPackages);
+        }
+
+        function openDuplicate(id) {
+            document.getElementById('duplicatePkgId').value = id;
+            new bootstrap.Modal(document.getElementById('duplicatePkgModal')).show();
+        }
+
+        async function confirmDuplicatePkg() {
+            const id = document.getElementById('duplicatePkgId').value;
+            const btn = document.getElementById('duplicateConfirmBtn');
+            btn.disabled = true;
+            try {
+                const res = await fetch('/api/admin/packages/' + id + '/duplicate', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: '{}'
+                });
+                const json = await res.json();
+                bootstrap.Modal.getInstance(document.getElementById('duplicatePkgModal')).hide();
+                if (json.success) {
+                    const copiedName = json.data && json.data.name ? json.data.name : '';
+                    showToast('Paket berhasil diduplikasi' + (copiedName ? ': ' + copiedName : ''), 'success');
+                    loadPackages();
+                } else {
+                    showToast(json.message || 'Gagal menduplikasi paket', 'danger');
+                }
+            } catch (e) {
+                showToast('Error: ' + e.message, 'danger');
+            } finally {
+                btn.disabled = false;
+            }
         }
 
         function openDelete(id, name) {

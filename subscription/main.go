@@ -110,6 +110,7 @@ func main() {
 	app.RegisterJob("update_package", packagesService.ProcessUpdatePackageJob)
 	app.RegisterJob("delete_package", packagesService.ProcessDeletePackageJob)
 	app.RegisterJob("toggle_package_status", packagesService.ProcessTogglePackageStatusJob)
+	app.RegisterJob("duplicate_package", packagesService.ProcessDuplicatePackageJob)
 
 	// PBI-45: Orders Module
 	ordersRepo := orders.NewRepository(app.DB)
